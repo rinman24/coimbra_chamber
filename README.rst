@@ -2,6 +2,8 @@
 UCSD Coimbra Chamber
 ====================
 
+.. image:: images/coimbra_ucsd_logo.png
+
 Table of Contents
 -----------------
 
