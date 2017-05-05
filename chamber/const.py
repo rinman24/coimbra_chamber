@@ -1,23 +1,27 @@
 """Docstring."""
 
+# ZnSe port parameters (From Spec Sheet)
+D_PORT = 2.286e-2 # 2.286 cm         [X]
+R_PORT = 1.143e-2 # 1.143 cm         [X]
+A_PORT = 4.104e-4 # 4.104 cm^2       [X]
+
+# Beam Parameters (A_B = A_ZNSE/2 -> R_B = R_ZNSE/sqrt(2))
+W = 8.082e-3 # 8.082 mm              [X]
+D_CB = 1.616e-2 # 1.616 cm           [X]
+A_CB = 2.052e-4 # 2.052 cm^2         [X]
+
 # Stefan Tube Dimensions
-D_OUT_ST = 2.54e-2 # 2.54 cm
-R_OUT_ST = 1.27e-2 # 1.27 cm
-D_IN_ST = 2.36e-2 # 2.36 cm
-R_IN_ST = 1.18e-2 # 1.18 cm
-D_BASE_ST = 3.4e-2 # 3.4 cm
-R_BASE_ST = 1.7e-2 # 1.7 cm
-H_BASE_ST = 8e-4 # 0.8 mm
-H_TUBE_ST = 4.72e-2 # 4.72 cm
-A_C_ST = 4.37e-4 # 4.37 cm^2
+D_IN_TUBE = 2.286e-2 # 2.286 cm      [X]
+R_IN_TUBE = 1.143e-2 # 1.143 cm      [X]
+A_C_TUBE = 4.104e-4 # 4.104 cm^2     [X]
+D_OUT_TUBE = 3.4e-2 # 3.4 cm         [X]
+R_OUT_TUBE = 1.7e-2 # 1.7 cm         [X]
+H_IN_TUBE = 4.572e-2 # 4.572 cm      [X]
+H_OUT_TUBE = 5.129e-2 # 5.129 cm     [X]
+H_TUBE_BASE = 5.57e-3 # 5.57 mm      [X]
 
 # Water Optical Properties at 10.59 microns
-K_ABS = 8.218e4 # 82,180 m^{-1}
-K_EXT = 6.925e-2 # 0.06925
-
-# Beam Parameters
-W = 8.3e-3 # 8.3 mm
-A_C_B = 2.16e-4 # 2.16 cm^2
-L_K_ABS = 1.22e-5 # 12 microns
-
+K_ABS_10P6 = 8.218e4 # 82,180 m^{-1} []
+K_EXT_10P6 = 6.925e-2 # 0.06925      []
+L_K_ABS = 1.22e-5 # 12 microns       []
 
