@@ -1,11 +1,15 @@
-"""Docstring."""
+"""Constants for the UCSD Chamber Experiment."""
 
 # ZnSe port parameters (From Spec Sheet)
 D_PORT = 2.286e-2 # 2.286 cm         [X]
 R_PORT = 1.143e-2 # 1.143 cm         [X]
 A_PORT = 4.104e-4 # 4.104 cm^2       [X]
 
-# Beam Parameters (A_B = A_ZNSE/2 -> R_B = R_ZNSE/sqrt(2))
+# Beam Parameters
+"""
+The cross-sectional area of the beam is chosen to be half of the area of the ZnSe aperature. As a
+result, the radius of the beam will be smaller by a factor of 1/sqrt(2).
+"""
 W = 8.082e-3 # 8.082 mm              [X]
 D_CB = 1.616e-2 # 1.616 cm           [X]
 A_CB = 2.052e-4 # 2.052 cm^2         [X]
