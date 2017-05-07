@@ -26,7 +26,7 @@ Back to `Table of Contents`_
 The structure of the directory
 ::
 
-    ├── README.rst 
+    ├── README.rst
     ├── chamber
     |   ├── __init__.py
     |   └── const.py
