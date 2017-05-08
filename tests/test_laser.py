@@ -21,7 +21,12 @@ class TestLaser(object):
     def test_laser_constructor_rayleigh(self):
         """Check that rayleigh length is calsulated correctly."""
         co2_laser = laser.GaussianBeam()
-        assert co2_laser.rayleigh == pi* 0.9e-3**2 / 10.59e-6
+        assert co2_laser.rayleigh == pi * 0.9e-3**2 / 10.59e-6
+
+    def test_laser_constructor_peak_intensity(self):
+        """Check that peak intensity is calsulated correctly."""
+        co2_laser = laser.GaussianBeam()
+        assert co2_laser.peak_intensity == 2 * 20 / (pi * 0.9e-3**2)
 
     def test_get_radial_profile_grid(self):
         """Check that the radial grid for the beam profile is generated correctly."""
@@ -29,4 +34,5 @@ class TestLaser(object):
         radial_profile_grid = co2_laser.get_radial_profile_grid()
         assert min(radial_profile_grid) == -2*co2_laser.radius
         assert max(radial_profile_grid) == 2*co2_laser.radius
+        assert len(radial_profile_grid) == 401
 
