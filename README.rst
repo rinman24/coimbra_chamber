@@ -30,10 +30,12 @@ The structure of the directory
     ├── chamber
     |   ├── __init__.py
     |   └── const.py
+    |   └── laser.py
     ├── images
     |   └── coimbra_ucsd_logo.png
     └── tests
         └── test_const.py
+        └── test_laser.py
 
 Preferred Way to Run Tests
 ---------------------------
