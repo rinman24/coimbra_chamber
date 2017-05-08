@@ -23,6 +23,11 @@ class TestLaser(object):
         co2_laser = laser.GaussianBeam()
         assert co2_laser.rayleigh == pi * 0.9e-3**2 / 10.59e-6
 
+    def test_laser_constructor_half_angle(self):
+        """Check that half-angle divergence is calsulated correctly."""
+        co2_laser = laser.GaussianBeam()
+        assert co2_laser.divergence_half == 10.59e-6/(pi*0.9e-3)
+
     def test_laser_constructor_peak_intensity(self):
         """Check that peak intensity is calsulated correctly."""
         co2_laser = laser.GaussianBeam()

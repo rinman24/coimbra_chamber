@@ -19,18 +19,23 @@ class GaussianBeam(object):
         self.power = power
         self.radius = radius
         self.set_rayleigh()
+        self.set_half_angle_divergence()
         self.set_peak_intensity()
 
     def set_rayleigh(self):
-        """Use radius and wavelength to calculate Rayleigh length."""
+        """Use radius and wavelength to calculate Rayleigh length [m]."""
         self.rayleigh = pi * self.radius**2 / self.lam
 
+    def set_half_angle_divergence(self):
+        """Use radius and wavelength to set the half-angle divergence [radians]."""
+        self.divergence_half = self.lam/(pi*self.radius)
+
     def set_peak_intensity(self):
-        """Use radius and power to get the peak intensity; i.e., at r = 0."""
+        """Use radius and power to set the peak intensity; i.e., at r = 0 [W/m^2]."""
         self.peak_intensity = 2 * self.power / (pi * self.radius**2)
 
     def get_radial_profile_grid(self):
         """Use radius to return a grid for the beam profile.
-        The grid for the profile goes from -2*W to 2*W in steps of W/100.
+        The grid for the profile goes from -2*W to 2*W in steps of W/100 [m].
         """
         return [x*self.radius*0.01 for x in range(-200, 201)]
