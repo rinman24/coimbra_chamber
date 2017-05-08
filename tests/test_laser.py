@@ -1,4 +1,4 @@
-from math import pi, sqrt
+from math import isclose, log, pi, sqrt
 
 import chamber.laser as laser
 
@@ -39,6 +39,13 @@ class TestLaser(object):
         co2_laser = laser.GaussianBeam()
         assert co2_laser.norm_coeff == 2 * sqrt(2.) * 20 / (pi**1.5 * 0.9e-3**3.)
 
+    def test_get_irradiance_at_r(self):
+        """Check that irradiance at a point is calculated correctly."""
+        co2_laser = laser.GaussianBeam()
+        assert co2_laser.get_irr_r(0) == co2_laser.norm_coeff
+        hwhm = sqrt(2*log(2)) * (co2_laser.radius/2.)
+        assert isclose(co2_laser.get_irr_r(hwhm), co2_laser.norm_coeff/2)
+
     def test_get_radial_profile_grid(self):
         """Check that the radial grid for the beam profile is generated correctly."""
         co2_laser = laser.GaussianBeam()
@@ -46,4 +53,3 @@ class TestLaser(object):
         assert min(radial_profile_grid) == -2*co2_laser.radius
         assert max(radial_profile_grid) == 2*co2_laser.radius
         assert len(radial_profile_grid) == 401
-

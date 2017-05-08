@@ -1,6 +1,6 @@
 """Docstring."""
 
-from math import pi, sqrt
+from math import pi, sqrt, exp
 
 from chamber.const import LAM, POW, W_0
 
@@ -41,8 +41,20 @@ class GaussianBeam(object):
         """Use radius and power to set the normalization coefficient for radial profile."""
         self.norm_coeff = 2 * sqrt(2) * self.power / (pi**1.5 * self.radius**3.)
 
+    def get_irr_r(self, r_coord):
+        """Use the radial coordinate to calculte the irradiance at that point.
+
+        Positional arguments:
+        r_coord -- radial distance from axis [m]
+
+        Returns:
+        irraciance [W/m^2]
+        """
+        return self.norm_coeff * exp((-2. * r_coord**2)/(self.radius**2))
+
     def get_radial_profile_grid(self):
         """Use radius to return a grid for the beam profile.
         The grid for the profile goes from -2*W to 2*W in steps of W/100 [m].
         """
         return [x*self.radius*0.01 for x in range(-200, 201)]
+
