@@ -1,5 +1,6 @@
+from math import pi, sqrt
+
 import chamber.laser as laser
-from math import pi
 
 class TestLaser(object):
     """Unit testing of laser.py."""
@@ -19,19 +20,24 @@ class TestLaser(object):
         assert co2_laser.radius == 4e-3
 
     def test_laser_constructor_rayleigh(self):
-        """Check that rayleigh length is calsulated correctly."""
+        """Check that rayleigh length is calculated correctly."""
         co2_laser = laser.GaussianBeam()
         assert co2_laser.rayleigh == pi * 0.9e-3**2 / 10.59e-6
 
     def test_laser_constructor_half_angle(self):
-        """Check that half-angle divergence is calsulated correctly."""
+        """Check that half-angle divergence is calculated correctly."""
         co2_laser = laser.GaussianBeam()
         assert co2_laser.divergence_half == 10.59e-6/(pi*0.9e-3)
 
     def test_laser_constructor_peak_intensity(self):
-        """Check that peak intensity is calsulated correctly."""
+        """Check that peak intensity is calculated correctly."""
         co2_laser = laser.GaussianBeam()
         assert co2_laser.peak_intensity == 2 * 20 / (pi * 0.9e-3**2)
+
+    def test_laser_constructor_norm_coeff(self):
+        """Check that normalization coefficient is calculated correctly."""
+        co2_laser = laser.GaussianBeam()
+        assert co2_laser.norm_coeff == 2 * sqrt(2.) * 20 / (pi**1.5 * 0.9e-3**3.)
 
     def test_get_radial_profile_grid(self):
         """Check that the radial grid for the beam profile is generated correctly."""

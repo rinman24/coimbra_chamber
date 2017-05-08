@@ -9,17 +9,19 @@ A_PORT = 4.104e-4 # 4.104 cm^2       [X]
 """
 The cross-sectional area of the beam is chosen to be half of the area of the ZnSe aperature. As a
 result, the radius of the beam will be smaller by a factor of 1/sqrt(2).
-lam  : wavelength of radiation
+LAM  : wavelength of radiation
 W_0  : beam radius at laser head
-z_0  : Rayleigh length at the laser head
-W    : beam radius after collimation
+POW  : total power transmitted by the beam
+Z_0  : Rayleigh length at the laser head
+W_COL: beam radius after collimation
 D_B  : diamter of the beam after collimation
 A_CB : cross-sectional area of the beam after collimation
 """
-lam = 10.59e-6 # 10.59 microns       [X]
+LAM = 10.59e-6 # 10.59 microns       [X]
 W_0 = 0.9e-3 # 0.9 mm                [X]
-z_0 = 24.03e-2 # 24.03 cm            [X]
-W = 8.082e-3 # 8.082 mm              [X]
+POW = 20 # 20 W                      [X]
+Z_0 = 24.03e-2 # 24.03 cm            [X]
+W_COL = 8.082e-3 # 8.082 mm          [X]
 D_B = 1.616e-2 # 1.616 cm            [X]
 A_CB = 2.052e-4 # 2.052 cm^2         [X]
 
