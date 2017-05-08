@@ -10,7 +10,6 @@ class TestLaser(object):
         assert co2_laser.lam == 10.59e-6
         assert co2_laser.power == 20
         assert co2_laser.radius == 0.9e-3
-        print(co2_laser.radius)
 
     def test_laser_constructor_custom(self):
         """Check that a laser can be instanciated with a custom parameters."""
@@ -23,3 +22,11 @@ class TestLaser(object):
         """Check that rayleigh length is calsulated correctly."""
         co2_laser = laser.GaussianBeam()
         assert co2_laser.rayleigh == pi* 0.9e-3**2 / 10.59e-6
+
+    def test_get_radial_profile_grid(self):
+        """Check that the radial grid for the beam profile is generated correctly."""
+        co2_laser = laser.GaussianBeam()
+        radial_profile_grid = co2_laser.get_radial_profile_grid()
+        assert min(radial_profile_grid) == -2*co2_laser.radius
+        assert max(radial_profile_grid) == 2*co2_laser.radius
+
