@@ -57,8 +57,8 @@ class TestLaser(object):
         """Check that the beam profile is set correctly.
 
         Note: The argument of the exponent in the Gaussian beam (i.e., -2*r^2/W^2 goes to 8 at
-            r=2*W. This is why exp(-8) is used in one of these below. Also, the Half Width Full
-            Maximum (HWFM) is equal to sqrt(2 ln(2))/2*W_0 or approximately 0.59*W_0 which occurs
+            r=2*W. This is why exp(-8) is used in one of these below. Also, the Half Width Half
+            Maximum (HWHM) is equal to sqrt(2 ln(2))/2*W_0 or approximately 0.59*W_0 which occurs
             at index 59 (because W_0 is at index 100). This is the reason
             that index 59 is used in this test case.
         """

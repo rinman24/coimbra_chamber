@@ -33,7 +33,7 @@ Dependencies
 
 Back to `Table of Contents`_
 
-None so far.
+  * matplotlib.pyplot
 
 Repo Directory Structure
 ------------------------

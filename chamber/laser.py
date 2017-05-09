@@ -2,7 +2,12 @@
 
 from math import pi, sqrt, exp
 
-from chamber.const import LAM, POW, W_0
+import matplotlib.pyplot as plt
+from matplotlib import rc
+FONT = {'family': 'Times New Roman', 'weight': 'normal', 'size': 15}
+rc('font', **FONT)
+
+from chamber.const import LAM, POW, W_0, HWHM_COEFF_W
 
 class GaussianBeam(object):
     """GaussianBeam type contains methods related to Gaussian laser beams."""
@@ -63,3 +68,19 @@ class GaussianBeam(object):
     def set_beam_profile(self):
         """Use the grid to calculate the beam profile."""
         self.r_profile = [self.get_irr_r(r_coord) for r_coord in self.r_grid]
+
+    def show_beam_profile(self):
+        """Plot the beam profile."""
+        hwhm = HWHM_COEFF_W*self.radius
+        hlf = 0.5*self.norm_coeff
+        w_e2 = self.norm_coeff*exp(-2)
+        plt.fill_between(self.r_grid, self.r_profile, 0, color='#B6D1E6')
+        plt.plot(self.r_grid, self.r_profile, 'k', linewidth=2)
+        plt.plot([0, hwhm], [hlf, hlf], 'k--', linewidth=1)
+        plt.plot([hwhm, hwhm], [0, hlf], 'k--', linewidth=1)
+        plt.plot([0, self.radius], [w_e2, w_e2], 'k--', linewidth=1)
+        plt.plot([self.radius, self.radius], [0, w_e2], 'k--', linewidth=1)
+        plt.ylim([0, 1.1*self.norm_coeff])
+        plt.xlabel(r'radius, $r\,$ [m]')
+        plt.ylabel(r"Irradiance per Unit Length, $I'\,$ [W/m$^3$]")
+        plt.show()
