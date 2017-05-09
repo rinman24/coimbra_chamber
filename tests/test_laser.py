@@ -46,19 +46,24 @@ class TestLaser(object):
         hwhm = sqrt(2*log(2)) * (co2_laser.radius/2.)
         assert isclose(co2_laser.get_irr_r(hwhm), co2_laser.norm_coeff/2.)
 
-    def test_get_radial_profile_grid(self):
-        """Check that the radial grid for the beam profile is generated correctly."""
+    def test_laser_constructor_radial_grid(self):
+        """Check that the radial grid for the beam profile is set correctly."""
         co2_laser = laser.GaussianBeam()
-        radial_profile_grid = co2_laser.get_radial_profile_grid()
-        assert min(radial_profile_grid) == 0
-        assert max(radial_profile_grid) == 2*co2_laser.radius
-        assert len(radial_profile_grid) == 201
+        assert co2_laser.r_grid[0] == 0
+        assert co2_laser.r_grid[-1] == 2*co2_laser.radius
+        assert len(co2_laser.r_grid) == 201
 
-    def test_get_beam_profile(self):
-        """Check that the beam profile is generated correctly."""
+    def test_laser_constructor_radial_profile(self):
+        """Check that the beam profile is set correctly.
+
+        Note: The argument of the exponent in the Gaussian beam (i.e., -2*r^2/W^2 goes to 8 at
+            r=2*W. This is why exp(-8) is used in one of these below. Also, the Half Width Full
+            Maximum (HWFM) is equal to sqrt(2 ln(2))/2*W_0 or approximately 0.59*W_0 which occurs
+            at index 59 (because W_0 is at index 100). This is the reason
+            that index 59 is used in this test case.
+        """
         co2_laser = laser.GaussianBeam()
-        __, profile = co2_laser.get_beam_profile()
-        assert len(profile) == 201
-        assert isclose(profile[0], co2_laser.norm_coeff)
-        assert isclose(profile[-1], exp(-8)*co2_laser.norm_coeff)
-        assert isclose(profile[59], co2_laser.norm_coeff/2., rel_tol=0.005)
+        assert len(co2_laser.r_profile) == 201
+        assert isclose(co2_laser.r_profile[0], co2_laser.norm_coeff)
+        assert isclose(co2_laser.r_profile[-1], exp(-8)*co2_laser.norm_coeff)
+        assert isclose(co2_laser.r_profile[59], co2_laser.norm_coeff/2., rel_tol=0.005)

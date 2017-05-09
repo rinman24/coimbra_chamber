@@ -24,6 +24,8 @@ class GaussianBeam(object):
         self.set_half_angle_divergence()
         self.set_peak_intensity()
         self.set_norm_coeff_profile()
+        self.set_radial_profile_grid()
+        self.set_beam_profile()
 
     def set_rayleigh(self):
         """Use radius and wavelength to calculate Rayleigh length [m]."""
@@ -52,13 +54,12 @@ class GaussianBeam(object):
         """
         return self.norm_coeff * exp((-2. * r_coord**2)/(self.radius**2))
 
-    def get_radial_profile_grid(self):
+    def set_radial_profile_grid(self):
         """Use radius to return a grid for the beam profile.
         The grid for the profile goes from -2*W to 2*W in steps of W/100 [m].
         """
-        return [x*self.radius*0.01 for x in range(0, 201)]
+        self.r_grid = [x*self.radius*0.01 for x in range(0, 201)]
 
-    def get_beam_profile(self):
+    def set_beam_profile(self):
         """Use the grid to calculate the beam profile."""
-        grid = self.get_radial_profile_grid()
-        return (grid, [self.get_irr_r(coord) for coord in grid])
+        self.r_profile = [self.get_irr_r(r_coord) for r_coord in self.r_grid]
