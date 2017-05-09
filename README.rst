@@ -8,8 +8,10 @@ Table of Contents
 -----------------
 
   * `Description`_
-  * `Repo Directory Structure`_.
-  * `Preferred Way to Run Tests`_.
+  * `Python Version`_
+  * `Dependencies`_
+  * `Repo Directory Structure`_
+  * `Preferred Way to Run Tests`_
 
 Description
 -----------
@@ -17,6 +19,21 @@ Description
 Back to `Table of Contents`_
 
 Description will go here.
+
+Python Version
+--------------
+
+Back to `Table of Contents`_
+
+This module is intended to use Python 3.x.
+Backward compatability with Python 2.x. has not been tested.
+
+Dependencies
+------------
+
+Back to `Table of Contents`_
+
+None so far.
 
 Repo Directory Structure
 ------------------------
