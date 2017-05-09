@@ -56,7 +56,7 @@ class GaussianBeam(object):
         """Use radius to return a grid for the beam profile.
         The grid for the profile goes from -2*W to 2*W in steps of W/100 [m].
         """
-        return [x*self.radius*0.01 for x in range(-200, 201)]
+        return [x*self.radius*0.01 for x in range(0, 201)]
 
     def get_beam_profile(self, grid):
         """Use the grid to calculate the beam profile."""

@@ -50,18 +50,16 @@ class TestLaser(object):
         """Check that the radial grid for the beam profile is generated correctly."""
         co2_laser = laser.GaussianBeam()
         radial_profile_grid = co2_laser.get_radial_profile_grid()
-        assert min(radial_profile_grid) == -2*co2_laser.radius
+        assert min(radial_profile_grid) == 0
         assert max(radial_profile_grid) == 2*co2_laser.radius
-        assert len(radial_profile_grid) == 401
+        assert len(radial_profile_grid) == 201
 
     def test_get_beam_profile(self):
         """Check that the beam profile is generated correctly."""
         co2_laser = laser.GaussianBeam()
         grid = co2_laser.get_radial_profile_grid()
         profile = co2_laser.get_beam_profile(grid)
-        assert len(profile) == 401
-        assert isclose(profile[200], co2_laser.norm_coeff)
-        assert isclose(profile[0], exp(-8)*co2_laser.norm_coeff)
+        assert len(profile) == 201
+        assert isclose(profile[0], co2_laser.norm_coeff)
         assert isclose(profile[-1], exp(-8)*co2_laser.norm_coeff)
-        assert isclose(profile[259], co2_laser.norm_coeff/2., rel_tol=0.005)
-        assert isclose(profile[141], co2_laser.norm_coeff/2., rel_tol=0.005)
+        assert isclose(profile[59], co2_laser.norm_coeff/2., rel_tol=0.005)
