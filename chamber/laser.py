@@ -58,3 +58,6 @@ class GaussianBeam(object):
         """
         return [x*self.radius*0.01 for x in range(-200, 201)]
 
+    def get_beam_profile(self, grid):
+        """Use the grid to calculate the beam profile."""
+        return [self.get_irr_r(coord) for coord in grid]
