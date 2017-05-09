@@ -57,8 +57,7 @@ class TestLaser(object):
     def test_get_beam_profile(self):
         """Check that the beam profile is generated correctly."""
         co2_laser = laser.GaussianBeam()
-        grid = co2_laser.get_radial_profile_grid()
-        profile = co2_laser.get_beam_profile(grid)
+        __, profile = co2_laser.get_beam_profile()
         assert len(profile) == 201
         assert isclose(profile[0], co2_laser.norm_coeff)
         assert isclose(profile[-1], exp(-8)*co2_laser.norm_coeff)
