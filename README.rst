@@ -34,6 +34,7 @@ Dependencies
 Back to `Table of Contents`_
 
   * matplotlib.pyplot
+  * pytest (for testing)
 
 Repo Directory Structure
 ------------------------

@@ -34,19 +34,32 @@ class TestLaser(object):
         co2_laser = laser.GaussianBeam()
         assert co2_laser.peak_irr == 2 * 20 / (pi * 0.9e-3**2)
 
+    def test_laser_constructor_radial_grid(self):
+        """Check that the radial grid for the beam profile is set correctly."""
+        co2_laser = laser.GaussianBeam()
+        step = co2_laser.r_grid[1] - co2_laser.r_grid[0]
+        assert co2_laser.r_grid[0] == 0
+        assert co2_laser.r_grid[100] == co2_laser.radius
+        assert co2_laser.r_grid[-1] == 2*co2_laser.radius
+        assert isclose(step, co2_laser.radius/100.)
+        assert len(co2_laser.r_grid) == 201
+
+    def test_laser_constructor_azimuthal_grid(self):
+    	"""Check that the azimuthal grid for the beam profile is set correctly."""
+    	co2_laser = laser.GaussianBeam()
+    	step = co2_laser.az_grid[1] - co2_laser.az_grid[0]
+    	assert co2_laser.az_grid[0] == 0
+    	assert co2_laser.az_grid[100] == pi
+    	assert co2_laser.az_grid[-1] == 2*pi
+    	assert isclose(step, pi/100.)
+    	assert len(co2_laser.az_grid) == 201
+
     def test_get_irradiance_at_r(self):
         """Check that irradiance at a point is calculated correctly."""
         co2_laser = laser.GaussianBeam()
         assert co2_laser.get_irr_r(0) == co2_laser.peak_irr
         hwhm = sqrt(2*log(2)) * (co2_laser.radius/2.)
         assert isclose(co2_laser.get_irr_r(hwhm), co2_laser.peak_irr/2.)
-
-    def test_laser_constructor_radial_grid(self):
-        """Check that the radial grid for the beam profile is set correctly."""
-        co2_laser = laser.GaussianBeam()
-        assert co2_laser.r_grid[0] == 0
-        assert co2_laser.r_grid[-1] == 2*co2_laser.radius
-        assert len(co2_laser.r_grid) == 201
 
     def test_laser_constructor_radial_profile(self):
         """Check that the beam profile is set correctly.
