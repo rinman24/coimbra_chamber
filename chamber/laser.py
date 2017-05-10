@@ -92,3 +92,6 @@ class GaussianBeam(object):
         plt.xlabel(r'radius, $r\,$ [m]')
         plt.ylabel(r"Irradiance, $I\,$ [W/m$^2$]")
         plt.show()
+
+    #def plt_pro_3d(self):
+    #	"""Plot the 3D beam profile."""
