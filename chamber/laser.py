@@ -94,4 +94,4 @@ class GaussianBeam(object):
         plt.show()
 
     #def plt_pro_3d(self):
-    #	"""Plot the 3D beam profile."""
+    #   """Plot the 3D beam profile."""
