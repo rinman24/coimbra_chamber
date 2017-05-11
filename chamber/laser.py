@@ -9,6 +9,7 @@ rc('font', **FONT)
 from mpl_toolkits.mplot3d import Axes3D
 
 from chamber.const import LAM, POW, W_0, HWHM_COEFF_W
+from chamber import tools
 
 class GaussianBeam(object):
     """GaussianBeam type contains methods related to Gaussian laser beams."""
@@ -98,9 +99,14 @@ class GaussianBeam(object):
         plt.ylabel(r"Irradiance, $I\,$ [W/m$^2$]")
         plt.show()
 
-    #def plt_pro_3d(self):
-    #   """Plot the 3D beam profile."""
-    #   fig = plt.figure()
-    #   ax = fig.add_subplot(111, projection='3d')
-
-
+    def plt_pro_3d(self):
+        """Plot the 3D beam profile."""
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        r_grid, az_grid = tools.meshgrid(self.r_points, self.az_points)
+        x_grid, y_grid = tools.meshgrid_pol2cart(r_grid, az_grid)
+        ax.plot_surface(x_grid, y_grid, self.profile_3d, cmap=plt.cm.YlGnBu_r)
+        ax.set_xlabel(r'$x$, m')
+        ax.set_ylabel(r'$y$, m')
+        ax.set_zlabel(r'$I$, W/m$^2$')
+        plt.show()
