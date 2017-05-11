@@ -29,12 +29,12 @@ class TestLaser(object):
     def test_laser_constructor_half_angle(self):
         """Check that half-angle divergence is calculated correctly."""
         co2_laser = laser.GaussianBeam()
-        assert co2_laser.divergence_half == 10.59e-6/(pi*0.9e-3)
+        assert co2_laser.div_half == 10.59e-6/(pi*0.9e-3)
 
     def test_laser_constructor_peak_irr(self):
         """Check that normalization coefficient is calculated correctly."""
         co2_laser = laser.GaussianBeam()
-        assert co2_laser.peak_irr == 2 * 20 / (pi * 0.9e-3**2)
+        assert co2_laser.irr_max == 2 * 20 / (pi * 0.9e-3**2)
 
     def test_laser_constructor_radial_grid(self):
         """Check that the radial grid for the beam profile is set correctly."""
@@ -59,9 +59,9 @@ class TestLaser(object):
     def test_get_irradiance_at_r(self):
         """Check that irradiance at a point is calculated correctly."""
         co2_laser = laser.GaussianBeam()
-        assert co2_laser.get_irr_r(0) == co2_laser.peak_irr
+        assert co2_laser.get_irr_r(0) == co2_laser.irr_max
         hwhm = sqrt(2*log(2)) * (co2_laser.radius/2.)
-        assert isclose(co2_laser.get_irr_r(hwhm), co2_laser.peak_irr/2.)
+        assert isclose(co2_laser.get_irr_r(hwhm), co2_laser.irr_max/2.)
 
     def test_laser_constructor_radial_profile(self):
         """Check that the beam profile is set correctly.
@@ -73,10 +73,10 @@ class TestLaser(object):
             that index 59 is used in this test case.
         """
         co2_laser = laser.GaussianBeam()
-        assert len(co2_laser.r_profile) == 201
-        assert isclose(co2_laser.r_profile[0], co2_laser.peak_irr)
-        assert isclose(co2_laser.r_profile[-1], exp(-8)*co2_laser.peak_irr)
-        assert isclose(co2_laser.r_profile[59], co2_laser.peak_irr/2., rel_tol=0.005)
+        assert len(co2_laser.profile) == 201
+        assert isclose(co2_laser.profile[0], co2_laser.irr_max)
+        assert isclose(co2_laser.profile[-1], exp(-8)*co2_laser.irr_max)
+        assert isclose(co2_laser.profile[59], co2_laser.irr_max/2., rel_tol=0.005)
 
     def test_laser_constructor_set_profile_3d(self):
     	"""Check that the 3d grid for the beam profile was created correctly.
@@ -85,6 +85,6 @@ class TestLaser(object):
     	symmetric.
     	"""
     	co2_laser = laser.GaussianBeam()
-    	assert [i[0] for i in co2_laser.profile_3d] == co2_laser.r_profile
-    	assert [i[-1] for i in co2_laser.profile_3d] == co2_laser.r_profile
-    	assert [i[100] for i in co2_laser.profile_3d] == co2_laser.r_profile
+    	assert [i[0] for i in co2_laser.profile_3d] == co2_laser.profile
+    	assert [i[-1] for i in co2_laser.profile_3d] == co2_laser.profile
+    	assert [i[100] for i in co2_laser.profile_3d] == co2_laser.profile

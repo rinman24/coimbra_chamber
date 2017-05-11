@@ -27,33 +27,33 @@ class GaussianBeam(object):
         self.power = power
         self.radius = radius
         self.set_rayleigh()
-        self.set_half_angle_divergence()
-        self.set_peak_irradiance()
-        self.set_radial_profile_points()
-        self.set_azimuthal_profile_points()
-        self.set_beam_profile()
+        self.set_div_half()
+        self.set_irr_max()
+        self.set_r_points()
+        self.set_az_points()
+        self.set_profile()
         self.set_profile_3d()
 
     def set_rayleigh(self):
         """Use radius and wavelength to calculate Rayleigh length [m]."""
         self.rayleigh = pi * self.radius**2 / self.lam
 
-    def set_half_angle_divergence(self):
+    def set_div_half(self):
         """Use radius and wavelength to set the half-angle divergence [radians]."""
-        self.divergence_half = self.lam/(pi*self.radius)
+        self.div_half = self.lam/(pi*self.radius)
 
-    def set_peak_irradiance(self):
+    def set_irr_max(self):
         """Use radius and power to set the normalization coefficient for radial profile."""
-        self.peak_irr = 2 * self.power / (pi * self.radius**2)
+        self.irr_max = 2 * self.power / (pi * self.radius**2)
 
-    def set_radial_profile_points(self):
+    def set_r_points(self):
         """Use radius to set the points of the radial beam profile.
 
         The points for the profile go from -2*W to 2*W in steps of W/100 [m].
         """
         self.r_points = [i*self.radius*0.01 for i in range(0, 201)]
 
-    def set_azimuthal_profile_points(self):
+    def set_az_points(self):
         """Use a list comprehension to set points in the azimuthal beam profile.
 
         The points for the profile go from 0 to 2*pi in steps of pi/100 [rad].
@@ -69,31 +69,31 @@ class GaussianBeam(object):
         Returns:
         irraciance [W/m^2]
         """
-        return self.peak_irr * exp((-2. * r_coord**2)/(self.radius**2))
+        return self.irr_max * exp((-2. * r_coord**2)/(self.radius**2))
 
-    def set_beam_profile(self):
+    def set_profile(self):
         """Use the r_points to calculate the beam profile."""
-        self.r_profile = [self.get_irr_r(r_coord) for r_coord in self.r_points]
+        self.profile = [self.get_irr_r(r_coord) for r_coord in self.r_points]
 
     def set_profile_3d(self):
         """Use the beam profile to generate a grid for 3d plotting."""
-        self.profile_3d = [[i]*201 for i in self.r_profile]
+        self.profile_3d = [[i]*201 for i in self.profile]
 
     def plt_pro(self):
         """Plot the beam profile."""
         # Constants used for plotting
         hwhm = HWHM_COEFF_W*self.radius
-        hlf = 0.5*self.peak_irr
-        i_e2 = self.peak_irr*exp(-2)
+        hlf = 0.5*self.irr_max
+        i_e2 = self.irr_max*exp(-2)
 
         # Plot the actual profile (could be rolled up into a function)
-        plt.fill_between(self.r_points, self.r_profile, 0, color='#B6D1E6')
-        plt.plot(self.r_points, self.r_profile, 'k', linewidth=2)
+        plt.fill_between(self.r_points, self.profile, 0, color='#B6D1E6')
+        plt.plot(self.r_points, self.profile, 'k', linewidth=2)
         plt.plot([0, hwhm], [hlf, hlf], 'k--', linewidth=1)
         plt.plot([hwhm, hwhm], [0, hlf], 'k--', linewidth=1)
         plt.plot([0, self.radius], [i_e2, i_e2], 'k--', linewidth=1)
         plt.plot([self.radius, self.radius], [0, i_e2], 'k--', linewidth=1)
-        plt.ylim([0, 1.1*self.peak_irr])
+        plt.ylim([0, 1.1*self.irr_max])
         plt.xlabel(r'radius, $r\,$ [m]')
         plt.ylabel(r"Irradiance, $I\,$ [W/m$^2$]")
         plt.show()
