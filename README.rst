@@ -26,7 +26,6 @@ Python Version
 Back to `Table of Contents`_
 
 This module is intended to use Python 3.x.
-Backward compatability with Python 2.x. has not been tested.
 
 Dependencies
 ------------
@@ -47,13 +46,15 @@ The structure of the directory
     ├── README.rst
     ├── chamber
     |   ├── __init__.py
-    |   └── const.py
-    |   └── laser.py
+    |   ├── const.py
+    |   ├── laser.py
+    |   └── tools.py
     ├── images
     |   └── coimbra_ucsd_logo.png
     └── tests
-        └── test_const.py
-        └── test_laser.py
+        ├── test_const.py
+        ├── test_laser.py
+        └── test_tools.py
 
 Preferred Way to Run Tests
 ---------------------------
