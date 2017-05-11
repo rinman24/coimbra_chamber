@@ -8,7 +8,8 @@ class TestTools(object):
 
     def test_meshgrid(self):
         """Check that the meshgrid is generated properly if points are passed to it."""
-        x_grid, y_grid = tools.meshgrid([0, 1, 2], [0, 1])
+        i_points, j_points = [0, 1, 2], [0, 1]
+        x_grid, y_grid = tools.meshgrid(i_points, j_points)
         assert x_grid == [[0, 0], [1, 1], [2, 2]]
         assert y_grid == [[0, 1], [0, 1], [0, 1]]
 

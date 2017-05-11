@@ -39,22 +39,22 @@ class TestLaser(object):
     def test_laser_constructor_radial_grid(self):
         """Check that the radial grid for the beam profile is set correctly."""
         co2_laser = laser.GaussianBeam()
-        step = co2_laser.r_grid[1] - co2_laser.r_grid[0]
-        assert co2_laser.r_grid[0] == 0
-        assert co2_laser.r_grid[100] == co2_laser.radius
-        assert co2_laser.r_grid[-1] == 2*co2_laser.radius
+        step = co2_laser.r_points[1] - co2_laser.r_points[0]
+        assert co2_laser.r_points[0] == 0
+        assert co2_laser.r_points[100] == co2_laser.radius
+        assert co2_laser.r_points[-1] == 2*co2_laser.radius
         assert isclose(step, co2_laser.radius/100.)
-        assert len(co2_laser.r_grid) == 201
+        assert len(co2_laser.r_points) == 201
 
     def test_laser_constructor_azimuthal_grid(self):
-    	"""Check that the azimuthal grid for the beam profile is set correctly."""
-    	co2_laser = laser.GaussianBeam()
-    	step = co2_laser.az_grid[1] - co2_laser.az_grid[0]
-    	assert co2_laser.az_grid[0] == 0
-    	assert co2_laser.az_grid[100] == pi
-    	assert co2_laser.az_grid[-1] == 2*pi
-    	assert isclose(step, pi/100.)
-    	assert len(co2_laser.az_grid) == 201
+        """Check that the azimuthal grid for the beam profile is set correctly."""
+        co2_laser = laser.GaussianBeam()
+        step = co2_laser.az_points[1] - co2_laser.az_points[0]
+        assert co2_laser.az_points[0] == 0
+        assert co2_laser.az_points[100] == pi
+        assert co2_laser.az_points[-1] == 2*pi
+        assert isclose(step, pi/100.)
+        assert len(co2_laser.az_points) == 201
 
     def test_get_irradiance_at_r(self):
         """Check that irradiance at a point is calculated correctly."""
@@ -77,3 +77,14 @@ class TestLaser(object):
         assert isclose(co2_laser.r_profile[0], co2_laser.peak_irr)
         assert isclose(co2_laser.r_profile[-1], exp(-8)*co2_laser.peak_irr)
         assert isclose(co2_laser.r_profile[59], co2_laser.peak_irr/2., rel_tol=0.005)
+
+    def test_laser_constructor_set_profile_3d(self):
+    	"""Check that the 3d grid for the beam profile was created correctly.
+
+    	Note: Every column of the 3d profile should be the same as the profile; e.g., radially
+    	symmetric.
+    	"""
+    	co2_laser = laser.GaussianBeam()
+    	assert [i[0] for i in co2_laser.profile_3d] == co2_laser.r_profile
+    	assert [i[-1] for i in co2_laser.profile_3d] == co2_laser.r_profile
+    	assert [i[100] for i in co2_laser.profile_3d] == co2_laser.r_profile
