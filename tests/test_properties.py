@@ -21,3 +21,11 @@ class TestProperties(object):
         assert isclose(prop.k_l(340), 0.661, rel_tol=0.005)
         assert isclose(prop.k_l(360), 0.676, rel_tol=0.005)
         assert isclose(prop.k_l(370), 0.680, rel_tol=0.005)
+
+    def test_specific_heat_liquid_water(self):
+        """Check that a the thermal conductivity of water can be calculated."""
+        assert isclose(prop.c_l(300), 4178, rel_tol=0.0005)
+        assert isclose(prop.c_l(320), 4174, rel_tol=0.0005)
+        assert isclose(prop.c_l(340), 4184, rel_tol=0.0005)
+        assert isclose(prop.c_l(360), 4200, rel_tol=0.0005)
+        assert isclose(prop.c_l(370), 4209, rel_tol=0.0005)
