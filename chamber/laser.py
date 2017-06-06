@@ -80,21 +80,34 @@ class GaussianBeam(object):
         """Use the beam profile to generate a grid for 3d plotting."""
         self.profile_3d = [[i]*201 for i in self.profile]
 
-    def plt_pro(self):
+    def plt_pro(self, full=False):
         """Plot the beam profile."""
         # Constants used for plotting
         hwhm = HWHM_COEFF_W*self.radius
         hlf = 0.5*self.irr_max
         i_e2 = self.irr_max*exp(-2)
 
+        # Lists to be plotted
+        r_coord = self.r_points
+        irr = self.profile
+
+        # If user requested a full version
+        if full:
+            r_coord = [-r for r in r_coord[::-1][:-1]] + r_coord
+            irr = irr[::-1][:-1] + irr
+
         # Plot the actual profile (could be rolled up into a function)
-        plt.fill_between(self.r_points, self.profile, 0, color='#B6D1E6')
-        plt.plot(self.r_points, self.profile, 'k', linewidth=2)
-        plt.plot([0, hwhm], [hlf, hlf], 'k--', linewidth=1)
-        plt.plot([hwhm, hwhm], [0, hlf], 'k--', linewidth=1)
-        plt.plot([0, self.radius], [i_e2, i_e2], 'k--', linewidth=1)
-        plt.plot([self.radius, self.radius], [0, i_e2], 'k--', linewidth=1)
-        plt.ylim([0, 1.1*self.irr_max])
+        plt.fill_between(r_coord, irr, 0, color='#B6D1E6')
+        plt.plot(r_coord, irr, 'k', linewidth=2)
+        
+        # Plot the lines that indicate HWHM and R_{e^{-2}}
+        #plt.plot([0, hwhm], [hlf, hlf], 'k--', linewidth=1)
+        #plt.plot([hwhm, hwhm], [0, hlf], 'k--', linewidth=1)
+        #plt.plot([0, self.radius], [i_e2, i_e2], 'k--', linewidth=1)
+        #plt.plot([self.radius, self.radius], [0, i_e2], 'k--', linewidth=1)
+        #plt.ylim([0, 1.1*self.irr_max])
+
+        # Add labels to the axes
         plt.xlabel(r'radius, $r\,$ [m]')
         plt.ylabel(r"Irradiance, $I\,$ [W/m$^2$]")
         plt.show()

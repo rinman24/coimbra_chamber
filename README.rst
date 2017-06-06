@@ -48,12 +48,14 @@ The structure of the directory
     |   ├── __init__.py
     |   ├── const.py
     |   ├── laser.py
+    |   ├── properties.py
     |   └── tools.py
     ├── images
     |   └── coimbra_ucsd_logo.png
     └── tests
         ├── test_const.py
         ├── test_laser.py
+        ├── test_properties.py
         └── test_tools.py
 
 Preferred Way to Run Tests

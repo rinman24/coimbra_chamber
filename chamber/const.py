@@ -40,8 +40,12 @@ H_TUBE_BASE = 5.57e-3 # 5.57 mm         [X]
 # Gaussian Beam Constants
 HWHM_COEFF_W = sqrt(2*log(2))/2 # 0.589 [X]
 
-# Water Optical Properties at 10.59 microns
+# Liquid Water Optical Properties at 10.59 microns
 K_ABS_10P6 = 8.218e4 # 82,180 m^{-1}    []
 K_EXT_10P6 = 6.925e-2 # 0.06925         []
 L_K_ABS = 1.22e-5 # 12 microns          []
+
+# Liquid Water Thermal Properties
+# (273.15 to 373.15 K)
+K_L_COEFF = [-2.9064388, 2.692925e-2, -6.8256489e-05, 5.858084e-08]
 
