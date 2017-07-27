@@ -20,10 +20,13 @@ Back to `Table of Contents`_
 
 Description will go here.
 
-Make sure that you export your MySQLCredentials environment variable for access.::
+Make sure that you export your MySQLCredentials environment variable for access
+::
 
-    export MySqlCredentials='your_password_here'
-
+    $ export MySqlUserName=*user_name*
+    $ export MySqlCredentials=*password*
+    $ export MySqlHost=*host*
+    $ export MySqlDataBase=*database*
 
 Python Version
 --------------
@@ -54,6 +57,7 @@ The structure of the directory
     |   ├── const.py
     |   ├── laser.py
     |   ├── properties.py
+    |   ├── sqldb.py
     |   └── tools.py
     ├── images
     |   └── coimbra_ucsd_logo.png
@@ -61,6 +65,7 @@ The structure of the directory
         ├── test_const.py
         ├── test_laser.py
         ├── test_properties.py
+        ├── test_sqldb.py
         └── test_tools.py
 
 Preferred Way to Run Tests
@@ -71,4 +76,4 @@ Back to `Table of Contents`_
 1. From the repo directory; i.e., ucsd_ch
 ::
 
-    $ python -m pytest tests/<your-test-name>.py -v
+    $ python -m pytest tests/*your-test-name*.py -v --capture=no
