@@ -20,6 +20,11 @@ Back to `Table of Contents`_
 
 Description will go here.
 
+Make sure that you export your MySQLCredentials environment variable for access.::
+
+    export MySqlCredentials='your_password_here'
+
+
 Python Version
 --------------
 
