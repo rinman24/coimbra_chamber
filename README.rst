@@ -42,8 +42,9 @@ Dependencies
 Back to `Table of Contents`_
 
   * matplotlib.pyplot
-  * pytest (for testing)
   * mysql.connector (for access to MySQL databases)
+  * nptdms (for interacting with LabVIEW TDMS files)
+  * pytest (for testing)
 
 Setting up Initial State of MySQL Database
 ------------------------------------------
@@ -79,7 +80,8 @@ The structure of the directory
     |   ├── sqldb.py
     |   └── tools.py
     ├── images
-    |   └── coimbra_ucsd_logo.png
+    |   ├── coimbra_ucsd_logo.png
+    |   └── mysql_schema.png
     └── tests
         ├── test_const.py
         ├── test_laser.py
