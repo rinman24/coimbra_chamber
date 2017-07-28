@@ -60,7 +60,7 @@ This will create all tables and populate the Unit table as well.
 
 The database schema is described below:
 
-.. image:: images/mysql_schema.pdf
+.. image:: images/mysql_schema.png
 
 Repo Directory Structure
 ------------------------
