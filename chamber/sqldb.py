@@ -51,7 +51,7 @@ def table_insert(cur, add_row, row_data):
     except conn.Error as err:
         print(err.msg)
     else:
-        print('Sucessfully added row.')
+        print('\tSucessfully added row.')
 
 def setting_exists(cur, setting):
     """Use the cursor and a setting dictionary to check if a setting already exists"""

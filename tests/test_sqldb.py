@@ -57,6 +57,8 @@ class TestSqlDb(object):
         cursor.execute("SELECT Value FROM UnitTest WHERE String = 'Test String';")
         assert isclose(float(cursor.fetchall()[0][0]), 99.9)
 
-    def test_setting_esists(self, cursor):
+    def test_setting_exists(self, cursor):
+        """Test that you can find settings that already exist."""
+        print()
         assert sqldb.setting_exists(cursor, SETTINGS_1)
         assert not sqldb.setting_exists(cursor, SETTINGS_2)

@@ -1,20 +1,13 @@
 """Docstring. This module sets up the initial state of the database. Be sure to only run onece."""
 
-# The first thing I need to do is get a connection to the database.
-# This will provide a connection as cnx and a cursor as cur.
 import chamber.sqldb as sqldb
 print("Loaded chamber.sqldb modulesucessfully.")
 
-# Now that I have the module loaded, I can use it to make a connection.
 cnx = sqldb.connect_sqldb()
 print("Sucessfully created a connection to the database")
 
 cur = cnx.cursor()
 print("Sucessfully created a cursor for the database")
-
-# Now that I have a connection to the database, I need to create several tables.
-# I can use the create_tables method from chamber.sqldb.
-# I just need to make several dictionaries that hold the info, see below:
 
 TABLES = {}
 TABLES['Unit'] = (
@@ -92,11 +85,11 @@ sqldb.create_tables(cur, TABLES)
 
 print("Populating Units table...")
 ADD_ROW_UNIT = (
-	"INSERT INTO Unit"
-	"    (Duty, Length, Mass, Power, Pressure, Temperature, Time) "
-	"  VALUES "
-	"    (%s, %s, %s, %s, %s, %s, %s)"
-	";")
+    "INSERT INTO Unit"
+    "    (Duty, Length, Mass, Power, Pressure, Temperature, Time) "
+    "  VALUES "
+    "    (%s, %s, %s, %s, %s, %s, %s)"
+    ";")
 ROW_DATA_UNIT = ('Percent', 'Meter', 'Kilogram', 'Watt', 'Pascal', 'Kelvin', 'Second')
 sqldb.table_insert(cur, ADD_ROW_UNIT, ROW_DATA_UNIT)
 
@@ -104,5 +97,6 @@ print("Committing changes to Unit table...")
 cnx.commit()
 
 print("All done, closing connection to server...")
+cur.close()
 cnx.close()
 print("Closed the connection.")
