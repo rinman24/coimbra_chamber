@@ -37,7 +37,7 @@ def create_tables(cur, tables):
     of MySQL DDL used to create the table."""
     for name, ddl in tables.items():
         try:
-            print("\nCreating table {}: ".format(name), end='')
+            print("\tCreating table {}: ".format(name), end='')
             cur.execute(ddl)
         except conn.Error as err:
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
