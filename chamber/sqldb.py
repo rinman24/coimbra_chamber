@@ -10,9 +10,6 @@ def connect_sqldb():
     Description: Uses environment variables MySqlUserName, MySqlCredentials, MySqlHost, and
     MySqlDataBase to connect to a MySQL server. The function returns both the connection object as well as the cursor object. If these variables are not already available use,
     for example, $ export MySqlUserName=user in the shell.
-
-    Usage:
-        >>> cnx, cur = connect_sqldb()
     """
     config = {'user': os.environ['MySqlUserName'],
               'password': os.environ['MySqlCredentials'],
@@ -55,3 +52,21 @@ def table_insert(cur, add_row, row_data):
         print(err.msg)
     else:
         print('Sucessfully added row.')
+
+def setting_exists(cur, setting):
+    """Use the cursor and a setting dictionary to check if a setting already exists"""
+    query = (
+        "SELECT SettingID FROM Setting"
+        "  WHERE"
+        "    InitialDewPoint = " + setting['InitialDewPoint'] + " AND"
+        "    InitialDuty = " + setting['InitialDuty'] + " AND"
+        "    InitialMass = " + setting['InitialMass'] + " AND"
+        "    InitialPressure = " + setting['InitialPressure'] + " AND"
+        "    InitialTemp = " + setting['InitialTemp'] + " AND"
+        "    TimeStep = " + setting['TimeStep'] + ";")
+    cur.execute(query)
+    result = cur.fetchall()
+    if not result:
+        return False
+    else:
+        return result[0][0]

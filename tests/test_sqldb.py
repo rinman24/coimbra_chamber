@@ -1,8 +1,9 @@
 """Docstring."""
-
-import pytest
+from math import isclose
 import mysql.connector as conn
 from mysql.connector import errorcode
+import pytest
+
 import chamber.sqldb as sqldb
 
 TABLES = {}
@@ -16,6 +17,11 @@ TABLES['UnitTest'] = (
 
 ADD_ROW = ("INSERT INTO UnitTest (Value, String) VALUES (%s, %s);")
 ROW_DATA = ('99.9', 'Test String')
+
+SETTINGS_1 = {'InitialDewPoint': '280', 'InitialDuty': '100', 'InitialMass': '0.7', 
+              'InitialPressure': '100000', 'InitialTemp': '290', 'TimeStep': '1'}
+SETTINGS_2 = {'InitialDewPoint': '500', 'InitialDuty': '1000', 'InitialMass': '20', 
+              'InitialPressure': '8', 'InitialTemp': '400', 'TimeStep': '20'}
 
 @pytest.fixture(scope='module')
 def cursor():
@@ -49,6 +55,8 @@ class TestSqlDb(object):
         """Test DDL for row insertion."""
         sqldb.table_insert(cursor, ADD_ROW, ROW_DATA)
         cursor.execute("SELECT Value FROM UnitTest WHERE String = 'Test String';")
-        assert float(cursor.fetchall()[0][0]) == 99.9
+        assert isclose(float(cursor.fetchall()[0][0]), 99.9)
 
-
+    def test_setting_esists(self, cursor):
+        assert sqldb.setting_exists(cursor, SETTINGS_1)
+        assert not sqldb.setting_exists(cursor, SETTINGS_2)
