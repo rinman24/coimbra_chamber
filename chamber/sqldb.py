@@ -69,6 +69,15 @@ def insert_dml(table, row_data):
         "    ('" + "', '".join(row_data.values()) + "');")
     return query
 
+def last_insert_id(cur):
+    """Use the last SELECT LAST_INSERT_ID() query to return the last inserted id.
+
+    Positional arguments:
+    cur -- mysql.connector.cursor.MySQLCursor
+    """
+    cur.execute("SELECT LAST_INSERT_ID();")
+    return cur.fetchone()[0]
+
 def setting_exists(cur, setting):
     """Use the cursor and a setting dictionary to check if a setting already exists"""
     query = (
@@ -81,8 +90,8 @@ def setting_exists(cur, setting):
         "    InitialTemp = " + setting['InitialTemp'] + " AND"
         "    TimeStep = " + setting['TimeStep'] + ";")
     cur.execute(query)
-    result = cur.fetchall()[0][0]
+    result = cur.fetchall()
     if not result:
         return False
     else:
-        return result
+        return result[0][0]

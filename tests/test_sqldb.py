@@ -53,9 +53,14 @@ class TestSqlDb(object):
         assert len(cursor.fetchall()) == 0
 
     def test_build_insert_dml(self):
+        """Test DML for INSERT statements."""
         query = sqldb.insert_dml('UnitTest', ROW_DATA_1)
         ref = "INSERT INTO UnitTest     (String)  VALUES    ('unit testing');"
         assert ref == query
+
+    def test_last_insert_id(self, cursor):
+        """Test retrevial of last insert id."""
+        assert isinstance(sqldb.last_insert_id(cursor), int)
 
     def test_enter_into_table(self, cursor):
         """Test DDL for row insertion."""
@@ -65,15 +70,8 @@ class TestSqlDb(object):
 
     def test_setting_exists(self, cursor):
         """Test that you can find settings that already exist."""
-        #add_row = ("INSERT INTO Setting"
-        #           "(InitialDewPoint, InitialDuty, InitialMass,"
-        #           " InitialPressure, InitialTemp, TimeStep)"
-        #           "  VALUES (%s, %s, %s, %s, %s, %s);")
-        #row_data = ('100', '100.0', '0.07', '100000', '290.0', '1.0')
-        #sqldb.table_insert(cursor, add_row, row_data)
         cursor.execute(sqldb.insert_dml('Setting', SETTINGS_1))
         assert sqldb.setting_exists(cursor, SETTINGS_1)
         assert not sqldb.setting_exists(cursor, SETTINGS_2)
-        cursor.execute("SELECT LAST_INSERT_ID();")
-        setting_id = str(cursor.fetchone()[0])
+        setting_id = sqldb.last_insert_id(cursor)
         cursor.execute("DELETE FROM Setting WHERE SettingID = {};".format(setting_id))
