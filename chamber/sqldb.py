@@ -28,11 +28,13 @@ def connect_sqldb():
         return cnx
 
 def create_tables(cur, tables):
-    """Use cur and a dictionaty of names and DDL to create tables in the database.
+    """Use cur and a list of tuples of names and DDL queries to create tables in the database.
 
-    Description: Uses a dictionaty where the key is the name of the table and the value is a string
-    of MySQL DDL used to create the table."""
-    for name, ddl in tables.items():
+    Description: Uses a list of tuples where the 0 index is the name of the table and the 1 index is
+    a string of MySQL DDL used to create the table. A list is required so that the DDL can be
+    executed in order so that foreign key constraint errors do not occur. """
+    for table in tables:
+        name, ddl = table
         try:
             print("\tCreating table {}: ".format(name), end='')
             cur.execute(ddl)

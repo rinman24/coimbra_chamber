@@ -82,6 +82,9 @@ The structure of the directory
     ├── images
     |   ├── coimbra_ucsd_logo.png
     |   └── mysql_schema.png
+    ├── setup
+    |   ├── add_tube.py
+    |   └── setup_sqldb.py
     └── tests
         ├── test_const.py
         ├── test_laser.py

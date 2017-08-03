@@ -6,21 +6,18 @@ import pytest
 
 import chamber.sqldb as sqldb
 
-TABLES = {}
-TABLES['UnitTest'] = (
-    "CREATE TABLE `UnitTest` ("
-    "    `UnitTestID` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
-    "    `Value` DECIMAL(5,2) NOT NULL,"
-    "    `String` VARCHAR(30) NOT NULL,"
-    "  PRIMARY KEY (`UnitTestID`)"
-    ");")
+TABLES = []
+TABLES.append(('UnitTest',
+               "CREATE TABLE `UnitTest` ("
+               "    `UnitTestID` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "    `Value` DECIMAL(5,2) NOT NULL,"
+               "    `String` VARCHAR(30) NOT NULL,"
+               "  PRIMARY KEY (`UnitTestID`)"
+               ");"))
 
-ADD_ROW = ("INSERT INTO UnitTest (Value, String) VALUES (%s, %s);")
-ROW_DATA = ('99.9', 'Test String')
-
-SETTINGS_1 = {'InitialDewPoint': '280', 'InitialDuty': '100', 'InitialMass': '0.7', 
+SETTINGS_1 = {'InitialDewPoint': '100', 'InitialDuty': '100', 'InitialMass': '0.07',
               'InitialPressure': '100000', 'InitialTemp': '290', 'TimeStep': '1'}
-SETTINGS_2 = {'InitialDewPoint': '500', 'InitialDuty': '1000', 'InitialMass': '20', 
+SETTINGS_2 = {'InitialDewPoint': '500', 'InitialDuty': '1000', 'InitialMass': '20',
               'InitialPressure': '8', 'InitialTemp': '400', 'TimeStep': '20'}
 
 @pytest.fixture(scope='module')
@@ -34,6 +31,7 @@ def cursor():
     print("\nCleaning up test database...")
     cur.execute("DROP TABLE UnitTest;")
     print("Disconnecting from MySQL...")
+    cnx.commit()
     cur.close()
     cnx.close()
     print("Connection to MySQL closed.")
@@ -52,13 +50,21 @@ class TestSqlDb(object):
         assert len(cursor.fetchall()) == 0
 
     def test_enter_into_table(self, cursor):
-        """Test DDL for row insertion."""
-        sqldb.table_insert(cursor, ADD_ROW, ROW_DATA)
+        """Test DDL for row insertion."""        
+        add_row = ("INSERT INTO UnitTest (Value, String) VALUES (%s, %s);")
+        row_data = ('99.9', 'Test String')
+        sqldb.table_insert(cursor, add_row, row_data)
         cursor.execute("SELECT Value FROM UnitTest WHERE String = 'Test String';")
         assert isclose(float(cursor.fetchall()[0][0]), 99.9)
 
     def test_setting_exists(self, cursor):
         """Test that you can find settings that already exist."""
-        print()
+        add_row = ("INSERT INTO Setting"
+                   "(InitialDewPoint, InitialDuty, InitialMass,"
+                   " InitialPressure, InitialTemp, TimeStep)"
+                   "  VALUES (%s, %s, %s, %s, %s, %s);")
+        row_data = ('100', '100.0', '0.07', '100000', '290.0', '1.0')
+        sqldb.table_insert(cursor, add_row, row_data)
         assert sqldb.setting_exists(cursor, SETTINGS_1)
         assert not sqldb.setting_exists(cursor, SETTINGS_2)
+        cursor.execute("DELETE FROM Setting WHERE InitialDewPoint = 100;")
