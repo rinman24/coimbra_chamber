@@ -8,12 +8,15 @@ import chamber.sqldb as sqldb
 
 TABLES = []
 TABLES.append(('UnitTest',
-               "CREATE TABLE `UnitTest` ("
-               "    `UnitTestID` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
-               "    `Value` DECIMAL(5,2) NOT NULL,"
-               "    `String` VARCHAR(30) NOT NULL,"
+               "CREATE TABLE UnitTest ("
+               "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "    Number DECIMAL(5,2) NULL,"
+               "    String VARCHAR(30) NULL,"
                "  PRIMARY KEY (`UnitTestID`)"
                ");"))
+
+ROW_DATA_1 = {'String': 'unit testing'}
+ROW_DATA_2 = {'Number': '99.9', 'String': 'more testing'}
 
 SETTINGS_1 = {'InitialDewPoint': '100', 'InitialDuty': '100', 'InitialMass': '0.07',
               'InitialPressure': '100000', 'InitialTemp': '290', 'TimeStep': '1'}
@@ -49,22 +52,28 @@ class TestSqlDb(object):
         cursor.execute("SELECT 1 FROM UnitTest LIMIT 1;")
         assert len(cursor.fetchall()) == 0
 
+    def test_build_insert_dml(self):
+        query = sqldb.insert_dml('UnitTest', ROW_DATA_1)
+        ref = "INSERT INTO UnitTest     (String)  VALUES    ('unit testing');"
+        assert ref == query
+
     def test_enter_into_table(self, cursor):
-        """Test DDL for row insertion."""        
-        add_row = ("INSERT INTO UnitTest (Value, String) VALUES (%s, %s);")
-        row_data = ('99.9', 'Test String')
-        sqldb.table_insert(cursor, add_row, row_data)
-        cursor.execute("SELECT Value FROM UnitTest WHERE String = 'Test String';")
+        """Test DDL for row insertion."""
+        cursor.execute(sqldb.insert_dml('UnitTest', ROW_DATA_2))
+        cursor.execute("SELECT Number FROM UnitTest WHERE String = 'more testing';")
         assert isclose(float(cursor.fetchall()[0][0]), 99.9)
 
     def test_setting_exists(self, cursor):
         """Test that you can find settings that already exist."""
-        add_row = ("INSERT INTO Setting"
-                   "(InitialDewPoint, InitialDuty, InitialMass,"
-                   " InitialPressure, InitialTemp, TimeStep)"
-                   "  VALUES (%s, %s, %s, %s, %s, %s);")
-        row_data = ('100', '100.0', '0.07', '100000', '290.0', '1.0')
-        sqldb.table_insert(cursor, add_row, row_data)
+        #add_row = ("INSERT INTO Setting"
+        #           "(InitialDewPoint, InitialDuty, InitialMass,"
+        #           " InitialPressure, InitialTemp, TimeStep)"
+        #           "  VALUES (%s, %s, %s, %s, %s, %s);")
+        #row_data = ('100', '100.0', '0.07', '100000', '290.0', '1.0')
+        #sqldb.table_insert(cursor, add_row, row_data)
+        cursor.execute(sqldb.insert_dml('Setting', SETTINGS_1))
         assert sqldb.setting_exists(cursor, SETTINGS_1)
         assert not sqldb.setting_exists(cursor, SETTINGS_2)
-        cursor.execute("DELETE FROM Setting WHERE InitialDewPoint = 100;")
+        cursor.execute("SELECT LAST_INSERT_ID();")
+        setting_id = str(cursor.fetchone()[0])
+        cursor.execute("DELETE FROM Setting WHERE SettingID = {};".format(setting_id))

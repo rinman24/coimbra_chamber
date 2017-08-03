@@ -32,11 +32,16 @@ def create_tables(cur, tables):
 
     Description: Uses a list of tuples where the 0 index is the name of the table and the 1 index is
     a string of MySQL DDL used to create the table. A list is required so that the DDL can be
-    executed in order so that foreign key constraint errors do not occur. """
+    executed in order so that foreign key constraint errors do not occur.
+    
+    Positional arguments:
+    cur -- mysql.connector.cursor.MySQLCursor
+    tables -- list
+    """
     for table in tables:
         name, ddl = table
         try:
-            print("\tCreating table {}: ".format(name), end='')
+            #print("\tCreating table {}: ".format(name), end='')
             cur.execute(ddl)
         except conn.Error as err:
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
@@ -46,14 +51,23 @@ def create_tables(cur, tables):
         else:
             print("OK")
 
-def table_insert(cur, add_row, row_data):
-    """Use cur and two DDL lines to add a row of data."""
-    try:
-        cur.execute(add_row, row_data)
-    except conn.Error as err:
-        print(err.msg)
-    else:
-        print('\tSucessfully added row.')
+def insert_dml(table, row_data):
+    """Use a table name and dictionay to return a MySQL insert DML query.
+
+    Description: Use the name of the table and a dictionary called row_data, where the keys are
+    attribute names and the values are row data, to build and return a MySQL DML INSERT query.
+    Please note that all the values in the row_data dictionary should be string types.
+
+    Positional arguments:
+    table -- string
+    row_data -- dict of strings
+    """
+    query = (
+        "INSERT INTO " + table + " "
+        "    (" + ', '.join(row_data.keys()) + ")"
+        "  VALUES"
+        "    ('" + "', '".join(row_data.values()) + "');")
+    return query
 
 def setting_exists(cur, setting):
     """Use the cursor and a setting dictionary to check if a setting already exists"""
@@ -67,8 +81,8 @@ def setting_exists(cur, setting):
         "    InitialTemp = " + setting['InitialTemp'] + " AND"
         "    TimeStep = " + setting['TimeStep'] + ";")
     cur.execute(query)
-    result = cur.fetchall()
+    result = cur.fetchall()[0][0]
     if not result:
         return False
     else:
-        return result[0][0]
+        return result
