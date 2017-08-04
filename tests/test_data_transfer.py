@@ -1,6 +1,7 @@
 from datetime import datetime
 from os import listdir
 
+from nptdms import TdmsFile
 import pytest
 import pytz
 
