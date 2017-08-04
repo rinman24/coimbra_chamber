@@ -13,6 +13,7 @@ Table of Contents
   * `Setting up Initial State of MySQL Database`_
   * `Repo Directory Structure`_
   * `Preferred Way to Run Tests`_
+  * `Images`_
 
 Description
 -----------
@@ -83,6 +84,9 @@ The structure of the directory
     ├── images
     |   ├── coimbra_ucsd_logo.png
     |   └── mysql_schema.png
+    ├── setup
+    |   ├── add_tube.py
+    |   └── setup_sqldb.py
     └── tests
         ├── test_const.py
         ├── test_laser.py
@@ -99,3 +103,14 @@ Back to `Table of Contents`_
 ::
 
     $ python -m pytest tests/<your-test-name>.py -v --capture=no
+
+Images
+------
+
+.. image:: images/chamber_iso_view.jpg
+
+.. image:: images/chamber_scale.jpg
+
+.. image:: images/chamber_profile.jpg
+
+.. image:: images/chamber_optics.jpg
