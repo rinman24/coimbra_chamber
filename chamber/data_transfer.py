@@ -4,7 +4,7 @@ from re import compile
 from nptdms import TdmsFile
 
 def list_tdms(file_path):
-    """Returns a list of the .tdms files contained within the argument file."""
+    """returns a list of the .tdms files contained within the argument file."""
     regex = compile(".tdms")
     file_list = [file for file in listdir(file_path) if regex.match(file, len(file)-5)]
     return file_list
@@ -33,7 +33,7 @@ def get_tests(tdms_obj):
     return tests
 
 def get_obs(tdms_obj, idx):
-	"""returns a dictionary of strings derived from tdms object observation data"""
+    """returns a dictionary of strings derived from tdms object observation data"""
     observations = {'cap_man_ok': str(tdms_obj.object("Data", "CapManOk").data[idx]),
         'dew_point': str(tdms_obj.object("Data", "DewPoint").data[idx]),
         'duty_cycle': str(tdms_obj.object("Data", "DutyCycle").data[idx]),
@@ -47,6 +47,6 @@ def get_obs(tdms_obj, idx):
     return observations
 
 def get_temp(tdms_obj, idx):
-	"""returns a dictionary of strings derived from tdms object temperature data"""
+    """returns a dictionary of strings derived from tdms object temperature data"""
     temp = {'TC_num': str(idx), 'temp': str(tdms_obj.object("Data", "TC{}".format(idx)).data[idx])}
     return temp
