@@ -1,9 +1,7 @@
 from os import listdir
 from datetime import datetime
-from datetime import tzinfo
 
 import pytest
-from nptdms import TdmsFile
 import pytz
 
 import chamber.data_transfer as data_transfer
@@ -17,7 +15,7 @@ TDMS_TEST_FILES = ["tests/data_transfer_test_files/tdms_test_files/tdms_test_fil
                   , "tests/data_transfer_test_files/tdms_test_files/tdms_test_file_03.tdms"
                   ]
 TDMS_01_DICT_SETS = {'initial_dew_point': 292.501, 'initial_duty': 0, 'initial_mass': -0.0658138
-                     , 'initial_pressure': 99977, 'initial_temp': (297.371+297.139+297.241+297.302+297.27
+                     , 'initial_pressure': 99977, 'initial_temp': (297.302+297.27
                      +297.284+296.835+296.753+297.094+297.054+296.928+296.86+297.318+297.325)/14
                      }
 TDMS_01_DICT_TESTS = {'author': "ADL", 'date_time': datetime(2017, 8, 3, 19, 33, 9, 217290, pytz.UTC)

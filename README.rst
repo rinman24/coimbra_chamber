@@ -45,6 +45,7 @@ Back to `Table of Contents`_
   * mysql.connector (for access to MySQL databases)
   * nptdms (for interacting with LabVIEW TDMS files)
   * pytest (for testing)
+  * pytz (for datetime testing)
 
 Setting up Initial State of MySQL Database
 ------------------------------------------
