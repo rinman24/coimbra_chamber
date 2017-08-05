@@ -1,6 +1,7 @@
 from datetime import datetime
 from os import listdir
 
+from nptdms import TdmsFile
 import pytest
 import pytz
 
@@ -24,6 +25,11 @@ TDMS_01_DICT_TESTS = {'author': "ADL", 'date_time': datetime(2017, 8, 3, 19, 33,
     'description': "This is at room temperature, pressure, no laser power, study of boundy development.",
     'time_step': 1
     }
+TDMS_01_THM_07 = {'TC_num': "7", 'temp': "296.762"}
+TDMS_01_OBS_08 = {'cap_man_ok': "1.0", 'dew_point': "292.427", 'duty_cycle': "0.0", 'idx': "8.0",
+    'mass': "-0.0658138", 'optidew_ok': "1.0", 'pow_out': "-0.001", 'pow_ref': "-0.0015", 'pressure': "99982.0"
+    }
+TEST_INDEX = 7
     
 @pytest.fixture(scope='module')
 def test_tdms_obj():
@@ -54,3 +60,11 @@ class TestSqlDb(object):
     def test_fixture(self, test_tdms_obj):
         """Test existence of test_tdms_obj fixture"""
         assert test_tdms_obj
+
+    def test_get_temp(self, test_tdms_obj):
+        """Test correcct output when converting tdms obj temperature data to dictionary of strings"""
+        assert TDMS_01_THM_07 == data_transfer.get_temp(test_tdms_obj, TEST_INDEX)
+
+    def test_get_obs(self, test_tdms_obj):
+        """Test correcct output when converting tdms obj observation data to dictionary of strings"""
+        assert TDMS_01_OBS_08 == data_transfer.get_obs(test_tdms_obj, TEST_INDEX)
