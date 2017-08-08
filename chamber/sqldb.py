@@ -278,5 +278,5 @@ def add_temp(cur, tdms_obj, obs_id, temp_idx):
     temp = {}
     for couple in range(14):
         temp.update(get_temp(tdms_obj, temp_idx, couple))
-    temp["ObservationID"] = obs_id
-    cur.execute(insert_dml("TempObservation", temp))
+        temp["ObservationID"] = obs_id
+        cur.execute(insert_dml("TempObservation", temp))
