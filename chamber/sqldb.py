@@ -280,4 +280,3 @@ def add_temp(cur, tdms_obj, obs_id, temp_idx):
         temp.update(get_temp(tdms_obj, temp_idx, couple))
     temp["ObservationID"] = obs_id
     cur.execute(insert_dml("TempObservation", temp))
-    return last_insert_id(cur)
