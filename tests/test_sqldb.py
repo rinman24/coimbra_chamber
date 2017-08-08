@@ -137,7 +137,7 @@ class TestSqlDb(object):
 
     def test_get_temp(self, test_tdms_obj):
         """Test correcct output when converting tdms obj temperature data to dictionary of strings."""
-        assert TDMS_01_THM_07 == sqldb.get_temp(test_tdms_obj, TEST_INDEX)
+        assert TDMS_01_THM_07 == sqldb.get_temp(test_tdms_obj, TEST_INDEX, 7)
 
     def test_get_obs(self, test_tdms_obj):
         """Test correct output when converting tdms obj observation data to dictionary of strings."""
@@ -149,7 +149,7 @@ class TestSqlDb(object):
         sqldb.add_input(cursor, TEST_DIRECTORY)
         cursor.execute("Select Temperature FROM TempObservation WHERE TempObservationID = '{}'".format(sqldb.last_insert_id(cursor)))
         res = cursor.fetchone()
-        assert res[0] == Decimal('297.09')
+        assert res[0] == Decimal('297.31')
         clear_sqldb(cursor)
 
     def test_add_setting(self, cursor, test_tdms_obj):
