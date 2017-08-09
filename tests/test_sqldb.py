@@ -45,7 +45,7 @@ TDMS_01_DICT_SETS = {'InitialDewPoint': "292.50", 'InitialDuty': "0.0", 'Initial
 TDMS_01_DICT_TESTS = {'Author': "ADL", 'DateTime': str(datetime(2017, 8, 3, 19, 33, 9, 217290, pytz.UTC)).split(".", 1)[0],
     'Description': "This is at room temperature, pressure, no laser power, study of boundy development."
     }
-TDMS_01_THM_07 = {'ThermocoupleNum': "7", 'Temperature': "296.762"}
+TDMS_01_THM_07 = 296.762
 TDMS_01_OBS_08 = {'CapManOk': "1.0", 'DewPoint': "292.43", 'Duty': "0.0", 'Idx': "8.0",
     'Mass': "-0.0658138", 'OptidewOk': "1.0", 'PowOut': "-0.001", 'PowRef': "-0.0015", 'Pressure': "99982.0"
     }
@@ -149,7 +149,7 @@ class TestSqlDb(object):
         sqldb.add_input(cursor, TEST_DIRECTORY)
         cursor.execute("Select Temperature FROM TempObservation WHERE TempObservationID = '{}'".format(sqldb.last_insert_id(cursor)))
         res = cursor.fetchone()
-        assert res[0] == Decimal('297.31')
+        assert res[0] == Decimal('297.36')
         clear_sqldb(cursor)
 
     def test_add_setting(self, cursor, test_tdms_obj):
