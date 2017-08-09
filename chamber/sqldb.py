@@ -195,16 +195,12 @@ def add_input(cur, directory):
     """
     cur.execute("SET AUTOCOMMIT=0;")
     for file in list_tdms(directory):
-        print("\n*****************************************\n")
-        print(file)
         tdms_obj = TdmsFile(directory + file)
         test_id = add_test(cur, tdms_obj, str(add_setting(cur, tdms_obj)))
         range_int = len(tdms_obj.object("Data", "Idx").data)
         for obs_idx in range(range_int):
             obs_id = add_obs(cur, tdms_obj, str(test_id), obs_idx)
-            print("#")
-            for temp_idx in range(range_int):
-                add_temp(cur, tdms_obj, str(obs_id), temp_idx)
+            add_temp(cur, tdms_obj, str(obs_id), obs_idx)
 
 def add_setting(cur, tdms_obj):
     """Uses settings_exist and insert_dml to add settings to the data base and returns the setting id.
@@ -276,8 +272,7 @@ def add_temp(cur, tdms_obj, obs_id, temp_idx):
     temp_idx -- int
     """
     temp = {}
-    for couple in range(14):
-        temp.update(get_temp(tdms_obj, temp_idx, couple))
     temp["ObservationID"] = obs_id
-    cur.execute(insert_dml("TempObservation", temp))
-    return last_insert_id(cur)
+    for couple_idx in range(14):
+        temp.update(get_temp(tdms_obj, temp_idx, couple_idx))
+        cur.execute(insert_dml("TempObservation", temp))
