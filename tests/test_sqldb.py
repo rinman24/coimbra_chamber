@@ -1,6 +1,5 @@
 """Docstring."""
 from datetime import datetime
-from decimal import Decimal
 from math import isclose
 
 import mysql.connector as conn
@@ -96,10 +95,6 @@ class TestSqlDb(object):
         ref = "INSERT INTO UnitTest     (String)  VALUES    ('unit testing');"
         assert ref == query
 
-    def test_last_insert_id(self, cursor):
-        """Test retrevial of last insert id."""
-        assert isinstance(sqldb.last_insert_id(cursor), int)
-
     def test_enter_into_table(self, cursor):
         """Test DDL for row insertion."""
         cursor.execute(sqldb.insert_dml('UnitTest', ROW_DATA_2))
@@ -111,12 +106,12 @@ class TestSqlDb(object):
         cursor.execute(sqldb.insert_dml('Setting', SETTINGS_1))
         assert sqldb.setting_exists(cursor, SETTINGS_1)
         assert not sqldb.setting_exists(cursor, SETTINGS_2)
-        setting_id = sqldb.last_insert_id(cursor)
+        setting_id = cursor.lastrowid
         cursor.execute("DELETE FROM Setting WHERE SettingID = {};".format(setting_id))
 
     def test_list_tdms(self):
         """Test correct output of all .tdms files contained in argument file."""
-        files = sqldb.list_tdms("tests/data_transfer_test_files")
+        files = sqldb.list_tdms('tests/data_transfer_test_files')
 
         for file in INCORRECT_FILE_LIST:
             assert file not in files
@@ -127,9 +122,9 @@ class TestSqlDb(object):
         """Test correct dictionary output when reading .tdms files for settings."""
         assert TDMS_01_DICT_SETS == sqldb.get_settings(test_tdms_obj)
 
-    def test_get_tests(self, test_tdms_obj):
+    def test_get_test_cols(self, test_tdms_obj):
         """Test correct dictionary output when reading .tdms files for tests."""
-        assert TDMS_01_DICT_TESTS == sqldb.get_tests(test_tdms_obj)
+        assert TDMS_01_DICT_TESTS == sqldb.get_test_cols(test_tdms_obj)
     
     def test_fixture(self, test_tdms_obj):
         """Test existence of test_tdms_obj fixture."""
@@ -147,9 +142,10 @@ class TestSqlDb(object):
         """Test correct data insertion through checking add_temp, the final table in cascade."""
         clear_sqldb(cursor)
         sqldb.add_input(cursor, TEST_DIRECTORY)
-        cursor.execute("Select Temperature FROM TempObservation WHERE TempObservationID = '{}'".format(sqldb.last_insert_id(cursor)))
+        cursor.execute("Select Temperature FROM TempObservation WHERE TempObservationID = '{}'".format(cursor.lastrowid))
         res = cursor.fetchone()
-        assert res[0] == Decimal('297.31')
+        print(type(res), len(res), type(res[0]), res[0])
+        assert isclose(float(res[0]), 297.23)
         clear_sqldb(cursor)
 
     def test_add_setting(self, cursor, test_tdms_obj):
@@ -166,7 +162,7 @@ class TestSqlDb(object):
         clear_sqldb(cursor)
         setting_id = sqldb.add_setting(cursor, test_tdms_obj)
         sqldb.add_test(cursor, test_tdms_obj, str(setting_id))
-        cursor.execute("Select Author FROM Test WHERE TestID = '{}'".format(sqldb.last_insert_id(cursor)))
+        cursor.execute("Select Author FROM Test WHERE TestID = '{}'".format(cursor.lastrowid))
         assert cursor.fetchone()[0] == "ADL"
         clear_sqldb(cursor)
 
@@ -176,8 +172,8 @@ class TestSqlDb(object):
         test_id = sqldb.add_test(cursor, test_tdms_obj, str(sqldb.add_setting(cursor, test_tdms_obj)))
         for obs_idx in range(len(test_tdms_obj.object("Data", "Idx").data)):
             sqldb.add_obs(cursor, test_tdms_obj, str(test_id), obs_idx)
-        cursor.execute("Select Duty FROM Observation WHERE ObservationID = '{}'".format(sqldb.last_insert_id(cursor)))
-        assert cursor.fetchone()[0] == Decimal('0.0')
+        cursor.execute("Select Duty FROM Observation WHERE ObservationID = '{}'".format(cursor.lastrowid))
+        assert isclose(float(cursor.fetchone()[0]), 0)
         clear_sqldb(cursor)
 
 
