@@ -62,7 +62,7 @@ def create_tables(cur, tables):
     for table in tables:
         name, ddl = table
         try:
-            #print('\tCreating table {}: '.format(name), end='')
+            print('\tCreating table {}: '.format(name), end='')
             cur.execute(ddl)
         except conn.Error as err:
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
