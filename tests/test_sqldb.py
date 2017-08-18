@@ -1,6 +1,5 @@
 """Docstring."""
 from datetime import datetime
-from decimal import Decimal
 from math import isclose
 
 import mysql.connector as conn
@@ -37,14 +36,15 @@ TDMS_TEST_FILES = ["tests/data_transfer_test_files/tdms_test_files/tdms_test_fil
     "tests/data_transfer_test_files/tdms_test_files/tdms_test_file_02.tdms",
     "tests/data_transfer_test_files/tdms_test_files/tdms_test_file_03.tdms"
     ]
-TDMS_01_DICT_SETS = {'InitialDewPoint': "292.50", 'InitialDuty': "0.0", 'InitialMass': "-0.0658138",
-    'InitialPressure': "99977.0", 'InitialTemp': "{0:.2f}".format(round((297.302+297.27
-    +297.284+296.835+296.753+297.094+297.054+296.928+296.86+297.318+297.325)/11, 2)),
-    'TimeStep': "1.00"
+TDMS_01_DICT_SETS = {'initial_dew_point': 292.501, 'initial_duty': 0, 'initial_mass': -0.0658138,
+    'initial_pressure': 99977, 'initial_temp': (297.302+297.27
+    +297.284+296.835+296.753+297.094+297.054+296.928+296.86+297.318+297.325)/11
     }
-TDMS_01_DICT_TESTS = {'Author': "ADL", 'DateTime': str(datetime(2017, 8, 3, 19, 33, 9, 217290, pytz.UTC)).split(".", 1)[0],
-    'Description': "This is at room temperature, pressure, no laser power, study of boundy development."
+TDMS_01_DICT_TESTS = {'author': "ADL", 'date_time': datetime(2017, 8, 3, 19, 33, 9, 217290, pytz.UTC),
+    'description': "This is at room temperature, pressure, no laser power, study of boundy development.",
+    'time_step': 1
     }
+
 TDMS_01_THM_07 = 296.762
 TDMS_01_OBS_08 = {'CapManOk': "1.0", 'DewPoint': "292.43", 'Duty': "0.0", 'Idx': "8.0",
     'Mass': "-0.0658138", 'OptidewOk': "1.0", 'PowOut': "-0.001", 'PowRef': "-0.0015", 'Pressure': "99982.0"
@@ -124,23 +124,23 @@ class TestSqlDb(object):
             assert file in files
 
     def test_get_settings(self, test_tdms_obj):
-        """Test correct dictionary output when reading .tdms files for settings."""
+        """Test correct dictionary output when reading .tdms files for settings"""
         assert TDMS_01_DICT_SETS == sqldb.get_settings(test_tdms_obj)
 
     def test_get_tests(self, test_tdms_obj):
-        """Test correct dictionary output when reading .tdms files for tests."""
+        """Test correct dictionary output when reading .tdms files for tests"""
         assert TDMS_01_DICT_TESTS == sqldb.get_tests(test_tdms_obj)
     
     def test_fixture(self, test_tdms_obj):
-        """Test existence of test_tdms_obj fixture."""
+        """Test existence of test_tdms_obj fixture"""
         assert test_tdms_obj
 
     def test_get_temp(self, test_tdms_obj):
-        """Test correcct output when converting tdms obj temperature data to dictionary of strings."""
-        assert TDMS_01_THM_07 == sqldb.get_temp(test_tdms_obj, TEST_INDEX, 7)
+        """Test correcct output when converting tdms obj temperature data to dictionary of strings"""
+        assert TDMS_01_THM_07 == sqldb.get_temp(test_tdms_obj, TEST_INDEX)
 
     def test_get_obs(self, test_tdms_obj):
-        """Test correct output when converting tdms obj observation data to dictionary of strings."""
+        """Test correcct output when converting tdms obj observation data to dictionary of strings"""
         assert TDMS_01_OBS_08 == sqldb.get_obs(test_tdms_obj, TEST_INDEX)
 
     def test_add_input(self, cursor):

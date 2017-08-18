@@ -81,7 +81,7 @@ def last_insert_id(cur):
     return cur.fetchone()[0]
 
 def setting_exists(cur, setting):
-    """Use the cursor and a setting dictionary to check if a setting already exists."""
+    """Use the cursor and a setting dictionary to check if a setting already exists"""
     query = (
         "SELECT SettingID FROM Setting"
         "  WHERE"
@@ -99,75 +99,48 @@ def setting_exists(cur, setting):
         return result[0][0]
 
 def list_tdms(file_path):
-    """Returns a list of the .tdms files contained within the argument directory.
-
-    Positional arguments:
-    file_path -- string
-    """
+    """returns a list of the .tdms files contained within the argument file."""
     regex = compile(".tdms")
     file_list = [file for file in os.listdir(file_path) if regex.match(file, len(file)-5)]
     return file_list
 
 def get_settings(tdms_obj):
-    """Returns a dictionary of the initial state of Tests in the TdmsFile object argument.
-
-    Description: Returns Setting data for the provided in the argument
-    TdmsFile, tdms_object in a dictionary formatted for insert_dml.
-    
-    Positional arguments:
-    tdms_obj -- nptdms.TdmsFile
-    """
-    settings = {'InitialDewPoint': "{0:.2f}".format(round(tdms_obj.object("Data", "DewPoint").data[0], 2)),
-        'InitialDuty': str(tdms_obj.object("Data", "DutyCycle").data[0]),
-        'InitialMass': str(tdms_obj.object("Data", "Mass").data[0]),
-        'InitialPressure': str(round(tdms_obj.object("Data", "Pressure").data[0],0)),
-        'InitialTemp': "{0:.2f}".format(round(sum(tdms_obj.object("Data", "TC{}".format(x)).data[0] for x in range(3, 14))/11, 2)),
-        'TimeStep': "{0:.2f}".format(tdms_obj.object("Settings", "TimeStep").data[0])
+    """returns a dictionary of the initial state of Tests in the TdmsFile object argument"""
+    settings = {'initial_dew_point': tdms_obj.object("Data", "DewPoint").data[0],
+        'initial_duty': tdms_obj.object("Data", "DutyCycle").data[0],
+        'initial_mass': tdms_obj.object("Data", "Mass").data[0],
+        'initial_pressure': tdms_obj.object("Data", "Pressure").data[0],
+        'initial_temp': sum(tdms_obj.object("Data", "TC{}".format(x)).data[0] for x in range(3,14))/11
         }
     return settings
 
 def get_tests(tdms_obj):
-    """Returns a dictionary of the initial state of Settings in the TdmsFile object argument.
-
-    Description: Builds a dictionary containing the initial state of Test in the TdmsFile,
-    and formats the data to use with insert_dml. Uses a loop to parse through a double linked
-    list to search for "Author" and "Description" data.
-    
-    Positional arguments:
-    tdms_obj -- nptdms.TdmsFile
-    """
-    tests = { 'Author': "", 'DateTime': str(tdms_obj.object().properties['DateTime']).split(".", 1)[0],
-        'Description': ""
+    """returns a dictionary of the initial state of Settings in the TdmsFile object argument"""
+    tests = { 'author': "", 'date_time': tdms_obj.object().properties['DateTime'],
+        'description': "", 'time_step': tdms_obj.object("Settings", "TimeStep").data[0]
         }
 
     for name, value in tdms_obj.object().properties.items():
         if name == "author":
-            tests['Author'] = value
+            tests['author'] = value
         if name == "description":
-            tests['Description'] = value
+            tests['description'] = value
     return tests
 
 def get_obs(tdms_obj, idx):
-    """Returns a dictionary of strings derived from tdms object observation data.
-    
-    Description: Returns observation data for the provided index, idx, in the argument
-    TdmsFile, tdms_object in a dictionary formatted for insert_dml.
-
-    Positional arguments:
-    tdms_obj -- nptdms.TdmsFile
-    idx -- int
-    """
-    observations = {'CapManOk': str(tdms_obj.object("Data", "CapManOk").data[idx]),
-        'DewPoint': "{0:.2f}".format(round(tdms_obj.object("Data", "DewPoint").data[idx], 2)),
-        'Duty': str(tdms_obj.object("Data", "DutyCycle").data[idx]),
-        'Idx': str(tdms_obj.object("Data", "Idx").data[idx]),
-        'Mass': str(tdms_obj.object("Data", "Mass").data[idx]),
-        'OptidewOk': str(tdms_obj.object("Data", "OptidewOk").data[idx]),
-        'PowOut': str(tdms_obj.object("Data", "PowOut").data[idx]),
-        'PowRef': str(tdms_obj.object("Data", "PowRef").data[idx]),
-        'Pressure': str(round(tdms_obj.object("Data", "Pressure").data[idx],0))
+    """returns a dictionary of strings derived from tdms object observation data"""
+    observations = {'cap_man_ok': str(tdms_obj.object("Data", "CapManOk").data[idx]),
+        'dew_point': str(tdms_obj.object("Data", "DewPoint").data[idx]),
+        'duty_cycle': str(tdms_obj.object("Data", "DutyCycle").data[idx]),
+        'idx': str(tdms_obj.object("Data", "Idx").data[idx]),
+        'mass': str(tdms_obj.object("Data", "Mass").data[idx]),
+        'optidew_ok': str(tdms_obj.object("Data", "OptidewOk").data[idx]),
+        'pow_out': str(tdms_obj.object("Data", "PowOut").data[idx]),
+        'pow_ref': str(tdms_obj.object("Data", "PowRef").data[idx]),
+        'pressure': str(tdms_obj.object("Data", "Pressure").data[idx]),
         }
     return observations
+
 
 def get_temp(tdms_obj, data_idx, couple_idx):
     """Returns a tdms object's temperature data from a specified thermocouple.
