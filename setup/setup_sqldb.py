@@ -111,9 +111,3 @@ print("All done, closing connection to server...")
 cur.close()
 cnx.close()
 print("Closed the connection.")
-
-def main():
-	assert True
-
-if __name__ == "__main__":
-    main()
