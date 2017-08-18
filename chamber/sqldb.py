@@ -62,7 +62,7 @@ def create_tables(cur, tables):
     for table in tables:
         name, ddl = table
         try:
-            #print('\tCreating table {}: '.format(name), end='')
+            print('\tCreating table {}: '.format(name), end='')
             cur.execute(ddl)
         except conn.Error as err:
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
@@ -292,8 +292,8 @@ def get_temp(tdms_obj, data_idx, couple_idx):
             str(tdms_obj.object('Data', 'TC{}'.format(couple_idx)).data[data_idx])}
     return temp
 
-def add_input(cnx, cur, directory):
-    """Use MySQL connection and cursor objects with a directory to insert tdms files.
+def add_input(cur, directory):
+    """Use a MySQL cursor object and a directory to insert tdms files into the MySQL database.
 
     Uses loops to structure calls to add_setting, add_test, add_obs, and add_temp to build and
     execute queries using insert_dml and populate the MySQL database for all tdms files in the
@@ -301,25 +301,19 @@ def add_input(cnx, cur, directory):
 
     Parameters
     ----------
-    cnx : MySQLConnection
-        Connection to the MySQL database.
     cur : MySQLCursor
         Cursor used to interact with the MySQL database.
     directory : string
         This is the directory to search for tdms files.
     """
-    #cur.execute('SET AUTOCOMMIT=0;')
-    if cnx.in_transaction:
-        cnx.commit()
+    cur.execute('SET AUTOCOMMIT=0;')
     for file_obj in list_tdms(directory):
-        cnx.start_transaction()
         tdms_obj = TdmsFile(directory + file_obj)
         test_id = add_test(cur, tdms_obj, str(add_setting(cur, tdms_obj)))
         range_int = len(tdms_obj.object('Data', 'Idx').data)
         for obs_idx in range(range_int):
             obs_id = add_obs(cur, tdms_obj, str(test_id), obs_idx)
             add_temp(cur, tdms_obj, str(obs_id), obs_idx)
-        cnx.commit()
 
 def add_setting(cur, tdms_obj):
     """Use MySQL cursor and TdmsFile objecs to add the settings for a given test.
