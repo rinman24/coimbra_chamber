@@ -44,9 +44,14 @@ TDMS_01_DICT_TESTS = {'author': "ADL", 'date_time': datetime(2017, 8, 3, 19, 33,
     'description': "This is at room temperature, pressure, no laser power, study of boundy development.",
     'time_step': 1
     }
-TDMS_01_THM_07 = {'TC_num': "7", 'temp': "296.762"}
-TDMS_01_OBS_08 = {'cap_man_ok': "1.0", 'dew_point': "292.427", 'duty_cycle': "0.0", 'idx': "8.0",
-    'mass': "-0.0658138", 'optidew_ok': "1.0", 'pow_out': "-0.001", 'pow_ref': "-0.0015", 'pressure': "99982.0"
+
+TDMS_01_THM_07 = 296.762
+TDMS_01_OBS_08 = {'CapManOk': "1.0", 'DewPoint': "292.43", 'Duty': "0.0", 'Idx': "8.0",
+    'Mass': "-0.0658138", 'OptidewOk': "1.0", 'PowOut': "-0.001", 'PowRef': "-0.0015", 'Pressure': "99982.0"
+    }
+TEST_DIRECTORY = "tests/data_transfer_test_files/tdms_test_files/"
+TEST_DICTIONARY = {'InitialDewPoint': '292.50', 'InitialDuty': '0.0', 'InitialMass': '-0.0658138',
+    'InitialPressure': '99977.0', 'InitialTemp': '297.093', 'TimeStep': '1.0'
     }
 TEST_INDEX = 7
 
@@ -137,3 +142,48 @@ class TestSqlDb(object):
     def test_get_obs(self, test_tdms_obj):
         """Test correcct output when converting tdms obj observation data to dictionary of strings"""
         assert TDMS_01_OBS_08 == sqldb.get_obs(test_tdms_obj, TEST_INDEX)
+
+    def test_add_input(self, cursor):
+        """Test correct data insertion through checking add_temp, the final table in cascade."""
+        clear_sqldb(cursor)
+        sqldb.add_input(cursor, TEST_DIRECTORY)
+        cursor.execute("Select Temperature FROM TempObservation WHERE TempObservationID = '{}'".format(sqldb.last_insert_id(cursor)))
+        res = cursor.fetchone()
+        assert res[0] == Decimal('297.36')
+        clear_sqldb(cursor)
+
+    def test_add_setting(self, cursor, test_tdms_obj):
+        """Test correct data insertion and condition handling in add_setting."""
+        clear_sqldb(cursor)
+        sqldb.add_setting(cursor, test_tdms_obj)
+        setting_id = sqldb.setting_exists(cursor, sqldb.get_settings(test_tdms_obj))
+        assert isinstance(setting_id, int)
+        assert sqldb.add_setting(cursor, test_tdms_obj) == setting_id
+        cursor.execute('DELETE FROM Setting;')
+
+    def test_add_test(self, cursor, test_tdms_obj):
+        """Test correct data insertion and condition handling in add_test."""
+        clear_sqldb(cursor)
+        setting_id = sqldb.add_setting(cursor, test_tdms_obj)
+        sqldb.add_test(cursor, test_tdms_obj, str(setting_id))
+        cursor.execute("Select Author FROM Test WHERE TestID = '{}'".format(sqldb.last_insert_id(cursor)))
+        assert cursor.fetchone()[0] == "ADL"
+        clear_sqldb(cursor)
+
+    def test_add_obs(self, cursor, test_tdms_obj):
+        """Test correct data insertion and condition handling in add_obs."""
+        clear_sqldb(cursor)
+        test_id = sqldb.add_test(cursor, test_tdms_obj, str(sqldb.add_setting(cursor, test_tdms_obj)))
+        for obs_idx in range(len(test_tdms_obj.object("Data", "Idx").data)):
+            sqldb.add_obs(cursor, test_tdms_obj, str(test_id), obs_idx)
+        cursor.execute("Select Duty FROM Observation WHERE ObservationID = '{}'".format(sqldb.last_insert_id(cursor)))
+        assert cursor.fetchone()[0] == Decimal('0.0')
+        clear_sqldb(cursor)
+
+
+def clear_sqldb(cursor):
+    """Clears test database."""
+    cursor.execute('DELETE FROM TempObservation;')
+    cursor.execute('DELETE FROM Observation;')
+    cursor.execute('DELETE FROM Test;') 
+    cursor.execute('DELETE FROM Setting;')

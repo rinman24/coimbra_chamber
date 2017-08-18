@@ -141,7 +141,109 @@ def get_obs(tdms_obj, idx):
         }
     return observations
 
-def get_temp(tdms_obj, idx):
-    """returns a dictionary of strings derived from tdms object temperature data"""
-    temp = {'TC_num': str(idx), 'temp': str(tdms_obj.object("Data", "TC{}".format(idx)).data[idx])}
-    return temp
+
+def get_temp(tdms_obj, data_idx, couple_idx):
+    """Returns a tdms object's temperature data from a specified thermocouple.
+
+    Description: Returns temperature data for the provided row index, idx, and thermocouple index,
+    couple_idx, in the argument TdmsFile.
+
+    Positional arguments:
+    tdms_obj -- nptdms.TdmsFile
+    data_idx -- int
+    couple_idx -- int
+    """
+    return tdms_obj.object("Data", "TC{}".format(couple_idx)).data[data_idx]
+
+def add_input(cur, directory):
+    """Adds data from argument directory to the data base using aproreate helper functions.
+
+    Description: Uses loops to structure calls to add_setting, add_test, add_obs, and add_temp
+    to build and execute queries using insert_dml and populate the MySQL database for all .tdms
+    files in the argument directory. Uses cursor to call insert_dml.
+
+    Positional arguments:
+    cur -- mysql.connector.cursor.MySQLCursor
+    directory -- string
+    """
+    for file in list_tdms(directory):
+        tdms_obj = TdmsFile(directory + file)
+        test_id = add_test(cur, tdms_obj, str(add_setting(cur, tdms_obj)))
+        range_int = len(tdms_obj.object("Data", "Idx").data)
+        for obs_idx in range(range_int):
+            obs_id = add_obs(cur, tdms_obj, str(test_id), obs_idx)
+            add_temp(cur, tdms_obj, str(obs_id), obs_idx)
+
+def add_setting(cur, tdms_obj):
+    """Uses settings_exist and insert_dml to add settings to the data base and returns the setting id.
+    
+    Description: Uses cursor, cur to call insert_dml on a dictionary of Setting data
+    built by get_setting using the argument TdmsFile, tdms_obj. Adds the new Setting and returns
+    the new SettingID to the MySQL database if setting_exists returns false, or else returns
+    the SettingID of the identical Setting found in the database.
+
+    Positional arguments:
+    cur -- mysql.connector.cursor.MySQLCursor
+    tdms_obj -- nptdms.TdmsFile
+    """
+    settings = get_settings(tdms_obj)
+    setting_id = setting_exists(cur, settings)
+    if not setting_id:
+        cur.execute(insert_dml("Setting", settings))
+        setting_id = last_insert_id(cur)
+    return setting_id
+
+def add_test(cur, tdms_obj, setting_id):
+    """Uses insert_dml to build a query for Test sql table and executes.
+
+    Description: Uses cursor, cur to call insert_dml on a dictionary of Test data
+    built by get_test using the argument TdmsFile, tdms_obj. Adds the foreign key
+    SettingID, setting_id, to the dictionary before building the MySQL query.
+    
+    Positional arguments:
+    cur -- mysql.connector.cursor.MySQLCursor
+    tdms_obj -- nptdms.TdmsFile
+    setting_id -- string
+    """
+    test = get_tests(tdms_obj)
+    test["SettingID"] = setting_id
+    test["TubeID"] = "1"#str(tdms_obj.object("Settings", "TubeID").data[0])
+    cur.execute(insert_dml("Test", test))
+    return last_insert_id(cur)
+
+def add_obs(cur, tdms_obj, test_id, obs_idx):
+    """Uses insert_dml to build a query for Test sql table and executes.
+    
+    Description: Uses cursor, cur to call insert_dml on a dictionary of observation data
+    built by get_obs using the argument TdmsFile, tdms_obj, and index, obs_idx. Adds the
+    foreign key TestID, test_id, to the dictionary before building the MySQL query.
+
+    Positional arguments:
+    cur -- mysql.connector.cursor.MySQLCursor
+    tdms_obj -- nptdms.TdmsFile
+    test_id -- string
+    obs_idx -- int
+    """
+    obs = get_obs(tdms_obj, obs_idx)
+    obs["TestID"] = test_id
+    cur.execute(insert_dml("Observation", obs))
+    return last_insert_id(cur)
+
+def add_temp(cur, tdms_obj, obs_id, temp_idx):
+    """Uses insert_dml to build a query for Test sql table and executes.
+    
+    Description: Uses cursor, cur and cursor function executemany to input TempObservation data
+    by looping through get_temp for each thermocouple using the argument TdmsFile, tdms_obj,
+    and index, temp_idx. Adds the foreign key ObservationID, obs_id, to the values list before
+    building the MySQL query.
+
+    Positional arguments:
+    cur -- mysql.connector.cursor.MySQLCursor
+    tdms_obj -- nptdms.TdmsFile
+    obs_id -- string
+    temp_idx -- int
+    """
+    values = []
+    for couple_idx in range(14):
+        values.append((obs_id, couple_idx, str(get_temp(tdms_obj, temp_idx, couple_idx))))
+    cur.executemany("""INSERT INTO TempObservation (ObservationID, ThermocoupleNum, Temperature) VALUES (%s, %s, %s)""", values)
