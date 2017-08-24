@@ -382,33 +382,3 @@ def add_input(cur, directory):
         for obs_idx in range(range_int):
             obs_id = add_obs_info(cur, tdms_obj, test_id, obs_idx)
             add_temp(cur, tdms_obj, obs_id, obs_idx)
-
-# def insert_dml(table, row_data):
-#    """Use a table name and dictionay to return a MySQL insert DML query.
-#    Use the name of the table and a dictionary called row_data, where the keys are attribute names
-#    and the values are row data, to build and return a MySQL DML INSERT query.
-
-#    Parameters
-#    ----------
-#    table : string
-#        Name of the MySQL database table to insert into.
-#    row_data : dict of strings
-#        Set of values to insert into the table. Keys should be column names and values should be the
-#        value to insert.
-#        **Note: all values should be type string.**
-#    """
-#     query = (
-#         "INSERT INTO " + table + " "
-#         "    (" + ', '.join(row_data.keys()) + ")"
-#         "  VALUES"
-#         "    ('" + "', '".join(row_data.values()) + "');")
-#     return query
-
-# def last_insert_id(cur):
-#     """Use the last SELECT LAST_INSERT_ID() query to return the last inserted id.
-
-#     Positional arguments:
-#     cur -- mysql.connector.cursor.MySQLCursor
-#     """
-#     cur.execute("SELECT LAST_INSERT_ID();")
-#     return cur.fetchone()[0]
