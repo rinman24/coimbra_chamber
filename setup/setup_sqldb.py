@@ -80,7 +80,7 @@ UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram', 'Power': 
              'Pressure': 'Pascal', 'Temperature': 'Kelvin', 'Time': 'Second'}
 
 TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
-             'Material':'Delrin', 'Mass': 0.0657957}
+             'Material': 'Delrin', 'Mass': 0.0657957}
 
 if __name__ == '__main__':
   cnx = sqldb.connect_sqldb()
