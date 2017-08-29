@@ -112,7 +112,7 @@ ADD_UNIT = ("INSERT INTO Unit "
             "(%(Duty)s, %(Length)s, %(Mass)s, %(Power)s, %(Pressure)s, %(Temperature)s, %(Time)s)")
 
 TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
-             'Material':'Delrin', 'Mass': 0.0657957}
+             'Material': 'Delrin', 'Mass': 0.0657957}
 
 UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram', 'Power': 'Watt',
              'Pressure': 'Pascal', 'Temperature': 'Kelvin', 'Time': 'Second'}
