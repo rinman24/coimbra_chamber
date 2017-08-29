@@ -25,7 +25,7 @@ TABLES.append(('Tube',
                ");"))
 TABLES.append(('Setting',
                "CREATE TABLE Setting("
-               "    SettingID SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "    SettingID SERIAL,"
                "    InitialDewPoint DECIMAL(5, 2) NOT NULL,"
                "    InitialDuty DECIMAL(4, 1) NOT NULL,"
                "    InitialMass DECIMAL(7, 7) NOT NULL,"
@@ -36,11 +36,11 @@ TABLES.append(('Setting',
                ");"))
 TABLES.append(('Test',
                "CREATE TABLE Test("
-               "    TestID SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "    TestID SERIAL,"
                "    Author VARCHAR(30) NOT NULL,"
                "    DateTime DATETIME NOT NULL,"
                "    Description VARCHAR(200) NOT NULL,"
-               "    SettingID SMALLINT UNSIGNED NOT NULL,"
+               "    SettingID BIGINT UNSIGNED NOT NULL,"
                "    TubeID TINYINT UNSIGNED NOT NULL,"
                "  PRIMARY KEY (TestID),"
                "  FOREIGN KEY (SettingID) REFERENCES Setting(SettingID)"
@@ -50,7 +50,7 @@ TABLES.append(('Test',
                ");"))
 TABLES.append(('Observation',
                "CREATE TABLE Observation("
-               "    ObservationID SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "    ObservationID SERIAL,"
                "    CapManOk TINYINT(1) NOT NULL,"
                "    DewPoint DECIMAL(5, 2) NOT NULL,"
                "    Duty DECIMAL(4, 1) NOT NULL,"
@@ -60,17 +60,17 @@ TABLES.append(('Observation',
                "    PowOut DECIMAL(6, 4) NOT NULL,"
                "    PowRef DECIMAL(6, 4) NOT NULL,"
                "    Pressure MEDIUMINT UNSIGNED NOT NULL,"
-               "    TestID SMALLINT UNSIGNED NOT NULL,"
+               "    TestID BIGINT UNSIGNED NOT NULL,"
                "  PRIMARY KEY (ObservationID),"
                "  FOREIGN KEY (TestID) REFERENCES Test(TestID)"
                "    ON UPDATE CASCADE ON DELETE RESTRICT"
                ");"))
 TABLES.append(('TempObservation',
                "CREATE TABLE TempObservation("
-               "    TempObservationID INT UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "    TempObservationID SERIAL,"
                "    Temperature DECIMAL(5, 2) NOT NULL,"
                "    ThermocoupleNum TINYINT(2) UNSIGNED NOT NULL,"
-               "    ObservationID SMALLINT UNSIGNED NOT NULL,"
+               "    ObservationID BIGINT UNSIGNED NOT NULL,"
                "  PRIMARY KEY (TempObservationID),"
                "  FOREIGN KEY (ObservationID) REFERENCES Observation(ObservationID)"
                "    ON UPDATE CASCADE ON DELETE RESTRICT"
@@ -79,8 +79,8 @@ TABLES.append(('TempObservation',
 UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram', 'Power': 'Watt',
              'Pressure': 'Pascal', 'Temperature': 'Kelvin', 'Time': 'Second'}
 
-TUBE_DATA = {'DiameterIn': '0.03', 'DiameterOut': '0.04', 'Length': '0.06',
-             'Material':'Delrin', 'Mass': '0.0657957'}
+TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
+             'Material': 'Delrin', 'Mass': 0.0657957}
 
 if __name__ == '__main__':
   cnx = sqldb.connect_sqldb()

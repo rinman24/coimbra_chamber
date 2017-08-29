@@ -71,10 +71,10 @@ def create_tables(cur, tables):
             else:
                 print(err.msg)
         else:
-            print('OK')
+            print(table[0], ' OK')
 
-def setting_exists(cur, setting):
-    """Use a MySQL cursor object and a setting dictionary to check if a setting already exists.
+def setting_exists(cur, setting_info):
+    """Use a MySQL cursor object and a setting_info dictionary to check if a setting already exists.
 
     Uses the setting dictionary where the keys are the columns in the Setting table and the values
     are the string values. The cursor executes a DML SELECT statement and returns the SettingID if
@@ -84,7 +84,7 @@ def setting_exists(cur, setting):
     ----------
     cur : MySQLCursor
         Cursor used to interact with the MySQL database.
-    setting : dict of strings
+    setting_info : dict of strings
         Set of setting values to check for. Keys should be column names from the Setting table and
         values should be the value to insert.
         **Note: all values should be type string.**
@@ -95,7 +95,36 @@ def setting_exists(cur, setting):
         This is the primary key for the Setting table if the setting already exists. If the setting
         does not exist in the database the function returns False.
     """
-    cur.execute(const.FIND_SETTING, setting)
+    cur.execute(const.FIND_SETTING, setting_info)
+    result = cur.fetchall()
+    if not result:
+        return False
+    else:
+        return result[0][0]
+
+def test_exists(cur, test_info):
+    """Use a MySQL cursor object and a test_info dictionary to check if a test already exists.
+
+    Uses the test_info dictionary where the keys are the columns in the Test table and the values
+    are the string values. The cursor executes a DML SELECT statement and returns the TestID if
+    the test exists or False if no test matching the query exists.
+    
+    Parameters
+    ----------
+    cur : MySQLCursor
+        Cursor used to interact with the MySQL database.
+    test_info : dict of strings
+        Set of setting values to check for. Keys should be column names from the Test table and
+        values should be the value to insert.
+
+    Returns
+    -------
+    TestID : int or False
+        This is the primary key for the Test table if the test already exists. If the test
+        does not exist in the database the function returns False.
+    """
+    test_info['DateTime'] = test_info['DateTime'].replace(microsecond=0).replace(tzinfo=None)
+    cur.execute(const.FIND_TEST, test_info)
     result = cur.fetchall()
     if not result:
         return False
@@ -129,8 +158,9 @@ def get_setting_info(tdms_obj):
 
     This function searces through the TdmsFile object for the initial settings including:
     InitialDewPoint, InitialDuty, InitialMass, InitialPressure, InitialTemp, and TimeStep.
-    The function returns a dictionary of settings formatted for the insert_dml method.
-    
+    The function returns a dictionary of settings formatted for use with the ADD_SETTING
+    querry in const.py.
+
     Parameters
     ----------
     tdms_obj : nptdms.TdmsFile
@@ -162,43 +192,43 @@ def get_test_info(tdms_obj):
     """Use a TdmsFile object to find test details.
 
     Builds a dictionary containing the initial state of Test in the TdmsFile, and formats the data
-    to use with insert_dml. Uses a loop to parse through a double linked list to search for 'Author'
-    and 'Description' fields.
-    
+    for use with the ADD_TEST querry in const.py. Uses a loop to parse through a double linked list
+    to search for 'Author' and 'Description' fields.
+
     Parameters
     ----------
     tdms_obj : nptdms.TdmsFile
         TdmsFile object containg the data from the tdms test file. Original tdms files were created
         from UCSD Chamber experiments in the Coimbra Lab in SERF 159.
-    
+
     Returns
     -------
     tests : dict of strings
         Set of values to insert into the Test table. Keys should be column names and values should
         be the value to insert.
      """
-    tests = {'Author': '', 'DateTime': tdms_obj.object().properties['DateTime'],
+    test_info = {'Author': '', 'DateTime': tdms_obj.object().properties['DateTime'],
              'Description': ''}
 
     for name, value in tdms_obj.object().properties.items():
         if name == "author":
-            tests['Author'] = value
+            test_info['Author'] = value
         if name == "description":
-            tests['Description'] = value
-    return tests
+            test_info['Description'] = value
+    return test_info
 
-def get_obs_info(tdms_obj, idx):
-    """Use a TdmsFile object and idx to return a dictionary of observation data.
+def get_obs_info(tdms_obj, obs_idx):
+    """Use a TdmsFile object and obs_idx to return a dictionary of observation data.
 
     Builds a dictionary containing the observation for a given index (time) in the TdmsFile objrct,
-    and formats the data for use with insert_dml.
+    and formats the data for use with the ADD_OBS querry in const.py.
     
     Parameters
     ----------
     tdms_obj : nptdms.TdmsFile
         TdmsFile object containg the data from the tdms test file. Original tdms files were created
         from UCSD Chamber experiments in the Coimbra Lab in SERF 159.
-    idx : int
+    obs_idx : int
         This is the index in the tdms file, which represents a single time.
     
     Returns
@@ -208,37 +238,37 @@ def get_obs_info(tdms_obj, idx):
         should be the value to insert.
     """
     observations = {'CapManOk':
-                    int(tdms_obj.object("Data", "CapManOk").data[idx]),
+                    int(tdms_obj.object("Data", "CapManOk").data[obs_idx]),
                     'DewPoint':
-                    '{:.2f}'.format(tdms_obj.object("Data", "DewPoint").data[idx]),
+                    '{:.2f}'.format(tdms_obj.object("Data", "DewPoint").data[obs_idx]),
                     'Duty':
-                    '{:.1f}'.format(tdms_obj.object("Data", "DutyCycle").data[idx]),
+                    '{:.1f}'.format(tdms_obj.object("Data", "DutyCycle").data[obs_idx]),
                     'Idx':
-                    int(tdms_obj.object("Data", "Idx").data[idx]),
+                    int(tdms_obj.object("Data", "Idx").data[obs_idx]),
                     'Mass':
-                    '{:.7f}'.format(tdms_obj.object("Data", "Mass").data[idx]),
+                    '{:.7f}'.format(tdms_obj.object("Data", "Mass").data[obs_idx]),
                     'OptidewOk':
-                    int(tdms_obj.object("Data", "OptidewOk").data[idx]),
+                    int(tdms_obj.object("Data", "OptidewOk").data[obs_idx]),
                     'PowOut':
-                    '{:.4f}'.format(tdms_obj.object("Data", "PowOut").data[idx]),
+                    '{:.4f}'.format(tdms_obj.object("Data", "PowOut").data[obs_idx]),
                     'PowRef':
-                    '{:.4f}'.format(tdms_obj.object("Data", "PowRef").data[idx]),
+                    '{:.4f}'.format(tdms_obj.object("Data", "PowRef").data[obs_idx]),
                     'Pressure':
-                    int(tdms_obj.object("Data", "Pressure").data[idx])}
+                    int(tdms_obj.object("Data", "Pressure").data[obs_idx])}
     return observations
 
-def get_temp(tdms_obj, data_idx, couple_idx):
+def get_temp(tdms_obj, temp_idx, couple_idx):
     """Use a TdmsFile object with data_idx and couple_idx to get a thermocouple observation.
 
     Returns temperature data for the provided index (time) and thermocouple index provided in the
-    argument and returns a dictionary formatted for use with the insert_dml method.
+    argument and returns a dictionary formatted for use with the ADD_TEMP querry in const.py.
 
     Parameters
     ----------
     tdms_obj : nptdms.TdmsFile
         TdmsFile object containg the data from the tdms test file. Original tdms files were created
         from UCSD Chamber experiments in the Coimbra Lab in SERF 159.
-    data_idx : int
+    temp_idx : int
         This is the index in the tdms file, which represents a single time.
     couple_idx : int
         This is the thermocouple index for a specific observation in the tdms file, which represents
@@ -250,14 +280,31 @@ def get_temp(tdms_obj, data_idx, couple_idx):
         A single value to insert into the TempObservation table. Key should be thermocouple number
         and the value should be the temperature measurement.
     """
-    return '{:.2f}'.format(tdms_obj.object("Data", "TC{}".format(couple_idx)).data[data_idx])
+    return '{:.2f}'.format(tdms_obj.object("Data", "TC{}".format(couple_idx)).data[temp_idx])
+
+def add_tube_info(cur):
+    """Use MySQL cursor to add the test-independant Tube information.
+
+    Uses cursor .execute function on the ADD_TUBE and TUBE_DATA constants in const.py.
+    Adds the new Tube if the Tube doesn't exist. If the Tube already exists, then the function
+    does nothing.
+    
+    Parameters
+    ----------
+    cur : MySQLCursor
+        Cursor used to interact with the MySQL database.
+    """
+    cur.execute(const.FIND_TUBE, const.TUBE_DATA)
+    if not cur.fetchall():
+        cur.execute(const.ADD_TUBE, const.TUBE_DATA)
 
 def add_setting_info(cur, tdms_obj):
     """Use MySQL cursor and TdmsFile objecs to add the settings for a given test.
 
-    Uses cursor to call insert_dml on a dictionary of Setting data built by the get_setting method.
-    Adds the new Setting if the setting doesn't exist and returns the SettingID form the MySQL
-    database. If the setting already exists, then the SettingID of that setting is returned.
+    Uses cursor's .execute function on a MySQL insert query and dictionary of Setting data built
+    by the get_setting method. Adds the new Setting if the setting doesn't exist and returns the
+    SettingID form the MySQL database. If the setting already exists, then the SettingID of that
+    setting is returned.
     
     Parameters
     ----------
@@ -283,9 +330,9 @@ def add_setting_info(cur, tdms_obj):
 def add_test_info(cur, tdms_obj, setting_id):
     """Use MySQL cursor and TdmsFile objects with setting_id to add a test to the database.
     
-    Uses cursor  to call insert_dml on a dictionary of Test data built by get_test using the
-    argument TdmsFile. Adds the foreign key SettingID to the dictionary before building the MySQL
-    query.
+    Uses cursor's .execute function on a MySQL insert query and dictionary of Test data built by
+    get_test using the argument TdmsFile. Adds the foreign key SettingID to the dictionary before
+    executing the MySQL query.
     
     Parameters
     ----------
@@ -304,17 +351,20 @@ def add_test_info(cur, tdms_obj, setting_id):
         This is the TestID which is the primary key for the Test table.
     """
     test_info = get_test_info(tdms_obj)
-    test_info["SettingID"] = setting_id
-    test_info["TubeID"] = 1#str(tdms_obj.object("Settings", "TubeID").data[0])
-    cur.execute(const.ADD_TEST, test_info)
-    return cur.lastrowid
-
+    test_id = test_exists(cur, test_info)
+    if not test_id:
+        test_info["SettingID"] = setting_id
+        test_info["TubeID"] = 1#str(tdms_obj.object("Settings", "TubeID").data[0])
+        cur.execute(const.ADD_TEST, test_info)
+        test_id = cur.lastrowid
+    return test_id
+    
 def add_obs_info(cur, tdms_obj, test_id, obs_idx):
     """Use MySQL cursor and TdmsFile objects with test_id and obs_idx to add obs to database.
 
-    Uses cursor to call insert_dml on a dictionary of observation data built by get_obs using the
-    argument TdmsFile and index. Adds the foreign key TestID to the dictionary before building the
-    MySQL query.
+    Uses cursor's .execute function on a MySQL insert query and dictionary of observation data built
+    by get_obs using the argument TdmsFile and index. Adds the foreign key TestID to the dictionary
+    before executing the MySQL query.
     
     Parameters
     ----------
@@ -341,9 +391,9 @@ def add_obs_info(cur, tdms_obj, test_id, obs_idx):
 def add_temp(cur, tdms_obj, obs_id, temp_idx):
     """Use MySQL cursor and TdmsFile objects with obs_id and temp_idx to add a temp observation.
 
-    Uses cursor to call insert_dml on a dictionary of TempObservation data built by looping through
-    get_temp for each thermocouple using the argument TdmsFile and index. Adds the foreign key
-    ObservationID to the dictionary before building the MySQL query.
+    Uses cursor's .execute function on a MySQL insert query and dictionary of TempObservation data
+    built by looping through get_temp for each thermocouple using the argument TdmsFile and index.
+    Adds the foreign key ObservationID to the dictionary before executing the MySQL query.
     
     Parameters
     ----------
@@ -365,8 +415,8 @@ def add_input(cur, directory):
     """Use a MySQL cursor object and a directory to insert tdms files into the MySQL database.
 
     Uses loops to structure calls to add_setting, add_test, add_obs, and add_temp to build and
-    execute queries using insert_dml and populate the MySQL database for all tdms files in the
-    argument directory. Uses cursor to call insert_dml.
+    execute queries using constants in const.py and populate the MySQL database for all tdms files
+    in the argument directory. Passes cursor into helper functions.
     
     Parameters
     ----------
@@ -377,8 +427,8 @@ def add_input(cur, directory):
     """
     for file_name in list_tdms(directory):
         tdms_obj = TdmsFile(directory + file_name)
-        test_id = add_test_info(cur, tdms_obj, add_setting_info(cur, tdms_obj))
-        range_int = len(tdms_obj.object("Data", "Idx").data)
-        for obs_idx in range(range_int):
-            obs_id = add_obs_info(cur, tdms_obj, test_id, obs_idx)
-            add_temp(cur, tdms_obj, obs_id, obs_idx)
+        if not test_exists(cur, get_test_info(tdms_obj)):
+            test_id = add_test_info(cur, tdms_obj, add_setting_info(cur, tdms_obj))
+            for obs_idx in range(len(tdms_obj.object("Data", "Idx").data)):
+                obs_id = add_obs_info(cur, tdms_obj, test_id, obs_idx)
+                add_temp(cur, tdms_obj, obs_id, obs_idx)
