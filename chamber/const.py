@@ -66,6 +66,19 @@ FIND_SETTING = ("SELECT SettingID FROM Setting WHERE "
                 "    InitialTemp = %(InitialTemp)s AND"
                 "    TimeStep = %(TimeStep)s;")
 
+FIND_TUBE = ("SELECT TubeID FROM Tube WHERE "
+             "    DiameterIn = %(DiameterIn)s AND"
+             "    DiameterOut = %(DiameterOut)s AND"
+             "    Length = %(Length)s AND"
+             "    Material = %(Material)s AND"
+             "    Mass = %(Mass)s")
+
+FIND_TEST = ("SELECT TestID FROM Test WHERE "
+             "    DateTime = %(DateTime)s")
+
+FIND_TESTID = ("SELECT TestID FROM Test WHERE "
+             "    TestID = (%s)")
+
 ADD_SETTING = ("INSERT INTO Setting "
                "(InitialDewPoint, InitialDuty, InitialMass, InitialPressure, InitialTemp, TimeStep)"
                " VALUES "
@@ -88,14 +101,106 @@ ADD_TEMP = ("INSERT INTO TempObservation "
             " VALUES "
             "(%s, %s, %s)")
 
+ADD_TUBE = ("INSERT INTO Tube "
+            "(DiameterIn, DiameterOut, Length, Material, Mass)"
+            " VALUES "
+            "(%(DiameterIn)s, %(DiameterOut)s, %(Length)s, %(Material)s, %(Mass)s)")
+
+ADD_UNIT = ("INSERT INTO Unit "
+            "(Duty, Length, Mass, Power, Pressure, Temperature, Time)"
+            " VALUES "
+            "(%(Duty)s, %(Length)s, %(Mass)s, %(Power)s, %(Pressure)s, %(Temperature)s, %(Time)s)")
+
+TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
+             'Material':'Delrin', 'Mass': 0.0657957}
+
+UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram', 'Power': 'Watt',
+             'Pressure': 'Pascal', 'Temperature': 'Kelvin', 'Time': 'Second'}
+
 # Testing MySQL
-TABLES = [('UnitTest',
+TABLES = []
+TABLES.append(('UnitTest',
            "CREATE TABLE UnitTest ("
            "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
            "    Number DECIMAL(5,2) NULL,"
            "    String VARCHAR(30) NULL,"
            "  PRIMARY KEY (`UnitTestID`)"
-           ");")]
+           ");"))
+TABLES.append(('Unit',
+               "CREATE TABLE Unit ("
+               "    Duty VARCHAR(30) NOT NULL,"
+               "    Length VARCHAR(30) NOT NULL,"
+               "    Mass VARCHAR(30) NOT NULL,"
+               "    Power VARCHAR(30) NOT NULL,"
+               "    Pressure VARCHAR(30) NOT NULL,"
+               "    Temperature VARCHAR(30) NOT NULL,"
+               "    Time VARCHAR(30) NOT NULL"
+               ");"))
+TABLES.append(('Tube',
+               "CREATE TABLE Tube("
+               "    TubeID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "    DiameterIn DECIMAL(7, 7) NOT NULL,"
+               "    DiameterOut DECIMAL(7, 7) NOT NULL,"
+               "    Length DECIMAL(4, 4) NOT NULL,"
+               "    Material VARCHAR(30) NOT NULL,"
+               "    Mass DECIMAL(7, 7) NOT NULL,"
+               "  PRIMARY KEY (TubeID)"
+               ");"))
+TABLES.append(('Setting',
+               "CREATE TABLE Setting("
+               "    SettingID SERIAL,"
+               "    InitialDewPoint DECIMAL(5, 2) NOT NULL,"
+               "    InitialDuty DECIMAL(4, 1) NOT NULL,"
+               "    InitialMass DECIMAL(7, 7) NOT NULL,"
+               "    InitialPressure MEDIUMINT UNSIGNED NOT NULL,"
+               "    InitialTemp DECIMAL(5, 2) NOT NULL,"
+               "    TimeStep DECIMAL(4, 2) NOT NULL,"
+               "  PRIMARY KEY (SettingID)"
+               ");"))
+TABLES.append(('Test',
+               "CREATE TABLE Test("
+               "    TestID SERIAL,"
+               "    Author VARCHAR(30) NOT NULL,"
+               "    DateTime DATETIME NOT NULL,"
+               "    Description VARCHAR(200) NOT NULL,"
+               "    SettingID BIGINT UNSIGNED NOT NULL,"
+               "    TubeID TINYINT UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (TestID),"
+               "  FOREIGN KEY (SettingID) REFERENCES Setting(SettingID)"
+               "    ON UPDATE CASCADE ON DELETE RESTRICT,"
+               "  FOREIGN KEY (TubeID) REFERENCES Tube(TubeID)"
+               "    ON UPDATE CASCADE ON DELETE RESTRICT"
+               ");"))
+TABLES.append(('Observation',
+               "CREATE TABLE Observation("
+               "    ObservationID SERIAL,"
+               "    CapManOk TINYINT(1) NOT NULL,"
+               "    DewPoint DECIMAL(5, 2) NOT NULL,"
+               "    Duty DECIMAL(4, 1) NOT NULL,"
+               "    Idx SMALLINT UNSIGNED NOT NULL,"
+               "    Mass DECIMAL(7, 7) NOT NULL,"
+               "    OptidewOk TINYINT(1) NOT NULL,"
+               "    PowOut DECIMAL(6, 4) NOT NULL,"
+               "    PowRef DECIMAL(6, 4) NOT NULL,"
+               "    Pressure MEDIUMINT UNSIGNED NOT NULL,"
+               "    TestID BIGINT UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (ObservationID),"
+               "  FOREIGN KEY (TestID) REFERENCES Test(TestID)"
+               "    ON UPDATE CASCADE ON DELETE RESTRICT"
+               ");"))
+TABLES.append(('TempObservation',
+               "CREATE TABLE TempObservation("
+               "    TempObservationID SERIAL,"
+               "    Temperature DECIMAL(5, 2) NOT NULL,"
+               "    ThermocoupleNum TINYINT(2) UNSIGNED NOT NULL,"
+               "    ObservationID BIGINT UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (TempObservationID),"
+               "  FOREIGN KEY (ObservationID) REFERENCES Observation(ObservationID)"
+               "    ON UPDATE CASCADE ON DELETE RESTRICT"
+               ");"))
+
+TABLE_NAME_LIST = [table[0] for table in TABLES]
+TABLE_NAME_LIST.reverse()
 
 SETTINGS_TEST_1 = {'InitialDewPoint': 100,
                    'InitialDuty': 100,
