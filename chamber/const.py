@@ -199,8 +199,7 @@ TABLES.append(('TempObservation',
                "    ON UPDATE CASCADE ON DELETE RESTRICT"
                ");"))
 
-TABLE_NAME_LIST = [table[0] for table in TABLES]
-TABLE_NAME_LIST.reverse()
+TABLE_NAME_LIST = [table[0] for table in reversed(TABLES)]
 
 SETTINGS_TEST_1 = {'InitialDewPoint': 100,
                    'InitialDuty': 100,
