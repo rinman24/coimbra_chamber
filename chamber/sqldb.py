@@ -134,7 +134,7 @@ def test_exists(cur, test_info):
     else:
         return result[0][0]
 
-def list_tdms(file_path, file_list):
+def list_tdms(file_path, file_list = []):
     """Use the file_path to find tdms files.
 
     This function recursively searches through the argument directory and returns a list of all filepaths for
@@ -145,10 +145,9 @@ def list_tdms(file_path, file_list):
     file_path : string
         This is the directory to search for tdms files.
     file_list : empty list
-        This should be an empty list when the function is called which is then populated recursively.
-        **Note: file_list should be an empty list when calling list_tdms.
-        For Example: list_tdms("directory/tdms_files", [])**
-    
+        This is an empty list when the function is called with only a directory argument.
+        File_list is then populated recursively.
+
     Returns
     -------
     file_list : list of strings
@@ -173,7 +172,7 @@ def move_files(directory):
     directory : string
         This is the directory to move tdms files from.
     """
-    for file_path in list_tdms(directory,[]):
+    for file_path in list_tdms(directory):
         new_file_path = os.path.join(os.path.join(str(Path.home()),"read_files"),
                         os.path.relpath(file_path)[3:])
         if not os.path.exists(os.path.split(new_file_path)[0]):
@@ -458,7 +457,7 @@ def add_input(cur, directory):
     directory : string
         This is the directory to search for tdms files.
     """
-    for file_name in list_tdms(directory, []):
+    for file_name in list_tdms(directory):
         tdms_obj = TdmsFile(file_name)
         if not test_exists(cur, get_test_info(tdms_obj)):
             test_id = add_test_info(cur, tdms_obj, add_setting_info(cur, tdms_obj))
