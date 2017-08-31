@@ -47,6 +47,7 @@ Back to `Table of Contents`_
   * nptdms (for interacting with LabVIEW TDMS files)
   * pytest (for testing)
   * pytz (for datetime testing)
+  * schedule (for autonomous execution)
 
 Setting up Initial State of MySQL Database
 ------------------------------------------

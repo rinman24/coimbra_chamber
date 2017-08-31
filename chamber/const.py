@@ -162,7 +162,7 @@ TABLES.append(('Test',
                "    TestID SERIAL,"
                "    Author VARCHAR(30) NOT NULL,"
                "    DateTime DATETIME NOT NULL,"
-               "    Description VARCHAR(200) NOT NULL,"
+               "    Description VARCHAR(500) NOT NULL,"
                "    SettingID BIGINT UNSIGNED NOT NULL,"
                "    TubeID TINYINT UNSIGNED NOT NULL,"
                "  PRIMARY KEY (TestID),"
@@ -223,13 +223,21 @@ TDMS_01_SETTING = {'InitialDewPoint': '292.50',
                    'TimeStep': '1.00'}
 
 TDMS_TEST_FILES = ["tests/data_transfer_test_files/tdms_test_files/tdms_test_file_01.tdms",
-                   "tests/data_transfer_test_files/tdms_test_files/tdms_test_file_02.tdms",
-                   "tests/data_transfer_test_files/tdms_test_files/tdms_test_file_03.tdms"]
+                   "tests/data_transfer_test_files/tdms_test_files/test_tdms_folder_2/tdms_test_file_02.tdms",
+                   "tests/data_transfer_test_files/tdms_test_files/test_tdms_folder_2/tdms_test_file_03.tdms"]
 
-CORRECT_FILE_LIST = ["test.tdms", "unit_test_01.tdms", "unit_test_02.tdms", "unit_test_03.tdms"]
+LIST_TDMS_TEST_DIR = "tests/data_transfer_test_files"
 
-INCORRECT_FILE_LIST = ["py.tdmstest", "py.tdmstest.py", "unit_test_01.tdms_index",
-                       "unit_test_02.tdms_index", "unit_test_03.tdms_index"]
+CORRECT_FILE_LIST = ["tests/data_transfer_test_files/test.tdms",
+                     "tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms",
+                     "tests/data_transfer_test_files/unit_test_02.tdms",
+                     "tests/data_transfer_test_files/unit_test_03.tdms"]
+
+INCORRECT_FILE_LIST = ["tests/data_transfer_test_files/py.tdmstest",
+                       "tests/data_transfer_test_files/py.tdmstest.py",
+                       "tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms_index",
+                       "tests/data_transfer_test_files/unit_test_02.tdms_index",
+                       "tests/data_transfer_test_files/unit_test_03.tdms_index"]
 
 TDMS_01_DICT_TESTS = {'Author': "ADL",
                       'DateTime': datetime(2017, 8, 3, 19, 33, 9, 217290, pytz.UTC),

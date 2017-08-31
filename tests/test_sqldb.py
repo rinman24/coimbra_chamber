@@ -1,6 +1,9 @@
 """Docstring."""
 from datetime import datetime
 from decimal import Decimal
+from os import path
+from pathlib import Path
+from shutil import move
 
 import mysql.connector as conn
 from mysql.connector import errorcode
@@ -28,7 +31,7 @@ def cursor():
 
 @pytest.fixture(scope='module')
 def test_tdms_obj():
-    """fixture to instantiate only one TdmsFile object for testing"""
+    """fixture to instantiate only one TdmsnFile object for testing"""
     return TdmsFile(const.TDMS_TEST_FILES[0])
 
 
@@ -53,11 +56,25 @@ class TestSqlDb(object):
 
     def test_list_tdms(self):
         """Test correct output of all .tdms files contained in argument file."""
-        files = sqldb.list_tdms("tests/data_transfer_test_files")
+        files = sqldb.list_tdms(const.LIST_TDMS_TEST_DIR, [])
         for tdms_file in const.INCORRECT_FILE_LIST:
             assert tdms_file not in files
         for tdms_file in const.CORRECT_FILE_LIST:
             assert tdms_file in files
+
+    def test_move_files(self):
+        """Test that files are removed from the input directory and into user."""
+        try:
+            assert path.exists(const.CORRECT_FILE_LIST[1])
+            sqldb.move_files(path.split(const.CORRECT_FILE_LIST[1])[0])
+            assert not path.exists(const.CORRECT_FILE_LIST[1])
+            new_path = path.join(path.join(str(Path.home()),"read_files"),
+                                 path.relpath(const.CORRECT_FILE_LIST[1])[3:])
+            assert path.exists(new_path)
+            move(new_path,
+                        path.split(const.CORRECT_FILE_LIST[1])[0])
+        except FileNotFoundError:
+            assert False
 
     def test_get_setting_info(self, test_tdms_obj):
         """Test correct dictionary output when reading .tdms files for settings"""
@@ -68,11 +85,11 @@ class TestSqlDb(object):
         assert const.TDMS_01_DICT_TESTS == sqldb.get_test_info(test_tdms_obj)
 
     def test_get_obs_info(self, test_tdms_obj):
-        """Test correcct output when converting tdms obj observation data to dictionary of strings"""
+        """Test correct output when converting tdms obj observation data to dictionary of strings"""
         assert const.TDMS_01_OBS_08 == sqldb.get_obs_info(test_tdms_obj, const.TEST_INDEX)
 
     def test_get_temp(self, test_tdms_obj):
-        """Test correcct output when converting tdms obj temperature data to dictionary of strings"""
+        """Test correct output when converting tdms obj temperature data to dictionary of strings"""
         assert const.TDMS_01_THM_07 == sqldb.get_temp(test_tdms_obj, const.TEST_INDEX,
                                                       const.TC_INDEX)
 
@@ -128,28 +145,11 @@ class TestSqlDb(object):
         """Test correct data insertion through checking add_temp, the final table in cascade."""
         clear_sqldb(cursor)
         sqldb.add_input(cursor, const.TEST_DIRECTORY)
-        cursor.execute("SELECT Temperature FROM TempObservation WHERE TempObservationID = '{}'".format(cursor.lastrowid))
-        assert cursor.fetchone()[0] == Decimal('297.33')
+        cursor.execute("SELECT Temperature FROM TempObservation WHERE TempObservationID = "
+                       + "'{}'".format(cursor.lastrowid))
+        result = cursor.fetchone()[0]
+        assert result == Decimal('297.33') or result == Decimal('297.36')
 
-    # def test_enter_into_table(self, cursor):
-    #     """Test DDL for row insertion."""
-    #     cursor.execute(sqldb.insert_dml('UnitTest', ROW_DATA_2))
-    #     cursor.execute("SELECT Number FROM UnitTest WHERE String = 'more testing';")
-    #     assert isclose(float(cursor.fetchall()[0][0]), 99.9)
-    
-    # def test_fixture(self, test_tdms_obj):
-    #     """Test existence of test_tdms_obj fixture"""
-    #     assert test_tdms_obj
-    
-    # def test_insert_dml(self):
-    #     """Test DML for INSERT statements."""
-    #     query = sqldb.insert_dml('UnitTest', ROW_DATA_1)
-    #     ref = "INSERT INTO UnitTest     (String)  VALUES    ('unit testing');"
-    #     assert ref == query
-
-    # def test_last_insert_id(self, cursor):
-    #     """Test retrevial of last insert id."""
-    #     assert isinstance(sqldb.last_insert_id(cursor), int)
 
 def clear_sqldb(cursor):
     """Clears test database."""
