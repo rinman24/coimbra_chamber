@@ -9,8 +9,8 @@ import mysql.connector as conn
 from mysql.connector import errorcode
 from nptdms import TdmsFile
 
-#import const
-import chamber.const as const
+import const
+#import chamber.const as const
 
 def connect_sqldb():
     """Use connect constructor to connect to a MySQL server.
@@ -241,7 +241,7 @@ def get_test_info(tdms_obj):
         if name == "author":
             test_info['Author'] = value
         if name == "description":
-            test_info['Description'] = value[:200]
+            test_info['Description'] = value[:500]
     return test_info
 
 def get_obs_info(tdms_obj, obs_idx):
