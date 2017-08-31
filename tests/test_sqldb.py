@@ -56,7 +56,7 @@ class TestSqlDb(object):
 
     def test_list_tdms(self):
         """Test correct output of all .tdms files contained in argument file."""
-        files = sqldb.list_tdms(const.LIST_TDMS_TEST_DIR, [])
+        files = sqldb.list_tdms(const.LIST_TDMS_TEST_DIR)
         for tdms_file in const.INCORRECT_FILE_LIST:
             assert tdms_file not in files
         for tdms_file in const.CORRECT_FILE_LIST:
