@@ -3,6 +3,7 @@
 from datetime import datetime
 from decimal import Decimal
 from math import log, sqrt
+from os import getcwd
 
 import pytz
 
@@ -222,22 +223,22 @@ TDMS_01_SETTING = {'InitialDewPoint': '292.50',
                    'InitialTemp': '297.09',
                    'TimeStep': '1.00'}
 
-TDMS_TEST_FILES = ["tests/data_transfer_test_files/tdms_test_files/tdms_test_file_01.tdms",
-                   "tests/data_transfer_test_files/tdms_test_files/test_tdms_folder_2/tdms_test_file_02.tdms",
-                   "tests/data_transfer_test_files/tdms_test_files/test_tdms_folder_2/tdms_test_file_03.tdms"]
+TDMS_TEST_FILES = [getcwd() + "/tests/data_transfer_test_files/tdms_test_files/tdms_test_file_01.tdms",
+                   getcwd() + "/tests/data_transfer_test_files/tdms_test_files/test_tdms_folder_2/tdms_test_file_02.tdms",
+                   getcwd() + "/tests/data_transfer_test_files/tdms_test_files/test_tdms_folder_2/tdms_test_file_03.tdms"]
 
-LIST_TDMS_TEST_DIR = "tests/data_transfer_test_files"
+LIST_TDMS_TEST_DIR = getcwd() + "/tests/data_transfer_test_files"
 
-CORRECT_FILE_LIST = ["tests/data_transfer_test_files/test.tdms",
-                     "tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms",
-                     "tests/data_transfer_test_files/unit_test_02.tdms",
-                     "tests/data_transfer_test_files/unit_test_03.tdms"]
+CORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/test.tdms",
+                     getcwd() + "/tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms",
+                     getcwd() + "/tests/data_transfer_test_files/unit_test_02.tdms",
+                     getcwd() + "/tests/data_transfer_test_files/unit_test_03.tdms"]
 
-INCORRECT_FILE_LIST = ["tests/data_transfer_test_files/py.tdmstest",
-                       "tests/data_transfer_test_files/py.tdmstest.py",
-                       "tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms_index",
-                       "tests/data_transfer_test_files/unit_test_02.tdms_index",
-                       "tests/data_transfer_test_files/unit_test_03.tdms_index"]
+INCORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/py.tdmstest",
+                       getcwd() + "/tests/data_transfer_test_files/py.tdmstest.py",
+                       getcwd() + "/tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms_index",
+                       getcwd() + "/tests/data_transfer_test_files/unit_test_02.tdms_index",
+                       getcwd() + "/tests/data_transfer_test_files/unit_test_03.tdms_index"]
 
 TDMS_01_DICT_TESTS = {'Author': "ADL",
                       'DateTime': datetime(2017, 8, 3, 19, 33, 9, 217290, pytz.UTC),
@@ -260,4 +261,4 @@ TDMS_01_THM_07 = '296.76'
 
 TC_INDEX = 7
 
-TEST_DIRECTORY = "tests/data_transfer_test_files/tdms_test_files/"
+TEST_DIRECTORY = getcwd() + "/tests/data_transfer_test_files/tdms_test_files/"
