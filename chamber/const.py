@@ -226,18 +226,18 @@ TDMS_TEST_FILES = ["tests/data_transfer_test_files/tdms_test_files/tdms_test_fil
                    "tests/data_transfer_test_files/tdms_test_files/test_tdms_folder_2/tdms_test_file_02.tdms",
                    "tests/data_transfer_test_files/tdms_test_files/test_tdms_folder_2/tdms_test_file_03.tdms"]
 
-LIST_TDMS_TEST_DIR = "/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files"
+LIST_TDMS_TEST_DIR = "tests/data_transfer_test_files"
 
-CORRECT_FILE_LIST = ["/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files/test.tdms",
-                     "/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms",
-                     "/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files/unit_test_02.tdms",
-                     "/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files/unit_test_03.tdms"]
+CORRECT_FILE_LIST = ["tests/data_transfer_test_files/test.tdms",
+                     "tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms",
+                     "tests/data_transfer_test_files/unit_test_02.tdms",
+                     "tests/data_transfer_test_files/unit_test_03.tdms"]
 
-INCORRECT_FILE_LIST = ["/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files/py.tdmstest",
-                       "/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files/py.tdmstest.py",
-                       "/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms_index",
-                       "/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files/unit_test_02.tdms_index",
-                       "/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files/unit_test_03.tdms_index"]
+INCORRECT_FILE_LIST = ["tests/data_transfer_test_files/py.tdmstest",
+                       "tests/data_transfer_test_files/py.tdmstest.py",
+                       "tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms_index",
+                       "tests/data_transfer_test_files/unit_test_02.tdms_index",
+                       "tests/data_transfer_test_files/unit_test_03.tdms_index"]
 
 TDMS_01_DICT_TESTS = {'Author': "ADL",
                       'DateTime': datetime(2017, 8, 3, 19, 33, 9, 217290, pytz.UTC),
@@ -260,6 +260,4 @@ TDMS_01_THM_07 = '296.76'
 
 TC_INDEX = 7
 
-TEST_DIRECTORY = "/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files/tdms_test_files/"
-
-DESTINATION_DIR = "/home/alexandre/Python_Workspace/Repo/ucsd_ch-master/tests/data_transfer_test_files/read_files/"
+TEST_DIRECTORY = "tests/data_transfer_test_files/tdms_test_files/"
