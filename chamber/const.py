@@ -162,7 +162,7 @@ TABLES.append(('Test',
                "    TestID SERIAL,"
                "    Author VARCHAR(30) NOT NULL,"
                "    DateTime DATETIME NOT NULL,"
-               "    Description VARCHAR(200) NOT NULL,"
+               "    Description VARCHAR(500) NOT NULL,"
                "    SettingID BIGINT UNSIGNED NOT NULL,"
                "    TubeID TINYINT UNSIGNED NOT NULL,"
                "  PRIMARY KEY (TestID),"
