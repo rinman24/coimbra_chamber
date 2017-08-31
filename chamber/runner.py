@@ -40,4 +40,5 @@ def execute_job():
         schedule.run_pending()
         time.sleep(60)
 
-execute_job()
+if __name__ == "__main__":
+    execute_job()
