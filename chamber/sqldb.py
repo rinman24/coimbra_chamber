@@ -210,7 +210,7 @@ def get_setting_info(tdms_obj):
                 'InitialPressure': 
                 int(tdms_obj.object("Data", "Pressure").data[0]),
                 'InitialTemp':
-                '{:.2f}'.format(sum(temp_list[x] for x in range(0, len(temp_list)))/len(temp_list)),
+                '{:.2f}'.format(sum(temp_list[x] for x in range(len(temp_list)))/len(temp_list)),
                 'TimeStep':
                 '{:.2f}'.format(tdms_obj.object("Settings", "TimeStep").data[0])}
     return settings
