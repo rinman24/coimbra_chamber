@@ -58,6 +58,15 @@ C_L_COEFF = [1.1844879e+06, -2.1559968e+04, 1.6404218e+02, -6.6524994e-01, 1.516
 RHO_L_COEFF = [-7.2156278e+04, 1.1366432e+03, -7.0513426e+00, 2.1835039e-02, -3.3746407e-05,
                2.0814924e-08]
 
+
+#Hardy Equation Constants
+G_COEF = (-2.8365744e3, -6.028076559e3, 1.954263612e1, -2.737830188e-2, 1.6261698e-5,
+          7.0229056e-10, -1.8680009e-13, 2.7150305)
+
+A_COEF = (-1.6302041e-1, 1.8071570e-3, -6.7703064e-6, 8.5813609e-9)
+
+B_COEF = (-5.9890467e1, 3.4378043e-1, -7.7326396e-4, 6.3405286e-7)
+
 # MySQL Constants
 FIND_SETTING = ("SELECT SettingID FROM Setting WHERE "
                 "    InitialDewPoint = %(InitialDewPoint)s AND"
@@ -118,7 +127,7 @@ TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
 UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram', 'Power': 'Watt',
              'Pressure': 'Pascal', 'Temperature': 'Kelvin', 'Time': 'Second'}
 
-# Testing MySQL
+# MySQL Test Constants
 TABLES = []
 TABLES.append(('UnitTest',
            "CREATE TABLE UnitTest ("
