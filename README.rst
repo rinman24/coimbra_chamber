@@ -74,6 +74,8 @@ Back to `Table of Contents`_
 The structure of the directory
 ::
 
+    ├── data_transfer_script.bat
+    ├── LICENSE.txt
     ├── README.rst
     ├── chamber
     |   ├── __init__.py
@@ -82,19 +84,26 @@ The structure of the directory
     |   ├── properties.py
     |   ├── runner.py
     |   ├── sqldb.py
-    |   └── tools.py
+    |   ├── tools.py
+    |   └── water.py
     ├── images
+    |   ├── chamber_iso_view.jpg
+    |   ├── chamber_optics.jpg
+    |   ├── chamber_profile.jpg
+    |   ├── chamber_scale.jpg
     |   ├── coimbra_ucsd_logo.png
     |   └── mysql_schema.png
     ├── setup
     |   ├── add_tube.py
     |   └── setup_sqldb.py
     └── tests
+        ├── data_transfer_test_files
         ├── test_const.py
         ├── test_laser.py
         ├── test_properties.py
         ├── test_sqldb.py
-        └── test_tools.py
+        ├── test_tools.py
+        └── test_water.py
 
 Preferred Way to Run Tests
 ---------------------------
@@ -108,6 +117,8 @@ Back to `Table of Contents`_
 
 Images
 ------
+
+Back to `Table of Contents`_
 
 .. image:: images/chamber_iso_view.jpg
 
