@@ -9,8 +9,8 @@ import mysql.connector as conn
 from mysql.connector import errorcode
 from nptdms import TdmsFile
 
-import const
-#import chamber.const as const
+#import const
+import chamber.const as const
 
 def connect_sqldb():
     """Use connect constructor to connect to a MySQL server.
@@ -200,6 +200,7 @@ def get_setting_info(tdms_obj):
         should be the value to insert.
     """
     temp_list = [float(get_temp(tdms_obj, 0, x)) for x in range(3, 14)]
+    temp_list = [temp for temp in temp_list if temp > 0]
     settings = {'InitialDewPoint':
                 '{:.2f}'.format(tdms_obj.object("Data", "DewPoint").data[0]),
                 'InitialDuty':
@@ -209,7 +210,7 @@ def get_setting_info(tdms_obj):
                 'InitialPressure': 
                 int(tdms_obj.object("Data", "Pressure").data[0]),
                 'InitialTemp':
-                '{:.2f}'.format(sum(temp_list[x] for x in range(0,11) if temp_list[x] > 0)/11),
+                '{:.2f}'.format(sum(temp_list[x] for x in range(0, len(temp_list)))/len(temp_list)),
                 'TimeStep':
                 '{:.2f}'.format(tdms_obj.object("Settings", "TimeStep").data[0])}
     return settings
