@@ -7,6 +7,7 @@ from os import getcwd
 
 import pytz
 
+#Constants for laser.py
 # ZnSe port parameters (From Spec Sheet)
 D_PORT = 2.286e-2 # 2.286 cm         [X]
 R_PORT = 1.143e-2 # 1.143 cm         [X]
@@ -45,6 +46,8 @@ H_TUBE_BASE = 5.57e-3 # 5.57 mm         [X]
 # Gaussian Beam Constants
 HWHM_COEFF_W = sqrt(2*log(2))/2 # 0.589 [X]
 
+
+#CONSTANTS FOR water.py
 # Liquid Water Optical Properties at 10.59 microns
 K_ABS_10P6 = 8.218e4 # 82,180 m^{-1}    []
 K_EXT_10P6 = 6.925e-2 # 0.06925         []
@@ -58,53 +61,43 @@ C_L_COEFF = [1.1844879e+06, -2.1559968e+04, 1.6404218e+02, -6.6524994e-01, 1.516
 RHO_L_COEFF = [-7.2156278e+04, 1.1366432e+03, -7.0513426e+00, 2.1835039e-02, -3.3746407e-05,
                2.0814924e-08]
 
-
 #Hardy Equation Constants
 G_COEF = (-2.8365744e3, -6.028076559e3, 1.954263612e1, -2.737830188e-2, 1.6261698e-5,
           7.0229056e-10, -1.8680009e-13, 2.7150305)
-
 A_COEF = (-1.6302041e-1, 1.8071570e-3, -6.7703064e-6, 8.5813609e-9)
-
 B_COEF = (-5.9890467e1, 3.4378043e-1, -7.7326396e-4, 6.3405286e-7)
 
-# MySQL Constants
-FIND_SETTING = ("SELECT SettingID FROM Setting WHERE "
-                "    InitialDewPoint = %(InitialDewPoint)s AND"
-                "    InitialDuty = %(InitialDuty)s AND"
-                "    InitialMass = %(InitialMass)s AND"
-                "    InitialPressure = %(InitialPressure)s AND"
-                "    InitialTemp = %(InitialTemp)s AND"
-                "    TimeStep = %(TimeStep)s;")
 
-FIND_TUBE = ("SELECT TubeID FROM Tube WHERE "
-             "    DiameterIn = %(DiameterIn)s AND"
-             "    DiameterOut = %(DiameterOut)s AND"
-             "    Length = %(Length)s AND"
-             "    Material = %(Material)s AND"
-             "    Mass = %(Mass)s")
+#CONSTANTS FOR sqldb.py
+# MySQL querry Constants
+ADD_SETTING_M_F = ("INSERT INTO Setting "
+                   "(IsMass, InitialDewPoint, InitialDuty, InitialPressure, InitialTemp, TimeStep)"
+                   " VALUES "
+                   "(%(IsMass)s, %(InitialDewPoint)s, %(InitialDuty)s, %(InitialPressure)s, "
+                   "%(InitialTemp)s, %(TimeStep)s)")
 
-FIND_TEST = ("SELECT TestID FROM Test WHERE "
-             "    DateTime = %(DateTime)s")
-
-FIND_TESTID = ("SELECT TestID FROM Test WHERE "
-             "    TestID = (%s)")
-
-ADD_SETTING = ("INSERT INTO Setting "
-               "(InitialDewPoint, InitialDuty, InitialMass, InitialPressure, InitialTemp, TimeStep)"
-               " VALUES "
-               "(%(InitialDewPoint)s, %(InitialDuty)s, %(InitialMass)s, %(InitialPressure)s, "
-               "%(InitialTemp)s, %(TimeStep)s)")
+ADD_SETTING_M_T = ("INSERT INTO Setting "
+                   "(IsMass, InitialDewPoint, InitialDuty, InitialMass, InitialPressure, InitialTemp, TimeStep)"
+                   " VALUES "
+                   "(%(IsMass)s, %(InitialDewPoint)s, %(InitialDuty)s, %(InitialMass)s, %(InitialPressure)s, "
+                   "%(InitialTemp)s, %(TimeStep)s)")
 
 ADD_TEST = ("INSERT INTO Test "
             "(Author, DateTime, Description, SettingID, TubeID)"
             " VALUES "
             "(%(Author)s, %(DateTime)s, %(Description)s, %(SettingID)s, %(TubeID)s)")
 
-ADD_OBS = ("INSERT INTO Observation "
-           "(CapManOk, DewPoint, Duty, Idx, Mass, OptidewOk, PowOut, PowRef, Pressure, TestID)"
-           " VALUES "
-           "(%(CapManOk)s, %(DewPoint)s, %(Duty)s, %(Idx)s, %(Mass)s, %(OptidewOk)s, %(PowOut)s,"
-           " %(PowRef)s, %(Pressure)s, %(TestID)s)")
+ADD_OBS_M_T = ("INSERT INTO Observation "
+               "(CapManOk, DewPoint, Duty, Idx, Mass, OptidewOk, PowOut, PowRef, Pressure, TestID)"
+               " VALUES "
+               "(%(CapManOk)s, %(DewPoint)s, %(Duty)s, %(Idx)s, %(Mass)s, %(OptidewOk)s, %(PowOut)s,"
+               " %(PowRef)s, %(Pressure)s, %(TestID)s)")
+
+ADD_OBS_M_F = ("INSERT INTO Observation "
+               "(CapManOk, DewPoint, Duty, Idx, OptidewOk, PowOut, PowRef, Pressure, TestID)"
+               " VALUES "
+               "(%(CapManOk)s, %(DewPoint)s, %(Duty)s, %(Idx)s, %(OptidewOk)s, %(PowOut)s,"
+               " %(PowRef)s, %(Pressure)s, %(TestID)s)")
 
 ADD_TEMP = ("INSERT INTO TempObservation "
             "(ObservationID, ThermocoupleNum, Temperature)"
@@ -121,13 +114,37 @@ ADD_UNIT = ("INSERT INTO Unit "
             " VALUES "
             "(%(Duty)s, %(Length)s, %(Mass)s, %(Power)s, %(Pressure)s, %(Temperature)s, %(Time)s)")
 
-TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
-             'Material': 'Delrin', 'Mass': 0.0657957}
+FIND_SETTING_M_F = ("SELECT SettingID FROM Setting WHERE "
+                    "    IsMass = %(IsMass)s AND"  
+                    "    InitialDewPoint = %(InitialDewPoint)s AND"
+                    "    InitialDuty = %(InitialDuty)s AND"
+                    "    InitialPressure = %(InitialPressure)s AND"
+                    "    InitialTemp = %(InitialTemp)s AND"
+                    "    TimeStep = %(TimeStep)s;")
 
-UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram', 'Power': 'Watt',
-             'Pressure': 'Pascal', 'Temperature': 'Kelvin', 'Time': 'Second'}
+FIND_SETTING_M_T = ("SELECT SettingID FROM Setting WHERE "
+                    "    IsMass = %(IsMass)s AND"  
+                    "    InitialDewPoint = %(InitialDewPoint)s AND"
+                    "    InitialDuty = %(InitialDuty)s AND"
+                    "    InitialMass = %(InitialMass)s AND"
+                    "    InitialPressure = %(InitialPressure)s AND"
+                    "    InitialTemp = %(InitialTemp)s AND"
+                    "    TimeStep = %(TimeStep)s;")
 
-# MySQL Test Constants
+FIND_TEST = ("SELECT TestID FROM Test WHERE "
+             "    DateTime = %(DateTime)s")
+
+FIND_TESTID = ("SELECT TestID FROM Test WHERE "
+             "    TestID = (%s)")
+
+FIND_TUBE = ("SELECT TubeID FROM Tube WHERE "
+             "    DiameterIn = %(DiameterIn)s AND"
+             "    DiameterOut = %(DiameterOut)s AND"
+             "    Length = %(Length)s AND"
+             "    Material = %(Material)s AND"
+             "    Mass = %(Mass)s")
+
+# MySQL Tables Constants
 TABLES = []
 TABLES.append(('UnitTest',
            "CREATE TABLE UnitTest ("
@@ -159,9 +176,10 @@ TABLES.append(('Tube',
 TABLES.append(('Setting',
                "CREATE TABLE Setting("
                "    SettingID SERIAL,"
+               "    IsMass BOOLEAN DEFAULT 1,"
                "    InitialDewPoint DECIMAL(5, 2) NOT NULL,"
                "    InitialDuty DECIMAL(4, 1) NOT NULL,"
-               "    InitialMass DECIMAL(7, 7) NOT NULL,"
+               "    InitialMass DECIMAL(7, 7),"
                "    InitialPressure MEDIUMINT UNSIGNED NOT NULL,"
                "    InitialTemp DECIMAL(5, 2) NOT NULL,"
                "    TimeStep DECIMAL(4, 2) NOT NULL,"
@@ -188,7 +206,7 @@ TABLES.append(('Observation',
                "    DewPoint DECIMAL(5, 2) NOT NULL,"
                "    Duty DECIMAL(4, 1) NOT NULL,"
                "    Idx SMALLINT UNSIGNED NOT NULL,"
-               "    Mass DECIMAL(7, 7) NOT NULL,"
+               "    Mass DECIMAL(7, 7),"
                "    OptidewOk TINYINT(1) NOT NULL,"
                "    PowOut DECIMAL(6, 4) NOT NULL,"
                "    PowRef DECIMAL(6, 4) NOT NULL,"
@@ -201,7 +219,7 @@ TABLES.append(('Observation',
 TABLES.append(('TempObservation',
                "CREATE TABLE TempObservation("
                "    TempObservationID SERIAL,"
-               "    Temperature DECIMAL(5, 2) NOT NULL,"
+               "    Temperature DECIMAL(5, 2),"
                "    ThermocoupleNum TINYINT(2) UNSIGNED NOT NULL,"
                "    ObservationID BIGINT UNSIGNED NOT NULL,"
                "  PRIMARY KEY (TempObservationID),"
@@ -209,65 +227,110 @@ TABLES.append(('TempObservation',
                "    ON UPDATE CASCADE ON DELETE RESTRICT"
                ");"))
 
+
+#Constant for Table Drop
 TABLE_NAME_LIST = [table[0] for table in reversed(TABLES)]
 
-SETTINGS_TEST_1 = {'InitialDewPoint': 100,
+
+#MySql Tube and Unit Constants
+TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
+             'Material': 'Delrin', 'Mass': 0.0657957}
+
+UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram', 'Power': 'Watt',
+             'Pressure': 'Pascal', 'Temperature': 'Kelvin', 'Time': 'Second'}
+
+
+#Constants for test_sqldb.py
+SETTINGS_TEST_1 = {'IsMass': 1,
+                   'InitialDewPoint': 100,
                    'InitialDuty': 100,
                    'InitialMass': 0.07,
                    'InitialPressure': 100000,
                    'InitialTemp': 290,
                    'TimeStep': 1}
 
-SETTINGS_TEST_2 = {'InitialDewPoint': 500,
+SETTINGS_TEST_2 = {'IsMass': 1,
+                   'InitialDewPoint': 500,
                    'InitialDuty': 1000,
                    'InitialMass': 20,
                    'InitialPressure': 8,
                    'InitialTemp': 400,
                    'TimeStep': 20}
 
-TDMS_01_SETTING = {'InitialDewPoint': '292.50',
-                   'InitialDuty': '0.0',
-                   'InitialMass': '-0.0658138',
-                   'InitialPressure': 99977,
-                   'InitialTemp': '297.09',
-                   'TimeStep': '1.00'}
+SETTINGS_TEST_3 = {'IsMass': 0,
+                   'InitialDewPoint': 100,
+                   'InitialDuty': 100,
+                   'InitialPressure': 100000,
+                   'InitialTemp': 290,
+                   'TimeStep': 1}
 
-TDMS_TEST_FILES = [getcwd() + "/tests/data_transfer_test_files/tdms_test_files/tdms_test_file_01.tdms",
-                   getcwd() + "/tests/data_transfer_test_files/tdms_test_files/test_tdms_folder_2/tdms_test_file_02.tdms",
-                   getcwd() + "/tests/data_transfer_test_files/tdms_test_files/test_tdms_folder_2/tdms_test_file_03.tdms"]
 
-LIST_TDMS_TEST_DIR = getcwd() + "/tests/data_transfer_test_files"
+TEST_DIRECTORY = getcwd() + "/tests/data_transfer_test_files"
 
-CORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/test.tdms",
-                     getcwd() + "/tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms",
-                     getcwd() + "/tests/data_transfer_test_files/unit_test_02.tdms",
-                     getcwd() + "/tests/data_transfer_test_files/unit_test_03.tdms"]
+CORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/ismass_test_0_01.tdms",
+                     getcwd() + "/tests/data_transfer_test_files/ismass_test_1_02.tdms",
+                     getcwd() + "/tests/data_transfer_test_files/tdms_test_folder/ismass_test_1_04.tdms",
+                     getcwd() + "/tests/data_transfer_test_files/tdms_test_folder/tdms_test_folder_full/ismass_test_0_03.tdms"]
 
 INCORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/py.tdmstest",
-                       getcwd() + "/tests/data_transfer_test_files/py.tdmstest.py",
-                       getcwd() + "/tests/data_transfer_test_files/full_test_folder/unit_test_01.tdms_index",
-                       getcwd() + "/tests/data_transfer_test_files/unit_test_02.tdms_index",
-                       getcwd() + "/tests/data_transfer_test_files/unit_test_03.tdms_index"]
+                       getcwd() + "/tests/data_transfer_test_files/ismass_test_0_01.tdms_index",
+                       getcwd() + "/tests/data_transfer_test_files/ismass_test_1_02.tdms_index",
+                       getcwd() + "/tests/data_transfer_test_files/tdms_test_folder/ismass_test_1_04.tdms_index",
+                       getcwd() + "/tests/data_transfer_test_files/tdms_test_folder/tdms_test_folder_full/ismass_test_0_03.tdms_index"]
 
-TDMS_01_DICT_TESTS = {'Author': "ADL",
-                      'DateTime': datetime(2017, 8, 3, 19, 33, 9, 217290, pytz.UTC),
-                      'Description': ("This is at room temperature, pressure, no laser power, study"
-                                      " of boundy development.")}
+TDMS_TEST_FILE_MF =  getcwd() + "/tests/data_transfer_test_files/ismass_test_0_01.tdms"
 
-TDMS_01_OBS_08 = {'CapManOk': 1,
-                  'DewPoint': '292.43',
+TDMS_TEST_FILE_MF_SETTING = {'IsMass' : 0,
+                            'InitialDewPoint': '289.70',
+                            'InitialDuty': '0.0',
+                            'InitialPressure': 99649,
+                            'InitialTemp': '296.57',
+                            'TimeStep': '1.00'}
+
+TDMS_TEST_FILE_MF_TESTS = {'Author': "ADL",
+                      'DateTime': datetime(2017, 9, 11, 21, 25, 55, 23629, pytz.UTC),
+                      'Description': ("This is the Stefan Tube on the balance with no water in it and the thermocouples disconnected. "
+                                      "The point of this study is to determine if the tube is stable with the thermocouple ports on "
+                                      "without the thermocouple wires conected.")}
+
+TDMS_TEST_FILE_MF_OBS_09 = {'CapManOk': 1,
+                  'DewPoint': '289.71',
                   'Duty': '0.0',
-                  'Idx': 8,
-                  'Mass': '-0.0658138',
+                  'Idx': 9,
                   'OptidewOk': 1,
-                  'PowOut': '-0.0010',
+                  'PowOut': '-0.0013',
+                  'PowRef': '-0.0016',
+                  'Pressure': 99684}
+
+TDMS_TEST_FILE_MF_THM_07 = '296.60'
+
+TDMS_TEST_FILE_MT =  getcwd() + "/tests/data_transfer_test_files/ismass_test_1_02.tdms"
+
+TDMS_TEST_FILE_MT_SETTING = {'IsMass' : 1,
+                            'InitialDewPoint': '289.73',
+                            'InitialDuty': '0.0',
+                            'InitialMass': '0.0874270',
+                            'InitialPressure': 99662,
+                            'InitialTemp': '296.57',
+                            'TimeStep': '1.00'}
+
+TDMS_TEST_FILE_MT_TESTS = {'Author': "ADL",
+                      'DateTime': datetime(2017, 9, 11, 21, 26, 59, 523318, pytz.UTC),
+                      'Description': ("This is the Stefan Tube on the balance with no water in it and the thermocouples disconnected. "
+                                      "The point of this study is to determine if the tube is stable with the thermocouple ports on "
+                                      "without the thermocouple wires conected.")}
+
+TDMS_TEST_FILE_MT_OBS_09 = {'CapManOk': 1,
+                  'DewPoint': '289.71',
+                  'Duty': '0.0',
+                  'Idx': 9,
+                  'Mass': '0.0874270',
+                  'OptidewOk': 1,
+                  'PowOut': '-0.0013',
                   'PowRef': '-0.0015',
-                  'Pressure': 99982}
+                  'Pressure': 99640}
+
+TDMS_TEST_FILE_MT_THM_07 = '296.59'
 
 TEST_INDEX = 7
-
-TDMS_01_THM_07 = '296.76'
-
 TC_INDEX = 7
-
-TEST_DIRECTORY = getcwd() + "/tests/data_transfer_test_files/tdms_test_files/"

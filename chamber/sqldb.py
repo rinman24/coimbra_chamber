@@ -90,20 +90,24 @@ def setting_exists(cur, setting_info):
     setting_info : dict of strings
         Set of setting values to check for. Keys should be column names from the Setting table and
         values should be the value to insert.
-        **Note: all values should be type string.**
     
     Returns
     -------
-    SettingID : int or False
-        This is the primary key for the Setting table if the setting already exists. If the setting
-        does not exist in the database the function returns False.
+    setting_id : tuple or False
+        SettingID[0] is the SettingID for the MySQL database. SettingID is the primary key for the
+        Setting table. Setting_ID[1] is the value of IsMass.If the setting does not exist in the
+        database the function returns False.
     """
-    cur.execute(const.FIND_SETTING, setting_info)
+    if setting_info['IsMass'] == 1:
+        cur.execute(const.FIND_SETTING_M_T, setting_info)
+    else:
+        cur.execute(const.FIND_SETTING_M_F, setting_info)
     result = cur.fetchall()
     if not result:
         return False
     else:
-        return result[0][0]
+        setting_id = result[0][0], setting_info['IsMass']
+        return setting_id
 
 def test_exists(cur, test_info):
     """Use a MySQL cursor object and a test_info dictionary to check if a test already exists.
@@ -195,25 +199,28 @@ def get_setting_info(tdms_obj):
     
     Returns
     -------
-    settings : dict of strings
+    setting_info : dict
         Set of values to insert into the Setting table. Keys should be column names and values
         should be the value to insert.
     """
-    temp_list = [float(get_temp(tdms_obj, 0, x)) for x in range(3, 14)]
-    temp_list = [temp for temp in temp_list if temp > 0]
-    settings = {'InitialDewPoint':
+    temp_list = [float(get_temp_info(tdms_obj, 0, x)) for x in range(4, 14)]
+    setting_info = {'InitialDewPoint':
                 '{:.2f}'.format(tdms_obj.object("Data", "DewPoint").data[0]),
                 'InitialDuty':
                 '{:.1f}'.format(tdms_obj.object("Data", "DutyCycle").data[0]),
-                'InitialMass':
-                '{:.7f}'.format(tdms_obj.object("Data", "Mass").data[0]),
                 'InitialPressure': 
                 int(tdms_obj.object("Data", "Pressure").data[0]),
                 'InitialTemp':
                 '{:.2f}'.format(sum(temp_list[x] for x in range(len(temp_list)))/len(temp_list)),
                 'TimeStep':
                 '{:.2f}'.format(tdms_obj.object("Settings", "TimeStep").data[0])}
-    return settings
+    try:
+        setting_info['IsMass'] = int(tdms_obj.object("Settings", "IsMass").data[0])
+    except KeyError:
+        setting_info['IsMass'] = 1
+    if setting_info['IsMass'] == 1:
+        setting_info['InitialMass'] = '{:.7f}'.format(tdms_obj.object("Data", "Mass").data[0])
+    return setting_info
 
 def get_test_info(tdms_obj):
     """Use a TdmsFile object to find test details.
@@ -230,13 +237,12 @@ def get_test_info(tdms_obj):
 
     Returns
     -------
-    tests : dict of strings
+    test_info : dict of strings
         Set of values to insert into the Test table. Keys should be column names and values should
         be the value to insert.
      """
     test_info = {'Author': '', 'DateTime': tdms_obj.object().properties['DateTime'],
              'Description': ''}
-
     for name, value in tdms_obj.object().properties.items():
         if name == "author":
             test_info['Author'] = value
@@ -244,7 +250,7 @@ def get_test_info(tdms_obj):
             test_info['Description'] = value[:500]
     return test_info
 
-def get_obs_info(tdms_obj, obs_idx):
+def get_obs_info(tdms_obj, obs_idx, is_mass = True):
     """Use a TdmsFile object and obs_idx to return a dictionary of observation data.
 
     Builds a dictionary containing the observation for a given index (time) in the TdmsFile objrct,
@@ -260,11 +266,11 @@ def get_obs_info(tdms_obj, obs_idx):
     
     Returns
     -------
-    observations : dict of strings
+    obs_info : dict
         Set of values to insert into the Observation table. Keys should be column names and values
         should be the value to insert.
     """
-    observations = {'CapManOk':
+    obs_info = {'CapManOk':
                     int(tdms_obj.object("Data", "CapManOk").data[obs_idx]),
                     'DewPoint':
                     '{:.2f}'.format(tdms_obj.object("Data", "DewPoint").data[obs_idx]),
@@ -272,8 +278,6 @@ def get_obs_info(tdms_obj, obs_idx):
                     '{:.1f}'.format(tdms_obj.object("Data", "DutyCycle").data[obs_idx]),
                     'Idx':
                     int(tdms_obj.object("Data", "Idx").data[obs_idx]),
-                    'Mass':
-                    '{:.7f}'.format(tdms_obj.object("Data", "Mass").data[obs_idx]),
                     'OptidewOk':
                     int(tdms_obj.object("Data", "OptidewOk").data[obs_idx]),
                     'PowOut':
@@ -282,14 +286,17 @@ def get_obs_info(tdms_obj, obs_idx):
                     '{:.4f}'.format(tdms_obj.object("Data", "PowRef").data[obs_idx]),
                     'Pressure':
                     int(tdms_obj.object("Data", "Pressure").data[obs_idx])}
-    return observations
+    if is_mass:
+        obs_info['Mass'] = '{:.7f}'.format(tdms_obj.object("Data", "Mass").data[obs_idx])
+    return obs_info
 
-def get_temp(tdms_obj, temp_idx, couple_idx):
+def get_temp_info(tdms_obj, temp_idx, couple_idx):
     """Use a TdmsFile object with data_idx and couple_idx to get a thermocouple observation.
 
     Returns temperature data for the provided index (time) and thermocouple index provided in the
     argument and returns a dictionary formatted for use with the ADD_TEMP querry in const.py.
-    Returns '-999.99' if temperature exceeds database limits is (1000.00 kelvin or above).
+    Does nothing if temperature exceeds database limits is (1000.00 kelvin or above) or IsMass
+    is set to 0.
 
     Parameters
     ----------
@@ -304,15 +311,15 @@ def get_temp(tdms_obj, temp_idx, couple_idx):
     
     Returns
     -------
-    temp : string
+    temp_info : string
         A single value to insert into the TempObservation table. Key should be thermocouple number
         and the value should be the temperature measurement.
     """
     regex = compile(r'^(\d){3}.(\d){2}$')
-    temperature = '{:.2f}'.format(tdms_obj.object("Data", "TC{}".format(couple_idx)).data[temp_idx])
-    if not regex.search(temperature):
-        return '-999.99'
-    return temperature
+    temp_info = '{:.2f}'.format(tdms_obj.object("Data", "TC{}".format(couple_idx)).data[temp_idx])
+    if not regex.search(temp_info):
+        return
+    return temp_info
 
 def add_tube_info(cur):
     """Use MySQL cursor to add the test-independant Tube information.
@@ -348,15 +355,18 @@ def add_setting_info(cur, tdms_obj):
     
     Returns
     -------
-    setting_id : int
-        This is the SettingID for the MySQL database. SettingID is the primary key for the Setting
-        table.
+    setting_id : tuple
+        SettingID[0] is the SettingID for the MySQL database. SettingID is the primary key for the Setting
+        table. Setting_ID[1] is the value of IsMass.
     """
     setting_info = get_setting_info(tdms_obj)
     setting_id = setting_exists(cur, setting_info)
     if not setting_id:
-        cur.execute(const.ADD_SETTING, setting_info)
-        setting_id = cur.lastrowid
+        if setting_info['IsMass'] == 1:
+            cur.execute(const.ADD_SETTING_M_T, setting_info)
+        else:
+            cur.execute(const.ADD_SETTING_M_F, setting_info)
+        setting_id = cur.lastrowid, setting_info['IsMass']
     return setting_id
 
 def add_test_info(cur, tdms_obj, setting_id):
@@ -373,22 +383,22 @@ def add_test_info(cur, tdms_obj, setting_id):
     tdms_obj : nptdms.TdmsFile
         TdmsFile object containg the data from the tdms test file. Original tdms files were created
         from UCSD Chamber experiments in the Coimbra Lab in SERF 159.
-    setting_id : int
-        This is the SettingID for the MySQL database. SettingID is the primary key for the Setting
-        table.
+    setting_id : tuple
+        SettingID[0] is the SettingID for the MySQL database. SettingID is the primary key for the Setting
+        table. Setting_ID[1] is the value of IsMass.
     
     Returns
     -------
-    lastrowid : int
-        This is the TestID which is the primary key for the Test table.
+    test_id : tuple
+        TestID[0] is the primary key for the Test table. TestID[1] is the value of IsMass.
     """
     test_info = get_test_info(tdms_obj)
     test_id = test_exists(cur, test_info)
     if not test_id:
-        test_info["SettingID"] = setting_id
+        test_info["SettingID"] = setting_id[0]
         test_info["TubeID"] = 1#str(tdms_obj.object("Settings", "TubeID").data[0])
         cur.execute(const.ADD_TEST, test_info)
-        test_id = cur.lastrowid
+        test_id = cur.lastrowid, setting_id[1]
     return test_id
     
 def add_obs_info(cur, tdms_obj, test_id, obs_idx):
@@ -405,26 +415,36 @@ def add_obs_info(cur, tdms_obj, test_id, obs_idx):
     tdms_obj : nptdms.TdmsFile
         TdmsFile object containg the data from the tdms test file. Original tdms files were created
         from UCSD Chamber experiments in the Coimbra Lab in SERF 159.
-    test_id : int
-        This is the TestID for the MySQL database. TestID is the primary key for the Test table.
+    test_id : tuple
+        TestID[0] is the primary key for the Test table. TestID[1] is the value of IsMass.
     obs_idx : int
         This is the index in the tdms file, which represents a single time.
     
     Returns
     -------
-    lastrowid : int
-        This is the ObservationID which is the primary key for the Observation table.
+    obs_id : tuple
+        obs_id[0] is the ObservationID which is the primary key for the Observation table.
+        obs_id[1] is the boolean representation of IsMass.
     """
-    obs_info = get_obs_info(tdms_obj, obs_idx)
-    obs_info['TestID'] = test_id
-    cur.execute(const.ADD_OBS, obs_info)
-    return cur.lastrowid
+    test_boolean = True
+    if test_id[1] == 0:
+        test_boolean = False
+        obs_info = get_obs_info(tdms_obj, obs_idx, False)
+    else:
+        obs_info = get_obs_info(tdms_obj, obs_idx)
+    obs_info['TestID'] = test_id[0]
+    if test_boolean:
+        cur.execute(const.ADD_OBS_M_T, obs_info)
+    else:
+        cur.execute(const.ADD_OBS_M_F, obs_info)
+    obs_id = cur.lastrowid, test_boolean
+    return obs_id
 
 def add_temp(cur, tdms_obj, obs_id, temp_idx):
     """Use MySQL cursor and TdmsFile objects with obs_id and temp_idx to add a temp observation.
 
     Uses cursor's .execute function on a MySQL insert query and dictionary of TempObservation data
-    built by looping through get_temp for each thermocouple using the argument TdmsFile and index.
+    built by looping through get_temp_info for each thermocouple using the argument TdmsFile and index.
     Adds the foreign key ObservationID to the dictionary before executing the MySQL query.
     
     Parameters
@@ -434,14 +454,18 @@ def add_temp(cur, tdms_obj, obs_id, temp_idx):
     tdms_obj : nptdms.TdmsFile
         TdmsFile object containg the data from the tdms test file. Original tdms files were created
         from UCSD Chamber experiments in the Coimbra Lab in SERF 159.
-    obs_id : int
-        This is the ObsID for the MySQL database. ObsID is the primary key for the Observation
-        table.
+    obs_id : tuple
+        obs_id[0] is the ObservationID which is the primary key for the Observation table.
+        obs_id[1] is the boolean representation of IsMass.
     temp_idx : int
         This is the temperature index in the tdms file, which represents a single time.
     """
-    temp_data = [(obs_id, couple_idx,
-                  get_temp(tdms_obj, temp_idx, couple_idx)) for couple_idx in range(14)]
+    if obs_id[1]:
+        temp_data = [(obs_id[0], couple_idx,
+                    get_temp_info(tdms_obj, temp_idx, couple_idx)) for couple_idx in range(14)]
+    else:
+        temp_data = [(obs_id[0], couple_idx,
+                    get_temp_info(tdms_obj, temp_idx, couple_idx)) for couple_idx in range(4, 14)]
     cur.executemany(const.ADD_TEMP, temp_data)
 
 def add_input(cur, directory):
@@ -465,4 +489,4 @@ def add_input(cur, directory):
             for obs_idx in range(len(tdms_obj.object("Data", "Idx").data)):
                 obs_id = add_obs_info(cur, tdms_obj, test_id, obs_idx)
                 add_temp(cur, tdms_obj, obs_id, obs_idx)
-    move_files(directory)
+    #move_files(directory)
