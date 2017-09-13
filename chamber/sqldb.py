@@ -9,8 +9,8 @@ import mysql.connector as conn
 from mysql.connector import errorcode
 from nptdms import TdmsFile
 
-#import const
-import chamber.const as const
+import const
+#import chamber.const as const
 
 def connect_sqldb():
     """Use connect constructor to connect to a MySQL server.
@@ -483,6 +483,7 @@ def add_input(cur, directory):
         This is the directory to search for tdms files.
     """
     for file_name in list_tdms(directory, []):
+        print("Writing: ", file_name)
         tdms_obj = TdmsFile(file_name)
         if not test_exists(cur, get_test_info(tdms_obj)):
             test_id = add_test_info(cur, tdms_obj, add_setting_info(cur, tdms_obj))
