@@ -28,7 +28,9 @@ Make sure that you export your MySQLCredentials environment variable for access
     $ export MySqlUserName=<user_name>
     $ export MySqlCredentials=<password>
     $ export MySqlHost=<host>
-    $ export MySqlDataBase=<database>
+    $ export MySqlDataBase=<database1>
+    $ export MySqlDataBaseCh=<database2>
+    $ export MySqlDataBaseRe=<database3>
 
 Python Version
 --------------
@@ -85,6 +87,7 @@ The structure of the directory
     |   ├── runner.py
     |   ├── sqldb.py
     |   ├── tools.py
+    |   ├── views.py
     |   └── water.py
     ├── images
     |   ├── chamber_iso_view.jpg
@@ -103,6 +106,7 @@ The structure of the directory
         ├── test_properties.py
         ├── test_sqldb.py
         ├── test_tools.py
+        ├── test_views.py
         └── test_water.py
 
 Preferred Way to Run Tests

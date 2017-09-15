@@ -5,6 +5,7 @@ import pytest
 
 import chamber.const as const
 import chamber.views as views
+import tests.test_const as test_const
 
 @pytest.fixture(scope='module')
 def cursor_ch():
@@ -30,7 +31,7 @@ def cursor_re():
     print("Connected.")
     yield cur
     print("\nCleaning up test database...")
-    drop_tables(cur)
+    drop_tables(cur, False)
     print("Disconnecting from MySQL results...")
     cnx.commit()
     cur.close()
@@ -56,21 +57,18 @@ class TestSqlDb(object):
         assert not cursor_re.fetchall()
 
     def test_normalized_mass(self, cursor_ch, cursor_re):
-    	"""Tests insertion and proper calculation of Normalized Mass"""
-    	views.normalized_mass(cursor_ch, cursor_re, 33)
-    	cursor_re.execute("SELECT NormalizedMass FROM NormalizedMass LIMIT 1;")
-    	assert cursor_re.fetchall()[0][0] == 1
+        """Tests insertion and proper calculation of Normalized Mass"""
+        views.normalized_mass(cursor_ch, cursor_re, 33)
+        cursor_re.execute("SELECT NormalizedMass FROM NormalizedMass LIMIT 1;")
+        assert cursor_re.fetchall()[0][0] == 1
 
 
-def drop_tables(cur):
+def drop_tables(cur, bol):
     """Prompts user to drop database tables or not. 'y' to drop, 'n' to not drop"""
-    user_input = input('\nDROP TABLES (y/n)?\n')
-    if user_input:
-        if user_input.lower() == 'y':
-            print("Dropping tables...")
-            cur.execute("DROP TABLE IF EXISTS " + ", ".join(const.VIEW_NAME_LIST) + ";")
-            return
-        if user_input.lower() == 'n':
-            print("Tables not dropped.")
-            return
-    drop_tables(cur)
+    if bol:
+        print("Dropping tables...")
+        cur.execute("DROP TABLE IF EXISTS " + ", ".join(const.VIEW_NAME_LIST) + ";")
+        return
+    else:
+        print("Tables not dropped.")
+        return

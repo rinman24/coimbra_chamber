@@ -12,6 +12,7 @@ import pytest
 
 import chamber.sqldb as sqldb
 import chamber.const as const
+import tests.test_const as test_const
 
 @pytest.fixture(scope='module')
 def cursor():
@@ -22,7 +23,7 @@ def cursor():
     print("Connected.")
     yield cur
     print("\nCleaning up test database...")
-    drop_tables(cur)
+    drop_tables(cur, True)
     print("Disconnecting from MySQL...")
     cnx.commit()
     cur.close()
@@ -32,7 +33,7 @@ def cursor():
 @pytest.fixture(scope='module')
 def test_tdms_obj():
     """fixture to instantiate only one TdmsnFile object for testing"""
-    return TdmsFile(const.TDMS_TEST_FILE_MF), TdmsFile(const.TDMS_TEST_FILE_MT)
+    return TdmsFile(test_const.TDMS_TEST_FILE_MF), TdmsFile(test_const.TDMS_TEST_FILE_MT)
 
 
 class TestSqlDb(object):
@@ -50,54 +51,60 @@ class TestSqlDb(object):
 
     def test_setting_exists(self, cursor):
         """Test that you can find settings that already exist."""
-        cursor.execute(const.ADD_SETTING_M_T, const.SETTINGS_TEST_1)
-        cursor.execute(const.ADD_SETTING_M_F, const.SETTINGS_TEST_3)
-        assert sqldb.setting_exists(cursor, const.SETTINGS_TEST_1)
-        assert not sqldb.setting_exists(cursor, const.SETTINGS_TEST_2)
-        assert sqldb.setting_exists(cursor, const.SETTINGS_TEST_3)
+        cursor.execute(const.ADD_SETTING_M_T, test_const.SETTINGS_TEST_1)
+        cursor.execute(const.ADD_SETTING_M_F, test_const.SETTINGS_TEST_3)
+        assert sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_1)
+        assert not sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_2)
+        assert sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_3)
 
     def test_list_tdms(self):
         """Test correct output of all .tdms files contained in argument file."""
-        files = sqldb.list_tdms(const.TEST_DIRECTORY, [])
-        for tdms_file in const.INCORRECT_FILE_LIST:
+        files = sqldb.list_tdms(test_const.TEST_DIRECTORY)
+        for tdms_file in test_const.INCORRECT_FILE_LIST:
             assert tdms_file not in files
-        for tdms_file in const.CORRECT_FILE_LIST:
+        for tdms_file in test_const.CORRECT_FILE_LIST:
             assert tdms_file in files
 
     def test_move_files(self):
         """Test that files are removed from the input directory and into user."""
         try:
-            assert path.exists(const.CORRECT_FILE_LIST[3])
-            sqldb.move_files(path.split(const.CORRECT_FILE_LIST[3])[0])
-            assert not path.exists(const.CORRECT_FILE_LIST[3])
+            assert path.exists(test_const.CORRECT_FILE_LIST[3])
+            sqldb.move_files(path.split(test_const.CORRECT_FILE_LIST[3])[0])
+            assert not path.exists(test_const.CORRECT_FILE_LIST[3])
             new_path = path.join(path.join(str(Path.home()),"read_files"),
-                                 path.relpath(const.CORRECT_FILE_LIST[3])[3:])
+                                 path.relpath(test_const.CORRECT_FILE_LIST[3])[3:])
             assert path.exists(new_path)
-            move(new_path, path.split(const.CORRECT_FILE_LIST[3])[0])
+            move(new_path, path.split(test_const.CORRECT_FILE_LIST[3])[0])
         except FileNotFoundError:
             assert False
 
     def test_get_setting_info(self, test_tdms_obj):
         """Test correct dictionary output when reading .tdms files for settings"""
-        assert const.TDMS_TEST_FILE_MT_SETTING == sqldb.get_setting_info(test_tdms_obj[1])
-        assert const.TDMS_TEST_FILE_MF_SETTING == sqldb.get_setting_info(test_tdms_obj[0])
+        assert test_const.TDMS_TEST_FILE_MT_SETTING == sqldb.get_setting_info(test_tdms_obj[1])
+        assert test_const.TDMS_TEST_FILE_MF_SETTING == sqldb.get_setting_info(test_tdms_obj[0])
 
     def test_get_test_info(self, test_tdms_obj):
         """Test correct dictionary output when reading .tdms files for tests"""
-        assert const.TDMS_TEST_FILE_MT_TESTS == sqldb.get_test_info(test_tdms_obj[1])
-        assert const.TDMS_TEST_FILE_MF_TESTS == sqldb.get_test_info(test_tdms_obj[0])
+        assert test_const.TDMS_TEST_FILE_MT_TESTS == sqldb.get_test_info(test_tdms_obj[1])
+        assert test_const.TDMS_TEST_FILE_MF_TESTS == sqldb.get_test_info(test_tdms_obj[0])
 
     def test_get_obs_info(self, test_tdms_obj):
         """Test correct output when converting tdms obj observation data to dictionary of strings"""
-        assert const.TDMS_TEST_FILE_MT_OBS_09 == sqldb.get_obs_info(test_tdms_obj[1], const.TEST_INDEX, True)
-        assert const.TDMS_TEST_FILE_MF_OBS_09 == sqldb.get_obs_info(test_tdms_obj[0], const.TEST_INDEX, False)
+        assert test_const.TDMS_TEST_FILE_MT_OBS_09 == sqldb.get_obs_info(test_tdms_obj[1],
+                                                                         test_const.TEST_INDEX,
+                                                                         True)
+        assert test_const.TDMS_TEST_FILE_MF_OBS_09 == sqldb.get_obs_info(test_tdms_obj[0],
+                                                                         test_const.TEST_INDEX,
+                                                                         False)
 
     def test_get_temp_info(self, test_tdms_obj):
         """Test correct output when converting tdms obj temperature data to dictionary of strings"""
-        assert const.TDMS_TEST_FILE_MT_THM_07 == sqldb.get_temp_info(test_tdms_obj[1], const.TEST_INDEX,
-                                                      const.TC_INDEX)
-        assert const.TDMS_TEST_FILE_MF_THM_07 == sqldb.get_temp_info(test_tdms_obj[0], const.TEST_INDEX,
-                                                      const.TC_INDEX)
+        assert test_const.TDMS_TEST_FILE_MT_THM_07 == sqldb.get_temp_info(test_tdms_obj[1],
+                                                                          test_const.TEST_INDEX,
+                                                                          test_const.TC_INDEX)
+        assert test_const.TDMS_TEST_FILE_MF_THM_07 == sqldb.get_temp_info(test_tdms_obj[0],
+                                                                          test_const.TEST_INDEX,
+                                                                          test_const.TC_INDEX)
 
     def test_add_tube_info(self, cursor):
         """Tsts correct data insertion into Tube table as well as correct handling of dulicate tubes"""
@@ -109,7 +116,6 @@ class TestSqlDb(object):
 
     def test_add_setting_info(self, cursor, test_tdms_obj):
         """Test correct data insertion and condition handling in add_setting."""
-        clear_sqldb(cursor)
         sqldb.add_setting_info(cursor, test_tdms_obj[0])
         setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(test_tdms_obj[0]))
         assert isinstance(setting_id, tuple)
@@ -119,34 +125,28 @@ class TestSqlDb(object):
         setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(test_tdms_obj[1]))
         assert isinstance(setting_id, tuple)
         assert setting_id[1] == 1
-        clear_sqldb(cursor)
 
     def test_add_test_info(self, cursor, test_tdms_obj):
         """Test correct data insertion and condition handling in add_test."""
-        clear_sqldb(cursor)
         setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[0])
         sqldb.add_test_info(cursor, test_tdms_obj[0], setting_id)
         cursor.execute("SELECT Author FROM Test WHERE TestID = {}".format(cursor.lastrowid))
         assert cursor.fetchone()[0] == "ADL"
-        clear_sqldb(cursor)
 
     def test_test_exists(self, cursor, test_tdms_obj):
         """Test that you can find tests that already exist."""
-        clear_sqldb(cursor)
         setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[0])
         sqldb.add_test_info(cursor, test_tdms_obj[0], setting_id)
         test_id = cursor.lastrowid
         assert test_id == sqldb.test_exists(cursor, sqldb.get_test_info(test_tdms_obj[0]))
-        clear_sqldb(cursor)
-        assert not test_id == sqldb.test_exists(cursor, sqldb.get_test_info(test_tdms_obj[0]))
+        assert not test_id == sqldb.test_exists(cursor, sqldb.get_test_info(test_tdms_obj[1]))
 
     def test_add_obs_info(self, cursor, test_tdms_obj):
         """Test correct data insertion and condition handling in add_obs."""
-        clear_sqldb(cursor)
         test_id = sqldb.add_test_info(cursor, test_tdms_obj[0],
                                       sqldb.add_setting_info(cursor, test_tdms_obj[0]))
         for obs_idx in range(len(test_tdms_obj[0].object("Data", "Idx").data)):
-            sqldb.add_obs_info(cursor, test_tdms_obj[0], test_id, obs_idx)
+            sqldb.add_obs_info(cursor, test_tdms_obj[0], (test_id, 0), obs_idx)
         cursor.execute('SELECT Duty FROM Observation '
                        'WHERE ObservationID = {}'.format(cursor.lastrowid))
         assert cursor.fetchone()[0] == Decimal('0.0')
@@ -158,34 +158,21 @@ class TestSqlDb(object):
         cursor.execute('SELECT Duty FROM Observation '
                        'WHERE ObservationID = {}'.format(cursor.lastrowid))
         assert cursor.fetchone()[0] == Decimal('0.0')
-        clear_sqldb(cursor)
 
     def test_add_input(self, cursor):
         """Test correct data insertion through checking add_temp, the final table in cascade."""
-        clear_sqldb(cursor)
-        sqldb.add_input(cursor, const.TEST_DIRECTORY)
+        sqldb.add_input(cursor, test_const.TEST_DIRECTORY, True)
         cursor.execute("SELECT Temperature FROM TempObservation WHERE TempObservationID = "
                        + "'{}'".format(cursor.lastrowid))
         result = cursor.fetchone()[0]
         assert result == Decimal('297.17')
 
-
-def clear_sqldb(cursor):
-    """Clears test database."""
-    cursor.execute('DELETE FROM TempObservation;')
-    cursor.execute('DELETE FROM Observation;')
-    cursor.execute('DELETE FROM Test;') 
-    cursor.execute('DELETE FROM Setting;')
-
-def drop_tables(cur):
+def drop_tables(cur, bol):
     """Prompts user to drop database tables or not. 'y' to drop, 'n' to not drop"""
-    user_input = input('\nDROP TABLES (y/n)?\n')
-    if user_input:
-        if user_input.lower() == 'y':
-            print("Dropping tables...")
-            cur.execute("DROP TABLE IF EXISTS " + ", ".join(const.TABLE_NAME_LIST) + ";")
-            return
-        if user_input.lower() == 'n':
-            print("Tables not dropped.")
-            return
-    drop_tables(cur)
+    if bol:
+        print("Dropping tables...")
+        cur.execute("DROP TABLE IF EXISTS " + ", ".join(const.TABLE_NAME_LIST) + ";")
+        return
+    else:
+        print("Tables not dropped.")
+        return
