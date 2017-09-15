@@ -1,62 +1,33 @@
 """Module level Docstring."""
 from math import isclose
-import pytest
 
 import chamber.properties as prop
+
+MODEL_VARS = dict(temp_dp=288, temp_e=295, temp_s=293, pressure=101325, ref='Mills', rule='mean',
+	              length=0.03, d_12=0, hfg=0, k_m=0, m_1e=0, m_1s=0, rho_m=0)
 
 class TestLiquidWaterProperties(object):
     """Unit testing of properties.py."""
 
-    def test_termal_conductivity_range(self):
-        """Check that the k_l function throws Value Errors for invalid temperatures."""
-        with pytest.raises(ValueError):
-            prop.k_l(273)
-        with pytest.raises(ValueError):
-            prop.k_l(374)
+    def test_get_ref_state(self):
+        """Test the ability to evaluate film values based on various rules."""
+        assert prop.get_ref_state(0, 2, 'mean') == 1
+        assert prop.get_ref_state(0, 3, 'one-third') == 2
 
-    def test_thermal_conductivity_liquid_water(self):
-        """Check that a the thermal conductivity of water can be calculated."""
-        assert isclose(prop.k_l(275), 0.556, rel_tol=0.005)
-        assert isclose(prop.k_l(280), 0.568, rel_tol=0.005)
-        assert isclose(prop.k_l(290), 0.591, rel_tol=0.005)
-        assert isclose(prop.k_l(300), 0.611, rel_tol=0.005)
-        assert isclose(prop.k_l(320), 0.641, rel_tol=0.005)
-        assert isclose(prop.k_l(340), 0.661, rel_tol=0.005)
-        assert isclose(prop.k_l(360), 0.676, rel_tol=0.005)
-        assert isclose(prop.k_l(370), 0.680, rel_tol=0.005)
+    def test_bin_diff_coeff(self):
+        """Test the calculation of the binary diffusion coefficient."""
+        ref_temp, pressure = 300, 101325
+        assert isclose(prop.get_bin_diff_coeff(ref_temp, pressure, 'Mills'),
+                       1.97e-5*(101325/pressure)*pow(ref_temp/256, 1.685))
+        assert isclose(prop.get_bin_diff_coeff(ref_temp, pressure, 'Marrero'),
+                       1.87e-10*pow(ref_temp, 2.072)/(pressure/101325))
 
-    def test_specific_heat_range(self):
-        """Check that the c_l function throws Value Errors for invalid temperatures."""
-        with pytest.raises(ValueError):
-            prop.c_l(273)
-        with pytest.raises(ValueError):
-            prop.c_l(374)
-
-    def test_specific_heat_liquid_water(self):
-        """Check that a the specific heat of water can be calculated."""
-        assert isclose(prop.c_l(275), 4217, rel_tol=0.0005)
-        assert isclose(prop.c_l(280), 4203, rel_tol=0.0005)
-        assert isclose(prop.c_l(290), 4186, rel_tol=0.0005)
-        assert isclose(prop.c_l(300), 4178, rel_tol=0.0005)
-        assert isclose(prop.c_l(320), 4174, rel_tol=0.0005)
-        assert isclose(prop.c_l(340), 4184, rel_tol=0.0005)
-        assert isclose(prop.c_l(360), 4200, rel_tol=0.0005)
-        assert isclose(prop.c_l(370), 4209, rel_tol=0.0005)
-
-    def test_density_range(self):
-        """Check that the rho_l function throws Value Errors for invalid temperatures."""
-        with pytest.raises(ValueError):
-            prop.rho_l(273)
-        with pytest.raises(ValueError):
-            prop.rho_l(374)
-
-    def test_density_liquid_water(self):
-        """Check that a the density of water can be calculated."""
-        assert isclose(prop.rho_l(275), 1000, rel_tol=0.0005)
-        assert isclose(prop.rho_l(280), 1000, rel_tol=0.0005)
-        assert isclose(prop.rho_l(290), 999, rel_tol=0.0005)
-        assert isclose(prop.rho_l(300), 996, rel_tol=0.0005)
-        assert isclose(prop.rho_l(320), 989, rel_tol=0.0005)
-        assert isclose(prop.rho_l(340), 980, rel_tol=0.0005)
-        assert isclose(prop.rho_l(360), 967, rel_tol=0.0005)
-        assert isclose(prop.rho_l(370), 960, rel_tol=0.0005)
+    def test_get_tp_props(self):
+        """Test the calculation of all of the thermophysical properties."""
+        props = prop.get_tp_props(MODEL_VARS)
+        assert isclose(props['d_12'], 2.487408627636508e-05)
+        assert isclose(props['h_fg'], 2453874.327285723)
+        assert isclose(props['k_m'], 0.02592285857763665)
+        assert isclose(props['m_1e'], 0.010478738655174959)
+        assert isclose(props['m_1s'], 0.01441074635353759)
+        assert isclose(props['rho_m'], 1.1921643674975833)
