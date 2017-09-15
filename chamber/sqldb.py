@@ -130,6 +130,9 @@ def test_exists(cur, test_info):
         This is the primary key for the Test table if the test already exists. If the test
         does not exist in the database the function returns False.
     """
+    if not test_info:
+        print("File Unable to Transfer")
+        return True
     test_info['DateTime'] = test_info['DateTime'].replace(microsecond=0).replace(tzinfo=None)
     cur.execute(const.FIND_TEST, test_info)
     result = cur.fetchall()
@@ -177,11 +180,12 @@ def move_files(directory):
         This is the directory to move tdms files from.
     """
     for file_path in list_tdms(directory, []):
-        new_file_path = os.path.join(os.path.join(str(Path.home()),"read_files"),
-                        os.path.relpath(file_path)[3:])
-        if not os.path.exists(os.path.split(new_file_path)[0]):
-            os.makedirs(os.path.split(new_file_path)[0])
-        shutil.move(file_path, new_file_path)
+        if not os.stat(file_path).st_size == 0:
+            new_file_path = os.path.join(os.path.join(str(Path.home()),"read_files"),
+                            os.path.relpath(file_path)[3:])
+            if not os.path.exists(os.path.split(new_file_path)[0]):
+                os.makedirs(os.path.split(new_file_path)[0])
+            shutil.move(file_path, new_file_path)
 
 def get_setting_info(tdms_obj):
     """Use a TdmsFile object to return a dictionary containg the initial state of the test.
@@ -241,8 +245,11 @@ def get_test_info(tdms_obj):
         Set of values to insert into the Test table. Keys should be column names and values should
         be the value to insert.
      """
-    test_info = {'Author': '', 'DateTime': tdms_obj.object().properties['DateTime'],
-             'Description': ''}
+    try:
+        test_info = {'Author': '', 'DateTime': tdms_obj.object().properties['DateTime'],
+                     'Description': ''}
+    except KeyError:
+        return None
     for name, value in tdms_obj.object().properties.items():
         if name == "author":
             test_info['Author'] = value
@@ -490,4 +497,4 @@ def add_input(cur, directory):
             for obs_idx in range(len(tdms_obj.object("Data", "Idx").data)):
                 obs_id = add_obs_info(cur, tdms_obj, test_id, obs_idx)
                 add_temp(cur, tdms_obj, obs_id, obs_idx)
-    #move_files(directory)
+    move_files(directory)
