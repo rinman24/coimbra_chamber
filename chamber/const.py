@@ -201,7 +201,7 @@ TABLES.append(('Observation',
                "    CapManOk TINYINT(1) NOT NULL,"
                "    DewPoint DECIMAL(5, 2) NOT NULL,"
                "    Duty DECIMAL(4, 1) NOT NULL,"
-               "    Idx SMALLINT UNSIGNED NOT NULL,"
+               "    Idx MEDIUMINT UNSIGNED NOT NULL,"
                "    Mass DECIMAL(7, 7),"
                "    OptidewOk TINYINT(1) NOT NULL,"
                "    PowOut DECIMAL(6, 4) NOT NULL,"
@@ -236,102 +236,6 @@ UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram', 'Power': 
              'Pressure': 'Pascal', 'Temperature': 'Kelvin', 'Time': 'Second'}
 
 
-#Constants for test_sqldb.py
-SETTINGS_TEST_1 = {'IsMass': 1,
-                   'InitialDewPoint': 100,
-                   'InitialDuty': 100,
-                   'InitialMass': 0.07,
-                   'InitialPressure': 100000,
-                   'InitialTemp': 290,
-                   'TimeStep': 1}
-
-SETTINGS_TEST_2 = {'IsMass': 1,
-                   'InitialDewPoint': 500,
-                   'InitialDuty': 1000,
-                   'InitialMass': 20,
-                   'InitialPressure': 8,
-                   'InitialTemp': 400,
-                   'TimeStep': 20}
-
-SETTINGS_TEST_3 = {'IsMass': 0,
-                   'InitialDewPoint': 100,
-                   'InitialDuty': 100,
-                   'InitialPressure': 100000,
-                   'InitialTemp': 290,
-                   'TimeStep': 1}
-
-
-TEST_DIRECTORY = getcwd() + "/tests/data_transfer_test_files"
-
-CORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/ismass_test_0_01.tdms",
-                     getcwd() + "/tests/data_transfer_test_files/ismass_test_1_02.tdms",
-                     getcwd() + "/tests/data_transfer_test_files/tdms_test_folder/ismass_test_1_04.tdms",
-                     getcwd() + "/tests/data_transfer_test_files/tdms_test_folder/tdms_test_folder_full/ismass_test_0_03.tdms"]
-
-INCORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/py.tdmstest",
-                       getcwd() + "/tests/data_transfer_test_files/ismass_test_0_01.tdms_index",
-                       getcwd() + "/tests/data_transfer_test_files/ismass_test_1_02.tdms_index",
-                       getcwd() + "/tests/data_transfer_test_files/tdms_test_folder/ismass_test_1_04.tdms_index",
-                       getcwd() + "/tests/data_transfer_test_files/tdms_test_folder/tdms_test_folder_full/ismass_test_0_03.tdms_index"]
-
-TDMS_TEST_FILE_MF =  getcwd() + "/tests/data_transfer_test_files/ismass_test_0_01.tdms"
-
-TDMS_TEST_FILE_MF_SETTING = {'IsMass' : 0,
-                            'InitialDewPoint': '289.70',
-                            'InitialDuty': '0.0',
-                            'InitialPressure': 99649,
-                            'InitialTemp': '296.57',
-                            'TimeStep': '1.00'}
-
-TDMS_TEST_FILE_MF_TESTS = {'Author': "ADL",
-                      'DateTime': datetime(2017, 9, 11, 21, 25, 55, 23629, pytz.UTC),
-                      'Description': ("This is the Stefan Tube on the balance with no water in it and the thermocouples disconnected. "
-                                      "The point of this study is to determine if the tube is stable with the thermocouple ports on "
-                                      "without the thermocouple wires conected.")}
-
-TDMS_TEST_FILE_MF_OBS_09 = {'CapManOk': 1,
-                  'DewPoint': '289.71',
-                  'Duty': '0.0',
-                  'Idx': 9,
-                  'OptidewOk': 1,
-                  'PowOut': '-0.0013',
-                  'PowRef': '-0.0016',
-                  'Pressure': 99684}
-
-TDMS_TEST_FILE_MF_THM_07 = '296.60'
-
-TDMS_TEST_FILE_MT =  getcwd() + "/tests/data_transfer_test_files/ismass_test_1_02.tdms"
-
-TDMS_TEST_FILE_MT_SETTING = {'IsMass' : 1,
-                            'InitialDewPoint': '289.73',
-                            'InitialDuty': '0.0',
-                            'InitialMass': '0.0874270',
-                            'InitialPressure': 99662,
-                            'InitialTemp': '296.57',
-                            'TimeStep': '1.00'}
-
-TDMS_TEST_FILE_MT_TESTS = {'Author': "ADL",
-                      'DateTime': datetime(2017, 9, 11, 21, 26, 59, 523318, pytz.UTC),
-                      'Description': ("This is the Stefan Tube on the balance with no water in it and the thermocouples disconnected. "
-                                      "The point of this study is to determine if the tube is stable with the thermocouple ports on "
-                                      "without the thermocouple wires conected.")}
-
-TDMS_TEST_FILE_MT_OBS_09 = {'CapManOk': 1,
-                  'DewPoint': '289.71',
-                  'Duty': '0.0',
-                  'Idx': 9,
-                  'Mass': '0.0874270',
-                  'OptidewOk': 1,
-                  'PowOut': '-0.0013',
-                  'PowRef': '-0.0015',
-                  'Pressure': 99640}
-
-TDMS_TEST_FILE_MT_THM_07 = '296.59'
-
-TEST_INDEX = 7
-TC_INDEX = 7
-
-
 #Constants for views.py
 #MySql Querries for views.py
 VIEWS = []
@@ -363,8 +267,6 @@ ADD_NORM_MASS = ("INSERT INTO NormalizedMass "
                  " VALUES "
                  "(%s, %s)")
 
-#FIND_TESTID = ("SELECT TestID FROM Test WHERE "
-#               "    TestID=%s")
+GET_TEST_ID_NM = "SELECT TestID FROM NormalizedMass WHERE TestID={} LIMIT 1"
 
-#FIND_NORM_MASS_TESTID= ("SELECT TestID FROM NormalizedMass WHERE "
-#                        "    TestID=%s LIMIT 1")
+GET_MASS = "SELECT mass FROM Observation WHERE TestID={}"

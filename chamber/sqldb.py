@@ -9,10 +9,10 @@ import mysql.connector as conn
 from mysql.connector import errorcode
 from nptdms import TdmsFile
 
-import const
-#import chamber.const as const
+#import const
+import chamber.const as const
 
-def connect_sqldb():
+def connect_sqldb(database=os.environ['MySqlDataBase']):
     """Use connect constructor to connect to a MySQL server.
 
     Uses environment variables MySqlUserName, MySqlCredentials, MySqlHost, and MySqlDataBase to
@@ -20,6 +20,12 @@ def connect_sqldb():
     the follwing command, for example, in the terminal:
     
     $ export MySqlUserName=user
+
+    Parameters
+    ----------
+    database : str
+        The name of the desired database to connect to. Defaults to value stored in the
+        MySqlDataBase environment variable.
     
     Returns
     -------
@@ -29,7 +35,7 @@ def connect_sqldb():
     config = {'user': os.environ['MySqlUserName'],
               'password': os.environ['MySqlCredentials'],
               'host': os.environ['MySqlHost'],
-              'database': os.environ['MySqlDataBase']}
+              'database': database}
     try:
         cnx = conn.connect(**config)
     except conn.Error as err:
@@ -141,7 +147,7 @@ def test_exists(cur, test_info):
     else:
         return result[0][0]
 
-def list_tdms(file_path, file_list):
+def list_tdms(file_path, file_list=None):
     """Use the file_path to find tdms files.
 
     This function recursively searches through the argument directory and returns a list of all filepaths for
@@ -160,6 +166,8 @@ def list_tdms(file_path, file_list):
     file_list : list of strings
         List of absolute filepaths of files with a .tdms extension. Elements of list are type string.
     """
+    if file_list == None:
+        file_list = []
     try:
         for file_name in os.listdir(file_path):
             list_tdms(os.path.join(file_path, file_name), file_list)
@@ -179,7 +187,7 @@ def move_files(directory):
     directory : string
         This is the directory to move tdms files from.
     """
-    for file_path in list_tdms(directory, []):
+    for file_path in list_tdms(directory):
         if not os.stat(file_path).st_size == 0:
             new_file_path = os.path.join(os.path.join(str(Path.home()),"read_files"),
                             os.path.relpath(file_path)[3:])
@@ -190,7 +198,7 @@ def move_files(directory):
 def get_setting_info(tdms_obj):
     """Use a TdmsFile object to return a dictionary containg the initial state of the test.
 
-    This function searces through the TdmsFile object for the initial settings including:
+    This function searches through the TdmsFile object for the initial settings including:
     InitialDewPoint, InitialDuty, InitialMass, InitialPressure, InitialTemp, and TimeStep.
     The function returns a dictionary of settings formatted for use with the ADD_SETTING
     querry in const.py.
@@ -475,7 +483,7 @@ def add_temp(cur, tdms_obj, obs_id, temp_idx):
                     get_temp_info(tdms_obj, temp_idx, couple_idx)) for couple_idx in range(4, 14)]
     cur.executemany(const.ADD_TEMP, temp_data)
 
-def add_input(cur, directory):
+def add_input(cur, directory, test=False):
     """Use a MySQL cursor object and a directory to insert tdms files into the MySQL database.
 
     Uses loops to structure calls to add_setting, add_test, add_obs, and add_temp to build and
@@ -489,12 +497,12 @@ def add_input(cur, directory):
     directory : string
         This is the directory to search for tdms files.
     """
-    for file_name in list_tdms(directory, []):
-        print("Writing: ", file_name)
+    for file_name in list_tdms(directory):
         tdms_obj = TdmsFile(file_name)
         if not test_exists(cur, get_test_info(tdms_obj)):
             test_id = add_test_info(cur, tdms_obj, add_setting_info(cur, tdms_obj))
             for obs_idx in range(len(tdms_obj.object("Data", "Idx").data)):
                 obs_id = add_obs_info(cur, tdms_obj, test_id, obs_idx)
                 add_temp(cur, tdms_obj, obs_id, obs_idx)
-    move_files(directory)
+    if not test:
+        move_files(directory)

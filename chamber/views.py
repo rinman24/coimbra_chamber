@@ -5,10 +5,10 @@ import os
 import mysql.connector as conn
 from mysql.connector import errorcode
 
-#import chamber.const as const
-import const
-#import chamber.sqldb as sqldb
-import sqldb
+import chamber.const as const
+#import const
+import chamber.sqldb as sqldb
+#import sqldb
 
 def connect_sqldb_chamber():
     """Use sqldb.connect_sqldb() to a MySQL server.
@@ -17,38 +17,19 @@ def connect_sqldb_chamber():
     -------
     cnx : MySQLConnection
         Returns the MySQL connection object"""
-    cnx = sqldb.connect_sqldb()
+    cnx = sqldb.connect_sqldb(os.environ['MySqlDataBaseCh'])
     return cnx
 
 def connect_sqldb_results():
-    """Use connect constructor to connect to a MySQL server.
+    """Use sqldb.connect_sqldb() to a MySQL server.
 
-    Uses environment variables MySqlUserName, MySqlCredentials, MySqlHost, and MySqlDataBase2 to
-    connect to a MySQL server. If the environment variables are not already available use, execute
-    the follwing command, for example, in the terminal:
-    
-    $ export MySqlUserName=user
-    
     Returns
     -------
     cnx : MySQLConnection
-        Returns the MySQL connection object
-    """
-    config = {'user': os.environ['MySqlUserName'],
-              'password': os.environ['MySqlCredentials'],
-              'host': os.environ['MySqlHost'],
-              'database': os.environ['MySqlDataBase2']}
-    try:
-        cnx = conn.connect(**config)
-    except conn.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Something is wrong with your user name or password")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exist")
-        else:
-            print(err)
-    else:
-        return cnx
+        Returns the MySQL connection object"""
+    cnx = sqldb.connect_sqldb(os.environ['MySqlDataBaseRe'])
+    return cnx
+
 
 
 def create_views(cur_re, views):
@@ -86,10 +67,9 @@ def normalized_mass(cur_ch, cur_re, test_id):
     test_id : int
         The TestID which normalized mass will be calculated and recorded for.
     """
-    #cur_re.execute("SELECT TestID FROM NormalizedMass WHERE TestID = %s", test_id)
-    cur_re.execute("SELECT TestID FROM NormalizedMass WHERE TestID={} LIMIT 1".format(test_id))
+    cur_re.execute(const.GET_TEST_ID_NM.format(test_id))
     if not cur_re.fetchall():
-        cur_ch.execute("SELECT mass FROM Observation WHERE TestID={}".format(test_id))
+        cur_ch.execute(const.GET_MASS.format(test_id))
         mass = [mass[0] for mass in cur_ch.fetchall()]
         mass = np.array(mass)
         norm_mass = (mass-min(mass))/(max(mass)-min(mass))
