@@ -1,5 +1,4 @@
 """Constants for the UCSD Chamber Experiment."""
-
 from datetime import datetime
 from decimal import Decimal
 from math import log, sqrt
@@ -133,9 +132,6 @@ FIND_SETTING_M_T = ("SELECT SettingID FROM Setting WHERE "
 
 FIND_TEST = ("SELECT TestID FROM Test WHERE "
              "    DateTime = %(DateTime)s")
-
-FIND_TESTID = ("SELECT TestID FROM Test WHERE "
-             "    TestID = (%s)")
 
 FIND_TUBE = ("SELECT TubeID FROM Tube WHERE "
              "    DiameterIn = %(DiameterIn)s AND"
@@ -334,3 +330,41 @@ TDMS_TEST_FILE_MT_THM_07 = '296.59'
 
 TEST_INDEX = 7
 TC_INDEX = 7
+
+
+#Constants for views.py
+#MySql Querries for views.py
+VIEWS = []
+VIEWS.append(('UnitTest',
+           "CREATE TABLE UnitTest ("
+           "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+           "    Number DECIMAL(5,2) NULL,"
+           "    String VARCHAR(30) NULL,"
+           "  PRIMARY KEY (`UnitTestID`)"
+           ");"))
+VIEWS.append(('Results',
+           "CREATE TABLE Results("
+           "    ResultsID SERIAL,"
+           "    TestID BIGINT UNSIGNED NOT NULL," 
+           "  PRIMARY KEY (`ResultsID`)"      
+           ");"))
+VIEWS.append(('NormalizedMass',
+           "CREATE TABLE NormalizedMass("
+           "    NormalizedMassID SERIAL,"
+           "    TestID BIGINT UNSIGNED NOT NULL,"           
+           "    NormalizedMass DECIMAL(8, 7),"
+           "  PRIMARY KEY (`NormalizedMassID`)"
+           ");"))
+
+VIEW_NAME_LIST = [view[0] for view in VIEWS]
+
+ADD_NORM_MASS = ("INSERT INTO NormalizedMass "
+                 "(TestID, NormalizedMass)"
+                 " VALUES "
+                 "(%s, %s)")
+
+#FIND_TESTID = ("SELECT TestID FROM Test WHERE "
+#               "    TestID=%s")
+
+#FIND_NORM_MASS_TESTID= ("SELECT TestID FROM NormalizedMass WHERE "
+#                        "    TestID=%s LIMIT 1")
