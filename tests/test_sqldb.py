@@ -18,7 +18,7 @@ import tests.test_const as test_const
 def cursor():
     """Cursor Fixture at module level so that only one connection is made."""
     print("\nConnecting to MySQL...")
-    cnx = sqldb.connect_sqldb()
+    cnx = sqldb.connect_sqldb("test")
     cur = cnx.cursor()
     print("Connected.")
     yield cur

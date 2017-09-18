@@ -12,11 +12,11 @@ from nptdms import TdmsFile
 #import const
 import chamber.const as const
 
-def connect_sqldb(database=os.environ['MySqlDataBase']):
+def connect_sqldb(database):
     """Use connect constructor to connect to a MySQL server.
 
-    Uses environment variables MySqlUserName, MySqlCredentials, MySqlHost, and MySqlDataBase to
-    connect to a MySQL server. If the environment variables are not already available use, execute
+    Uses environment variables MySqlUserName, MySqlCredentials, MySqlHost to connect
+    to a MySQL server. If the environment variables are not already available use, execute
     the follwing command, for example, in the terminal:
     
     $ export MySqlUserName=user
@@ -24,8 +24,7 @@ def connect_sqldb(database=os.environ['MySqlDataBase']):
     Parameters
     ----------
     database : str
-        The name of the desired database to connect to. Defaults to value stored in the
-        MySqlDataBase environment variable.
+        The name of the desired database to connect to.
     
     Returns
     -------

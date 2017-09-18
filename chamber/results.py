@@ -17,7 +17,7 @@ def connect_sqldb_chamber():
     -------
     cnx : MySQLConnection
         Returns the MySQL connection object"""
-    cnx = sqldb.connect_sqldb(os.environ['MySqlDataBaseCh'])
+    cnx = sqldb.connect_sqldb("test_chamber")
     return cnx
 
 def connect_sqldb_results():
@@ -27,7 +27,7 @@ def connect_sqldb_results():
     -------
     cnx : MySQLConnection
         Returns the MySQL connection object"""
-    cnx = sqldb.connect_sqldb(os.environ['MySqlDataBaseRe'])
+    cnx = sqldb.connect_sqldb("test_results")
     return cnx
 
 
@@ -70,8 +70,7 @@ def normalized_mass(cur_ch, cur_re, test_id):
     cur_re.execute(const.GET_TEST_ID_NM.format(test_id))
     if not cur_re.fetchall():
         cur_ch.execute(const.GET_MASS.format(test_id))
-        mass = [mass[0] for mass in cur_ch.fetchall()]
-        mass = np.array(mass)
+        mass = np.array([mass[0] for mass in cur_ch.fetchall()])
         norm_mass = (mass-min(mass))/(max(mass)-min(mass))
         nm_id = [(test_id, '{:.7f}'.format(round(mass, 7))) for mass in norm_mass]
         cur_re.executemany(const.ADD_NORM_MASS, nm_id)
