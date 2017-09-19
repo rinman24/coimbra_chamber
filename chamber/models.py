@@ -121,14 +121,15 @@ class OneDimIsoLiqNoRad(Model):
         res[2] = mddp*self.h_fg - (self.k_m/self.length)*(self.temp_e - temp_s)
         return res
 
-    # def solve_iteratively(self):
-    #     """Docstring."""
-    #     delta, count = 1, 0
-    #     while delta > 1e-9:
-    #         sol = opt.fsolve(self.eval_model, [1, 1, 1])
-    #         delta = abs(sol[2] - self.temp_s)
-    #         self.temp_s = (self.temp_s + sol[2])/2
-    #         self.eval_props()
-    #         count += 1
-    #     self.mddp, self.q_m = sol[0], sol[1]
-    #     return count
+class OneDimIsoLiqBlackRad(Model):
+    """Docstring."""
+
+    def eval_model(self, vec_in):
+        """Docstring."""
+        mddp, q_m, temp_s = vec_in
+        res = [0 for _ in range(3)]
+        res[0] = q_m + (self.k_m/self.length)*(self.temp_e - temp_s)
+        res[1] = mddp + (self.rho_m*self.d_12/self.length)*(self.m_1e -  self.m_1s)
+        res[2] = mddp*self.h_fg - (self.k_m/self.length)*(self.temp_e - temp_s) - \
+                 5.67e-8*(pow(self.temp_e, 4) - pow(temp_s, 4))
+        return res

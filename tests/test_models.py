@@ -7,6 +7,7 @@ import tests.test_const as test_const
 
 MODEL = models.Model(test_const.SETTINGS)
 ONEDIM_ISOLIQ_NORAD = models.OneDimIsoLiqNoRad(test_const.SETTINGS)
+ONEDIM_ISOLIQ_BLACKRAD = models.OneDimIsoLiqBlackRad(test_const.SETTINGS)
 
 class Test_Models(object):
     """Unit testing of Models class."""
@@ -62,7 +63,7 @@ class Test_Models(object):
         assert MODEL.__str__() == test_const.STR
 
 class Test_OneDimIsoLiqNoRad(object):
-    """Unit testing of OneD_IsoLiq_NoRad class."""
+    """Unit testing of OneDimIsoLiqNoRad class."""
 
     def test_eval_model(self):
         res = ONEDIM_ISOLIQ_NORAD.eval_model([1, 1, 1])
@@ -76,3 +77,20 @@ class Test_OneDimIsoLiqNoRad(object):
         assert isclose(ONEDIM_ISOLIQ_NORAD.mddp, 1.65263956378e-06)
         assert isclose(ONEDIM_ISOLIQ_NORAD.q_m, -4.06602294335)
         assert isclose(ONEDIM_ISOLIQ_NORAD.temp_s, 290.276252547)
+
+
+class Test_OneDimIsoLiqBlackRad(object):
+    """Unit testing of OneDimIsoLiqBlackRad class."""
+
+    def test_eval_model(self):
+        res = ONEDIM_ISOLIQ_BLACKRAD.eval_model([1, 1, 1])
+        assert isclose(res[0], 254.49907209600156)
+        assert isclose(res[1], 0.9999973637622117)
+        assert isclose(res[2], 2456741.6373595484)
+
+    def test_solve_iteratively(self):
+        count = ONEDIM_ISOLIQ_BLACKRAD.solve_iteratively()
+        assert count == 21
+        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.mddp, 4.31348878793e-06)
+        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.q_m, -1.37760426483)
+        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.temp_s, 293.406541019)
