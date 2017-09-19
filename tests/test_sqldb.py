@@ -172,7 +172,5 @@ def drop_tables(cur, bol):
     if bol:
         print("Dropping tables...")
         cur.execute("DROP TABLE IF EXISTS " + ", ".join(const.TABLE_NAME_LIST) + ";")
-        return
     else:
         print("Tables not dropped.")
-        return
