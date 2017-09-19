@@ -4,6 +4,8 @@ from CoolProp.CoolProp import PropsSI
 
 import chamber.const as const
 
+import scipy.optimize as opt
+
 class Model(object):
     """Object to hold the state of a heat and mass transfer model."""
 
@@ -18,13 +20,15 @@ class Model(object):
         self.temp_e = settings['temp_e']
         self.ref = ref
         self.rule = rule
-        self.temp_s = 300
+        self.temp_s = (self.temp_e + self.temp_dp)/2
         self.d_12 = None
         self.h_fg = None
         self.k_m = None
         self.m_1e = None
         self.m_1s = None
         self.rho_m = None
+        self.mddp = None
+        self.q_m = None
 
         self.eval_props()
 
@@ -47,14 +51,15 @@ class Model(object):
                 'Rule:\t\t{}\n' +
                 'Temp_DP:\t{:.6g}\n' +
                 'Temp_e:\t\t{:.6g}\n' +
+                'Temp_s:\t\t{:.6g}\n' +
                 '-------- Properties --------\n' +
                 'D_12:\t\t{:.6g}\n' +
                 'h_fg:\t\t{:.6g}\n' +
                 'm_1e:\t\t{:.6g}\n' +
                 'm_1s:\t\t{:.6g}\n' +
                 'rho_m:\t\t{:.6g}')\
-                .format(self.length, self.pressure, self.ref, self.rule, self.temp_dp,\
-                        self.temp_e, self.d_12, self.h_fg, self.m_1e, self.m_1s, self.rho_m)
+                .format(self.length, self.pressure, self.ref, self.rule, self.temp_dp, self.temp_e,\
+                        self.temp_s, self.d_12, self.h_fg, self.m_1e, self.m_1s, self.rho_m)
 
     @staticmethod
     def get_ref_state(e_state, s_state, rule):
@@ -86,3 +91,44 @@ class Model(object):
         self.m_1e = (x_1e*const.M1)/(x_1e*const.M1 + (1-x_1e)*const.M2)
         self.m_1s = (x_1s*const.M1)/(x_1s*const.M1 + (1-x_1s)*const.M2)
         self.rho_m = 1/HAPropsSI('Vha', 'T', ref_temp, 'Y', ref_x, 'P', self.pressure)
+
+    def solve_iteratively(self):
+        """Docstring."""
+        delta, count = 1, 0
+        while delta > 1e-9:
+            sol = opt.fsolve(self.eval_model, [1, 1, 1])
+            delta = abs(sol[2] - self.temp_s)
+            self.temp_s = (self.temp_s + sol[2])/2
+            self.eval_props()
+            count += 1
+        self.mddp, self.q_m = sol[0], sol[1]
+        return count
+
+    def eval_model(self, vec_in):
+        """Docstring."""
+        # These are overridden by the sub-classes that extend this class
+        pass
+
+class OneDimIsoLiqNoRad(Model):
+    """Docstring."""
+
+    def eval_model(self, vec_in):
+        """Docstring."""
+        mddp, q_m, temp_s = vec_in
+        res = [0 for _ in range(3)]
+        res[0] = q_m + (self.k_m/self.length)*(self.temp_e - temp_s)
+        res[1] = mddp + (self.rho_m*self.d_12/self.length)*(self.m_1e -  self.m_1s)
+        res[2] = mddp*self.h_fg - (self.k_m/self.length)*(self.temp_e - temp_s)
+        return res
+
+    # def solve_iteratively(self):
+    #     """Docstring."""
+    #     delta, count = 1, 0
+    #     while delta > 1e-9:
+    #         sol = opt.fsolve(self.eval_model, [1, 1, 1])
+    #         delta = abs(sol[2] - self.temp_s)
+    #         self.temp_s = (self.temp_s + sol[2])/2
+    #         self.eval_props()
+    #         count += 1
+    #     self.mddp, self.q_m = sol[0], sol[1]
+    #     return count
