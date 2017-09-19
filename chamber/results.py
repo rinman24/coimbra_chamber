@@ -74,3 +74,71 @@ def normalized_mass(cur_ch, cur_re, test_id):
         norm_mass = (mass-min(mass))/(max(mass)-min(mass))
         nm_id = [(test_id, '{:.7f}'.format(round(mass, 7))) for mass in norm_mass]
         cur_re.executemany(const.ADD_NORM_MASS, nm_id)
+
+def get_mass(cur_ch, test_id):
+    """Use a TestID to get the mass observations from a given test.
+
+    This function searches the chamber database for the masses recorded for the given TestID.
+
+    Parameters
+    ----------
+    cur_ch : MySQLCursor
+        Cursor used to interact with the chamber MySQL database.
+    test_id : int
+        The TestID which normalized mass will be calculated and recorded for.
+
+    Returns
+    -------
+    mass : list of floats
+        List of mass observations for the given TestID.
+    """
+    cur_ch.execute(const.GET_MASS.format(test_id))
+    mass = [float(mass[0]) for mass in cur_ch.fetchall()]
+    return mass
+
+def get_dew_point(cur_ch, test_id):
+    """Use a TestID to get the dew point observations from a given test.
+
+    This function searches the chamber database for the dew points recorded for the given TestID.
+
+    Parameters
+    ----------
+    cur_ch : MySQLCursor
+        Cursor used to interact with the chamber MySQL database.
+    test_id : int
+        The TestID which normalized mass will be calculated and recorded for.
+
+    Returns
+    -------
+    dew_point : list of floats
+        List of dew point observations for the given TestID.
+    """
+    cur_ch.execute(const.GET_DEW_POINT.format(test_id))
+    dew_point = [float(dp[0]) for dp in cur_ch.fetchall()]
+    return dew_point
+
+def get_pressure(cur_ch, test_id):
+    """Use a TestID to get the pressure observations from a given test.
+
+    This function searches the chamber database for the pressures recorded for the given TestID.
+
+    Parameters
+    ----------
+    cur_ch : MySQLCursor
+        Cursor used to interact with the chamber MySQL database.
+    test_id : int
+        The TestID which normalized mass will be calculated and recorded for.
+
+    Returns
+    -------
+    pressure : list of floats
+        List of pressure observations for the given TestID.
+    """
+    cur_ch.execute(const.GET_PRESSURE.format(test_id))
+    pressure = [float(pa[0]) for pa in cur_ch.fetchall()]
+    return pressure
+
+def lin_reg(start, end):
+    slope, intercept, r_value, p_value, std_err = stats.linregress(idx[start-end:start+end],mass[start-end:start+end])
+    if r_value**2 >= 0.99:
+        return slope, r_value**2

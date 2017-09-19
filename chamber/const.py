@@ -273,4 +273,12 @@ ADD_NORM_MASS = ("INSERT INTO NormalizedMass "
 
 GET_TEST_ID_NM = "SELECT TestID FROM NormalizedMass WHERE TestID={} LIMIT 1"
 
-GET_MASS = "SELECT mass FROM Observation WHERE TestID={}"
+GET_MASS = "SELECT Mass FROM Observation WHERE TestID={}"
+
+GET_DEW_POINT = "SELECT DewPoint FROM Observation WHERE TestID={}"
+
+GET_PRESSURE = "SELECT Pressure FROM Observation WHERE TestID={}"
+
+GET_SUM_TEMP = "SELECT SUM(Temperature) FROM TempObservation WHERE ObservationID={}"
+
+GET_OBS_ID = "SELECT ObservationID FROM Observation WHERE TestID={}"
