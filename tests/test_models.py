@@ -62,6 +62,10 @@ class Test_Models(object):
         """print(str(<MODEL>))"""
         assert MODEL.__str__() == test_const.STR
 
+    def test_get_f12(self):
+        """Test the calculation of the view factor F_{12}."""
+        assert isclose(MODEL.get_f12(), 0.1715728752538097)
+
 class Test_OneDimIsoLiqNoRad(object):
     """Unit testing of OneDimIsoLiqNoRad class."""
 

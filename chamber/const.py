@@ -282,3 +282,5 @@ GET_PRESSURE = "SELECT Pressure FROM Observation WHERE TestID={}"
 GET_SUM_TEMP = "SELECT SUM(Temperature) FROM TempObservation WHERE ObservationID={}"
 
 GET_OBS_ID = "SELECT ObservationID FROM Observation WHERE TestID={}"
+
+TUBE_RADIUS = 0.015 #[m]

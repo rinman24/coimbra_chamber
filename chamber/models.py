@@ -109,6 +109,13 @@ class Model(object):
         # These are overridden by the sub-classes that extend this class
         pass
 
+    def get_f12(self):
+        """Docstring."""
+        r1 = const.TUBE_RADIUS/self.length
+        r2 = const.TUBE_RADIUS/self.length
+        x = 1 + (1 + pow(r2, 2))/pow(r1, 2)
+        return (x - pow(pow(x, 2) - 4*pow(r2/r1, 2), 0.5))/2
+
 class OneDimIsoLiqNoRad(Model):
     """Docstring."""
 
