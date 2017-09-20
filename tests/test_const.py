@@ -6,7 +6,7 @@ from os import getcwd
 
 import pytz
 
-#Constants for test_sqldb.py
+# Constants for test_sqldb.py
 SETTINGS_TEST_1 = {'IsMass': 1,
                    'InitialDewPoint': 100,
                    'InitialDuty': 100,
@@ -100,3 +100,27 @@ TDMS_TEST_FILE_MT_THM_07 = '296.59'
 
 TEST_INDEX = 7
 TC_INDEX = 7
+
+# Constants for test_results.py
+NORM_TEST = [1, 3, 5, 4, 7]
+NORM_TEST_RESULT = [0, 1/3, 2/3, 1/2, 1]
+
+# Constants for test_models.py
+SETTINGS = dict(length=0.03, pressure=99950, ref='mean', rule='Mills', temp_dp=288, temp_e=295)
+
+REPR = 'settings = dict(length=0.03, pressure=99950, temp_dp=288, temp_e=295)\n'+\
+       "Model(settings, ref='Mills', rule='mean')"
+
+STR = ('--------- Settings ---------\n' +
+       'Length:\t\t0.03\n' +
+       'Pressure:\t99950\n' +
+       'Reference:\tMills\n' +
+       'Rule:\t\tmean\n' +
+       'Temp_DP:\t288\n' +
+       'Temp_e:\t\t295\n' +
+       '-------- Properties --------\n' +
+       'D_12:\t\t2.57242e-05\n' +
+       'h_fg:\t\t2.43729e+06\n' +
+       'm_1e:\t\t0.0106234\n' +
+       'm_1s:\t\t0.0224033\n' +
+       'rho_m:\t\t1.1593')

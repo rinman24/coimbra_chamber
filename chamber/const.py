@@ -135,7 +135,7 @@ FIND_SETTING_M_T = ("SELECT SettingID FROM Setting WHERE "
                     "    TimeStep = %(TimeStep)s;")
 
 FIND_TEST = ("SELECT TestID FROM Test WHERE "
-             "    DateTime = %(DateTime)s")
+             "    DateTime='{}'")
 
 FIND_TUBE = ("SELECT TubeID FROM Tube WHERE "
              "    DiameterIn = %(DiameterIn)s AND"
@@ -282,3 +282,7 @@ GET_PRESSURE = "SELECT Pressure FROM Observation WHERE TestID={}"
 GET_SUM_TEMP = "SELECT SUM(Temperature) FROM TempObservation WHERE ObservationID={}"
 
 GET_OBS_ID = "SELECT ObservationID FROM Observation WHERE TestID={}"
+
+GET_AVG_TEMP = ("SELECT AVG(Temperature) FROM TempObservation AS Temp INNER JOIN Observation "
+                "AS Obs ON Temp.ObservationID=Obs.ObservationID INNER JOIN Test ON "
+                "Obs.TestID=Test.TestID WHERE Test.TestID={} GROUP BY Obs.ObservationID")

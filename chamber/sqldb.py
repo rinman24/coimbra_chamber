@@ -138,8 +138,7 @@ def test_exists(cur, test_info):
     if not test_info:
         print("File Unable to Transfer")
         return True
-    test_info['DateTime'] = test_info['DateTime'].replace(microsecond=0).replace(tzinfo=None)
-    cur.execute(const.FIND_TEST, test_info)
+    cur.execute(const.FIND_TEST.format(test_info['DateTime'].replace(microsecond=0).replace(tzinfo=None)))
     result = cur.fetchall()
     if not result:
         return False
