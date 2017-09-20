@@ -101,6 +101,10 @@ TDMS_TEST_FILE_MT_THM_07 = '296.59'
 TEST_INDEX = 7
 TC_INDEX = 7
 
+# Constants for test_results.py
+NORM_TEST = [1, 3, 5, 4, 7]
+NORM_TEST_RESULT = [0, 1/3, 2/3, 1/2, 1]
+
 # Constants for test_models.py
 SETTINGS = dict(length=0.03, pressure=99950, ref='mean', rule='Mills', temp_dp=288, temp_e=295)
 
