@@ -286,3 +286,5 @@ GET_OBS_ID = "SELECT ObservationID FROM Observation WHERE TestID={}"
 GET_AVG_TEMP = ("SELECT AVG(Temperature) FROM TempObservation AS Temp INNER JOIN Observation "
                 "AS Obs ON Temp.ObservationID=Obs.ObservationID INNER JOIN Test ON "
                 "Obs.TestID=Test.TestID WHERE Test.TestID={} GROUP BY Obs.ObservationID")
+
+TUBE_RADIUS = 0.015 #[m]
