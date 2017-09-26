@@ -1,6 +1,7 @@
-"""Docstring. This module sets up the initial state of the database. Be sure to only run onece."""
-
+"""Docstring. This module sets up the initial state of the database.
+Be sure to only run onece."""
 import chamber.sqldb as sqldb
+
 
 TABLES = []
 TABLES.append(('Unit',
@@ -76,30 +77,31 @@ TABLES.append(('TempObservation',
                "    ON UPDATE CASCADE ON DELETE RESTRICT"
                ");"))
 
-UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram', 'Power': 'Watt',
-             'Pressure': 'Pascal', 'Temperature': 'Kelvin', 'Time': 'Second'}
+UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram',
+             'Power': 'Watt', 'Pressure': 'Pascal', 'Temperature': 'Kelvin',
+             'Time': 'Second'}
 
 TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
              'Material': 'Delrin', 'Mass': 0.0657957}
 
 if __name__ == '__main__':
-  cnx = sqldb.connect_sqldb()
-  print("Sucessfully created a connection to the database")
+    cnx = sqldb.connect_sqldb()
+    print("Sucessfully created a connection to the database")
 
-  cur = cnx.cursor()
-  print("Sucessfully created a cursor for the database")
-  sqldb.create_tables(cur, TABLES)
+    cur = cnx.cursor()
+    print("Sucessfully created a cursor for the database")
+    sqldb.create_tables(cur, TABLES)
 
-  print("Populating Units table...")
-  cur.execute(sqldb.insert_dml('Unit', UNIT_DATA))
+    print("Populating Units table...")
+    cur.execute(sqldb.insert_dml('Unit', UNIT_DATA))
 
-  print("Populating Tube table with initial tube...")
-  cur.execute(sqldb.insert_dml('Tube', TUBE_DATA))
+    print("Populating Tube table with initial tube...")
+    cur.execute(sqldb.insert_dml('Tube', TUBE_DATA))
 
-  print("Committing changes to Unit table...")
-  cnx.commit()
+    print("Committing changes to Unit table...")
+    cnx.commit()
 
-  print("All done, closing connection to server...")
-  cur.close()
-  cnx.close()
-  print("Closed the connection.")
+    print("All done, closing connection to server...")
+    cur.close()
+    cnx.close()
+    print("Closed the connection.")

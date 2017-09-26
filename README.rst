@@ -41,12 +41,15 @@ Dependencies
 
 Back to `Table of Contents`_
 
+  * CoolProp.HumidAirProp.HAPropsSI (for humid air calculations)
   * matplotlib.pyplot
+  * matplotlib.legend_handler.HandlerLine2D
   * mysql.connector (for access to MySQL databases)
   * nptdms (for interacting with LabVIEW TDMS files)
   * pytest (for testing)
   * pytz (for datetime testing)
   * schedule (for autonomous execution)
+  * tabulate.tabulate (for table formatting)
 
 Setting up Initial State of MySQL Database
 ------------------------------------------

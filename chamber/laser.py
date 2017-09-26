@@ -1,20 +1,25 @@
 """Docstring."""
-
 from math import pi, sqrt, exp
 
 import matplotlib.pyplot as plt
 from matplotlib import rc
-FONT = {'family': 'Times New Roman', 'weight': 'normal', 'size': 15}
-rc('font', **FONT)
 from mpl_toolkits.mplot3d import Axes3D
 
 from chamber.const import LAM, POW, W_0, HWHM_COEFF_W
 from chamber import tools
 
+
+FONT = {'family': 'Times New Roman', 'weight': 'normal', 'size': 15}
+rc('font', **FONT)
+
+
 class GaussianBeam(object):
     """GaussianBeam type contains methods related to Gaussian laser beams."""
     def __init__(self, lam=LAM, power=POW, radius=W_0):
-        """Use wavelength, power, and 1/e^2 waist radius to instanciate a Gaussian laser beam.
+        """Instanciate a Gaussian laser beam.
+
+        Use wavelength, power, and 1/e^2 waist radius to instanciate a
+        Gaussian laser beam.
 
         Keyword arguments:
         lam -- wavelength [m] of the laser (default 10.59e-6)
@@ -40,11 +45,13 @@ class GaussianBeam(object):
         self.rayleigh = pi * self.radius**2 / self.lam
 
     def set_div_half(self):
-        """Use radius and wavelength to set the half-angle divergence [radians]."""
+        """Use radius and wavelength to set
+        the half-angle divergence [radians]."""
         self.div_half = self.lam/(pi*self.radius)
 
     def set_irr_max(self):
-        """Use radius and power to set the normalization coefficient for radial profile."""
+        """Use radius and power to set
+        the normalization coefficient for radial profile."""
         self.irr_max = 2 * self.power / (pi * self.radius**2)
 
     def set_r_points(self):
@@ -99,13 +106,13 @@ class GaussianBeam(object):
         # Plot the actual profile (could be rolled up into a function)
         plt.fill_between(r_coord, irr, 0, color='#B6D1E6')
         plt.plot(r_coord, irr, 'k', linewidth=2)
-        
+
         # Plot the lines that indicate HWHM and R_{e^{-2}}
-        #plt.plot([0, hwhm], [hlf, hlf], 'k--', linewidth=1)
-        #plt.plot([hwhm, hwhm], [0, hlf], 'k--', linewidth=1)
-        #plt.plot([0, self.radius], [i_e2, i_e2], 'k--', linewidth=1)
-        #plt.plot([self.radius, self.radius], [0, i_e2], 'k--', linewidth=1)
-        #plt.ylim([0, 1.1*self.irr_max])
+        # plt.plot([0, hwhm], [hlf, hlf], 'k--', linewidth=1)
+        # plt.plot([hwhm, hwhm], [0, hlf], 'k--', linewidth=1)
+        # plt.plot([0, self.radius], [i_e2, i_e2], 'k--', linewidth=1)
+        # plt.plot([self.radius, self.radius], [0, i_e2], 'k--', linewidth=1)
+        # plt.ylim([0, 1.1*self.irr_max])
 
         # Add labels to the axes
         plt.xlabel(r'radius, $r\,$ [m]')

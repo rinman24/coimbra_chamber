@@ -6,6 +6,7 @@ import chamber.const as const
 
 import scipy.optimize as opt
 
+
 class Model(object):
     """Object to hold the state of a heat and mass transfer model."""
 
@@ -77,7 +78,8 @@ class Model(object):
                }[ref](ref_temp, pressure/101325)
 
     def eval_props(self):
-        """Use CoolProp and attributes to evaluate thermo-physical properties."""
+        """Use CoolProp and attributes to evaluate thermo-physical properties.
+        """
         x_1e = HAPropsSI('Y', 'T', self.temp_e, 'T_dp', self.temp_dp, 'P', self.pressure)
         x_1s = HAPropsSI('Y', 'T', self.temp_s, 'RH', 1, 'P', self.pressure)
 
@@ -116,9 +118,9 @@ class Model(object):
         x = 1 + (1 + pow(r2, 2))/pow(r1, 2)
         return (x - pow(pow(x, 2) - 4*pow(r2/r1, 2), 0.5))/2
 
+
 class OneDimIsoLiqNoRad(Model):
     """Docstring."""
-
     def eval_model(self, vec_in):
         """Docstring."""
         mddp, q_m, temp_s = vec_in
@@ -128,15 +130,15 @@ class OneDimIsoLiqNoRad(Model):
         res[2] = mddp*self.h_fg - (self.k_m/self.length)*(self.temp_e - temp_s)
         return res
 
+
 class OneDimIsoLiqBlackRad(Model):
     """Docstring."""
-
     def eval_model(self, vec_in):
         """Docstring."""
         mddp, q_m, temp_s = vec_in
         res = [0 for _ in range(3)]
         res[0] = q_m + (self.k_m/self.length)*(self.temp_e - temp_s)
-        res[1] = mddp + (self.rho_m*self.d_12/self.length)*(self.m_1e -  self.m_1s)
+        res[1] = mddp + (self.rho_m*self.d_12/self.length)*(self.m_1e - self.m_1s)
         res[2] = mddp*self.h_fg - (self.k_m/self.length)*(self.temp_e - temp_s) - \
                  5.67e-8*(pow(self.temp_e, 4) - pow(temp_s, 4))
         return res
