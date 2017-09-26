@@ -35,7 +35,8 @@ def cursor():
 @pytest.fixture(scope='module')
 def test_tdms_obj():
     """fixture to instantiate only one TdmsnFile object for testing"""
-    return TdmsFile(test_const.TDMS_TEST_FILE_MF), TdmsFile(test_const.TDMS_TEST_FILE_MT)
+    return (TdmsFile(test_const.TDMS_TEST_FILE_MF),
+            TdmsFile(test_const.TDMS_TEST_FILE_MT))
 
 
 class TestSqlDb(object):
@@ -73,8 +74,9 @@ class TestSqlDb(object):
             assert path.exists(test_const.CORRECT_FILE_LIST[3])
             sqldb.move_files(path.split(test_const.CORRECT_FILE_LIST[3])[0])
             assert not path.exists(test_const.CORRECT_FILE_LIST[3])
-            new_path = path.join(path.join(str(Path.home()), "read_files"),
-                                 path.relpath(test_const.CORRECT_FILE_LIST[3])[3:])
+            new_path = path.join(
+                path.join(str(Path.home()), "read_files"),
+                path.relpath(test_const.CORRECT_FILE_LIST[3])[3:])
             assert path.exists(new_path)
             move(new_path, path.split(test_const.CORRECT_FILE_LIST[3])[0])
         except FileNotFoundError:
@@ -82,31 +84,39 @@ class TestSqlDb(object):
 
     def test_get_setting_info(self, test_tdms_obj):
         """Test output when reading .tdms files for settings"""
-        assert test_const.TDMS_TEST_FILE_MT_SETTING == sqldb.get_setting_info(test_tdms_obj[1])
-        assert test_const.TDMS_TEST_FILE_MF_SETTING == sqldb.get_setting_info(test_tdms_obj[0])
+        assert test_const.TDMS_TEST_FILE_MT_SETTING == sqldb.get_setting_info(
+                                                         test_tdms_obj[1])
+        assert test_const.TDMS_TEST_FILE_MF_SETTING == sqldb.get_setting_info(
+                                                         test_tdms_obj[0])
 
     def test_get_test_info(self, test_tdms_obj):
         """Test dictionary output when reading .tdms files for tests"""
-        assert test_const.TDMS_TEST_FILE_MT_TESTS == sqldb.get_test_info(test_tdms_obj[1])
-        assert test_const.TDMS_TEST_FILE_MF_TESTS == sqldb.get_test_info(test_tdms_obj[0])
+        assert test_const.TDMS_TEST_FILE_MT_TESTS == sqldb.get_test_info(
+                                                       test_tdms_obj[1])
+        assert test_const.TDMS_TEST_FILE_MF_TESTS == sqldb.get_test_info(
+                                                       test_tdms_obj[0])
 
     def test_get_obs_info(self, test_tdms_obj):
         """Test output when converting Observation data to a dict of strs"""
-        assert test_const.TDMS_TEST_FILE_MT_OBS_09 == sqldb.get_obs_info(test_tdms_obj[1],
-                                                                         test_const.TEST_INDEX,
-                                                                         True)
-        assert test_const.TDMS_TEST_FILE_MF_OBS_09 == sqldb.get_obs_info(test_tdms_obj[0],
-                                                                         test_const.TEST_INDEX,
-                                                                         False)
+        assert test_const.TDMS_TEST_FILE_MT_OBS_09 == sqldb.get_obs_info(
+                                                        test_tdms_obj[1],
+                                                        test_const.TEST_INDEX,
+                                                        True)
+        assert test_const.TDMS_TEST_FILE_MF_OBS_09 == sqldb.get_obs_info(
+                                                        test_tdms_obj[0],
+                                                        test_const.TEST_INDEX,
+                                                        False)
 
     def test_get_temp_info(self, test_tdms_obj):
         """Test output when converting temperature data to a dict of strings"""
-        assert test_const.TDMS_TEST_FILE_MT_THM_07 == sqldb.get_temp_info(test_tdms_obj[1],
-                                                                          test_const.TEST_INDEX,
-                                                                          test_const.TC_INDEX)
-        assert test_const.TDMS_TEST_FILE_MF_THM_07 == sqldb.get_temp_info(test_tdms_obj[0],
-                                                                          test_const.TEST_INDEX,
-                                                                          test_const.TC_INDEX)
+        assert test_const.TDMS_TEST_FILE_MT_THM_07 == sqldb.get_temp_info(
+                                                        test_tdms_obj[1],
+                                                        test_const.TEST_INDEX,
+                                                        test_const.TC_INDEX)
+        assert test_const.TDMS_TEST_FILE_MF_THM_07 == sqldb.get_temp_info(
+                                                        test_tdms_obj[0],
+                                                        test_const.TEST_INDEX,
+                                                        test_const.TC_INDEX)
 
     def test_add_tube_info(self, cursor):
         """Tsts data insertion into Tube and handling of dulicate tubes"""
@@ -119,12 +129,14 @@ class TestSqlDb(object):
     def test_add_setting_info(self, cursor, test_tdms_obj):
         """Test data insertion and condition handling in add_setting."""
         sqldb.add_setting_info(cursor, test_tdms_obj[0])
-        setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(test_tdms_obj[0]))
+        setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
+                                                    test_tdms_obj[0]))
         assert isinstance(setting_id, tuple)
         assert setting_id[1] == 0
 
         sqldb.add_setting_info(cursor, test_tdms_obj[1])
-        setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(test_tdms_obj[1]))
+        setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
+                                                    test_tdms_obj[1]))
         assert isinstance(setting_id, tuple)
         assert setting_id[1] == 1
 
@@ -132,7 +144,8 @@ class TestSqlDb(object):
         """Test correct data insertion and condition handling in add_test."""
         setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[0])
         sqldb.add_test_info(cursor, test_tdms_obj[0], setting_id)
-        cursor.execute("SELECT Author FROM Test WHERE TestID = {}".format(cursor.lastrowid))
+        cursor.execute("SELECT Author FROM Test WHERE TestID={}".format(
+                       cursor.lastrowid))
         assert cursor.fetchone()[0] == "ADL"
 
     def test_test_exists(self, cursor, test_tdms_obj):
@@ -140,32 +153,37 @@ class TestSqlDb(object):
         setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[0])
         sqldb.add_test_info(cursor, test_tdms_obj[0], setting_id)
         test_id = cursor.lastrowid
-        assert test_id == sqldb.test_exists(cursor, sqldb.get_test_info(test_tdms_obj[0]))
-        assert not test_id == sqldb.test_exists(cursor, sqldb.get_test_info(test_tdms_obj[1]))
+        assert test_id == sqldb.test_exists(cursor, sqldb.get_test_info(
+                                                      test_tdms_obj[0]))
+        assert not test_id == sqldb.test_exists(cursor, sqldb.get_test_info(
+                                                          test_tdms_obj[1]))
 
     def test_add_obs_info(self, cursor, test_tdms_obj):
         """Test correct data insertion and condition handling in add_obs."""
-        test_id = sqldb.add_test_info(cursor, test_tdms_obj[0],
-                                      sqldb.add_setting_info(cursor, test_tdms_obj[0]))
+        test_id = sqldb.add_test_info(
+            cursor, test_tdms_obj[0],
+            sqldb.add_setting_info(cursor, test_tdms_obj[0]))
         for obs_idx in range(len(test_tdms_obj[0].object("Data", "Idx").data)):
             sqldb.add_obs_info(cursor, test_tdms_obj[0], (test_id, 0), obs_idx)
         cursor.execute('SELECT Duty FROM Observation '
-                       'WHERE ObservationID = {}'.format(cursor.lastrowid))
+                       'WHERE ObservationID={}'.format(cursor.lastrowid))
         assert cursor.fetchone()[0] == Decimal('0.0')
 
-        test_id = sqldb.add_test_info(cursor, test_tdms_obj[1],
-                                      sqldb.add_setting_info(cursor, test_tdms_obj[1]))
+        test_id = sqldb.add_test_info(
+            cursor, test_tdms_obj[1],
+            sqldb.add_setting_info(cursor, test_tdms_obj[1]))
         for obs_idx in range(len(test_tdms_obj[1].object("Data", "Idx").data)):
             sqldb.add_obs_info(cursor, test_tdms_obj[1], test_id, obs_idx)
         cursor.execute('SELECT Duty FROM Observation '
-                       'WHERE ObservationID = {}'.format(cursor.lastrowid))
+                       'WHERE ObservationID={}'.format(cursor.lastrowid))
         assert cursor.fetchone()[0] == Decimal('0.0')
 
     def test_add_input(self, cursor):
         """Test overall data insertion, the final table in cascade."""
         sqldb.add_input(cursor, test_const.TEST_DIRECTORY, True)
-        cursor.execute("SELECT Temperature FROM TempObservation WHERE"
-                       "TempObservationID = '{}'".format(cursor.lastrowid))
+        cursor.execute(
+            "SELECT Temperature FROM TempObservation WHERE TempObservationID="
+            "'{}'".format(cursor.lastrowid))
         result = cursor.fetchone()[0]
         assert result == Decimal('297.17')
 
