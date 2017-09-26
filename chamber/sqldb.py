@@ -250,8 +250,8 @@ def get_setting_info(tdms_obj):
     except KeyError:
         setting_info['IsMass'] = 1
     if setting_info['IsMass'] == 1:
-        setting_info['InitialMass'] =
-        '{:.7f}'.format(tdms_obj.object("Data", "Mass").data[0])
+        setting_info['InitialMass'] = '{:.7f}'.format(
+            tdms_obj.object("Data", "Mass").data[0])
     return setting_info
 
 
