@@ -10,9 +10,10 @@ from mysql.connector import errorcode
 from nptdms import TdmsFile
 import pytest
 
-import chamber.sqldb as sqldb
 import chamber.const as const
+import chamber.sqldb as sqldb
 import tests.test_const as test_const
+
 
 @pytest.fixture(scope='module')
 def cursor():
@@ -29,6 +30,7 @@ def cursor():
     cur.close()
     cnx.close()
     print("Connection to MySQL closed.")
+
 
 @pytest.fixture(scope='module')
 def test_tdms_obj():
@@ -58,7 +60,7 @@ class TestSqlDb(object):
         assert sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_3)
 
     def test_list_tdms(self):
-        """Test correct output of all .tdms files contained in argument file."""
+        """Test correct output of all .tdms files contained in argument."""
         files = sqldb.list_tdms(test_const.TEST_DIRECTORY)
         for tdms_file in test_const.INCORRECT_FILE_LIST:
             assert tdms_file not in files
@@ -66,12 +68,12 @@ class TestSqlDb(object):
             assert tdms_file in files
 
     def test_move_files(self):
-        """Test that files are removed from the input directory and into user."""
+        """Test that files are removed from the directory and into user."""
         try:
             assert path.exists(test_const.CORRECT_FILE_LIST[3])
             sqldb.move_files(path.split(test_const.CORRECT_FILE_LIST[3])[0])
             assert not path.exists(test_const.CORRECT_FILE_LIST[3])
-            new_path = path.join(path.join(str(Path.home()),"read_files"),
+            new_path = path.join(path.join(str(Path.home()), "read_files"),
                                  path.relpath(test_const.CORRECT_FILE_LIST[3])[3:])
             assert path.exists(new_path)
             move(new_path, path.split(test_const.CORRECT_FILE_LIST[3])[0])
@@ -79,17 +81,17 @@ class TestSqlDb(object):
             assert False
 
     def test_get_setting_info(self, test_tdms_obj):
-        """Test correct dictionary output when reading .tdms files for settings"""
+        """Test output when reading .tdms files for settings"""
         assert test_const.TDMS_TEST_FILE_MT_SETTING == sqldb.get_setting_info(test_tdms_obj[1])
         assert test_const.TDMS_TEST_FILE_MF_SETTING == sqldb.get_setting_info(test_tdms_obj[0])
 
     def test_get_test_info(self, test_tdms_obj):
-        """Test correct dictionary output when reading .tdms files for tests"""
+        """Test dictionary output when reading .tdms files for tests"""
         assert test_const.TDMS_TEST_FILE_MT_TESTS == sqldb.get_test_info(test_tdms_obj[1])
         assert test_const.TDMS_TEST_FILE_MF_TESTS == sqldb.get_test_info(test_tdms_obj[0])
 
     def test_get_obs_info(self, test_tdms_obj):
-        """Test correct output when converting tdms obj observation data to dictionary of strings"""
+        """Test output when converting Observation data to a dict of strs"""
         assert test_const.TDMS_TEST_FILE_MT_OBS_09 == sqldb.get_obs_info(test_tdms_obj[1],
                                                                          test_const.TEST_INDEX,
                                                                          True)
@@ -98,7 +100,7 @@ class TestSqlDb(object):
                                                                          False)
 
     def test_get_temp_info(self, test_tdms_obj):
-        """Test correct output when converting tdms obj temperature data to dictionary of strings"""
+        """Test output when converting temperature data to a dict of strings"""
         assert test_const.TDMS_TEST_FILE_MT_THM_07 == sqldb.get_temp_info(test_tdms_obj[1],
                                                                           test_const.TEST_INDEX,
                                                                           test_const.TC_INDEX)
@@ -107,7 +109,7 @@ class TestSqlDb(object):
                                                                           test_const.TC_INDEX)
 
     def test_add_tube_info(self, cursor):
-        """Tsts correct data insertion into Tube table as well as correct handling of dulicate tubes"""
+        """Tsts data insertion into Tube and handling of dulicate tubes"""
         sqldb.add_tube_info(cursor)
         cursor.execute("SELECT TubeID FROM Tube;")
         assert cursor.fetchone()[0] == 1
@@ -115,12 +117,12 @@ class TestSqlDb(object):
         assert len(cursor.fetchall()) == 1
 
     def test_add_setting_info(self, cursor, test_tdms_obj):
-        """Test correct data insertion and condition handling in add_setting."""
+        """Test data insertion and condition handling in add_setting."""
         sqldb.add_setting_info(cursor, test_tdms_obj[0])
         setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(test_tdms_obj[0]))
         assert isinstance(setting_id, tuple)
         assert setting_id[1] == 0
-        
+
         sqldb.add_setting_info(cursor, test_tdms_obj[1])
         setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(test_tdms_obj[1]))
         assert isinstance(setting_id, tuple)
@@ -150,7 +152,7 @@ class TestSqlDb(object):
         cursor.execute('SELECT Duty FROM Observation '
                        'WHERE ObservationID = {}'.format(cursor.lastrowid))
         assert cursor.fetchone()[0] == Decimal('0.0')
-        
+
         test_id = sqldb.add_test_info(cursor, test_tdms_obj[1],
                                       sqldb.add_setting_info(cursor, test_tdms_obj[1]))
         for obs_idx in range(len(test_tdms_obj[1].object("Data", "Idx").data)):
@@ -160,17 +162,19 @@ class TestSqlDb(object):
         assert cursor.fetchone()[0] == Decimal('0.0')
 
     def test_add_input(self, cursor):
-        """Test correct data insertion through checking add_temp, the final table in cascade."""
+        """Test overall data insertion, the final table in cascade."""
         sqldb.add_input(cursor, test_const.TEST_DIRECTORY, True)
-        cursor.execute("SELECT Temperature FROM TempObservation WHERE TempObservationID = "
-                       + "'{}'".format(cursor.lastrowid))
+        cursor.execute("SELECT Temperature FROM TempObservation WHERE"
+                       "TempObservationID = '{}'".format(cursor.lastrowid))
         result = cursor.fetchone()[0]
         assert result == Decimal('297.17')
 
+
 def drop_tables(cur, bol):
-    """Prompts user to drop database tables or not. 'y' to drop, 'n' to not drop"""
+    """Drops databese tables if bol is true, does not drop if false"""
     if bol:
         print("Dropping tables...")
-        cur.execute("DROP TABLE IF EXISTS " + ", ".join(const.TABLE_NAME_LIST) + ";")
+        cur.execute("DROP TABLE IF EXISTS " +
+                    ", ".join(const.TABLE_NAME_LIST) + ";")
     else:
         print("Tables not dropped.")

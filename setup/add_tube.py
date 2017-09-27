@@ -1,6 +1,6 @@
 """Docstring. This module adds a tube to the MySQL Database."""
-
 import chamber.sqldb as sqldb
+
 
 ATTRIBUTES = {}
 ATTRIBUTES['DiameterIn'] = input("Enter the inside diameter [m]: ")
@@ -24,8 +24,9 @@ if "y" in ANS.lower():
     ADD_ROW = (
         "INSERT INTO Tube (DiameterIn, DiameterOut, Length, Material, Mass) "
         "VALUES (%s, %s, %s, %s, %s);")
-    ROW_DATA = (ATTRIBUTES['DiameterIn'], ATTRIBUTES['DiameterOut'], ATTRIBUTES['Length'],
-        ATTRIBUTES['Material'], ATTRIBUTES['Mass'])
+    ROW_DATA = (ATTRIBUTES['DiameterIn'], ATTRIBUTES['DiameterOut'],
+                ATTRIBUTES['Length'], ATTRIBUTES['Material'],
+                ATTRIBUTES['Mass'])
     sqldb.table_insert(CUR, ADD_ROW, ROW_DATA)
     print("Committing changes to Unit table...")
     CNX.commit()

@@ -6,16 +6,18 @@ from os import getcwd
 
 import pytz
 
-#Constants for laser.py
+
+# Constants for laser.py
 # ZnSe port parameters (From Spec Sheet)
-D_PORT = 2.286e-2 # 2.286 cm         [X]
-R_PORT = 1.143e-2 # 1.143 cm         [X]
-A_PORT = 4.104e-4 # 4.104 cm^2       [X]
+D_PORT = 2.286e-2    # 2.286 cm         [X]
+R_PORT = 1.143e-2    # 1.143 cm         [X]
+A_PORT = 4.104e-4    # 4.104 cm^2       [X]
 
 # Beam Parameters
 """
-The cross-sectional area of the beam is chosen to be half of the area of the ZnSe aperature. As a
-result, the radius of the beam will be smaller by a factor of 1/sqrt(2).
+The cross-sectional area of the beam is chosen to be half of the area of the
+ZnSe aperature. As a result, the radius of the beam will be smaller by a factor
+of 1/sqrt(2).
 LAM  : wavelength of radiation
 W_0  : beam radius at laser head
 POW  : total power transmitted by the beam
@@ -24,33 +26,33 @@ W_COL: beam radius after collimation
 D_B  : diamter of the beam after collimation
 A_CB : cross-sectional area of the beam after collimation
 """
-LAM = 10.59e-6 # 10.59 microns          [X]
-W_0 = 0.9e-3 # 0.9 mm                   [X]
-POW = 20 # 20 W                         [X]
-Z_0 = 24.03e-2 # 24.03 cm               [X]
-W_COL = 8.082e-3 # 8.082 mm             [X]
-D_B = 1.616e-2 # 1.616 cm               [X]
-A_CB = 2.052e-4 # 2.052 cm^2            [X]
+LAM = 10.59e-6      # 10.59 microns          [X]
+W_0 = 0.9e-3        # 0.9 mm                   [X]
+POW = 20            # 20 W                         [X]
+Z_0 = 24.03e-2      # 24.03 cm               [X]
+W_COL = 8.082e-3    # 8.082 mm             [X]
+D_B = 1.616e-2      # 1.616 cm               [X]
+A_CB = 2.052e-4     # 2.052 cm^2            [X]
 
 # Stefan Tube Dimensions
-D_IN_TUBE = 2.286e-2 # 2.286 cm         [X]
-R_IN_TUBE = 1.143e-2 # 1.143 cm         [X]
-A_C_TUBE = 4.104e-4 # 4.104 cm^2        [X]
-D_OUT_TUBE = 3.4e-2 # 3.4 cm            [X]
-R_OUT_TUBE = 1.7e-2 # 1.7 cm            [X]
-H_IN_TUBE = 4.572e-2 # 4.572 cm         [X]
-H_OUT_TUBE = 5.129e-2 # 5.129 cm        [X]
-H_TUBE_BASE = 5.57e-3 # 5.57 mm         [X]
+D_IN_TUBE = 2.286e-2     # 2.286 cm         [X]
+R_IN_TUBE = 1.143e-2     # 1.143 cm         [X]
+A_C_TUBE = 4.104e-4      # 4.104 cm^2        [X]
+D_OUT_TUBE = 3.4e-2      # 3.4 cm            [X]
+R_OUT_TUBE = 1.7e-2      # 1.7 cm            [X]
+H_IN_TUBE = 4.572e-2     # 4.572 cm         [X]
+H_OUT_TUBE = 5.129e-2    # 5.129 cm        [X]
+H_TUBE_BASE = 5.57e-3    # 5.57 mm         [X]
 
 # Gaussian Beam Constants
-HWHM_COEFF_W = sqrt(2*log(2))/2 # 0.589 [X]
+HWHM_COEFF_W = sqrt(2*log(2))/2    # 0.589 [X]
 
 
-#CONSTANTS FOR water.py
+# CONSTANTS FOR water.py
 # Liquid Water Optical Properties at 10.59 microns
-K_ABS_10P6 = 8.218e4 # 82,180 m^{-1}    []
-K_EXT_10P6 = 6.925e-2 # 0.06925         []
-L_K_ABS = 1.22e-5 # 12 microns          []
+K_ABS_10P6 = 8.218e4     # 82,180 m^{-1}    []
+K_EXT_10P6 = 6.925e-2    # 0.06925         []
+L_K_ABS = 1.22e-5        # 12 microns          []
 
 
 # Molecular weights
@@ -59,19 +61,19 @@ M2 = 28.964
 # # Liquid Water Thermal Properties
 # # (273.15 to 373.15 K)
 # K_L_COEFF = [-2.9064388, 2.692925e-2, -6.8256489e-05, 5.858084e-08]
-# C_L_COEFF = [1.1844879e+06, -2.1559968e+04, 1.6404218e+02, -6.6524994e-01, 1.5161227e-03,
-#              -1.8406899e-06, 9.2992482e-10]
-# RHO_L_COEFF = [-7.2156278e+04, 1.1366432e+03, -7.0513426e+00, 2.1835039e-02, -3.3746407e-05,
-#                2.0814924e-08]
+# C_L_COEFF = [1.1844879e+06, -2.1559968e+04, 1.6404218e+02, -6.6524994e-01,
+#              1.5161227e-03, -1.8406899e-06, 9.2992482e-10]
+# RHO_L_COEFF = [-7.2156278e+04, 1.1366432e+03, -7.0513426e+00, 2.1835039e-02,
+#                -3.3746407e-05, 2.0814924e-08]
 
-#Hardy Equation Constants
-G_COEF = (-2.8365744e3, -6.028076559e3, 1.954263612e1, -2.737830188e-2, 1.6261698e-5,
-          7.0229056e-10, -1.8680009e-13, 2.7150305)
+# Hardy Equation Constants
+G_COEF = (-2.8365744e3, -6.028076559e3, 1.954263612e1, -2.737830188e-2,
+          1.6261698e-5, 7.0229056e-10, -1.8680009e-13, 2.7150305)
 A_COEF = (-1.6302041e-1, 1.8071570e-3, -6.7703064e-6, 8.5813609e-9)
 B_COEF = (-5.9890467e1, 3.4378043e-1, -7.7326396e-4, 6.3405286e-7)
 
 
-#CONSTANTS FOR sqldb.py
+# CONSTANTS FOR sqldb.py
 # MySQL querry Constants
 ADD_SETTING_M_F = ("INSERT INTO Setting "
                    "(IsMass, InitialDewPoint, InitialDuty, InitialPressure, InitialTemp, TimeStep)"
@@ -118,7 +120,7 @@ ADD_UNIT = ("INSERT INTO Unit "
             "(%(Duty)s, %(Length)s, %(Mass)s, %(Power)s, %(Pressure)s, %(Temperature)s, %(Time)s)")
 
 FIND_SETTING_M_F = ("SELECT SettingID FROM Setting WHERE "
-                    "    IsMass = %(IsMass)s AND"  
+                    "    IsMass = %(IsMass)s AND"
                     "    InitialDewPoint = %(InitialDewPoint)s AND"
                     "    InitialDuty = %(InitialDuty)s AND"
                     "    InitialPressure = %(InitialPressure)s AND"
@@ -126,7 +128,7 @@ FIND_SETTING_M_F = ("SELECT SettingID FROM Setting WHERE "
                     "    TimeStep = %(TimeStep)s;")
 
 FIND_SETTING_M_T = ("SELECT SettingID FROM Setting WHERE "
-                    "    IsMass = %(IsMass)s AND"  
+                    "    IsMass = %(IsMass)s AND"
                     "    InitialDewPoint = %(InitialDewPoint)s AND"
                     "    InitialDuty = %(InitialDuty)s AND"
                     "    InitialMass = %(InitialMass)s AND"
@@ -147,12 +149,12 @@ FIND_TUBE = ("SELECT TubeID FROM Tube WHERE "
 # MySQL Tables Constants
 TABLES = []
 TABLES.append(('UnitTest',
-           "CREATE TABLE UnitTest ("
-           "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
-           "    Number DECIMAL(5,2) NULL,"
-           "    String VARCHAR(30) NULL,"
-           "  PRIMARY KEY (`UnitTestID`)"
-           ");"))
+               "CREATE TABLE UnitTest ("
+               "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "    Number DECIMAL(5,2) NULL,"
+               "    String VARCHAR(30) NULL,"
+               "  PRIMARY KEY (`UnitTestID`)"
+               ");"))
 TABLES.append(('Unit',
                "CREATE TABLE Unit ("
                "    Duty VARCHAR(30) NOT NULL,"
@@ -228,41 +230,42 @@ TABLES.append(('TempObservation',
                ");"))
 
 
-#Constant for Table Drop
+# Constant for Table Drop
 TABLE_NAME_LIST = [table[0] for table in reversed(TABLES)]
 
 
-#MySql Tube and Unit Constants
+# MySql Tube and Unit Constants
 TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
              'Material': 'Delrin', 'Mass': 0.0657957}
 
-UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram', 'Power': 'Watt',
-             'Pressure': 'Pascal', 'Temperature': 'Kelvin', 'Time': 'Second'}
+UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram',
+             'Power': 'Watt', 'Pressure': 'Pascal', 'Temperature': 'Kelvin',
+             'Time': 'Second'}
 
 
-#Constants for views.py
-#MySql Querries for views.py
+# Constants for views.py
+# MySql Querries for views.py
 VIEWS = []
 VIEWS.append(('UnitTest',
-           "CREATE TABLE UnitTest ("
-           "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
-           "    Number DECIMAL(5,2) NULL,"
-           "    String VARCHAR(30) NULL,"
-           "  PRIMARY KEY (`UnitTestID`)"
-           ");"))
+              "CREATE TABLE UnitTest ("
+              "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+              "    Number DECIMAL(5,2) NULL,"
+              "    String VARCHAR(30) NULL,"
+              "  PRIMARY KEY (`UnitTestID`)"
+              ");"))
 VIEWS.append(('Results',
-           "CREATE TABLE Results("
-           "    ResultsID SERIAL,"
-           "    TestID BIGINT UNSIGNED NOT NULL," 
-           "  PRIMARY KEY (`ResultsID`)"      
-           ");"))
+              "CREATE TABLE Results("
+              "    ResultsID SERIAL,"
+              "    TestID BIGINT UNSIGNED NOT NULL,"
+              "  PRIMARY KEY (`ResultsID`)"
+              ");"))
 VIEWS.append(('NormalizedMass',
-           "CREATE TABLE NormalizedMass("
-           "    NormalizedMassID SERIAL,"
-           "    TestID BIGINT UNSIGNED NOT NULL,"           
-           "    NormalizedMass DECIMAL(8, 7),"
-           "  PRIMARY KEY (`NormalizedMassID`)"
-           ");"))
+              "CREATE TABLE NormalizedMass("
+              "    NormalizedMassID SERIAL,"
+              "    TestID BIGINT UNSIGNED NOT NULL,"
+              "    NormalizedMass DECIMAL(8, 7),"
+              "  PRIMARY KEY (`NormalizedMassID`)"
+              ");"))
 
 VIEW_NAME_LIST = [view[0] for view in VIEWS]
 
@@ -287,4 +290,4 @@ GET_AVG_TEMP = ("SELECT AVG(Temperature) FROM TempObservation AS Temp INNER JOIN
                 "AS Obs ON Temp.ObservationID=Obs.ObservationID INNER JOIN Test ON "
                 "Obs.TestID=Test.TestID WHERE Test.TestID={} GROUP BY Obs.ObservationID")
 
-TUBE_RADIUS = 0.015 #[m]
+TUBE_RADIUS = 0.015    # [m]

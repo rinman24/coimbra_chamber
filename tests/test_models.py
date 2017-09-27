@@ -5,9 +5,11 @@ import chamber.models as models
 
 import tests.test_const as test_const
 
+
 MODEL = models.Model(test_const.SETTINGS)
 ONEDIM_ISOLIQ_NORAD = models.OneDimIsoLiqNoRad(test_const.SETTINGS)
 ONEDIM_ISOLIQ_BLACKRAD = models.OneDimIsoLiqBlackRad(test_const.SETTINGS)
+
 
 class Test_Models(object):
     """Unit testing of Models class."""
@@ -65,6 +67,7 @@ class Test_Models(object):
     def test_get_f12(self):
         """Test the calculation of the view factor F_{12}."""
         assert isclose(MODEL.get_f12(), 0.1715728752538097)
+
 
 class Test_OneDimIsoLiqNoRad(object):
     """Unit testing of OneDimIsoLiqNoRad class."""
