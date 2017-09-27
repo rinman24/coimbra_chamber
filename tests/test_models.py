@@ -5,11 +5,9 @@ import chamber.models as models
 
 import tests.test_const as test_const
 
-
 MODEL = models.Model(test_const.SETTINGS)
 ONEDIM_ISOLIQ_NORAD = models.OneDimIsoLiqNoRad(test_const.SETTINGS)
 ONEDIM_ISOLIQ_BLACKRAD = models.OneDimIsoLiqBlackRad(test_const.SETTINGS)
-
 
 class Test_Models(object):
     """Unit testing of Models class."""
@@ -24,12 +22,18 @@ class Test_Models(object):
         assert isclose(MODEL.temp_e, 295)
         assert isclose(MODEL.temp_s, 291.5)
 
+        assert isclose(MODEL.mu_m, 1.8106909203849476e-05)
+        assert isclose(MODEL.cp_m, 1016.6738656679439)
         assert isclose(MODEL.d_12, 2.510797939645015e-05)
         assert isclose(MODEL.h_fg, 2457424.545412025)
         assert isclose(MODEL.k_m, 0.025867252254694034)
         assert isclose(MODEL.m_1e, 0.010623365736965384)
         assert isclose(MODEL.m_1s, 0.013294255082507034)
         assert isclose(MODEL.rho_m, 1.1793376852254565)
+        assert isclose(MODEL.nu_m, 1.5353455953023276e-05)
+        assert isclose(MODEL.alpha_m, 2.157398944861877e-05)
+        assert isclose(MODEL.beta_m, 0.0034100596760443308)
+        assert isclose(MODEL.beta_star_m, 0.6033861519510446)
 
     def test_get_ref_state(self):
         """Test the ability to evaluate film values based on various rules."""
@@ -67,7 +71,6 @@ class Test_Models(object):
     def test_get_f12(self):
         """Test the calculation of the view factor F_{12}."""
         assert isclose(MODEL.get_f12(), 0.1715728752538097)
-
 
 class Test_OneDimIsoLiqNoRad(object):
     """Unit testing of OneDimIsoLiqNoRad class."""

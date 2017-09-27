@@ -6,7 +6,6 @@ import chamber.const as const
 
 import scipy.optimize as opt
 
-
 class Model(object):
     """Object to hold the state of a heat and mass transfer model."""
 
@@ -22,6 +21,8 @@ class Model(object):
         self.ref = ref
         self.rule = rule
         self.temp_s = (self.temp_e + self.temp_dp)/2
+        self.mu_m = None
+        self.cp_m = None
         self.d_12 = None
         self.h_fg = None
         self.k_m = None
@@ -30,6 +31,10 @@ class Model(object):
         self.rho_m = None
         self.mddp = None
         self.q_m = None
+        self.nu_m = None
+        self.alpha_m = None
+        self.beta_m = None
+        self.beta_star_m = None
 
         self.eval_props()
 
@@ -78,14 +83,15 @@ class Model(object):
                }[ref](ref_temp, pressure/101325)
 
     def eval_props(self):
-        """Use CoolProp and attributes to evaluate thermo-physical properties.
-        """
+        """Use CoolProp and attributes to evaluate thermo-physical properties."""
         x_1e = HAPropsSI('Y', 'T', self.temp_e, 'T_dp', self.temp_dp, 'P', self.pressure)
         x_1s = HAPropsSI('Y', 'T', self.temp_s, 'RH', 1, 'P', self.pressure)
 
         ref_x = self.get_ref_state(x_1e, x_1s, self.rule)
         ref_temp = self.get_ref_state(self.temp_e, self.temp_s, self.rule)
 
+        self.mu_m = HAPropsSI('mu', 'T', ref_temp, 'Y', ref_x, 'P', self.pressure)
+        self.cp_m = HAPropsSI('cp', 'T', ref_temp, 'Y', ref_x, 'P', self.pressure)
         self.d_12 = self.get_bin_diff_coeff(ref_temp, self.pressure, self.ref)
         self.h_fg = PropsSI('H', 'T', self.temp_s, 'Q', 1, 'water') - \
                     PropsSI('H', 'T', self.temp_s, 'Q', 0, 'water')
@@ -93,6 +99,10 @@ class Model(object):
         self.m_1e = (x_1e*const.M1)/(x_1e*const.M1 + (1-x_1e)*const.M2)
         self.m_1s = (x_1s*const.M1)/(x_1s*const.M1 + (1-x_1s)*const.M2)
         self.rho_m = 1/HAPropsSI('Vha', 'T', ref_temp, 'Y', ref_x, 'P', self.pressure)
+        self.nu_m = self.mu_m/self.rho_m
+        self.alpha_m = self.k_m/(self.cp_m * self.rho_m)
+        self.beta_m = 1/ref_temp
+        self.beta_star_m = (const.M2 - const.M1)/(ref_x*const.M1*(const.M2 - const.M1)/(ref_x*const.M1 + (1-ref_x)*const.M2) + const.M1)
 
     def solve_iteratively(self):
         """Docstring."""
@@ -118,9 +128,9 @@ class Model(object):
         x = 1 + (1 + pow(r2, 2))/pow(r1, 2)
         return (x - pow(pow(x, 2) - 4*pow(r2/r1, 2), 0.5))/2
 
-
 class OneDimIsoLiqNoRad(Model):
     """Docstring."""
+
     def eval_model(self, vec_in):
         """Docstring."""
         mddp, q_m, temp_s = vec_in
@@ -130,15 +140,15 @@ class OneDimIsoLiqNoRad(Model):
         res[2] = mddp*self.h_fg - (self.k_m/self.length)*(self.temp_e - temp_s)
         return res
 
-
 class OneDimIsoLiqBlackRad(Model):
     """Docstring."""
+
     def eval_model(self, vec_in):
         """Docstring."""
         mddp, q_m, temp_s = vec_in
         res = [0 for _ in range(3)]
         res[0] = q_m + (self.k_m/self.length)*(self.temp_e - temp_s)
-        res[1] = mddp + (self.rho_m*self.d_12/self.length)*(self.m_1e - self.m_1s)
+        res[1] = mddp + (self.rho_m*self.d_12/self.length)*(self.m_1e -  self.m_1s)
         res[2] = mddp*self.h_fg - (self.k_m/self.length)*(self.temp_e - temp_s) - \
                  5.67e-8*(pow(self.temp_e, 4) - pow(temp_s, 4))
         return res
