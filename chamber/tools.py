@@ -8,8 +8,10 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from tabulate import tabulate
 
-import results
-import sqldb
+# import results
+import chamber.results as results
+# import sqldb
+import chamber.sqldb as sqldb
 
 
 def meshgrid(i_points, j_points):
@@ -391,23 +393,16 @@ def generate_summary(test_id):
         hum_per_list.append(hum_per)
         hum_dict[hum_per] = hum
 
-        slope[hum_per], r_squared[hum_per], place_holder, ends[hum_per] =
-        get_lin(mass, hum)
+        slope[hum_per], r_squared[hum_per], place_holder, ends[hum_per] = get_lin(mass, hum)
 
-        slope_99[hum_per], r_99[hum_per], inter_99[hum_per] =
-        get_lin(mass, hum, tol=0.99, get_one=True)
-        slope_999[hum_per], r_999[hum_per], inter_999[hum_per] =
-        get_lin(mass, hum, tol=0.999, get_one=True)
+        slope_99[hum_per], r_99[hum_per], inter_99[hum_per] = get_lin(mass, hum, tol=0.99, get_one=True)
+        slope_999[hum_per], r_999[hum_per], inter_999[hum_per] = get_lin(mass, hum, tol=0.999, get_one=True)
 
-        avg_slope_99[hum_per], avg_r_99[hum_per], avg_inter_99[hum_per] =
-        get_avg(mass, hum, tol=0.99)
-        avg_slope_999[hum_per], avg_r_999[hum_per], avg_inter_999[hum_per] =
-        get_avg(mass, hum, tol=0.999)
+        avg_slope_99[hum_per], avg_r_99[hum_per], avg_inter_99[hum_per] = get_avg(mass, hum, tol=0.99)
+        avg_slope_999[hum_per], avg_r_999[hum_per], avg_inter_999[hum_per] = get_avg(mass, hum, tol=0.999)
 
-        set_slope_250[hum_per], set_r_250[hum_per], set_inter_250[hum_per] =
-        get_set_width(mass, hum, 250)
-        set_slope_500[hum_per], set_r_500[hum_per], set_inter_500[hum_per] =
-        get_set_width(mass, hum, 500)
+        set_slope_250[hum_per], set_r_250[hum_per], set_inter_250[hum_per] = get_set_width(mass, hum, 250)
+        set_slope_500[hum_per], set_r_500[hum_per], set_inter_500[hum_per] = get_set_width(mass, hum, 500)
 
     hum_per_list.sort()
 
