@@ -1,7 +1,7 @@
 """Constants for the UCSD Chamber Experiment."""
 from datetime import datetime
 from decimal import Decimal
-from math import log, sqrt
+from math import log, sqrt, pi
 from os import getcwd
 
 import pytz
@@ -45,7 +45,7 @@ H_OUT_TUBE = 5.129e-2    # 5.129 cm        [X]
 H_TUBE_BASE = 5.57e-3    # 5.57 mm         [X]
 
 # Gaussian Beam Constants
-HWHM_COEFF_W = sqrt(2*log(2))/2    # 0.589 [X]
+HWHM_COEFF_W = sqrt(2 * log(2)) / 2    # 0.589 [X]
 
 
 # CONSTANTS FOR water.py
@@ -291,3 +291,8 @@ GET_AVG_TEMP = ("SELECT AVG(Temperature) FROM TempObservation AS Temp INNER JOIN
                 "Obs.TestID=Test.TestID WHERE Test.TestID={} GROUP BY Obs.ObservationID")
 
 TUBE_RADIUS = 0.015    # [m]
+TUBE_AREA = pi * pow(TUBE_RADIUS, 2)
+TUBE_CIRCUM = 2 * pi * TUBE_RADIUS
+
+# Radiative Properties
+SIGMA = 5.670367e-8
