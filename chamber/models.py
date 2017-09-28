@@ -35,6 +35,7 @@ class Model(object):
         self.alpha_m = None
         self.beta_m = None
         self.beta_star_m = None
+        self.Ra_number = None
 
         self.eval_props()
 
@@ -103,6 +104,8 @@ class Model(object):
         self.alpha_m = self.k_m/(self.cp_m * self.rho_m)
         self.beta_m = 1/ref_temp
         self.beta_star_m = (const.M2 - const.M1)/(ref_x*const.M1*(const.M2 - const.M1)/(ref_x*const.M1 + (1-ref_x)*const.M2) + const.M1)
+
+        self.Ra_number = const.GRAVIT_ACCLR*(self.beta_m*(self.temp_s - self.temp_e) + self.beta_star_m*(self.m_1s - self.m_1e))*pow(self.length, 3)/(self.alpha_m*self.nu_m)
 
     def solve_iteratively(self):
         """Docstring."""

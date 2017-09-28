@@ -88,6 +88,9 @@ class Test_OneDimIsoLiqNoRad(object):
         assert isclose(ONEDIM_ISOLIQ_NORAD.q_m, -4.06602294335)
         assert isclose(ONEDIM_ISOLIQ_NORAD.temp_s, 290.276252547)
 
+    def test_eval_props(self):
+        """Test the evaluation of the Rayleigh number"""
+        assert isclose(ONEDIM_ISOLIQ_NORAD.Ra_number, -12184.705621803925)
 
 class Test_OneDimIsoLiqBlackRad(object):
     """Unit testing of OneDimIsoLiqBlackRad class."""
@@ -104,3 +107,7 @@ class Test_OneDimIsoLiqBlackRad(object):
         assert isclose(ONEDIM_ISOLIQ_BLACKRAD.mddp, 4.31348878793e-06)
         assert isclose(ONEDIM_ISOLIQ_BLACKRAD.q_m, -1.37760426483)
         assert isclose(ONEDIM_ISOLIQ_BLACKRAD.temp_s, 293.406541019)
+
+    def test_eval_props(self):
+        """Test the evaluation of the Rayleigh number"""
+        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.Ra_number, -2200.886053286315)
