@@ -204,8 +204,7 @@ class OneDimIsoLiqNoRad(Model):
 
     def set_solution(self, solution):
         """Docstring."""
-        self.solution = dict(
-            mddp=solution[0], q_m=solution[1], temp_s=solution[2])
+        self.solution = dict(mddp=solution[0], q_m=solution[1], temp_s=solution[2])
 
 
 class OneDimIsoLiqBlackRad(Model):
@@ -213,8 +212,7 @@ class OneDimIsoLiqBlackRad(Model):
 
     def __init__(self, settings, ref='Mills', rule='mean'):
         """The f_matrix and j_matrix are constant, can be set in __init__()."""
-        super(OneDimIsoLiqBlackRad, self).__init__(
-            settings, ref=ref, rule=rule)
+        super(OneDimIsoLiqBlackRad, self).__init__(settings, ref=ref, rule=rule)
 
         self.unknowns = ['mddp', 'q_m', 'q_r', 'temp_s']
         self.temp_s_loc = 3
@@ -232,8 +230,7 @@ class OneDimIsoLiqBlackRad(Model):
 
     def set_solution(self, solution):
         """Docstring."""
-        self.solution = dict(
-            mddp=solution[0], q_m=solution[1], q_r=solution[2], temp_s=solution[3])
+        self.solution = dict(mddp=solution[0], q_m=solution[1], q_r=solution[2], temp_s=solution[3])
 
 
 class OneDimIsoLiqGrayRad(Model):
