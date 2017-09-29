@@ -191,8 +191,7 @@ class OneDimIsoLiqNoRad(Model):
 
     def set_solution(self, solution):
         """Docstring."""
-        self.solution = dict(
-            mddp=solution[0], q_m=solution[1], temp_s=solution[2])
+        self.solution = dict(mddp=solution[0], q_m=solution[1], temp_s=solution[2])
 
 
 class OneDimIsoLiqBlackRad(Model):
