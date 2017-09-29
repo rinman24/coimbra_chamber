@@ -40,9 +40,10 @@ class Test_Models(object):
         """Test the calculation of the binary diffusion coefficient."""
         ref_temp, pressure = 300, 101325
         assert isclose(MODEL.get_bin_diff_coeff(ref_temp, pressure, 'Mills'),
-                       1.97e-5*(101325/pressure)*pow(ref_temp/256, 1.685))
+                       1.97e-5 * (101325 / pressure) *
+                       pow(ref_temp / 256, 1.685))
         assert isclose(MODEL.get_bin_diff_coeff(ref_temp, pressure, 'Marrero'),
-                       1.87e-10*pow(ref_temp, 2.072)/(pressure/101325))
+                       1.87e-10 * pow(ref_temp, 2.072) / (pressure / 101325))
 
     def test_eval_props(self):
         """Test the calculation of all of the thermophysical properties."""
