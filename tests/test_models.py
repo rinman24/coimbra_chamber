@@ -5,7 +5,6 @@ import chamber.models as models
 
 import tests.test_const as test_const
 
-
 MODEL = models.Model(test_const.SETTINGS)
 ONEDIM_ISOLIQ_NORAD = models.OneDimIsoLiqNoRad(test_const.SETTINGS)
 ONEDIM_ISOLIQ_BLACKRAD = models.OneDimIsoLiqBlackRad(test_const.SETTINGS)
@@ -24,13 +23,21 @@ class Test_Models(object):
         assert isclose(MODEL.temp_e, 295)
         assert isclose(MODEL.temp_s, 291.5)
 
+        assert isclose(MODEL.mu_m, 1.8106909203849476e-05)
+        assert isclose(MODEL.cp_m, 1016.6738656679439)
         assert isclose(MODEL.d_12, 2.510797939645015e-05)
         assert isclose(MODEL.h_fg, 2457424.545412025)
         assert isclose(MODEL.k_m, 0.025867252254694034)
         assert isclose(MODEL.m_1e, 0.010623365736965384)
         assert isclose(MODEL.m_1s, 0.013294255082507034)
         assert isclose(MODEL.rho_m, 1.1793376852254565)
+        assert isclose(MODEL.nu_m, 1.5353455953023276e-05)
+        assert isclose(MODEL.alpha_m, 2.157398944861877e-05)
+        assert isclose(MODEL.beta_m, 0.0034100596760443308)
+        assert isclose(MODEL.beta_star_m, 0.6033861519510446)
         assert MODEL.solution is None
+
+        assert isclose(MODEL.Ra_number, -8252.400804563847)
 
     def test_repr(self):
         """print(repr(<MODEL>))"""
@@ -58,12 +65,20 @@ class Test_Models(object):
         """Test the calculation of all of the thermophysical properties."""
         MODEL.temp_s = 293
         MODEL.eval_props()
+        assert isclose(MODEL.mu_m, 1.813689690669493e-05)
+        assert isclose(MODEL.cp_m, 1017.2873735694611)
         assert isclose(MODEL.d_12, 2.521627605755569e-05)
         assert isclose(MODEL.h_fg, 2453874.327285723)
         assert isclose(MODEL.k_m, 0.02592145926625826)
         assert isclose(MODEL.m_1e, 0.010623365736965384)
         assert isclose(MODEL.m_1s, 0.014610145619944618)
         assert isclose(MODEL.rho_m, 1.1758589997836344)
+
+        assert isclose(MODEL.nu_m, 1.5424380737853974e-05)
+        assert isclose(MODEL.alpha_m, 2.167008152326072e-05)
+        assert isclose(MODEL.beta_m, 0.003401360544217687)
+        assert isclose(MODEL.beta_star_m, 0.603147186094405)
+        assert isclose(MODEL.Ra_number, -3484.0297271546015)
         MODEL.temp_s = 291.5
 
 
@@ -85,11 +100,15 @@ class Test_OneDimIsoLiqNoRad(object):
     def test_solve_iteratively(self):
         count = ONEDIM_ISOLIQ_NORAD.solve_iteratively()
         assert count == 126
-        assert isclose(ONEDIM_ISOLIQ_NORAD.solution['mddp'], 1.6526395638614737e-06)
-        assert isclose(ONEDIM_ISOLIQ_NORAD.solution['q_m'], -4.0660229435638495)
-        assert isclose(ONEDIM_ISOLIQ_NORAD.solution['temp_s'], 290.27625254693885)
+        assert isclose(
+            ONEDIM_ISOLIQ_NORAD.solution['mddp'], 1.6526395638614737e-06)
+        assert isclose(
+            ONEDIM_ISOLIQ_NORAD.solution['q_m'], -4.0660229435638495)
+        assert isclose(
+            ONEDIM_ISOLIQ_NORAD.solution['temp_s'], 290.27625254693885)
         assert isclose(ONEDIM_ISOLIQ_NORAD.temp_s,
                        ONEDIM_ISOLIQ_NORAD.solution['temp_s'])
+
 
 class Test_OneDimIsoLiqBlackRad(object):
     """Unit testing of OneDimIsoLiqBlackRad class."""
@@ -111,7 +130,11 @@ class Test_OneDimIsoLiqBlackRad(object):
     def test_solve_iteratively(self):
         count = ONEDIM_ISOLIQ_BLACKRAD.solve_iteratively()
         assert count == 34
-        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'], 4.3134887884960156e-06)
-        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.solution['q_m'], -1.3776042647982443)
-        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.solution['q_r'], -9.2030040325246905)
-        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.solution['temp_s'], 293.40654101908603)
+        assert isclose(
+            ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'], 4.3134887884960156e-06)
+        assert isclose(
+            ONEDIM_ISOLIQ_BLACKRAD.solution['q_m'], -1.3776042647982443)
+        assert isclose(
+            ONEDIM_ISOLIQ_BLACKRAD.solution['q_r'], -9.2030040325246905)
+        assert isclose(
+            ONEDIM_ISOLIQ_BLACKRAD.solution['temp_s'], 293.40654101908603)

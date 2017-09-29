@@ -72,6 +72,8 @@ G_COEF = (-2.8365744e3, -6.028076559e3, 1.954263612e1, -2.737830188e-2,
 A_COEF = (-1.6302041e-1, 1.8071570e-3, -6.7703064e-6, 8.5813609e-9)
 B_COEF = (-5.9890467e1, 3.4378043e-1, -7.7326396e-4, 6.3405286e-7)
 
+# Gravitational acceleration
+ACC_GRAV = 9.80665  # m/s^2
 
 # CONSTANTS FOR sqldb.py
 # MySQL querry Constants
