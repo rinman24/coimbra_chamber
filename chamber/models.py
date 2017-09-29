@@ -199,8 +199,7 @@ class OneDimIsoLiqBlackRad(Model):
 
     def __init__(self, settings, ref='Mills', rule='mean'):
         """The f_matrix and j_matrix are constant, can be set in __init__()."""
-        super(OneDimIsoLiqBlackRad, self).__init__(
-            settings, ref=ref, rule=rule)
+        super(OneDimIsoLiqBlackRad, self).__init__(settings, ref=ref, rule=rule)
 
         self.unknowns = ['mddp', 'q_m', 'q_r', 'temp_s']
         self.temp_s_loc = 3
