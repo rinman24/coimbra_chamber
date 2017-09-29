@@ -12,6 +12,8 @@ import scipy.optimize as opt
 class Model(object):
     """Object to hold the state of a heat and mass transfer model."""
 
+    learning_rate = 0.05
+
     def __init__(self, settings, ref='Mills', rule='mean'):
         """Constructor."""
         self.length = settings['length']
@@ -27,8 +29,7 @@ class Model(object):
         self.m_1e = None
         self.m_1s = None
         self.rho_m = None
-        self.mddp = None
-        self.q_m = None
+        self.solution = None
 
         self.eval_props()
 
@@ -108,15 +109,7 @@ class Model(object):
 
     def solve_iteratively(self):
         """Docstring."""
-        delta, count = 1, 0
-        while delta > 1e-9:
-            sol = opt.fsolve(self.eval_model, [1, 1, 1])
-            delta = abs(sol[2] - self.temp_s)
-            self.temp_s = (self.temp_s + sol[2]) / 2
-            self.eval_props()
-            count += 1
-        self.mddp, self.q_m = sol[0], sol[1]
-        return count
+        pass
 
     def eval_model(self, vec_in):
         """Docstring."""
@@ -134,9 +127,20 @@ class OneDimIsoLiqNoRad(Model):
         res[0] = q_m + (self.k_m / self.length) * (self.temp_e - temp_s)
         res[1] = mddp + \
             (self.rho_m * self.d_12 / self.length) * (self.m_1e - self.m_1s)
-        res[2] = mddp * self.h_fg - \
-            (self.k_m / self.length) * (self.temp_e - temp_s)
+        res[2] = mddp * self.h_fg + q_m
         return res
+
+    def solve_iteratively(self):
+        """Docstring."""
+        delta, count = 1, 0
+        while abs(delta) > 1e-9:
+            sol = opt.fsolve(self.eval_model, [1, 1, 1])
+            delta = sol[2] - self.temp_s
+            self.temp_s += self.learning_rate * delta
+            self.eval_props()
+            count += 1
+        self.solution = dict(mddp=sol[0], q_m=sol[1], temp_s=sol[2])
+        return count
 
 
 class OneDimIsoLiqBlackRad(Model):
@@ -144,16 +148,26 @@ class OneDimIsoLiqBlackRad(Model):
 
     def eval_model(self, vec_in):
         """Docstring."""
-        mddp, q_m, temp_s = vec_in
-        res = [0 for _ in range(3)]
+        mddp, q_m, q_r, temp_s = vec_in
+        res = [0 for _ in range(4)]
         res[0] = q_m + (self.k_m / self.length) * (self.temp_e - temp_s)
         res[1] = mddp + \
             (self.rho_m * self.d_12 / self.length) * (self.m_1e - self.m_1s)
-        res[2] = mddp * self.h_fg - \
-            (self.k_m / self.length) * (self.temp_e - temp_s) - \
-            const.SIGMA * (pow(self.temp_e, 4) - pow(temp_s, 4))
+        res[2] = mddp * self.h_fg + q_m + q_r
+        res[3] = q_r - 5.67e-8 * (pow(self.temp_s, 4) - pow(self.temp_e, 4))
         return res
 
+    def solve_iteratively(self):
+        """Docstring."""
+        delta, count = 1, 0
+        while abs(delta) > 1e-9:
+            sol = opt.fsolve(self.eval_model, [1, 1, 1, 1])
+            delta = sol[3] - self.temp_s
+            self.temp_s += self.learning_rate * delta
+            self.eval_props()
+            count += 1
+        self.solution = dict(mddp=sol[0], q_m=sol[1], q_r=sol[2], temp_s=sol[3])
+        return count
 
 class OneDimIsoLiqGrayRad(Model):
     """Docstring."""
