@@ -8,6 +8,7 @@ import numpy as np
 
 import scipy.optimize as opt
 
+
 class Model(object):
     """Object to hold the state of a heat and mass transfer model."""
 
@@ -19,23 +20,27 @@ class Model(object):
         self.pressure = settings['pressure']
         self.temp_dp = settings['temp_dp']
         self.temp_e = settings['temp_e']
+        self.temp_s = (self.temp_e + self.temp_dp) / 2
         self.ref = ref
         self.rule = rule
-        self.temp_s = (self.temp_e + self.temp_dp)/2
-        self.mu_m = None
+
+        # Properties
+        self.alpha_m = None
+        self.beta_m = None
+        self.beta_star_m = None
         self.cp_m = None
         self.d_12 = None
         self.h_fg = None
         self.k_m = None
         self.m_1e = None
         self.m_1s = None
-        self.rho_m = None
+        self.mu_m = None
         self.nu_m = None
-        self.alpha_m = None
-        self.beta_m = None
-        self.beta_star_m = None
-        self.Ra_number = None
+        self.rho_m = None
         self.solution = None
+
+        # Dimensionless Groups
+        self.Ra_number = None
 
         self.eval_props()
 
@@ -94,10 +99,17 @@ class Model(object):
 
         ref_x = self.get_ref_state(x_1e, x_1s, self.rule)
 
+        ref_m = (ref_x * const.M1) /\
+            (ref_x * const.M1 + (1 - ref_x) * const.M2)
+
         ref_temp = self.get_ref_state(self.temp_e, self.temp_s, self.rule)
 
-        self.mu_m = HAPropsSI('mu', 'T', ref_temp, 'Y', ref_x, 'P', self.pressure)
-        self.cp_m = HAPropsSI('cp', 'T', ref_temp, 'Y', ref_x, 'P', self.pressure)
+        self.mu_m = HAPropsSI('mu', 'T', ref_temp, 'Y', ref_x,
+                              'P', self.pressure)
+
+        self.cp_m = HAPropsSI('cp', 'T', ref_temp, 'Y', ref_x,
+                              'P', self.pressure)
+
         self.d_12 = self.get_bin_diff_coeff(ref_temp, self.pressure, self.ref)
 
         self.h_fg = PropsSI('H', 'T', self.temp_s, 'Q', 1, 'water') - \
@@ -115,12 +127,23 @@ class Model(object):
         self.rho_m = 1 / HAPropsSI('Vha', 'T', ref_temp, 'Y', ref_x,
                                    'P', self.pressure)
 
-        self.nu_m = self.mu_m/self.rho_m
-        self.alpha_m = self.k_m/(self.cp_m * self.rho_m)
-        self.beta_m = 1/ref_temp
-        self.beta_star_m = (const.M2 - const.M1)/(ref_x*const.M1*(const.M2 - const.M1)/(ref_x*const.M1 + (1-ref_x)*const.M2) + const.M1)
+        self.nu_m = self.mu_m / self.rho_m
 
-        self.Ra_number = const.GRAVIT_ACCLR*(self.beta_m*(self.temp_s - self.temp_e) + self.beta_star_m*(self.m_1s - self.m_1e))*pow(self.length, 3)/(self.alpha_m*self.nu_m)
+        self.alpha_m = self.k_m / (self.cp_m * self.rho_m)
+
+        self.beta_m = 1 / ref_temp
+
+        self.beta_star_m = (const.M2 - const.M1) /\
+            (ref_m * (const.M2 - const.M1) + const.M1)
+
+        delta_t = self.temp_s - self.temp_e
+
+        delta_m = self.m_1s - self.m_1e
+
+        beta_term = (self.beta_m * (delta_t) + self.beta_star_m * (delta_m))
+
+        self.Ra_number = const.ACC_GRAV * beta_term * pow(self.length, 3) /\
+            (self.alpha_m * self.nu_m)
 
     def solve_iteratively(self):
         """Docstring."""
@@ -145,6 +168,7 @@ class Model(object):
         # These are overridden by the sub-classes that extend this class
         pass
 
+
 class OneDimIsoLiqNoRad(Model):
     """Docstring."""
 
@@ -167,14 +191,17 @@ class OneDimIsoLiqNoRad(Model):
 
     def set_solution(self, solution):
         """Docstring."""
-        self.solution = dict(mddp=solution[0], q_m=solution[1], temp_s=solution[2])
+        self.solution = dict(
+            mddp=solution[0], q_m=solution[1], temp_s=solution[2])
+
 
 class OneDimIsoLiqBlackRad(Model):
     """Docstring."""
 
     def __init__(self, settings, ref='Mills', rule='mean'):
         """The f_matrix and j_matrix are constant, can be set in __init__()."""
-        super(OneDimIsoLiqBlackRad, self).__init__(settings, ref=ref, rule=rule)
+        super(OneDimIsoLiqBlackRad, self).__init__(
+            settings, ref=ref, rule=rule)
 
         self.unknowns = ['mddp', 'q_m', 'q_r', 'temp_s']
         self.temp_s_loc = 3
@@ -192,7 +219,9 @@ class OneDimIsoLiqBlackRad(Model):
 
     def set_solution(self, solution):
         """Docstring."""
-        self.solution = dict(mddp=solution[0], q_m=solution[1], q_r=solution[2], temp_s=solution[3])
+        self.solution = dict(
+            mddp=solution[0], q_m=solution[1], q_r=solution[2], temp_s=solution[3])
+
 
 class OneDimIsoLiqGrayRad(Model):
     """Docstring."""
