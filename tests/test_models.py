@@ -45,6 +45,7 @@ class Test_Models(object):
 
     def test_str(self):
         """print(str(<MODEL>))"""
+        print(MODEL.__str__())
         assert MODEL.__str__() == test_const.STR
 
     def test_get_ref_state(self):

@@ -37,10 +37,12 @@ class Model(object):
         self.mu_m = None
         self.nu_m = None
         self.rho_m = None
-        self.solution = None
 
         # Dimensionless Groups
         self.Ra_number = None
+
+        # Container for solution of model
+        self.solution = None
 
         self.eval_props()
 
@@ -65,14 +67,25 @@ class Model(object):
                 'Temp_e:\t\t{:.6g}\n' +
                 'Temp_s:\t\t{:.6g}\n' +
                 '-------- Properties --------\n' +
+                'alpha_m:\t{:.6g}\n' +
+                'beta_m:\t\t{:.6g}\n' +
+                'beta_star_m:\t{:.6g}\n' +
+                'cp_m:\t\t{:.6g}\n' +
                 'D_12:\t\t{:.6g}\n' +
                 'h_fg:\t\t{:.6g}\n' +
+                'k_m:\t\t{:.6g}\n' +
                 'm_1e:\t\t{:.6g}\n' +
                 'm_1s:\t\t{:.6g}\n' +
-                'rho_m:\t\t{:.6g}'
+                'mu_m:\t\t{:.6g}\n' +
+                'nu_m:\t\t{:.6g}\n' +
+                'rho_m:\t\t{:.6g}\n' +
+                '-------- Dim. Param --------\n' +
+                'Ra:\t\t{:.6g}'
                 ).format(self.length, self.pressure, self.ref, self.rule,
-                         self.temp_dp, self.temp_e, self.temp_s, self.d_12,
-                         self.h_fg, self.m_1e, self.m_1s, self.rho_m)
+                         self.temp_dp, self.temp_e, self.temp_s, self.alpha_m,
+                         self.beta_m, self.beta_star_m, self.cp_m, self.d_12,
+                         self.h_fg, self.k_m, self.m_1e, self.m_1s, self.mu_m,
+                         self.nu_m, self.rho_m, self.Ra_number)
 
     @staticmethod
     def get_ref_state(e_state, s_state, rule):
