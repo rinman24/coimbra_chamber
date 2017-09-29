@@ -107,13 +107,13 @@ class Model(object):
         self.rho_m = 1 / HAPropsSI('Vha', 'T', ref_temp, 'Y', ref_x,
                                    'P', self.pressure)
 
-    def solve_iteratively(self, unknowns, temp_s_loc):
+    def solve_iteratively(self):
         """Docstring."""
         delta, count = 1, 0
-        guess = [1 for _ in range(unknowns)]
+        guess = [1 for _ in range(len(self.unknowns))]
         while abs(delta) > 1e-9:
             sol = opt.fsolve(self.eval_model, guess)
-            delta = sol[temp_s_loc] - self.temp_s
+            delta = sol[self.temp_s_loc] - self.temp_s
             self.temp_s += self.learning_rate * delta
             self.eval_props()
             count += 1
@@ -134,6 +134,13 @@ class Model(object):
 class OneDimIsoLiqNoRad(Model):
     """Docstring."""
 
+    def __init__(self, settings, ref='Mills', rule='mean'):
+        """The f_matrix and j_matrix are constant, can be set in __init__()."""
+        super(OneDimIsoLiqNoRad, self).__init__(settings, ref=ref, rule=rule)
+
+        self.unknowns = ['mddp', 'q_m', 'temp_s']
+        self.temp_s_loc = 2
+
     def eval_model(self, vec_in):
         """Docstring."""
         mddp, q_m, temp_s = vec_in
@@ -150,6 +157,13 @@ class OneDimIsoLiqNoRad(Model):
 
 class OneDimIsoLiqBlackRad(Model):
     """Docstring."""
+
+    def __init__(self, settings, ref='Mills', rule='mean'):
+        """The f_matrix and j_matrix are constant, can be set in __init__()."""
+        super(OneDimIsoLiqBlackRad, self).__init__(settings, ref=ref, rule=rule)
+
+        self.unknowns = ['mddp', 'q_m', 'q_r', 'temp_s']
+        self.temp_s_loc = 3
 
     def eval_model(self, vec_in):
         """Docstring."""
