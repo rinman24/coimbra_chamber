@@ -107,11 +107,25 @@ class Model(object):
         self.rho_m = 1 / HAPropsSI('Vha', 'T', ref_temp, 'Y', ref_x,
                                    'P', self.pressure)
 
-    def solve_iteratively(self):
+    def solve_iteratively(self, unknowns, temp_s_loc):
         """Docstring."""
-        pass
+        delta, count = 1, 0
+        guess = [1 for _ in range(unknowns)]
+        while abs(delta) > 1e-9:
+            sol = opt.fsolve(self.eval_model, guess)
+            delta = sol[temp_s_loc] - self.temp_s
+            self.temp_s += self.learning_rate * delta
+            self.eval_props()
+            count += 1
+        self.set_solution(sol)
+        return count
 
     def eval_model(self, vec_in):
+        """Docstring."""
+        # These are overridden by the sub-classes that extend this class
+        pass
+
+    def set_solution(self):
         """Docstring."""
         # These are overridden by the sub-classes that extend this class
         pass
@@ -130,18 +144,9 @@ class OneDimIsoLiqNoRad(Model):
         res[2] = mddp * self.h_fg + q_m
         return res
 
-    def solve_iteratively(self):
+    def set_solution(self, solution):
         """Docstring."""
-        delta, count = 1, 0
-        while abs(delta) > 1e-9:
-            sol = opt.fsolve(self.eval_model, [1, 1, 1])
-            delta = sol[2] - self.temp_s
-            self.temp_s += self.learning_rate * delta
-            self.eval_props()
-            count += 1
-        self.solution = dict(mddp=sol[0], q_m=sol[1], temp_s=sol[2])
-        return count
-
+        self.solution = dict(mddp=solution[0], q_m=solution[1], temp_s=solution[2])
 
 class OneDimIsoLiqBlackRad(Model):
     """Docstring."""
@@ -157,17 +162,9 @@ class OneDimIsoLiqBlackRad(Model):
         res[3] = q_r - 5.67e-8 * (pow(self.temp_s, 4) - pow(self.temp_e, 4))
         return res
 
-    def solve_iteratively(self):
+    def set_solution(self, solution):
         """Docstring."""
-        delta, count = 1, 0
-        while abs(delta) > 1e-9:
-            sol = opt.fsolve(self.eval_model, [1, 1, 1, 1])
-            delta = sol[3] - self.temp_s
-            self.temp_s += self.learning_rate * delta
-            self.eval_props()
-            count += 1
-        self.solution = dict(mddp=sol[0], q_m=sol[1], q_r=sol[2], temp_s=sol[3])
-        return count
+        self.solution = dict(mddp=solution[0], q_m=solution[1], q_r=solution[2], temp_s=solution[3])
 
 class OneDimIsoLiqGrayRad(Model):
     """Docstring."""

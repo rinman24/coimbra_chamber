@@ -77,7 +77,7 @@ class Test_OneDimIsoLiqNoRad(object):
         assert isclose(res[2], 2457425.545412025)
 
     def test_solve_iteratively(self):
-        count = ONEDIM_ISOLIQ_NORAD.solve_iteratively()
+        count = ONEDIM_ISOLIQ_NORAD.solve_iteratively(3, 2)
         assert count == 126
         assert isclose(ONEDIM_ISOLIQ_NORAD.solution['mddp'], 1.6526395638614737e-06)
         assert isclose(ONEDIM_ISOLIQ_NORAD.solution['q_m'], -4.0660229435638495)
@@ -95,7 +95,7 @@ class Test_OneDimIsoLiqBlackRad(object):
 
 
     def test_solve_iteratively(self):
-        count = ONEDIM_ISOLIQ_BLACKRAD.solve_iteratively()
+        count = ONEDIM_ISOLIQ_BLACKRAD.solve_iteratively(4, 3)
         assert count == 34
         assert isclose(ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'], 4.3134887884960156e-06)
         assert isclose(ONEDIM_ISOLIQ_BLACKRAD.solution['q_m'], -1.3776042647982443)
