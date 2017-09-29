@@ -34,6 +34,15 @@ class Test_Models(object):
         assert isclose(MODEL.alpha_m, 2.157398944861877e-05)
         assert isclose(MODEL.beta_m, 0.0034100596760443308)
         assert isclose(MODEL.beta_star_m, 0.6033861519510446)
+        assert MODEL.solution is None
+
+    def test_repr(self):
+        """print(repr(<MODEL>))"""
+        assert MODEL.__repr__() == test_const.REPR
+
+    def test_str(self):
+        """print(str(<MODEL>))"""
+        assert MODEL.__str__() == test_const.STR
 
     def test_get_ref_state(self):
         """Test the ability to evaluate film values based on various rules."""
@@ -44,9 +53,10 @@ class Test_Models(object):
         """Test the calculation of the binary diffusion coefficient."""
         ref_temp, pressure = 300, 101325
         assert isclose(MODEL.get_bin_diff_coeff(ref_temp, pressure, 'Mills'),
-                       1.97e-5*(101325/pressure)*pow(ref_temp/256, 1.685))
+                       1.97e-5 * (101325 / pressure) *
+                       pow(ref_temp / 256, 1.685))
         assert isclose(MODEL.get_bin_diff_coeff(ref_temp, pressure, 'Marrero'),
-                       1.87e-10*pow(ref_temp, 2.072)/(pressure/101325))
+                       1.87e-10 * pow(ref_temp, 2.072) / (pressure / 101325))
 
     def test_eval_props(self):
         """Test the calculation of all of the thermophysical properties."""
@@ -60,18 +70,6 @@ class Test_Models(object):
         assert isclose(MODEL.rho_m, 1.1758589997836344)
         MODEL.temp_s = 291.5
 
-    def test_repr(self):
-        """print(repr(<MODEL>))"""
-        assert MODEL.__repr__() == test_const.REPR
-
-    def test_str(self):
-        """print(str(<MODEL>))"""
-        assert MODEL.__str__() == test_const.STR
-
-    def test_get_f12(self):
-        """Test the calculation of the view factor F_{12}."""
-        assert isclose(MODEL.get_f12(), 0.1715728752538097)
-
 class Test_OneDimIsoLiqNoRad(object):
     """Unit testing of OneDimIsoLiqNoRad class."""
 
@@ -79,34 +77,52 @@ class Test_OneDimIsoLiqNoRad(object):
         res = ONEDIM_ISOLIQ_NORAD.eval_model([1, 1, 1])
         assert isclose(res[0], 254.49907209600156)
         assert isclose(res[1], 0.9999973637622117)
-        assert isclose(res[2], 2457171.046339929)
+        assert isclose(res[2], 2457425.545412025)
+
+    def test_set_solution(self):
+        ONEDIM_ISOLIQ_NORAD.set_solution([1, 2, 3])
+        assert ONEDIM_ISOLIQ_NORAD.solution['mddp'] == 1
+        assert ONEDIM_ISOLIQ_NORAD.solution['q_m'] == 2
+        assert ONEDIM_ISOLIQ_NORAD.solution['temp_s'] == 3
 
     def test_solve_iteratively(self):
         count = ONEDIM_ISOLIQ_NORAD.solve_iteratively()
-        assert count == 43
-        assert isclose(ONEDIM_ISOLIQ_NORAD.mddp, 1.65263956378e-06)
-        assert isclose(ONEDIM_ISOLIQ_NORAD.q_m, -4.06602294335)
-        assert isclose(ONEDIM_ISOLIQ_NORAD.temp_s, 290.276252547)
+        assert count == 126
+        assert isclose(ONEDIM_ISOLIQ_NORAD.solution['mddp'], 1.6526395638614737e-06)
+        assert isclose(ONEDIM_ISOLIQ_NORAD.solution['q_m'], -4.0660229435638495)
+        assert isclose(ONEDIM_ISOLIQ_NORAD.solution['temp_s'], 290.27625254693885)
+        assert isclose(ONEDIM_ISOLIQ_NORAD.temp_s,
+                       ONEDIM_ISOLIQ_NORAD.solution['temp_s'])
 
     def test_eval_props(self):
         """Test the evaluation of the Rayleigh number"""
         assert isclose(ONEDIM_ISOLIQ_NORAD.Ra_number, -12184.705621803925)
 
+
 class Test_OneDimIsoLiqBlackRad(object):
     """Unit testing of OneDimIsoLiqBlackRad class."""
 
     def test_eval_model(self):
-        res = ONEDIM_ISOLIQ_BLACKRAD.eval_model([1, 1, 1])
+        res = ONEDIM_ISOLIQ_BLACKRAD.eval_model([1, 1, 1, 1])
         assert isclose(res[0], 254.49907209600156)
         assert isclose(res[1], 0.9999973637622117)
-        assert isclose(res[2], 2456741.6373595484)
+        assert isclose(res[2], 2457426.545412025)
+        assert isclose(res[3], 21.01891902495625)
+
+    def test_set_solution(self):
+        ONEDIM_ISOLIQ_BLACKRAD.set_solution([1, 2, 3, 4])
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'] == 1
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['q_m'] == 2
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['q_r'] == 3
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['temp_s'] == 4
 
     def test_solve_iteratively(self):
         count = ONEDIM_ISOLIQ_BLACKRAD.solve_iteratively()
-        assert count == 21
-        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.mddp, 4.31348878793e-06)
-        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.q_m, -1.37760426483)
-        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.temp_s, 293.406541019)
+        assert count == 34
+        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'], 4.3134887884960156e-06)
+        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.solution['q_m'], -1.3776042647982443)
+        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.solution['q_r'], -9.2030040325246905)
+        assert isclose(ONEDIM_ISOLIQ_BLACKRAD.solution['temp_s'], 293.40654101908603)
 
     def test_eval_props(self):
         """Test the evaluation of the Rayleigh number"""

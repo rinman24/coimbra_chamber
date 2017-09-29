@@ -84,7 +84,7 @@ class TestLaser(object):
                        co2_laser.irr_max/2., rel_tol=0.005)
 
     def test_laser_constructor_set_profile_3d(self):
-    	"""Check that the 3d grid for the beam profile was created correctly.
+        """Check that the 3d grid for the beam profile was created correctly.
 
         Note: Every column of the 3d profile should be the same as the profile;
         e.g., radially
