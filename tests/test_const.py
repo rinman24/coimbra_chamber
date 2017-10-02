@@ -2,48 +2,26 @@
 from datetime import datetime
 from os import getcwd
 
-import pytz
 
 # Constants for test_sqldb.py
-SETTINGS_TEST_1 = {'IsMass': 1,
-                   'InitialDewPoint': 100,
-                   'InitialDuty': 100,
-                   'InitialMass': 0.07,
-                   'InitialPressure': 100000,
-                   'InitialTemp': 290,
-                   'TimeStep': 1}
+SETTINGS_TEST_1 = {'Duty': 10,
+                   'Pressure': 100000,
+                   'Temperature': 300}
 
-SETTINGS_TEST_2 = {'IsMass': 1,
-                   'InitialDewPoint': 500,
-                   'InitialDuty': 1000,
-                   'InitialMass': 20,
-                   'InitialPressure': 8,
-                   'InitialTemp': 400,
-                   'TimeStep': 20}
-
-SETTINGS_TEST_3 = {'IsMass': 0,
-                   'InitialDewPoint': 100,
-                   'InitialDuty': 100,
-                   'InitialPressure': 100000,
-                   'InitialTemp': 290,
-                   'TimeStep': 1}
+SETTINGS_TEST_2 = {'Duty': 20,
+                   'Pressure': 110000,
+                   'Temperature': 270}
 
 
 TEST_DIRECTORY = getcwd() + "/tests/data_transfer_test_files"
 
-CORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/"
-                                "ismass_test_0_01.tdms",
+CORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files"
+                                "/tdms_test_folder/tdms_test_folder_full/"
+                                "New_Test_Structure_1.tdms",
                      getcwd() + "/tests/data_transfer_test_files/"
-                                "ismass_test_1_02.tdms",
-                     getcwd() + "/tests/data_transfer_test_files/"
-                                "tdms_test_folder/ismass_test_1_04.tdms",
-                     getcwd() + "/tests/data_transfer_test_files/"
-                                "tdms_test_folder/tdms_test_folder_full/"
-                                "ismass_test_0_03.tdms"]
+                                "New_Test_Structure_2.tdms"]
 
 INCORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/"
-                                  "py.tdmstest",
-                       getcwd() + "/tests/data_transfer_test_files/"
                                   "ismass_test_0_01.tdms_index",
                        getcwd() + "/tests/data_transfer_test_files/"
                                   "ismass_test_1_02.tdms_index",
@@ -54,69 +32,55 @@ INCORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/"
                                   "tdms_test_folder/tdms_test_folder_full/"
                                   "ismass_test_0_03.tdms_index"]
 
-TDMS_TEST_FILE_MF = getcwd() + ("/tests/data_transfer_test_files/"
-                                "ismass_test_0_01.tdms")
 
-TDMS_TEST_FILE_MF_SETTING = {'IsMass': 0,
-                             'InitialDewPoint': '289.70',
-                             'InitialDuty': '0.0',
-                             'InitialPressure': 99649,
-                             'InitialTemp': '296.57',
-                             'TimeStep': '1.00'}
+TDMS_MT_SETTING = {'Duty': 10,
+                   'Pressure': 100000,
+                   'Temperature': 300}
 
-TDMS_TEST_FILE_MF_TESTS = {'Author': "ADL",
-                           'DateTime':
-                           datetime(2017, 9, 11, 21, 25, 55, 23629, pytz.UTC),
-                           'Description':
-                           ("This is the Stefan Tube on the balance with no "
-                            "water in it and the thermocouples disconnected. "
-                            "The point of this study is to determine if the "
-                            "tube is stable with the thermocouple ports on "
-                            "without the thermocouple wires conected.")}
+TDMS_MF_SETTING = {'Duty': 20,
+                   'Pressure': 100000,
+                   'Temperature': 300}
 
-TDMS_TEST_FILE_MF_OBS_09 = {'CapManOk': 1,
-                            'DewPoint': '289.71',
-                            'Duty': '0.0',
-                            'Idx': 9,
-                            'OptidewOk': 1,
-                            'PowOut': '-0.0013',
-                            'PowRef': '-0.0016',
-                            'Pressure': 99684}
+TDMS_MT_TEST = {'Author': 'RHI',
+                'DateTime':
+                    datetime(2017, 9, 28, 15, 58, 7),
+                'Description': 'Test description one.',
+                'IsMass': 1,
+                'TimeStep': 1}
 
-TDMS_TEST_FILE_MF_THM_07 = '296.60'
+TDMS_MF_TEST = {'Author': 'RHI',
+                'DateTime':
+                    datetime(2017, 9, 28, 16, 0, 52),
+                'Description': 'Test description two.',
+                'IsMass': 0,
+                'TimeStep': 1}
 
-TDMS_TEST_FILE_MT = getcwd() + ("/tests/data_transfer_test_files/"
-                                "ismass_test_1_02.tdms")
+TDMS_MT_ADD_TEST = [(1, 'RHI', datetime(2017, 9, 28, 15, 58, 7),
+                     'Test description one.', 1, Decimal('1.00'), 2, 1)]
 
-TDMS_TEST_FILE_MT_SETTING = {'IsMass': 1,
-                             'InitialDewPoint': '289.73',
-                             'InitialDuty': '0.0',
-                             'InitialMass': '0.0874270',
-                             'InitialPressure': 99662,
-                             'InitialTemp': '296.57',
-                             'TimeStep': '1.00'}
+TDMS_MF_ADD_TEST = [(2, 'RHI', datetime(2017, 9, 28, 16, 0, 52),
+                     'Test description two.', 0, Decimal('1.00'), 1, 1)]
 
-TDMS_TEST_FILE_MT_TESTS = {'Author': "ADL",
-                           'DateTime':
-                           datetime(2017, 9, 11, 21, 26, 59, 523318, pytz.UTC),
-                           'Description':
-                           ("This is the Stefan Tube on the balance with no "
-                            "water in it and the thermocouples disconnected. "
-                            "The point of this study is to determine if the "
-                            "tube is stable with the thermocouple ports on "
-                            "without the thermocouple wires conected.")}
+TDMS_MT_OBS_07 = {'CapManOk': 1,
+                  'DewPoint': '285.99',
+                  'Idx': 7,
+                  'Mass': '0.0000000',
+                  'OptidewOk': 1,
+                  'PowOut': '0.0003',
+                  'PowRef': '-0.0008',
+                  'Pressure': 99789}
 
-TDMS_TEST_FILE_MT_OBS_09 = {'CapManOk': 1,
-                            'DewPoint': '289.71',
-                            'Duty': '0.0',
-                            'Idx': 9,
-                            'Mass': '0.0874270',
-                            'OptidewOk': 1,
-                            'PowOut': '-0.0013',
-                            'PowRef': '-0.0015',
-                            'Pressure': 99640}
+TDMS_MF_OBS_07 = {'CapManOk': 1,
+                  'DewPoint': '287.82',
+                  'Idx': 7,
+                  'OptidewOk': 1,
+                  'PowOut': '0.0002',
+                  'PowRef': '-0.0007',
+                  'Pressure': 99846}
 
-TDMS_TEST_FILE_MT_THM_07 = '296.59'
+TDMS_MT_THM_07 = '299.77'
+
+TDMS_MF_THM_07 = '299.70'
 
 TEST_INDEX = 7
 TC_INDEX = 7
