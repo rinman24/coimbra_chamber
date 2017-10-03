@@ -27,8 +27,6 @@ class Model(object):
         # Properties:
         self.props = dict()
         # Default: temp_s = mean of temp_e and temp_dp
-        self.props['T_s'] = \
-            (self.settings['T_e'] + self.settings['T_DP']) / 2
         self.props['alpha_m'] = None
         self.props['beta_m'] = None
         self.props['beta*_m'] = None
@@ -41,68 +39,53 @@ class Model(object):
         self.props['mu_m'] = None
         self.props['nu_m'] = None
         self.props['rho_m'] = None
+        self.props['T_s'] = \
+            (self.settings['T_e'] + self.settings['T_DP']) / 2
         self.props['x_1e'] = None
         self.props['x_1s'] = None
 
         # Reference state:
         self.ref_state = dict()
-        self.ref_state['x'] = None
-        self.ref_state['m'] = None
+        self.ref_state['x_1'] = None
+        self.ref_state['m_1'] = None
         self.ref_state['T'] = None
 
         # Dimensionless parameters:
         self.params = dict()
         self.params['Ra'] = None
 
-        # Container for solution of model
-        self.solution = None
-
         # Radiation properties
         self.eps = [1, 1, 1]  # Default to black surface
+
+        # Container for solution of model
+        self.solution = None
 
         # Populate self.props:
         self.eval_props()
 
     def __repr__(self):
         """print(repr(<MODEL>))"""
-        pt1 = "settings = dict(length={}, pressure={}, temp_dp={}, temp_e={})"\
-            .format(self.length, self.pressure, self.temp_dp, self.temp_e)
+        pt1 = "settings = dict(L_t={}, P={}, T_DP={}, T_e={})"\
+            .format(self.settings['L_t'], self.settings['P'],
+                    self.settings['T_DP'], self.settings['T_e'])
 
         pt2 = "\nModel(settings, ref='{}', rule='{}')"\
-            .format(self.ref, self.rule)
+            .format(self.settings['ref'], self.settings['rule'])
 
         return pt1 + pt2
 
     def __str__(self):
-        """print(str(<MODEL>))"""
+        """print(<MODEL>)"""
         return ('--------- Settings ---------\n'
-                'Length:\t\t{:.6g}\n' +
-                'Pressure:\t{:.6g}\n' +
-                'Reference:\t{}\n' +
-                'Rule:\t\t{}\n' +
-                'Temp_DP:\t{:.6g}\n' +
-                'Temp_e:\t\t{:.6g}\n' +
-                'Temp_s:\t\t{:.6g}\n' +
-                '-------- Properties --------\n' +
-                'alpha_m:\t{:.6g}\n' +
-                'beta_m:\t\t{:.6g}\n' +
-                'beta_star_m:\t{:.6g}\n' +
-                'cp_m:\t\t{:.6g}\n' +
-                'D_12:\t\t{:.6g}\n' +
-                'h_fg:\t\t{:.6g}\n' +
-                'k_m:\t\t{:.6g}\n' +
-                'm_1e:\t\t{:.6g}\n' +
-                'm_1s:\t\t{:.6g}\n' +
-                'mu_m:\t\t{:.6g}\n' +
-                'nu_m:\t\t{:.6g}\n' +
-                'rho_m:\t\t{:.6g}\n' +
-                '-------- Dim. Param --------\n' +
-                'Ra:\t\t{:.6g}'
-                ).format(self.length, self.pressure, self.ref, self.rule,
-                         self.temp_dp, self.temp_e, self.temp_s, self.alpha_m,
-                         self.beta_m, self.beta_star_m, self.cp_m, self.d_12,
-                         self.h_fg, self.k_m, self.m_1e, self.m_1s, self.mu_m,
-                         self.nu_m, self.rho_m, self.Ra_number)
+                'L_t:\t{:.6g}\n'
+                'P:\t{:.6g}\n'
+                'ref:\t{}\n'
+                'rule:\t{}\n'
+                'T_DP:\t{:.6g}\n'
+                'T_e:\t{:.6g}\n')\
+            .format(self.settings['L_t'], self.settings['P'],
+                    self.settings['ref'], self.settings['rule'],
+                    self.settings['T_DP'], self.settings['T_e'])
 
     @staticmethod
     def get_ref_state(e_state, s_state, rule):
@@ -132,13 +115,13 @@ class Model(object):
                                        'T', self.props['T_s'], 'RH', 1,
                                        'P', self.settings['P'])
 
-        self.ref_state['x'] = self.get_ref_state(self.props['x_1e'],
-                                                 self.props['x_1s'],
-                                                 self.settings['rule'])
+        self.ref_state['x_1'] = self.get_ref_state(self.props['x_1e'],
+                                                   self.props['x_1s'],
+                                                   self.settings['rule'])
 
-        self.ref_state['m'] = (self.ref_state['x'] * const.M1) /\
-            (self.ref_state['x'] * const.M1 +
-             (1 - self.ref_state['x']) * const.M2)
+        self.ref_state['m_1'] = (self.ref_state['x_1'] * const.M1) /\
+            (self.ref_state['x_1'] * const.M1 +
+             (1 - self.ref_state['x_1']) * const.M2)
 
         self.ref_state['T'] = self.get_ref_state(self.settings['T_e'],
                                                  self.props['T_s'],
@@ -152,7 +135,7 @@ class Model(object):
 
         self.props['c_pm'] = HAPropsSI('cp',
                                        'T', self.ref_state['T'],
-                                       'Y', self.ref_state['x'],
+                                       'Y', self.ref_state['x_1'],
                                        'P', self.settings['P'])
 
         self.props['D_12'] = self.get_bin_diff_coeff(self.ref_state['T'],
@@ -165,7 +148,7 @@ class Model(object):
 
         self.props['k_m'] = HAPropsSI('k',
                                       'T', self.ref_state['T'],
-                                      'Y', self.ref_state['x'],
+                                      'Y', self.ref_state['x_1'],
                                       'P', self.settings['P'])
 
         self.props['m_1e'] = (self.props['x_1e'] * const.M1) /\
@@ -178,12 +161,12 @@ class Model(object):
 
         self.props['mu_m'] = HAPropsSI('mu',
                                        'T', self.ref_state['T'],
-                                       'Y', self.ref_state['x'],
+                                       'Y', self.ref_state['x_1'],
                                        'P', self.settings['P'])
 
         self.props['rho_m'] = 1 / HAPropsSI('Vha',
                                             'T', self.ref_state['T'],
-                                            'Y', self.ref_state['x'],
+                                            'Y', self.ref_state['x_1'],
                                             'P', self.settings['P'])
 
         # Composite properties
@@ -193,7 +176,7 @@ class Model(object):
         self.props['nu_m'] = self.props['mu_m'] / self.props['rho_m']
 
         self.props['beta*_m'] = (const.M2 - const.M1) /\
-            (self.ref_state['m'] * (const.M2 - const.M1) + const.M1)
+            (self.ref_state['m_1'] * (const.M2 - const.M1) + const.M1)
 
         delta_t = self.props['T_s'] - self.settings['T_e']
 

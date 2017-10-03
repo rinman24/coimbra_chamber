@@ -44,9 +44,9 @@ class Test_Models(object):
         assert isclose(MODEL.props['x_1s'], 0.021202805952925376)
 
         # Test reference state
-        assert isclose(MODEL.ref_state['m'], 0.011957734324044858)
+        assert isclose(MODEL.ref_state['m_1'], 0.011957734324044858)
         assert isclose(MODEL.ref_state['T'], 293.25)
-        assert isclose(MODEL.ref_state['x'], 0.019086589000686643)
+        assert isclose(MODEL.ref_state['x_1'], 0.019086589000686643)
 
         # Test dimensionless parameters
         assert isclose(MODEL.params['Ra'], -8252.400804563847)
@@ -57,47 +57,49 @@ class Test_Models(object):
         # Test solution is None
         assert MODEL.solution is None
 
-    # def test_repr(self):
-    #     """print(repr(<MODEL>))"""
-    #     assert MODEL.__repr__() == test_const.REPR
+    def test_repr(self):
+        """print(repr(<MODEL>))"""
+        assert MODEL.__repr__() == test_const.REPR
 
-    # def test_str(self):
-    #     """print(str(<MODEL>))"""
-    #     assert MODEL.__str__() == test_const.STR
+    def test_str(self):
+        """print(str(<MODEL>))"""
+        assert MODEL.__str__() == test_const.STR
 
-    # def test_get_ref_state(self):
-    #     """Test the ability to evaluate film values based on various rules."""
-    #     assert MODEL.get_ref_state(0, 2, 'mean') == 1
-    #     assert MODEL.get_ref_state(0, 3, 'one-third') == 2
+    def test_get_ref_state(self):
+        """Test the ability to evaluate film values based on various rules."""
+        assert MODEL.get_ref_state(0, 2, 'mean') == 1
+        assert MODEL.get_ref_state(0, 3, 'one-third') == 2
 
-    # def test_bin_diff_coeff(self):
-    #     """Test the calculation of the binary diffusion coefficient."""
-    #     ref_temp, pressure = 300, 101325
-    #     assert isclose(MODEL.get_bin_diff_coeff(ref_temp, pressure, 'Mills'),
-    #                    1.97e-5 * (101325 / pressure) *
-    #                    pow(ref_temp / 256, 1.685))
-    #     assert isclose(MODEL.get_bin_diff_coeff(ref_temp, pressure, 'Marrero'),
-    #                    1.87e-10 * pow(ref_temp, 2.072) / (pressure / 101325))
+    def test_bin_diff_coeff(self):
+        """Test the calculation of the binary diffusion coefficient."""
+        temp_ref, pressure = 300, 101325
+        assert isclose(MODEL.get_bin_diff_coeff(temp_ref, pressure, 'Mills'),
+                       1.97e-5 * (101325 / pressure) *
+                       pow(temp_ref / 256, 1.685))
+        assert isclose(MODEL.get_bin_diff_coeff(temp_ref, pressure, 'Marrero'),
+                       1.87e-10 * pow(temp_ref, 2.072) / (pressure / 101325))
 
-    # def test_eval_props(self):
-    #     """Test the calculation of all of the thermophysical properties."""
-    #     MODEL.temp_s = 293
-    #     MODEL.eval_props()
-    #     assert isclose(MODEL.mu_m, 1.813689690669493e-05)
-    #     assert isclose(MODEL.cp_m, 1017.2873735694611)
-    #     assert isclose(MODEL.d_12, 2.521627605755569e-05)
-    #     assert isclose(MODEL.h_fg, 2453874.327285723)
-    #     assert isclose(MODEL.k_m, 0.02592145926625826)
-    #     assert isclose(MODEL.m_1e, 0.010623365736965384)
-    #     assert isclose(MODEL.m_1s, 0.014610145619944618)
-    #     assert isclose(MODEL.rho_m, 1.1758589997836344)
-
-    #     assert isclose(MODEL.nu_m, 1.5424380737853974e-05)
-    #     assert isclose(MODEL.alpha_m, 2.167008152326072e-05)
-    #     assert isclose(MODEL.beta_m, 0.003401360544217687)
-    #     assert isclose(MODEL.beta_star_m, 0.603147186094405)
-    #     assert isclose(MODEL.Ra_number, -3484.0297271546015)
-    #     MODEL.temp_s = 291.5
+    def test_eval_props(self):
+        """Test the calculation of all of the thermophysical properties."""
+        MODEL.props['T_s'] = 293
+        MODEL.eval_props()
+        assert isclose(MODEL.props['alpha_m'], 2.167008152326072e-05)
+        assert isclose(MODEL.props['beta_m'], 0.003401360544217687)
+        assert isclose(MODEL.props['beta*_m'], 0.603147186094405)
+        assert isclose(MODEL.props['c_pm'], 1017.2873735694611)
+        assert isclose(MODEL.props['D_12'], 2.521627605755569e-05)
+        assert isclose(MODEL.props['h_fg'], 2453874.327285723)
+        assert isclose(MODEL.props['k_m'], 0.02592145926625826)
+        assert isclose(MODEL.props['m_1e'], 0.010623365736965384)
+        assert isclose(MODEL.props['m_1s'], 0.014610145619944618)
+        assert isclose(MODEL.props['mu_m'], 1.813689690669493e-05)
+        assert isclose(MODEL.props['nu_m'], 1.5424380737853974e-05)
+        assert isclose(MODEL.props['rho_m'], 1.1758589997836344)
+        assert isclose(MODEL.props['T_s'], 293)
+        assert isclose(MODEL.props['x_1e'], 0.01697037204844791)
+        assert isclose(MODEL.props['x_1s'], 0.023283028230036043)
+        MODEL.props['T_s'] = 291.5
+        assert isclose(MODEL.props['T_s'], 291.5)
 
 
 # class Test_OneDimIsoLiqNoRad(object):

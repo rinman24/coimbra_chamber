@@ -129,29 +129,30 @@ NORM_TEST_RESULT = [0, 1 / 3, 2 / 3, 1 / 2, 1]
 MOD_SET_01 = dict(L_t=0.03, P=99950, T_DP=288, T_e=295)
 MOD_SET_02 = dict(L_t=0.03, P=99950, T_DP=288, T_e=295, eps=[1, 0.95, 1])
 
-REPR = 'settings = dict(length=0.03, pressure=99950, temp_dp=288, \
-temp_e=295)\n' + "Model(settings, ref='Mills', rule='mean')"
+REPR = 'settings = dict(L_t=0.03, P=99950, T_DP=288, T_e=295)\n' + \
+    "Model(settings, ref='Mills', rule='mean')"
 
-STR = ('--------- Settings ---------\n' +
-       'Length:\t\t0.03\n' +
-       'Pressure:\t99950\n' +
-       'Reference:\tMills\n' +
-       'Rule:\t\tmean\n' +
-       'Temp_DP:\t288\n' +
-       'Temp_e:\t\t295\n' +
-       'Temp_s:\t\t291.5\n' +
-       '-------- Properties --------\n' +
-       'alpha_m:\t2.1574e-05\n' +
-       'beta_m:\t\t0.00341006\n' +
-       'beta_star_m:\t0.603386\n' +
-       'cp_m:\t\t1016.67\n' +
-       'D_12:\t\t2.5108e-05\n' +
-       'h_fg:\t\t2.45742e+06\n' +
-       'k_m:\t\t0.0258673\n' +
-       'm_1e:\t\t0.0106234\n' +
-       'm_1s:\t\t0.0132943\n' +
-       'mu_m:\t\t1.81069e-05\n' +
-       'nu_m:\t\t1.53535e-05\n' +
-       'rho_m:\t\t1.17934\n' +
-       '-------- Dim. Param --------\n' +
-       'Ra:\t\t-8252.4')
+STR = ('--------- Settings ---------\n'
+       'L_t:\t0.03\n'
+       'P:\t99950\n'
+       'ref:\tMills\n'
+       'rule:\tmean\n'
+       'T_DP:\t288\n'
+       'T_e:\t295\n')
+
+       # 'Temp_s:\t\t291.5\n' +
+       # '-------- Properties --------\n' +
+       # 'alpha_m:\t2.1574e-05\n' +
+       # 'beta_m:\t\t0.00341006\n' +
+       # 'beta_star_m:\t0.603386\n' +
+       # 'cp_m:\t\t1016.67\n' +
+       # 'D_12:\t\t2.5108e-05\n' +
+       # 'h_fg:\t\t2.45742e+06\n' +
+       # 'k_m:\t\t0.0258673\n' +
+       # 'm_1e:\t\t0.0106234\n' +
+       # 'm_1s:\t\t0.0132943\n' +
+       # 'mu_m:\t\t1.81069e-05\n' +
+       # 'nu_m:\t\t1.53535e-05\n' +
+       # 'rho_m:\t\t1.17934\n' +
+       # '-------- Dim. Param --------\n' +
+       # 'Ra:\t\t-8252.4')
