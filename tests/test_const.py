@@ -126,7 +126,9 @@ NORM_TEST = [1, 3, 5, 4, 7]
 NORM_TEST_RESULT = [0, 1 / 3, 2 / 3, 1 / 2, 1]
 
 # Constants for test_models.py
-SETTINGS = dict(length=0.03, pressure=99950, temp_dp=288, temp_e=295)
+MOD_SET_01 = dict(length=0.03, pressure=99950, temp_dp=288, temp_e=295)
+MOD_SET_02 = dict(length=0.03, pressure=99950, temp_dp=288, temp_e=295,
+                  eps=[1, 0.95, 1])
 
 REPR = 'settings = dict(length=0.03, pressure=99950, temp_dp=288, \
 temp_e=295)\n' + "Model(settings, ref='Mills', rule='mean')"
