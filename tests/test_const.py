@@ -56,10 +56,10 @@ TDMS_MF_TEST = {'Author': 'RHI',
                 'TimeStep': 1}
 
 TDMS_MT_ADD_TEST = [(1, 'RHI', datetime(2017, 9, 28, 15, 58, 7),
-                     'Test description one.', 1, Decimal('1.00'), 2, 1)]
+                     'Test description one.', 1, 1.00, 2, 1)]
 
 TDMS_MF_ADD_TEST = [(2, 'RHI', datetime(2017, 9, 28, 16, 0, 52),
-                     'Test description two.', 0, Decimal('1.00'), 1, 1)]
+                     'Test description two.', 0, 1.00, 1, 1)]
 
 TDMS_MT_OBS_07 = {'CapManOk': 1,
                   'DewPoint': '285.99',
