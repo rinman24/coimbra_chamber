@@ -5,9 +5,11 @@ import chamber.models as models
 
 import tests.test_const as test_const
 
-MODEL = models.Model(test_const.SETTINGS)
-ONEDIM_ISOLIQ_NORAD = models.OneDimIsoLiqNoRad(test_const.SETTINGS)
-ONEDIM_ISOLIQ_BLACKRAD = models.OneDimIsoLiqBlackRad(test_const.SETTINGS)
+MODEL = models.Model(test_const.MOD_SET_01)
+ONEDIM_ISOLIQ_NORAD = models.OneDimIsoLiqNoRad(test_const.MOD_SET_01)
+ONEDIM_ISOLIQ_BLACKRAD = models.OneDimIsoLiqBlackRad(test_const.MOD_SET_01)
+# ONEDIM_ISOLIQ_BLACKGRAYRAD = \
+#     models.OneDimIsoLiqBlackGrayRad(test_const.MOD_SET_02)
 
 
 class Test_Models(object):
@@ -45,7 +47,6 @@ class Test_Models(object):
 
     def test_str(self):
         """print(str(<MODEL>))"""
-        print(MODEL.__str__())
         assert MODEL.__str__() == test_const.STR
 
     def test_get_ref_state(self):
@@ -98,9 +99,9 @@ class Test_OneDimIsoLiqNoRad(object):
         assert ONEDIM_ISOLIQ_NORAD.solution['q_m'] == 2
         assert ONEDIM_ISOLIQ_NORAD.solution['temp_s'] == 3
 
-    def test_solve_iteratively(self):
-        count = ONEDIM_ISOLIQ_NORAD.solve_iteratively()
-        assert count == 126
+    def test_iter_solve(self):
+        count = ONEDIM_ISOLIQ_NORAD.iter_solve()
+        assert count == 126  # Used to be 32, so lets look at iter_solve
         assert isclose(
             ONEDIM_ISOLIQ_NORAD.solution['mddp'], 1.6526395638614737e-06)
         assert isclose(
@@ -119,7 +120,7 @@ class Test_OneDimIsoLiqBlackRad(object):
         assert isclose(res[0], 254.49907209600156)
         assert isclose(res[1], 0.9999973637622117)
         assert isclose(res[2], 2457426.545412025)
-        assert isclose(res[3], 21.01891902495625)
+        assert isclose(res[3], 430.43677457759003)
 
     def test_set_solution(self):
         ONEDIM_ISOLIQ_BLACKRAD.set_solution([1, 2, 3, 4])
@@ -128,14 +129,26 @@ class Test_OneDimIsoLiqBlackRad(object):
         assert ONEDIM_ISOLIQ_BLACKRAD.solution['q_r'] == 3
         assert ONEDIM_ISOLIQ_BLACKRAD.solution['temp_s'] == 4
 
-    def test_solve_iteratively(self):
-        count = ONEDIM_ISOLIQ_BLACKRAD.solve_iteratively()
-        assert count == 34
+    def test_iter_solve(self):
+        count = ONEDIM_ISOLIQ_BLACKRAD.iter_solve()
+        assert count == 315
         assert isclose(
-            ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'], 4.3134887884960156e-06)
+            ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'], 4.313551217117603e-06)
         assert isclose(
-            ONEDIM_ISOLIQ_BLACKRAD.solution['q_m'], -1.3776042647982443)
+            ONEDIM_ISOLIQ_BLACKRAD.solution['q_m'], -1.3775462599751673)
         assert isclose(
-            ONEDIM_ISOLIQ_BLACKRAD.solution['q_r'], -9.2030040325246905)
+            ONEDIM_ISOLIQ_BLACKRAD.solution['q_r'], -9.2032144826349729)
         assert isclose(
-            ONEDIM_ISOLIQ_BLACKRAD.solution['temp_s'], 293.40654101908603)
+            ONEDIM_ISOLIQ_BLACKRAD.solution['temp_s'], 293.40660826138048)
+
+    def test_rad_props(self):
+        assert ONEDIM_ISOLIQ_BLACKRAD.rad_props() == \
+            'eps_1: 1\neps_2: 1\neps_3: 1'
+
+
+# class Test_OneDimIsoLiqBlackGrayRad(object):
+#     """Unit testing of OneDimIsoLiqBlackGrayRad class."""
+
+#     def test_init(self):
+#         assert ONEDIM_ISOLIQ_BLACKGRAYRAD
+#         assert ONEDIM_ISOLIQ_BLACKGRAYRAD.eps == [1, 0.95, 1]
