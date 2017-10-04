@@ -2,11 +2,9 @@
 from CoolProp.HumidAirProp import HAPropsSI
 from CoolProp.CoolProp import PropsSI
 
-import chamber.const as const
-
-import numpy as np
-
 import scipy.optimize as opt
+
+import chamber.const as const
 
 
 class Model(object):
@@ -16,79 +14,146 @@ class Model(object):
 
     def __init__(self, settings, ref='Mills', rule='mean'):
         """Constructor."""
-        self.length = settings['length']
-        self.pressure = settings['pressure']
-        self.temp_dp = settings['temp_dp']
-        self.temp_e = settings['temp_e']
-        self.temp_s = (self.temp_e + self.temp_dp) / 2
-        self.ref = ref
-        self.rule = rule
 
-        # Properties
-        self.alpha_m = None
-        self.beta_m = None
-        self.beta_star_m = None
-        self.cp_m = None
-        self.d_12 = None
-        self.h_fg = None
-        self.k_m = None
-        self.m_1e = None
-        self.m_1s = None
-        self.mu_m = None
-        self.nu_m = None
-        self.rho_m = None
+        # Settings:
+        self.settings = dict()
+        self.settings['L_t'] = settings['L_t']
+        self.settings['P'] = settings['P']
+        self.settings['ref'] = ref
+        self.settings['rule'] = rule
+        self.settings['T_DP'] = settings['T_DP']
+        self.settings['T_e'] = settings['T_e']
 
-        # Dimensionless Groups
-        self.Ra_number = None
+        # Properties:
+        self.props = dict()
+        # Default: temp_s = mean of temp_e and temp_dp
+        self.props['alpha_m'] = None
+        self.props['beta_m'] = None
+        self.props['beta*_m'] = None
+        self.props['c_pm'] = None
+        self.props['D_12'] = None
+        self.props['h_fg'] = None
+        self.props['k_m'] = None
+        self.props['m_1e'] = None
+        self.props['m_1s'] = None
+        self.props['mu_m'] = None
+        self.props['nu_m'] = None
+        self.props['rho_m'] = None
+        self.props['T_s'] = \
+            (self.settings['T_e'] + self.settings['T_DP']) / 2
+        self.props['x_1e'] = None
+        self.props['x_1s'] = None
 
-        # Container for solution of model
-        self.solution = None
+        # Reference state:
+        self.ref_state = dict()
+        self.ref_state['x_1'] = None
+        self.ref_state['m_1'] = None
+        self.ref_state['T_m'] = None
+
+        # Dimensionless parameters:
+        self.params = dict()
+        self.params['Ra'] = None
 
         # Radiation properties
         self.eps = [1, 1, 1]  # Default to black surface
 
+        # Container for solution of model
+        self.solution = None
+
+        # Populate self.props:
         self.eval_props()
 
     def __repr__(self):
         """print(repr(<MODEL>))"""
-        pt1 = "settings = dict(length={}, pressure={}, temp_dp={}, temp_e={})"\
-            .format(self.length, self.pressure, self.temp_dp, self.temp_e)
+        pt1 = "settings = dict(L_t={}, P={}, T_DP={}, T_e={})"\
+            .format(self.settings['L_t'], self.settings['P'],
+                    self.settings['T_DP'], self.settings['T_e'])
 
         pt2 = "\nModel(settings, ref='{}', rule='{}')"\
-            .format(self.ref, self.rule)
+            .format(self.settings['ref'], self.settings['rule'])
 
         return pt1 + pt2
 
     def __str__(self):
-        """print(str(<MODEL>))"""
-        return ('--------- Settings ---------\n'
-                'Length:\t\t{:.6g}\n' +
-                'Pressure:\t{:.6g}\n' +
-                'Reference:\t{}\n' +
-                'Rule:\t\t{}\n' +
-                'Temp_DP:\t{:.6g}\n' +
-                'Temp_e:\t\t{:.6g}\n' +
-                'Temp_s:\t\t{:.6g}\n' +
-                '-------- Properties --------\n' +
-                'alpha_m:\t{:.6g}\n' +
-                'beta_m:\t\t{:.6g}\n' +
-                'beta_star_m:\t{:.6g}\n' +
-                'cp_m:\t\t{:.6g}\n' +
-                'D_12:\t\t{:.6g}\n' +
-                'h_fg:\t\t{:.6g}\n' +
-                'k_m:\t\t{:.6g}\n' +
-                'm_1e:\t\t{:.6g}\n' +
-                'm_1s:\t\t{:.6g}\n' +
-                'mu_m:\t\t{:.6g}\n' +
-                'nu_m:\t\t{:.6g}\n' +
-                'rho_m:\t\t{:.6g}\n' +
-                '-------- Dim. Param --------\n' +
-                'Ra:\t\t{:.6g}'
-                ).format(self.length, self.pressure, self.ref, self.rule,
-                         self.temp_dp, self.temp_e, self.temp_s, self.alpha_m,
-                         self.beta_m, self.beta_star_m, self.cp_m, self.d_12,
-                         self.h_fg, self.k_m, self.m_1e, self.m_1s, self.mu_m,
-                         self.nu_m, self.rho_m, self.Ra_number)
+        """print(<MODEL>)"""
+        return ('------ Settings ------\n'
+                'L_t:\t{:.6g}\t[m]\n'
+                'P:\t{:.6g}\t[Pa]\n'
+                'T_DP:\t{:.6g}\t[K]\n'
+                'T_e:\t{:.6g}\t[K]\n'
+                'ref:\t{}\t[-]\n'
+                'rule:\t{}\t[-]\n')\
+            .format(self.settings['L_t'], self.settings['P'],
+                    self.settings['T_DP'], self.settings['T_e'],
+                    self.settings['ref'], self.settings['rule'])
+
+    def show_settings(self, show_res=True):
+        res = ('------ Settings ------\n'
+               'L_t:\t{:.6g}\t[m]\n'
+               'P:\t{:.6g}\t[Pa]\n'
+               'T_DP:\t{:.6g}\t[K]\n'
+               'T_e:\t{:.6g}\t[K]\n'
+               'ref:\t{}\t[-]\n'
+               'rule:\t{}\t[-]\n')\
+            .format(self.settings['L_t'], self.settings['P'],
+                    self.settings['T_DP'], self.settings['T_e'],
+                    self.settings['ref'], self.settings['rule'])
+        if show_res:
+            print(res)
+        else:
+            return res
+
+    def show_props(self, show_res=True):
+        """Docstring."""
+        res = ('--------------- Properties ---------------\n'
+               'alpha_m:\t{:.6g}\t[m^2 / s]\n'
+               'beta_m:\t\t{:.6g}\t[1 / K]\n'
+               'beta*_m:\t{:.6g}\t[-]\n'
+               'c_pm:\t\t{:.6g}\t\t[J / kg]\n'
+               'D_12:\t\t{:.6g}\t[m^2 / s]\n'
+               'h_fg:\t\t{:.6g}\t[J / kg]\n'
+               'k_m:\t\t{:.6g}\t[W / m K]\n'
+               'm_1e:\t\t{:.6g}\t[-]\n'
+               'm_1s:\t\t{:.6g}\t[-]\n'
+               'mu_m:\t\t{:.6g}\t[kg / m s]\n'
+               'nu_m:\t\t{:.6g}\t[m^2 / s]\n'
+               'rho_m:\t\t{:.6g}\t\t[kg / m^3]\n'
+               'T_s:\t\t{:.6g}\t\t[K]\n'
+               'x_1e:\t\t{:.6g}\t[-]\n'
+               'x_1s:\t\t{:.6g}\t[-]\n')\
+            .format(self.props['alpha_m'], self.props['beta_m'],
+                    self.props['beta*_m'], self.props['c_pm'],
+                    self.props['D_12'], self.props['h_fg'], self.props['k_m'],
+                    self.props['m_1e'], self.props['m_1s'], self.props['mu_m'],
+                    self.props['nu_m'], self.props['rho_m'], self.props['T_s'],
+                    self.props['x_1e'], self.props['x_1s'])
+        if show_res:
+            print(res)
+        else:
+            return res
+
+    def show_ref_state(self, show_res=True):
+        """Docstring."""
+        res = ('-------- Ref. State --------\n'
+               'm_1:\t{:.6g}\t[-]\n'
+               'T_m:\t{:.6g}\t\t[K]\n'
+               'x_1:\t{:.6g}\t[-]\n')\
+            .format(self.ref_state['m_1'], self.ref_state['T_m'],
+                    self.ref_state['x_1'])
+        if show_res:
+            print(res)
+        else:
+            return res
+
+    def show_params(self, show_res=True):
+        """Docstring."""
+        res = ('---- Parameters ----\n'
+               'Ra:\t{:.6g}\t[-]\n')\
+            .format(self.params['Ra'])
+        if show_res:
+            print(res)
+        else:
+            return res
 
     @staticmethod
     def get_ref_state(e_state, s_state, rule):
@@ -106,60 +171,91 @@ class Model(object):
                 }[ref](ref_temp, pressure / 101325)
 
     def eval_props(self):
-        """Use CoolProp and attributes to evaluate thermo-physical properties.
-        """
-        x_1e = HAPropsSI('Y', 'T', self.temp_e, 'T_dp', self.temp_dp,
-                         'P', self.pressure)
+        """Use CoolProp to populate self.props."""
 
-        x_1s = HAPropsSI('Y', 'T', self.temp_s, 'RH', 1, 'P', self.pressure)
+        # Reference states:
+        self.props['x_1e'] = HAPropsSI('Y',
+                                       'T', self.settings['T_e'],
+                                       'T_dp', self.settings['T_DP'],
+                                       'P', self.settings['P'])
 
-        ref_x = self.get_ref_state(x_1e, x_1s, self.rule)
+        self.props['x_1s'] = HAPropsSI('Y',
+                                       'T', self.props['T_s'], 'RH', 1,
+                                       'P', self.settings['P'])
 
-        ref_m = (ref_x * const.M1) /\
-            (ref_x * const.M1 + (1 - ref_x) * const.M2)
+        self.ref_state['x_1'] = self.get_ref_state(self.props['x_1e'],
+                                                   self.props['x_1s'],
+                                                   self.settings['rule'])
 
-        ref_temp = self.get_ref_state(self.temp_e, self.temp_s, self.rule)
+        self.ref_state['m_1'] = (self.ref_state['x_1'] * const.M1) /\
+            (self.ref_state['x_1'] * const.M1 +
+             (1 - self.ref_state['x_1']) * const.M2)
 
-        self.mu_m = HAPropsSI('mu', 'T', ref_temp, 'Y', ref_x,
-                              'P', self.pressure)
+        self.ref_state['T_m'] = self.get_ref_state(self.settings['T_e'],
+                                                   self.props['T_s'],
+                                                   self.settings['rule'])
 
-        self.cp_m = HAPropsSI('cp', 'T', ref_temp, 'Y', ref_x,
-                              'P', self.pressure)
+        # Primary properties:
+        # These can be calculated with the information we have now as opposed
+        # composite properties that can be calculated as groups of primary
+        # properties; e.g., alpha = k / (rho * c)
+        self.props['beta_m'] = 1 / self.ref_state['T_m']
 
-        self.d_12 = self.get_bin_diff_coeff(ref_temp, self.pressure, self.ref)
+        self.props['c_pm'] = HAPropsSI('cp',
+                                       'T', self.ref_state['T_m'],
+                                       'Y', self.ref_state['x_1'],
+                                       'P', self.settings['P'])
 
-        self.h_fg = PropsSI('H', 'T', self.temp_s, 'Q', 1, 'water') - \
-            PropsSI('H', 'T', self.temp_s, 'Q', 0, 'water')
+        self.props['D_12'] = self.get_bin_diff_coeff(self.ref_state['T_m'],
+                                                     self.settings['P'],
+                                                     self.settings['ref'])
 
-        self.k_m = HAPropsSI('k', 'T', ref_temp, 'Y', ref_x,
-                             'P', self.pressure)
+        self.props['h_fg'] = \
+            PropsSI('H', 'T', self.props['T_s'], 'Q', 1, 'water') - \
+            PropsSI('H', 'T', self.props['T_s'], 'Q', 0, 'water')
 
-        self.m_1e = (x_1e * const.M1) /\
-            (x_1e * const.M1 + (1 - x_1e) * const.M2)
+        self.props['k_m'] = HAPropsSI('k',
+                                      'T', self.ref_state['T_m'],
+                                      'Y', self.ref_state['x_1'],
+                                      'P', self.settings['P'])
 
-        self.m_1s = (x_1s * const.M1) /\
-            (x_1s * const.M1 + (1 - x_1s) * const.M2)
+        self.props['m_1e'] = (self.props['x_1e'] * const.M1) /\
+            (self.props['x_1e'] * const.M1 +
+             (1 - self.props['x_1e']) * const.M2)
 
-        self.rho_m = 1 / HAPropsSI('Vha', 'T', ref_temp, 'Y', ref_x,
-                                   'P', self.pressure)
+        self.props['m_1s'] = (self.props['x_1s'] * const.M1) /\
+            (self.props['x_1s'] * const.M1 +
+             (1 - self.props['x_1s']) * const.M2)
 
-        self.nu_m = self.mu_m / self.rho_m
+        self.props['mu_m'] = HAPropsSI('mu',
+                                       'T', self.ref_state['T_m'],
+                                       'Y', self.ref_state['x_1'],
+                                       'P', self.settings['P'])
 
-        self.alpha_m = self.k_m / (self.cp_m * self.rho_m)
+        self.props['rho_m'] = 1 / HAPropsSI('Vha',
+                                            'T', self.ref_state['T_m'],
+                                            'Y', self.ref_state['x_1'],
+                                            'P', self.settings['P'])
 
-        self.beta_m = 1 / ref_temp
+        # Composite properties
+        self.props['alpha_m'] = self.props['k_m'] /\
+            (self.props['c_pm'] * self.props['rho_m'])
 
-        self.beta_star_m = (const.M2 - const.M1) /\
-            (ref_m * (const.M2 - const.M1) + const.M1)
+        self.props['nu_m'] = self.props['mu_m'] / self.props['rho_m']
 
-        delta_t = self.temp_s - self.temp_e
+        self.props['beta*_m'] = (const.M2 - const.M1) /\
+            (self.ref_state['m_1'] * (const.M2 - const.M1) + const.M1)
 
-        delta_m = self.m_1s - self.m_1e
+        delta_t = self.props['T_s'] - self.settings['T_e']
 
-        beta_term = (self.beta_m * (delta_t) + self.beta_star_m * (delta_m))
+        delta_m = self.props['m_1s'] - self.props['m_1e']
 
-        self.Ra_number = const.ACC_GRAV * beta_term * pow(self.length, 3) /\
-            (self.alpha_m * self.nu_m)
+        beta_term = (self.props['beta_m'] * (delta_t) +
+                     self.props['beta*_m'] * (delta_m))
+
+        self.params['Ra'] = const.ACC_GRAV * beta_term * \
+            pow(self.settings['L_t'], 3) /\
+            (self.props['alpha_m'] * self.props['nu_m'])
 
     def iter_solve(self):
         """Docstring."""
