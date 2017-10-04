@@ -45,7 +45,7 @@ class Test_Models(object):
 
         # Test reference state
         assert isclose(MODEL.ref_state['m_1'], 0.011957734324044858)
-        assert isclose(MODEL.ref_state['T'], 293.25)
+        assert isclose(MODEL.ref_state['T_m'], 293.25)
         assert isclose(MODEL.ref_state['x_1'], 0.019086589000686643)
 
         # Test dimensionless parameters
@@ -58,12 +58,30 @@ class Test_Models(object):
         assert MODEL.solution is None
 
     def test_repr(self):
-        """print(repr(<MODEL>))"""
+        """>>> <MODEL>"""
         assert MODEL.__repr__() == test_const.REPR
 
     def test_str(self):
-        """print(str(<MODEL>))"""
+        """>>> print(<MODEL>)"""
         assert MODEL.__str__() == test_const.STR
+
+    def test_show_settings(self):
+        """>>> print(<MODEL>)"""
+        assert MODEL.show_settings(show_res=False) == test_const.STR
+
+    def test_show_props(self):
+        """>>> print(<MODEL>.show_props())"""
+        assert MODEL.show_props(show_res=False) == test_const.PROPS
+
+    def test_show_ref_state(self):
+        """>>> print(<MODEL>.show_ref_state())"""
+        assert MODEL.show_ref_state(show_res=False) == test_const.REF_STATE
+
+    def test_show_params(self):
+        """>>> print(<MODEL>.show_params())"""
+        # MODEL.show_params()
+        # print(test_const.PARAMS)
+        assert MODEL.show_params(show_res=False) == test_const.PARAMS
 
     def test_get_ref_state(self):
         """Test the ability to evaluate film values based on various rules."""

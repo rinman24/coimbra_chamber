@@ -48,7 +48,7 @@ class Model(object):
         self.ref_state = dict()
         self.ref_state['x_1'] = None
         self.ref_state['m_1'] = None
-        self.ref_state['T'] = None
+        self.ref_state['T_m'] = None
 
         # Dimensionless parameters:
         self.params = dict()
@@ -76,16 +76,84 @@ class Model(object):
 
     def __str__(self):
         """print(<MODEL>)"""
-        return ('--------- Settings ---------\n'
-                'L_t:\t{:.6g}\n'
-                'P:\t{:.6g}\n'
-                'ref:\t{}\n'
-                'rule:\t{}\n'
-                'T_DP:\t{:.6g}\n'
-                'T_e:\t{:.6g}\n')\
+        return ('------ Settings ------\n'
+                'L_t:\t{:.6g}\t[m]\n'
+                'P:\t{:.6g}\t[Pa]\n'
+                'T_DP:\t{:.6g}\t[K]\n'
+                'T_e:\t{:.6g}\t[K]\n'
+                'ref:\t{}\t[-]\n'
+                'rule:\t{}\t[-]\n')\
             .format(self.settings['L_t'], self.settings['P'],
-                    self.settings['ref'], self.settings['rule'],
-                    self.settings['T_DP'], self.settings['T_e'])
+                    self.settings['T_DP'], self.settings['T_e'],
+                    self.settings['ref'], self.settings['rule'])
+
+    def show_settings(self, show_res=True):
+        res = ('------ Settings ------\n'
+               'L_t:\t{:.6g}\t[m]\n'
+               'P:\t{:.6g}\t[Pa]\n'
+               'T_DP:\t{:.6g}\t[K]\n'
+               'T_e:\t{:.6g}\t[K]\n'
+               'ref:\t{}\t[-]\n'
+               'rule:\t{}\t[-]\n')\
+            .format(self.settings['L_t'], self.settings['P'],
+                    self.settings['T_DP'], self.settings['T_e'],
+                    self.settings['ref'], self.settings['rule'])
+        if show_res:
+            print(res)
+        else:
+            return res
+
+    def show_props(self, show_res=True):
+        """Docstring."""
+        res = ('--------------- Properties ---------------\n'
+               'alpha_m:\t{:.6g}\t[m^2 / s]\n'
+               'beta_m:\t\t{:.6g}\t[1 / K]\n'
+               'beta*_m:\t{:.6g}\t[-]\n'
+               'c_pm:\t\t{:.6g}\t\t[J / kg]\n'
+               'D_12:\t\t{:.6g}\t[m^2 / s]\n'
+               'h_fg:\t\t{:.6g}\t[J / kg]\n'
+               'k_m:\t\t{:.6g}\t[W / m K]\n'
+               'm_1e:\t\t{:.6g}\t[-]\n'
+               'm_1s:\t\t{:.6g}\t[-]\n'
+               'mu_m:\t\t{:.6g}\t[kg / m s]\n'
+               'nu_m:\t\t{:.6g}\t[m^2 / s]\n'
+               'rho_m:\t\t{:.6g}\t\t[kg / m^3]\n'
+               'T_s:\t\t{:.6g}\t\t[K]\n'
+               'x_1e:\t\t{:.6g}\t[-]\n'
+               'x_1s:\t\t{:.6g}\t[-]\n')\
+            .format(self.props['alpha_m'], self.props['beta_m'],
+                    self.props['beta*_m'], self.props['c_pm'],
+                    self.props['D_12'], self.props['h_fg'], self.props['k_m'],
+                    self.props['m_1e'], self.props['m_1s'], self.props['mu_m'],
+                    self.props['nu_m'], self.props['rho_m'], self.props['T_s'],
+                    self.props['x_1e'], self.props['x_1s'])
+        if show_res:
+            print(res)
+        else:
+            return res
+
+    def show_ref_state(self, show_res=True):
+        """Docstring."""
+        res = ('-------- Ref. State --------\n'
+               'm_1:\t{:.6g}\t[-]\n'
+               'T_m:\t{:.6g}\t\t[K]\n'
+               'x_1:\t{:.6g}\t[-]\n')\
+            .format(self.ref_state['m_1'], self.ref_state['T_m'],
+                    self.ref_state['x_1'])
+        if show_res:
+            print(res)
+        else:
+            return res
+
+    def show_params(self, show_res=True):
+        """Docstring."""
+        res = ('---- Parameters ----\n'
+               'Ra:\t{:.6g}\t[-]\n')\
+            .format(self.params['Ra'])
+        if show_res:
+            print(res)
+        else:
+            return res
 
     @staticmethod
     def get_ref_state(e_state, s_state, rule):
@@ -123,22 +191,22 @@ class Model(object):
             (self.ref_state['x_1'] * const.M1 +
              (1 - self.ref_state['x_1']) * const.M2)
 
-        self.ref_state['T'] = self.get_ref_state(self.settings['T_e'],
-                                                 self.props['T_s'],
-                                                 self.settings['rule'])
+        self.ref_state['T_m'] = self.get_ref_state(self.settings['T_e'],
+                                                   self.props['T_s'],
+                                                   self.settings['rule'])
 
         # Primary properties:
         # These can be calculated with the information we have now as opposed
         # composite properties that can be calculated as groups of primary
         # properties; e.g., alpha = k / (rho * c)
-        self.props['beta_m'] = 1 / self.ref_state['T']
+        self.props['beta_m'] = 1 / self.ref_state['T_m']
 
         self.props['c_pm'] = HAPropsSI('cp',
-                                       'T', self.ref_state['T'],
+                                       'T', self.ref_state['T_m'],
                                        'Y', self.ref_state['x_1'],
                                        'P', self.settings['P'])
 
-        self.props['D_12'] = self.get_bin_diff_coeff(self.ref_state['T'],
+        self.props['D_12'] = self.get_bin_diff_coeff(self.ref_state['T_m'],
                                                      self.settings['P'],
                                                      self.settings['ref'])
 
@@ -147,7 +215,7 @@ class Model(object):
             PropsSI('H', 'T', self.props['T_s'], 'Q', 0, 'water')
 
         self.props['k_m'] = HAPropsSI('k',
-                                      'T', self.ref_state['T'],
+                                      'T', self.ref_state['T_m'],
                                       'Y', self.ref_state['x_1'],
                                       'P', self.settings['P'])
 
@@ -160,12 +228,12 @@ class Model(object):
              (1 - self.props['x_1s']) * const.M2)
 
         self.props['mu_m'] = HAPropsSI('mu',
-                                       'T', self.ref_state['T'],
+                                       'T', self.ref_state['T_m'],
                                        'Y', self.ref_state['x_1'],
                                        'P', self.settings['P'])
 
         self.props['rho_m'] = 1 / HAPropsSI('Vha',
-                                            'T', self.ref_state['T'],
+                                            'T', self.ref_state['T_m'],
                                             'Y', self.ref_state['x_1'],
                                             'P', self.settings['P'])
 
