@@ -55,7 +55,10 @@ class Model(object):
         self.params['Ra'] = None
 
         # Radiation properties
-        self.eps = [1, 1, 1]  # Default to black surface
+        self.rad_props = dict()
+        self.rad_props['eps_1'] = 1  # Default to black surfaces
+        self.rad_props['eps_2'] = 1
+        self.rad_props['eps_3'] = 1
 
         # Container for solution of model
         self.solution = None
@@ -130,6 +133,19 @@ class Model(object):
                     self.props['m_1e'], self.props['m_1s'], self.props['mu_m'],
                     self.props['nu_m'], self.props['rho_m'], self.props['T_s'],
                     self.props['x_1e'], self.props['x_1s'])
+        if show_res:
+            print(res)
+        else:
+            return res
+
+    def show_rad_props(self, show_res=True):
+        """Docstring."""
+        res = ('- Radiation Properties -\n'
+               'eps_1:\t{:.6g}\t[-]\n'
+               'eps_2:\t{:.6g}\t[-]\n'
+               'eps_3:\t{:.6g}\t[-]\n')\
+            .format(self.rad_props['eps_1'], self.rad_props['eps_2'],
+                    self.rad_props['eps_3'])
         if show_res:
             print(res)
         else:

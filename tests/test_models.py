@@ -43,6 +43,11 @@ class Test_Models(object):
         assert isclose(MODEL.props['x_1e'], 0.01697037204844791)
         assert isclose(MODEL.props['x_1s'], 0.021202805952925376)
 
+        # Test radiation properties
+        assert MODEL.rad_props['eps_1'] == 1
+        assert MODEL.rad_props['eps_2'] == 1
+        assert MODEL.rad_props['eps_3'] == 1
+
         # Test reference state
         assert isclose(MODEL.ref_state['m_1'], 0.011957734324044858)
         assert isclose(MODEL.ref_state['T_m'], 293.25)
@@ -50,9 +55,6 @@ class Test_Models(object):
 
         # Test dimensionless parameters
         assert isclose(MODEL.params['Ra'], -8252.400804563847)
-
-        # Test radiation properties
-        assert MODEL.eps == [1, 1, 1]
 
         # Test solution is None
         assert MODEL.solution is None
@@ -72,6 +74,10 @@ class Test_Models(object):
     def test_show_props(self):
         """>>> print(<MODEL>.show_props())"""
         assert MODEL.show_props(show_res=False) == test_const.PROPS
+
+    def test_show_rad_props(self):
+        """>>> print(<MODEL>.show_rad_props())"""
+        assert MODEL.show_rad_props(show_res=False) == test_const.RAD_PROPS
 
     def test_show_ref_state(self):
         """>>> print(<MODEL>.show_ref_state())"""
