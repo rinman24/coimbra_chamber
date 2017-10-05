@@ -63,6 +63,9 @@ class Model(object):
         # Populate self.props:
         self.eval_props()
 
+        # Populate self.params:
+        self.eval_params()
+
     def __repr__(self):
         """print(repr(<MODEL>))"""
         pt1 = "settings = dict(L_t={}, P={}, T_DP={}, T_e={})"\
@@ -246,6 +249,8 @@ class Model(object):
         self.props['beta*_m'] = (const.M2 - const.M1) /\
             (self.ref_state['m_1'] * (const.M2 - const.M1) + const.M1)
 
+    def eval_params(self):
+        # Rayleigh number
         delta_t = self.props['T_s'] - self.settings['T_e']
 
         delta_m = self.props['m_1s'] - self.props['m_1e']
@@ -303,10 +308,12 @@ class OneDimIsoLiqNoRad(Model):
         """Docstring."""
         mddp, q_m, temp_s = vec_in
         res = [0 for _ in range(3)]
-        res[0] = q_m + (self.k_m / self.length) * (self.temp_e - temp_s)
+        res[0] = q_m + (self.props['k_m'] / self.settings['L_t']
+                        ) * (self.settings['T_e'] - temp_s)
         res[1] = mddp + \
-            (self.rho_m * self.d_12 / self.length) * (self.m_1e - self.m_1s)
-        res[2] = mddp * self.h_fg + q_m
+            (self.props['rho_m'] * self.props['D_12'] / self.settings['L_t']
+             ) * (self.props['m_1e'] - self.props['m_1s'])
+        res[2] = mddp * self.props['h_fg'] + q_m
         return res
 
     def set_solution(self, solution):
