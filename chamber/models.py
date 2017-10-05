@@ -299,6 +299,14 @@ class Model(object):
         # These are overridden by the sub-classes that extend this class
         pass
 
+    def describe(self):
+        """Docstring."""
+        self.show_settings()
+        self.show_props()
+        self.show_ref_state()
+        self.show_params()
+        self.show_solution()
+
 
 class OneDimIsoLiqNoRad(Model):
     """Docstring."""
@@ -331,12 +339,18 @@ class OneDimIsoLiqNoRad(Model):
 
     def show_solution(self, show_res=True):
         """Docstring."""
-        res = ('------------- Solution -------------\n'
-               'mddp:\t{:.6g}\t[kg / m^2 s]\n'
-               'q_cs:\t{:.6g}\t[W / m^2]\n'
-               'T_s:\t{:.6g}\t\t[K]\n')\
-            .format(self.solution['mddp'], self.solution['q_cs'],
-                    self.solution['T_s'])
+        # If the model has been solved
+        if self.solution['mddp']:
+            res = ('------------- Solution -------------\n'
+                   'mddp:\t{:.6g}\t[kg / m^2 s]\n'
+                   'q_cs:\t{:.6g}\t[W / m^2]\n'
+                   'T_s:\t{:.6g}\t\t[K]\n')\
+                .format(self.solution['mddp'], self.solution['q_cs'],
+                        self.solution['T_s'])
+        else:
+            res = ('------------- Solution -------------\n'
+                   '......... Not solved yet ...........\n')
+
         if show_res:
             print(res)
         else:
