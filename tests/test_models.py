@@ -138,6 +138,11 @@ class Test_Models(object):
         MODEL.props['T_s'] = 291.5
         assert isclose(MODEL.props['T_s'], 291.5)
 
+    def test_run(self):
+        """Docstring."""
+        # No testing needed for this as all the methods have been tested above.
+        pass
+
 
 class Test_OneDimIsoLiqNoRad(object):
     """Unit testing of OneDimIsoLiqNoRad class."""
@@ -181,39 +186,51 @@ class Test_OneDimIsoLiqNoRad(object):
             test_const.SOLUTION_01
 
 
-# class Test_OneDimIsoLiqBlackRad(object):
-#     """Unit testing of OneDimIsoLiqBlackRad class."""
+class Test_OneDimIsoLiqBlackRad(object):
+    """Unit testing of OneDimIsoLiqBlackRad class."""
 
-#     def test_eval_model(self):
-#         res = ONEDIM_ISOLIQ_BLACKRAD.eval_model([1, 1, 1, 1])
-#         assert isclose(res[0], 254.49907209600156)
-#         assert isclose(res[1], 0.9999973637622117)
-#         assert isclose(res[2], 2457426.545412025)
-#         assert isclose(res[3], 430.43677457759003)
+    def test__init__(self):
+        """Docstring."""
+        assert ONEDIM_ISOLIQ_BLACKRAD
 
-#     def test_set_solution(self):
-#         ONEDIM_ISOLIQ_BLACKRAD.set_solution([1, 2, 3, 4])
-#         assert ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'] == 1
-#         assert ONEDIM_ISOLIQ_BLACKRAD.solution['q_m'] == 2
-#         assert ONEDIM_ISOLIQ_BLACKRAD.solution['q_r'] == 3
-#         assert ONEDIM_ISOLIQ_BLACKRAD.solution['temp_s'] == 4
+        assert len(ONEDIM_ISOLIQ_BLACKRAD.solution) == 4
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'] is None
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['q_cs'] is None
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['q_rad'] is None
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['T_s'] is None
 
-#     def test_solve(self):
-#         count = ONEDIM_ISOLIQ_BLACKRAD.solve()
-#         assert count == 315
-#         assert isclose(
-#             ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'], 4.313551217117603e-06)
-#         assert isclose(
-#             ONEDIM_ISOLIQ_BLACKRAD.solution['q_m'], -1.3775462599751673)
-#         assert isclose(
-#             ONEDIM_ISOLIQ_BLACKRAD.solution['q_r'], -9.2032144826349729)
-#         assert isclose(
-#             ONEDIM_ISOLIQ_BLACKRAD.solution['temp_s'], 293.40660826138048)
+    def test_eval_model(self):
+        """Docstring."""
+        res = ONEDIM_ISOLIQ_BLACKRAD.eval_model([1, 1, 1, 1])
+        assert isclose(res[0], 254.49907209600156)
+        assert isclose(res[1], 0.9999973637622117)
+        assert isclose(res[2], 2457426.545412025)
+        assert isclose(res[3], 430.43677457759003)
 
-#     def test_rad_props(self):
-#         assert ONEDIM_ISOLIQ_BLACKRAD.rad_props() == \
-#             'eps_1: 1\neps_2: 1\neps_3: 1'
+    def test_set_solution(self):
+        """Docstring."""
+        ONEDIM_ISOLIQ_BLACKRAD.set_solution([1, 2, 3, 4])
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'] == 1
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['q_cs'] == 2
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['q_rad'] == 3
+        assert ONEDIM_ISOLIQ_BLACKRAD.solution['T_s'] == 4
 
+    def test_solve(self):
+        count = ONEDIM_ISOLIQ_BLACKRAD.solve()
+        assert count == 315
+        assert isclose(
+            ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'], 4.313551217117603e-06)
+        assert isclose(
+            ONEDIM_ISOLIQ_BLACKRAD.solution['q_cs'], -1.3775462599751673)
+        assert isclose(
+            ONEDIM_ISOLIQ_BLACKRAD.solution['q_rad'], -9.2032144826349729)
+        assert isclose(
+            ONEDIM_ISOLIQ_BLACKRAD.solution['T_s'], 293.40660826138048)
+
+    def test_show_solution(self):
+        """>>> <OneDimIsoLiqNoRad>.show_props()"""
+        assert ONEDIM_ISOLIQ_BLACKRAD.show_solution(show_res=False) == \
+            test_const.SOLUTION_02
 
 # class Test_OneDimIsoLiqBlackGrayRad(object):
 #     """Unit testing of OneDimIsoLiqBlackGrayRad class."""

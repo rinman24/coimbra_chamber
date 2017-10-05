@@ -54,9 +54,9 @@ class Model(object):
         self.params = dict()
         self.params['Ra'] = None
 
-        # Radiation properties
+        # Radiation properties, default to black surfaces.
         self.rad_props = dict()
-        self.rad_props['eps_1'] = 1  # Default to black surfaces
+        self.rad_props['eps_1'] = 1
         self.rad_props['eps_2'] = 1
         self.rad_props['eps_3'] = 1
 
@@ -178,7 +178,7 @@ class Model(object):
         """Docstring."""
         self.show_settings()
         self.show_props()
-        # self.show_rad_props()
+        self.show_rad_props()
         self.show_ref_state()
         self.show_params()
         self.show_solution()
@@ -309,6 +309,13 @@ class Model(object):
         self.eval_params()
         return count
 
+    def run(self):
+        """Docstring."""
+        self.solve()
+        self.describe()
+
+    # Methods that are defined here but overwritten by children.
+
     def eval_model(self, vec_in):
         """Docstring."""
         # These are overridden by the sub-classes that extend this class
@@ -330,7 +337,8 @@ class OneDimIsoLiqNoRad(Model):
 
     def __init__(self, settings, ref='Mills', rule='mean'):
         """The f_matrix and j_matrix are constant, can be set in __init__()."""
-        super(OneDimIsoLiqNoRad, self).__init__(settings, ref=ref, rule=rule)
+        super(OneDimIsoLiqNoRad, self)\
+            .__init__(settings, ref=ref, rule=rule)
 
         self.solution = dict(mddp=None, q_cs=None, T_s=None)
 
@@ -379,35 +387,53 @@ class OneDimIsoLiqBlackRad(Model):
 
     def __init__(self, settings, ref='Mills', rule='mean'):
         """Docstring."""
-        super(OneDimIsoLiqBlackRad, self).__init__(
-            settings, ref=ref, rule=rule)
+        super(OneDimIsoLiqBlackRad, self)\
+            .__init__(settings, ref=ref, rule=rule)
 
-        self.unknowns = ['mddp', 'q_cs', 'q_r', 'temp_s']
-        self.temp_s_loc = 3
+        self.solution = dict(mddp=None, q_cs=None, q_rad=None, T_s=None)
 
     def eval_model(self, vec_in):
         """Docstring."""
-        mddp, q_cs, q_r, temp_s = vec_in
-        res = [0 for _ in range(4)]
-        res[0] = q_cs + (self.k_m / self.length) * (self.temp_e - temp_s)
+        mddp, q_cs, q_rad, T_s = vec_in
+        res = [0 for _ in range(len(self.solution))]
+        res[0] = q_cs + \
+            (self.props['k_m'] / self.settings['L_t']) * \
+            (self.settings['T_e'] - T_s)
         res[1] = mddp + \
-            (self.rho_m * self.d_12 / self.length) * (self.m_1e - self.m_1s)
-        res[2] = mddp * self.h_fg + q_cs + q_r
-        res[3] = q_r - \
-            const.SIGMA * (pow(temp_s, 4) - pow(self.temp_e, 4))
+            (self.props['rho_m'] * self.props['D_12'] /
+             self.settings['L_t']) * \
+            (self.props['m_1e'] - self.props['m_1s'])
+        res[2] = mddp * self.props['h_fg'] + q_cs + q_rad
+        res[3] = q_rad + \
+            const.SIGMA * (pow(self.settings['T_e'], 4) - pow(T_s, 4))
         return res
 
     def set_solution(self, solution):
         """Docstring."""
-        self.solution = dict(mddp=solution[0], q_cs=solution[1],
-                             q_r=solution[2], temp_s=solution[3])
+        self.solution['mddp'] = solution[0]
+        self.solution['q_cs'] = solution[1]
+        self.solution['q_rad'] = solution[2]
+        self.solution['T_s'] = solution[3]
 
-    def rad_props(self):
+    def show_solution(self, show_res=True):
         """Docstring."""
-        return 'eps_1: ' + str(self.eps[0]) + \
-               '\neps_2: ' + str(self.eps[1]) + \
-               '\neps_3: ' + str(self.eps[2])
+        # If the model has been solved
+        if self.solution['mddp']:
+            res = ('------------- Solution -------------\n'
+                   'mddp:\t{:.6g}\t[kg / m^2 s]\n'
+                   'q_cs:\t{:.6g}\t[W / m^2]\n'
+                   'q_rad:\t{:.6g}\t[W / m^2]\n'
+                   'T_s:\t{:.6g}\t\t[K]\n')\
+                .format(self.solution['mddp'], self.solution['q_cs'],
+                        self.solution['q_rad'], self.solution['T_s'])
+        else:
+            res = ('------------- Solution -------------\n'
+                   '......... Not solved yet ...........\n')
 
+        if show_res:
+            print(res)
+        else:
+            return res
 
 # class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
 #     """Docstring."""
