@@ -294,7 +294,7 @@ class Model(object):
         # These are overridden by the sub-classes that extend this class
         pass
 
-    def set_solution(self):
+    def show_solution(self):
         """Docstring."""
         # These are overridden by the sub-classes that extend this class
         pass
@@ -307,27 +307,40 @@ class OneDimIsoLiqNoRad(Model):
         """The f_matrix and j_matrix are constant, can be set in __init__()."""
         super(OneDimIsoLiqNoRad, self).__init__(settings, ref=ref, rule=rule)
 
-        self.solution = dict(mddp=None, q_cm=None, T_s=None)
+        self.solution = dict(mddp=None, q_cs=None, T_s=None)
 
     def eval_model(self, vec_in):
         """Docstring."""
-        mddp, q_cm, T_s = vec_in
+        mddp, q_cs, T_s = vec_in
         res = [0 for _ in range(len(self.solution))]
-        res[0] = q_cm + \
+        res[0] = q_cs + \
             (self.props['k_m'] / self.settings['L_t']) * \
             (self.settings['T_e'] - T_s)
         res[1] = mddp + \
             (self.props['rho_m'] * self.props['D_12'] /
              self.settings['L_t']) * \
             (self.props['m_1e'] - self.props['m_1s'])
-        res[2] = mddp * self.props['h_fg'] + q_cm
+        res[2] = mddp * self.props['h_fg'] + q_cs
         return res
 
     def set_solution(self, solution):
         """Docstring."""
         self.solution['mddp'] = solution[0]
-        self.solution['q_cm'] = solution[1]
+        self.solution['q_cs'] = solution[1]
         self.solution['T_s'] = solution[2]
+
+    def show_solution(self, show_res=True):
+        """Docstring."""
+        res = ('------------- Solution -------------\n'
+               'mddp:\t{:.6g}\t[kg / m^2 s]\n'
+               'q_cs:\t{:.6g}\t[W / m^2]\n'
+               'T_s:\t{:.6g}\t\t[K]\n')\
+            .format(self.solution['mddp'], self.solution['q_cs'],
+                    self.solution['T_s'])
+        if show_res:
+            print(res)
+        else:
+            return res
 
 
 class OneDimIsoLiqBlackRad(Model):
@@ -338,24 +351,24 @@ class OneDimIsoLiqBlackRad(Model):
         super(OneDimIsoLiqBlackRad, self).__init__(
             settings, ref=ref, rule=rule)
 
-        self.unknowns = ['mddp', 'q_m', 'q_r', 'temp_s']
+        self.unknowns = ['mddp', 'q_cs', 'q_r', 'temp_s']
         self.temp_s_loc = 3
 
     def eval_model(self, vec_in):
         """Docstring."""
-        mddp, q_m, q_r, temp_s = vec_in
+        mddp, q_cs, q_r, temp_s = vec_in
         res = [0 for _ in range(4)]
-        res[0] = q_m + (self.k_m / self.length) * (self.temp_e - temp_s)
+        res[0] = q_cs + (self.k_m / self.length) * (self.temp_e - temp_s)
         res[1] = mddp + \
             (self.rho_m * self.d_12 / self.length) * (self.m_1e - self.m_1s)
-        res[2] = mddp * self.h_fg + q_m + q_r
+        res[2] = mddp * self.h_fg + q_cs + q_r
         res[3] = q_r - \
             const.SIGMA * (pow(temp_s, 4) - pow(self.temp_e, 4))
         return res
 
     def set_solution(self, solution):
         """Docstring."""
-        self.solution = dict(mddp=solution[0], q_m=solution[1],
+        self.solution = dict(mddp=solution[0], q_cs=solution[1],
                              q_r=solution[2], temp_s=solution[3])
 
     def rad_props(self):
@@ -377,12 +390,12 @@ class OneDimIsoLiqBlackRad(Model):
 
 #     def eval_model(self, vec_in):
 #         """Docstring."""
-#         mddp, q_m, q_r, temp_s = vec_in
+#         mddp, q_cs, q_r, temp_s = vec_in
 #         res = [0 for _ in range(4)]
-#         res[0] = q_m + (self.k_m / self.length) * (self.temp_e - temp_s)
+#         res[0] = q_cs + (self.k_m / self.length) * (self.temp_e - temp_s)
 #         res[1] = mddp + \
 #             (self.rho_m * self.d_12 / self.length) * (self.m_1e - self.m_1s)
-#         res[2] = mddp * self.h_fg + q_m + q_r
+#         res[2] = mddp * self.h_fg + q_cs + q_r
 
 #         eb1 = const.SIGMA * pow(temp_s, 4)
 #         eb2 = const.SIGMA * pow(self.temp_e, 4)
@@ -394,7 +407,7 @@ class OneDimIsoLiqBlackRad(Model):
 
 #     def set_solution(self, solution):
 #         """Docstring."""
-#         self.solution = dict(mddp=solution[0], q_m=solution[1],
+#         self.solution = dict(mddp=solution[0], q_cs=solution[1],
 #                              q_r=solution[2], temp_s=solution[3])
 
 
@@ -458,7 +471,7 @@ class OneDimIsoLiqBlackRad(Model):
 
 #     def eval_model(self, vec_in):
 #         """Docstring."""
-#         mddp, q_m, temp_s = vec_in
+#         mddp, q_cs, temp_s = vec_in
 #         res = [0 for _ in range(3)]
 #         # First we need to solve the linear system of radiosity equations
 #         j_vec = self.solve_j_system()
