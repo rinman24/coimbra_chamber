@@ -260,16 +260,16 @@ class Model(object):
     def iter_solve(self):
         """Docstring."""
         delta, count = 1, 0
-        sol = [1 for _ in range(len(self.unknowns))]
+        sol = [1 for _ in range(len(self.solution))]
         while abs(delta) > 1e-9:
             # Get the solution with the current properties evaluated at
             # self.temp_s:
             sol = opt.fsolve(self.eval_model, sol)
             self.set_solution(sol)
 
-            # Make a new guess on self.temp_s based on self.solution['temp_s']:
-            delta = self.solution['temp_s'] - self.temp_s
-            self.temp_s += self.learning_rate * delta
+            # Make new guess @ self.props['T_s'] based on self.solution['T_s']:
+            delta = self.solution['T_s'] - self.props['T_s']
+            self.props['T_s'] += self.learning_rate * delta
 
             # Evaluate the new properties before solving again:
             self.eval_props()
@@ -296,25 +296,27 @@ class OneDimIsoLiqNoRad(Model):
         """The f_matrix and j_matrix are constant, can be set in __init__()."""
         super(OneDimIsoLiqNoRad, self).__init__(settings, ref=ref, rule=rule)
 
-        self.unknowns = ['mddp', 'q_m', 'temp_s']
-        self.temp_s_loc = 2
+        self.solution = dict(mddp=None, q_cm=None, T_s=None)
 
     def eval_model(self, vec_in):
         """Docstring."""
-        mddp, q_m, temp_s = vec_in
-        res = [0 for _ in range(3)]
-        res[0] = q_m + (self.props['k_m'] / self.settings['L_t']
-                        ) * (self.settings['T_e'] - temp_s)
+        mddp, q_cm, T_s = vec_in
+        res = [0 for _ in range(len(self.solution))]
+        res[0] = q_cm + \
+            (self.props['k_m'] / self.settings['L_t']) * \
+            (self.settings['T_e'] - T_s)
         res[1] = mddp + \
-            (self.props['rho_m'] * self.props['D_12'] / self.settings['L_t']
-             ) * (self.props['m_1e'] - self.props['m_1s'])
-        res[2] = mddp * self.props['h_fg'] + q_m
+            (self.props['rho_m'] * self.props['D_12'] /
+             self.settings['L_t']) * \
+            (self.props['m_1e'] - self.props['m_1s'])
+        res[2] = mddp * self.props['h_fg'] + q_cm
         return res
 
     def set_solution(self, solution):
         """Docstring."""
-        self.solution = dict(mddp=solution[0], q_m=solution[1],
-                             temp_s=solution[2])
+        self.solution['mddp'] = solution[0]
+        self.solution['q_cm'] = solution[1]
+        self.solution['T_s'] = solution[2]
 
 
 class OneDimIsoLiqBlackRad(Model):
