@@ -15,7 +15,7 @@ ONEDIM_ISOLIQ_BLACKRAD = models.OneDimIsoLiqBlackRad(test_const.MOD_SET_01)
 class Test_Models(object):
     """Unit testing of Models class."""
 
-    def test_init(self):
+    def test__init__(self):
         assert MODEL
 
         # Test settings
@@ -57,11 +57,11 @@ class Test_Models(object):
         # Test solution is None
         assert MODEL.solution is None
 
-    def test_repr(self):
+    def test___repr__(self):
         """>>> <MODEL>"""
         assert MODEL.__repr__() == test_const.REPR
 
-    def test_str(self):
+    def test__str__(self):
         """>>> print(<MODEL>)"""
         assert MODEL.__str__() == test_const.STR
 
@@ -133,32 +133,46 @@ class Test_Models(object):
         assert isclose(MODEL.props['T_s'], 291.5)
 
 
-# class Test_OneDimIsoLiqNoRad(object):
-#     """Unit testing of OneDimIsoLiqNoRad class."""
+class Test_OneDimIsoLiqNoRad(object):
+    """Unit testing of OneDimIsoLiqNoRad class."""
 
-#     def test_eval_model(self):
-#         res = ONEDIM_ISOLIQ_NORAD.eval_model([1, 1, 1])
-#         assert isclose(res[0], 254.49907209600156)
-#         assert isclose(res[1], 0.9999973637622117)
-#         assert isclose(res[2], 2457425.545412025)
+    def test__init__(self):
+        """Docstring."""
+        assert ONEDIM_ISOLIQ_NORAD
 
-#     def test_set_solution(self):
-#         ONEDIM_ISOLIQ_NORAD.set_solution([1, 2, 3])
-#         assert ONEDIM_ISOLIQ_NORAD.solution['mddp'] == 1
-#         assert ONEDIM_ISOLIQ_NORAD.solution['q_m'] == 2
-#         assert ONEDIM_ISOLIQ_NORAD.solution['temp_s'] == 3
+        assert len(ONEDIM_ISOLIQ_NORAD.solution) == 3
+        assert ONEDIM_ISOLIQ_NORAD.solution['mddp'] is None
+        assert ONEDIM_ISOLIQ_NORAD.solution['q_cs'] is None
+        assert ONEDIM_ISOLIQ_NORAD.solution['T_s'] is None
 
-#     def test_solve(self):
-#         count = ONEDIM_ISOLIQ_NORAD.solve()
-#         assert count == 126  # Used to be 32, so lets look at solve
-#         assert isclose(
-#             ONEDIM_ISOLIQ_NORAD.solution['mddp'], 1.6526395638614737e-06)
-#         assert isclose(
-#             ONEDIM_ISOLIQ_NORAD.solution['q_m'], -4.0660229435638495)
-#         assert isclose(
-#             ONEDIM_ISOLIQ_NORAD.solution['temp_s'], 290.27625254693885)
-#         assert isclose(ONEDIM_ISOLIQ_NORAD.temp_s,
-#                        ONEDIM_ISOLIQ_NORAD.solution['temp_s'])
+    def test_eval_model(self):
+        sol = ONEDIM_ISOLIQ_NORAD.eval_model([1, 1, 1])
+        assert isclose(sol[0], 254.49907209600156)
+        assert isclose(sol[1], 0.9999973637622117)
+        assert isclose(sol[2], 2457425.545412025)
+
+    def test_set_solution(self):
+        ONEDIM_ISOLIQ_NORAD.set_solution([1, 2, 3])
+        assert ONEDIM_ISOLIQ_NORAD.solution['mddp'] == 1
+        assert ONEDIM_ISOLIQ_NORAD.solution['q_cs'] == 2
+        assert ONEDIM_ISOLIQ_NORAD.solution['T_s'] == 3
+
+    def test_solve(self):
+        count = ONEDIM_ISOLIQ_NORAD.solve()
+        assert count == 126
+        assert isclose(
+            ONEDIM_ISOLIQ_NORAD.solution['mddp'], 1.6526395638614737e-06)
+        assert isclose(
+            ONEDIM_ISOLIQ_NORAD.solution['q_cs'], -4.0660229435638495)
+        assert isclose(
+            ONEDIM_ISOLIQ_NORAD.solution['T_s'], 290.27625254693885)
+        assert isclose(ONEDIM_ISOLIQ_NORAD.props['T_s'],
+                       ONEDIM_ISOLIQ_NORAD.solution['T_s'])
+
+    def test_show_solution(self):
+        """>>> <OneDimIsoLiqNoRad>.show_props()"""
+        assert ONEDIM_ISOLIQ_NORAD.show_solution(show_res=False) == \
+            test_const.SOLUTION_01
 
 
 # class Test_OneDimIsoLiqBlackRad(object):
