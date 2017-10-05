@@ -157,7 +157,7 @@ PROPS = ('--------------- Properties ---------------\n'
          'x_1e:\t\t0.0169704\t[-]\n'
          'x_1s:\t\t0.0212028\t[-]\n')
 
-RAD_PROPS = ('- Radiation Properties -\n'
+RAD_PROPS = ('--- Rad. Props. ---\n'
              'eps_1:\t1\t[-]\n'
              'eps_2:\t1\t[-]\n'
              'eps_3:\t1\t[-]\n')

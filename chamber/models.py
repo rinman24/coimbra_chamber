@@ -140,7 +140,7 @@ class Model(object):
 
     def show_rad_props(self, show_res=True):
         """Docstring."""
-        res = ('- Radiation Properties -\n'
+        res = ('--- Rad. Props. ---\n'
                'eps_1:\t{:.6g}\t[-]\n'
                'eps_2:\t{:.6g}\t[-]\n'
                'eps_3:\t{:.6g}\t[-]\n')\
