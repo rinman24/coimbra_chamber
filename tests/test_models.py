@@ -89,6 +89,11 @@ class Test_Models(object):
         # print(test_const.PARAMS)
         assert MODEL.show_params(show_res=False) == test_const.PARAMS
 
+    def test_describe(self):
+        """Docstring."""
+        # No testing needed for this as all the methods have been tested above.
+        pass
+
     def test_get_ref_state(self):
         """Test the ability to evaluate film values based on various rules."""
         assert MODEL.get_ref_state(0, 2, 'mean') == 1
@@ -149,9 +154,9 @@ class Test_Models(object):
 #         assert ONEDIM_ISOLIQ_NORAD.solution['q_m'] == 2
 #         assert ONEDIM_ISOLIQ_NORAD.solution['temp_s'] == 3
 
-#     def test_iter_solve(self):
-#         count = ONEDIM_ISOLIQ_NORAD.iter_solve()
-#         assert count == 126  # Used to be 32, so lets look at iter_solve
+#     def test_solve(self):
+#         count = ONEDIM_ISOLIQ_NORAD.solve()
+#         assert count == 126  # Used to be 32, so lets look at solve
 #         assert isclose(
 #             ONEDIM_ISOLIQ_NORAD.solution['mddp'], 1.6526395638614737e-06)
 #         assert isclose(
@@ -179,8 +184,8 @@ class Test_Models(object):
 #         assert ONEDIM_ISOLIQ_BLACKRAD.solution['q_r'] == 3
 #         assert ONEDIM_ISOLIQ_BLACKRAD.solution['temp_s'] == 4
 
-#     def test_iter_solve(self):
-#         count = ONEDIM_ISOLIQ_BLACKRAD.iter_solve()
+#     def test_solve(self):
+#         count = ONEDIM_ISOLIQ_BLACKRAD.solve()
 #         assert count == 315
 #         assert isclose(
 #             ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'], 4.313551217117603e-06)

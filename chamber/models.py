@@ -174,6 +174,15 @@ class Model(object):
         else:
             return res
 
+    def describe(self):
+        """Docstring."""
+        self.show_settings()
+        self.show_props()
+        # self.show_rad_props()
+        self.show_ref_state()
+        self.show_params()
+        self.show_solution()
+
     @staticmethod
     def get_ref_state(e_state, s_state, rule):
         """Calculate ref state based on rule."""
@@ -278,7 +287,7 @@ class Model(object):
             pow(self.settings['L_t'], 3) /\
             (self.props['alpha_m'] * self.props['nu_m'])
 
-    def iter_solve(self):
+    def solve(self):
         """Docstring."""
         delta, count = 1, 0
         sol = [1 for _ in range(len(self.solution))]
@@ -347,12 +356,18 @@ class OneDimIsoLiqNoRad(Model):
 
     def show_solution(self, show_res=True):
         """Docstring."""
-        res = ('------------- Solution -------------\n'
-               'mddp:\t{:.6g}\t[kg / m^2 s]\n'
-               'q_cs:\t{:.6g}\t[W / m^2]\n'
-               'T_s:\t{:.6g}\t\t[K]\n')\
-            .format(self.solution['mddp'], self.solution['q_cs'],
-                    self.solution['T_s'])
+        # If the model has been solved
+        if self.solution['mddp']:
+            res = ('------------- Solution -------------\n'
+                   'mddp:\t{:.6g}\t[kg / m^2 s]\n'
+                   'q_cs:\t{:.6g}\t[W / m^2]\n'
+                   'T_s:\t{:.6g}\t\t[K]\n')\
+                .format(self.solution['mddp'], self.solution['q_cs'],
+                        self.solution['T_s'])
+        else:
+            res = ('------------- Solution -------------\n'
+                   '......... Not solved yet ...........\n')
+
         if show_res:
             print(res)
         else:
