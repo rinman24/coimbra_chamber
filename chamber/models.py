@@ -158,6 +158,15 @@ class Model(object):
         else:
             return res
 
+    def describe(self):
+        """Docstring."""
+        self.show_settings()
+        self.show_props()
+        # self.show_rad_props()
+        self.show_ref_state()
+        self.show_params()
+        self.show_solution()
+
     @staticmethod
     def get_ref_state(e_state, s_state, rule):
         """Calculate ref state based on rule."""
@@ -262,7 +271,7 @@ class Model(object):
             pow(self.settings['L_t'], 3) /\
             (self.props['alpha_m'] * self.props['nu_m'])
 
-    def iter_solve(self):
+    def solve(self):
         """Docstring."""
         delta, count = 1, 0
         sol = [1 for _ in range(len(self.solution))]
@@ -298,14 +307,6 @@ class Model(object):
         """Docstring."""
         # These are overridden by the sub-classes that extend this class
         pass
-
-    def describe(self):
-        """Docstring."""
-        self.show_settings()
-        self.show_props()
-        self.show_ref_state()
-        self.show_params()
-        self.show_solution()
 
 
 class OneDimIsoLiqNoRad(Model):
