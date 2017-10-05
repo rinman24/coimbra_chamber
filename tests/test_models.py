@@ -119,6 +119,14 @@ class Test_Models(object):
         MODEL.props['T_s'] = 291.5
         assert isclose(MODEL.props['T_s'], 291.5)
 
+    def test_eval_params(self):
+        """Test the calculation of all the dimensionless parameters"""
+        MODEL.props['T_s'] = 293
+        MODEL.eval_params()
+        assert isclose(MODEL.params['Ra'], -3484.0297271546015)
+        MODEL.props['T_s'] = 291.5
+        assert isclose(MODEL.props['T_s'], 291.5)
+
 
 # class Test_OneDimIsoLiqNoRad(object):
 #     """Unit testing of OneDimIsoLiqNoRad class."""
