@@ -68,11 +68,11 @@ class Model(object):
 
     def __repr__(self):
         """print(repr(<MODEL>))"""
-        pt1 = "settings = dict(L_t={}, P={}, T_DP={}, T_e={})"\
+        pt1 = "settings = dict(L_t={}, P={}, T_DP={}, T_e={})\n"\
             .format(self.settings['L_t'], self.settings['P'],
                     self.settings['T_DP'], self.settings['T_e'])
 
-        pt2 = "\nModel(settings, ref='{}', rule='{}')"\
+        pt2 = type(self).__name__ + "(settings, ref='{}', rule='{}')"\
             .format(self.settings['ref'], self.settings['rule'])
 
         return pt1 + pt2
@@ -281,9 +281,15 @@ class Model(object):
 
             # Bookkeeping
             count += 1
+        self.eval_params()
         return count
 
     def eval_model(self, vec_in):
+        """Docstring."""
+        # These are overridden by the sub-classes that extend this class
+        pass
+
+    def set_solution(self):
         """Docstring."""
         # These are overridden by the sub-classes that extend this class
         pass
