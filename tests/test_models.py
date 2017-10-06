@@ -55,6 +55,8 @@ class Test_Models(object):
 
         # Test dimensionless parameters
         assert isclose(MODEL.params['Ra'], -8252.400804563847)
+        assert isclose(MODEL.params['Pr'], 0.7116651275643526)
+        assert isclose(MODEL.params['Gr_h'], -13406.091168735455)
 
         # Test solution is None
         assert MODEL.solution is None

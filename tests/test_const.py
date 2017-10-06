@@ -157,7 +157,7 @@ PROPS = ('--------------- Properties ---------------\n'
          'x_1e:\t\t0.0169704\t[-]\n'
          'x_1s:\t\t0.0212028\t[-]\n')
 
-RAD_PROPS = ('- Radiation Properties -\n'
+RAD_PROPS = ('--- Rad. Props. ---\n'
              'eps_1:\t1\t[-]\n'
              'eps_2:\t1\t[-]\n'
              'eps_3:\t1\t[-]\n')
@@ -167,8 +167,10 @@ REF_STATE = ('-------- Ref. State --------\n'
              'T_m:\t293.25\t\t[K]\n'
              'x_1:\t0.0190866\t[-]\n')
 
-PARAMS = ('---- Parameters ----\n'
-          'Ra:\t-8252.4\t[-]\n')
+PARAMS = ('-------- Parameters --------\n'
+          'Ra:\t-8252.4\t[-]\n'
+          'Pr:\t0.711665\t[-]\n'
+          'Gr_h:\t-13406.1\t[-]\n')
 
 SOLUTION_01 = ('------------- Solution -------------\n'
                'mddp:\t1.65264e-06\t[kg / m^2 s]\n'
