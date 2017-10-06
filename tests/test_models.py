@@ -3,6 +3,7 @@ from math import isclose
 
 import chamber.models as models
 
+import chamber.const as const
 import tests.test_const as test_const
 
 MODEL = models.Model(test_const.MOD_SET_01)
@@ -148,6 +149,11 @@ class Test_Models(object):
         """Docstring."""
         # No testing needed for this as all the methods have been tested above.
         pass
+
+    def test_e_b(self):
+        """Docstring."""
+        assert isclose(MODEL.e_b(MODEL.settings['T_e']),
+                       const.SIGMA * pow(MODEL.settings['T_e'], 4))
 
 
 class Test_OneDimIsoLiqNoRad(object):
