@@ -54,6 +54,7 @@ class Model(object):
         self.params = dict()
         self.params['Ra'] = None
         self.params['Pr'] = None
+        self.params['Le'] = None
         self.params['Gr_h'] = None
 
         # Radiation properties, default to black surfaces.
@@ -171,9 +172,10 @@ class Model(object):
         res = ('-------- Parameters --------\n'
                'Ra:\t{:.6g}\t[-]\n'
                'Pr:\t{:.6g}\t[-]\n'
+               'Le:\t{:.6g}\t\t[-]\n'
                'Gr_h:\t{:.6g}\t[-]\n')\
             .format(self.params['Ra'], self.params['Pr'],
-                    self.params['Gr_h'])
+                    self.params['Le'], self.params['Gr_h'])
         if show_res:
             print(res)
         else:
@@ -296,6 +298,10 @@ class Model(object):
         # Prandtl number
         self.params['Pr'] = self.props['c_pm'] * self.props['mu_m'] /\
             self.props['k_m']
+
+        # Le number
+        self.params['Le'] = self.props['D_12'] * self.props['rho_m'] /\
+            (self.props['k_m'] / self.props['c_pm'])
 
         # Grashof number for heat transfer
         self.params['Gr_h'] = const.ACC_GRAV * self.props['beta_m'] *\
