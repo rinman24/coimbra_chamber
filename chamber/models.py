@@ -52,10 +52,10 @@ class Model(object):
 
         # Dimensionless parameters:
         self.params = dict()
-        self.params['Ra'] = None
-        self.params['Pr'] = None
-        self.params['Le'] = None
         self.params['Gr_h'] = None
+        self.params['Le'] = None
+        self.params['Pr'] = None
+        self.params['Ra'] = None
 
         # Radiation properties, default to black surfaces.
         self.rad_props = dict()
@@ -170,12 +170,12 @@ class Model(object):
     def show_params(self, show_res=True):
         """Docstring."""
         res = ('-------- Parameters --------\n'
-               'Ra:\t{:.6g}\t[-]\n'
-               'Pr:\t{:.6g}\t[-]\n'
+               'Gr_h:\t{:.6g}\t[-]\n'
                'Le:\t{:.6g}\t\t[-]\n'
-               'Gr_h:\t{:.6g}\t[-]\n')\
-            .format(self.params['Ra'], self.params['Pr'],
-                    self.params['Le'], self.params['Gr_h'])
+               'Pr:\t{:.6g}\t[-]\n'
+               'Ra:\t{:.6g}\t[-]\n')\
+            .format(self.params['Gr_h'], self.params['Le'],
+                    self.params['Pr'], self.params['Ra'])
         if show_res:
             print(res)
         else:
@@ -290,22 +290,22 @@ class Model(object):
         beta_term = (self.props['beta_m'] * (delta_t) +
                      self.props['beta*_m'] * (delta_m))
 
-        # Rayleigh number
-        self.params['Ra'] = const.ACC_GRAV * beta_term * \
-            pow(self.settings['L_t'], 3) /\
-            (self.props['alpha_m'] * self.props['nu_m'])
-
-        # Prandtl number
-        self.params['Pr'] = self.props['c_pm'] * self.props['mu_m'] /\
-            self.props['k_m']
+        # Grashof number for heat transfer
+        self.params['Gr_h'] = const.ACC_GRAV * self.props['beta_m'] *\
+            delta_t * pow(self.settings['L_t'], 3) / pow(self.props['nu_m'], 2)
 
         # Le number
         self.params['Le'] = self.props['D_12'] * self.props['rho_m'] /\
             (self.props['k_m'] / self.props['c_pm'])
 
-        # Grashof number for heat transfer
-        self.params['Gr_h'] = const.ACC_GRAV * self.props['beta_m'] *\
-            delta_t * pow(self.settings['L_t'], 3) / pow(self.props['nu_m'], 2)
+        # Prandtl number
+        self.params['Pr'] = self.props['c_pm'] * self.props['mu_m'] /\
+            self.props['k_m']
+
+        # Rayleigh number
+        self.params['Ra'] = const.ACC_GRAV * beta_term * \
+            pow(self.settings['L_t'], 3) /\
+            (self.props['alpha_m'] * self.props['nu_m'])
 
     def solve(self):
         """Docstring."""
@@ -334,7 +334,7 @@ class Model(object):
         self.solve()
         self.describe()
 
-    # @ staticmethod
+    @ staticmethod
     def e_b(temp):
         """Docstring."""
         return const.SIGMA * pow(temp, 4)
@@ -461,5 +461,5 @@ class OneDimIsoLiqBlackRad(Model):
             return res
 
 
-# class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
-#     """Docstring."""
+class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
+    """Docstring."""

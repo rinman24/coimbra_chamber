@@ -55,10 +55,10 @@ class Test_Models(object):
         assert isclose(MODEL.ref_state['x_1'], 0.019086589000686643)
 
         # Test dimensionless parameters
-        assert isclose(MODEL.params['Ra'], -8352.269630198443)
-        assert isclose(MODEL.params['Pr'], 0.7202775498421996)
-        assert isclose(MODEL.params['Le'], 1.1778920613376593)
         assert isclose(MODEL.params['Gr_h'], -13406.091168735455)
+        assert isclose(MODEL.params['Le'], 1.1778920613376593)
+        assert isclose(MODEL.params['Pr'], 0.7202775498421996)
+        assert isclose(MODEL.params['Ra'], -8352.269630198443)
 
         # Test solution is None
         assert MODEL.solution is None
@@ -138,10 +138,10 @@ class Test_Models(object):
         """Test the calculation of all the dimensionless parameters"""
         MODEL.props['T_s'] = 293
         MODEL.eval_params()
-        assert isclose(MODEL.params['Ra'], -3528.537563755052)
-        assert isclose(MODEL.params['Pr'], 0.7208752001056339)
-        assert isclose(MODEL.params['Le'], 1.1785100716749086)
         assert isclose(MODEL.params['Gr_h'], -7570.9718465628275)
+        assert isclose(MODEL.params['Le'], 1.1785100716749086)
+        assert isclose(MODEL.params['Pr'], 0.7208752001056339)
+        assert isclose(MODEL.params['Ra'], -3528.537563755052)
         MODEL.props['T_s'] = 291.5
         assert isclose(MODEL.props['T_s'], 291.5)
 
