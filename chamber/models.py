@@ -314,6 +314,11 @@ class Model(object):
         self.solve()
         self.describe()
 
+    # @ staticmethod
+    def e_b(temp):
+        """Docstring."""
+        return const.SIGMA * pow(temp, 4)
+
     # Methods that are defined here but overwritten by children.
 
     def eval_model(self, vec_in):
@@ -435,102 +440,6 @@ class OneDimIsoLiqBlackRad(Model):
         else:
             return res
 
+
 # class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
 #     """Docstring."""
-
-#     def __init__(self, settings, ref='Mills', rule='mean'):
-#         """Docstring."""
-#         super(OneDimIsoLiqBlackGrayRad, self).__init__(settings, ref=ref,
-#                                                        rule=rule)
-
-#         self.eps = settings['eps']
-
-#     def eval_model(self, vec_in):
-#         """Docstring."""
-#         mddp, q_cs, q_r, temp_s = vec_in
-#         res = [0 for _ in range(4)]
-#         res[0] = q_cs + (self.k_m / self.length) * (self.temp_e - temp_s)
-#         res[1] = mddp + \
-#             (self.rho_m * self.d_12 / self.length) * (self.m_1e - self.m_1s)
-#         res[2] = mddp * self.h_fg + q_cs + q_r
-
-#         eb1 = const.SIGMA * pow(temp_s, 4)
-#         eb2 = const.SIGMA * pow(self.temp_e, 4)
-#         a1 = const.TUBE_AREA
-#         a2t = (self.eps[1] * 2 * a1) / (1 - self.eps[1])
-
-#         res[3] = q_r - eb1 + ((a1 * eb1 + a2t * eb2) / (a1 + a2t))
-#         return res
-
-#     def set_solution(self, solution):
-#         """Docstring."""
-#         self.solution = dict(mddp=solution[0], q_cs=solution[1],
-#                              q_r=solution[2], temp_s=solution[3])
-
-
-# class OneDimIsoLiqGrayRad(Model):
-#     """Docstring."""
-
-#     def __init__(self, settings, eps, ref='Mills', rule='mean'):
-#         """The f_matrix and j_matrix are constant, can be set in __init__()."""
-#         super(OneDimIsoLiqGrayRad, self).__init__(settings, ref=ref, rule=rule)
-
-#         self.f_matrix = [[0, 0, 0] for _ in range(3)]
-#         self.set_f_matrix()
-#         self.j_matrix = [[0, 0, 0] for _ in range(3)]
-#         self.eps = eps
-#         self.set_j_matrix()
-
-#     def get_f12(self):
-#         """Docstring."""
-#         r_1 = const.TUBE_RADIUS / self.length
-#         r_2 = const.TUBE_RADIUS / self.length
-#         x_value = 1 + (1 + pow(r_2, 2)) / pow(r_1, 2)
-#         return (x_value -
-#                 pow(pow(x_value, 2) - 4 * pow(r_2 / r_1, 2), 0.5)) / 2
-
-#     def get_f31(self):
-#         """Docstring."""
-#         area_1 = const.TUBE_AREA
-#         area_3 = const.TUBE_CIRCUM * self.length
-#         return area_1 / area_3 * self.get_f12()
-
-#     def set_f_matrix(self):
-#         """Use geometry of the tube to obtain view factor matrix."""
-#         # f_matrix = [[0, 0, 0] for _ in range(3)]
-#         # We know from symmetry that F_12 = F_21
-#         self.f_matrix[0][1] = self.f_matrix[1][0] = self.get_f12()
-#         # We also know that F_11 = F_22 = 0, which means that
-#         # F_13 = F_23 = 1 - F_12
-#         self.f_matrix[0][2] = self.f_matrix[1][2] = 1 - self.f_matrix[0][1]
-#         # Use the G_13 = G_31 to calculate F_31
-#         self.f_matrix[2][0] = self.f_matrix[2][1] = self.get_f31()
-#         # Everything from 3 that doesn't hit 1 or 2 hits 3
-#         self.f_matrix[2][2] = 1 - 2 * self.f_matrix[2][0]
-
-#     def set_j_matrix(self):
-#         """"Set the radiosoty matrix using view factors and emissivities."""
-#         for row in range(3):
-#             for col in range(3):
-#                 if row == col:
-#                     self.j_matrix[row][col] = 1 - \
-#                         (1 - self.eps[row]) * self.f_matrix[row][col]
-#                 else:
-#                     self.j_matrix[row][col] = -(1 - self.eps[row]) * \
-#                         self.f_matrix[row][col]
-
-#     def solve_j_system(self):
-#         """Docstring."""
-#         temp = [self.temp_s, self.temp_e, (self.temp_s + self.temp_e) / 2]
-#         emiss_vec = [self.eps[i] * const.SIGMA * pow(temp[i], 4)
-#                      for i in range(3)]
-#         return np.linalg.solve(self.j_matrix, emiss_vec)
-
-#     def eval_model(self, vec_in):
-#         """Docstring."""
-#         mddp, q_cs, temp_s = vec_in
-#         res = [0 for _ in range(3)]
-#         # First we need to solve the linear system of radiosity equations
-#         j_vec = self.solve_j_system()
-
-#         print(j_vec, res)
