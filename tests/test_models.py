@@ -33,6 +33,7 @@ class Test_Models(object):
         assert isclose(MODEL.props['beta_m'], 0.0034100596760443308)
         assert isclose(MODEL.props['beta*_m'], 0.6033861519510446)
         assert isclose(MODEL.props['c_pm'], 1028.977439794093)
+        assert isclose(MODEL.props['c_p1'], 1902.1686411087035)
         assert isclose(MODEL.props['D_12'], 2.510797939645015e-05)
         assert isclose(MODEL.props['h_fg'], 2457424.545412025)
         assert isclose(MODEL.props['k_m'], 0.025867252254694034)
@@ -56,6 +57,7 @@ class Test_Models(object):
 
         # Test dimensionless parameters
         assert isclose(MODEL.params['Gr_h'], -13406.091168735455)
+        assert isclose(MODEL.params['Ja_v'], 0.002709173820335637)
         assert isclose(MODEL.params['Le'], 1.1778920613376593)
         assert isclose(MODEL.params['Pr'], 0.7202775498421996)
         assert isclose(MODEL.params['Ra'], -8352.269630198443)
@@ -120,6 +122,7 @@ class Test_Models(object):
         assert isclose(MODEL.props['beta_m'], 0.003401360544217687)
         assert isclose(MODEL.props['beta*_m'], 0.603147186094405)
         assert isclose(MODEL.props['c_pm'], 1030.2830319720397)
+        assert isclose(MODEL.props['c_p1'], 1903.1216298034035)
         assert isclose(MODEL.props['D_12'], 2.521627605755569e-05)
         assert isclose(MODEL.props['h_fg'], 2453874.327285723)
         assert isclose(MODEL.props['k_m'], 0.02592145926625826)
@@ -139,6 +142,7 @@ class Test_Models(object):
         MODEL.props['T_s'] = 293
         MODEL.eval_params()
         assert isclose(MODEL.params['Gr_h'], -7570.9718465628275)
+        assert isclose(MODEL.params['Ja_v'], 0.0015511158078812314)
         assert isclose(MODEL.params['Le'], 1.1785100716749086)
         assert isclose(MODEL.params['Pr'], 0.7208752001056339)
         assert isclose(MODEL.params['Ra'], -3528.537563755052)
