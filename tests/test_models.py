@@ -138,6 +138,9 @@ class Test_Models(object):
         MODEL.props['T_s'] = 293
         MODEL.eval_params()
         assert isclose(MODEL.params['Ra'], -3484.0297271546015)
+        assert isclose(MODEL.params['Pr'], 0.7117823124614187)
+        assert isclose(MODEL.params['Le'], 1.1636447251242907)
+        assert isclose(MODEL.params['Gr_h'], -7570.9718465628275)
         MODEL.props['T_s'] = 291.5
         assert isclose(MODEL.props['T_s'], 291.5)
 
