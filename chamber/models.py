@@ -53,6 +53,7 @@ class Model(object):
         # Dimensionless parameters:
         self.params = dict()
         self.params['Ra'] = None
+        self.params['Pr'] = None
 
         # Radiation properties, default to black surfaces.
         self.rad_props = dict()
@@ -166,9 +167,10 @@ class Model(object):
 
     def show_params(self, show_res=True):
         """Docstring."""
-        res = ('---- Parameters ----\n'
-               'Ra:\t{:.6g}\t[-]\n')\
-            .format(self.params['Ra'])
+        res = ('-------- Parameters --------\n'
+               'Ra:\t{:.6g}\t[-]\n'
+               'Pr:\t{:.6g}\t[-]\n')\
+            .format(self.params['Ra'], self.params['Pr'])
         if show_res:
             print(res)
         else:
@@ -286,6 +288,10 @@ class Model(object):
         self.params['Ra'] = const.ACC_GRAV * beta_term * \
             pow(self.settings['L_t'], 3) /\
             (self.props['alpha_m'] * self.props['nu_m'])
+
+        # Prandtl number
+        self.params['Pr'] = self.props['c_pm'] * self.props['mu_m'] /\
+            self.props['k_m']
 
     def solve(self):
         """Docstring."""
