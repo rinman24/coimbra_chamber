@@ -54,6 +54,7 @@ class Model(object):
         self.params = dict()
         self.params['Ra'] = None
         self.params['Pr'] = None
+        self.params['Gr_h'] = None
 
         # Radiation properties, default to black surfaces.
         self.rad_props = dict()
@@ -169,8 +170,10 @@ class Model(object):
         """Docstring."""
         res = ('-------- Parameters --------\n'
                'Ra:\t{:.6g}\t[-]\n'
-               'Pr:\t{:.6g}\t[-]\n')\
-            .format(self.params['Ra'], self.params['Pr'])
+               'Pr:\t{:.6g}\t[-]\n'
+               'Gr_h:\t{:.6g}\t[-]\n')\
+            .format(self.params['Ra'], self.params['Pr'],
+                    self.params['Gr_h'])
         if show_res:
             print(res)
         else:
@@ -277,7 +280,7 @@ class Model(object):
             (self.ref_state['m_1'] * (const.M2 - const.M1) + const.M1)
 
     def eval_params(self):
-        # Rayleigh number
+        """Use self.props to calculate the self.params"""
         delta_t = self.props['T_s'] - self.settings['T_e']
 
         delta_m = self.props['m_1s'] - self.props['m_1e']
@@ -285,6 +288,7 @@ class Model(object):
         beta_term = (self.props['beta_m'] * (delta_t) +
                      self.props['beta*_m'] * (delta_m))
 
+        # Rayleigh number
         self.params['Ra'] = const.ACC_GRAV * beta_term * \
             pow(self.settings['L_t'], 3) /\
             (self.props['alpha_m'] * self.props['nu_m'])
@@ -292,6 +296,10 @@ class Model(object):
         # Prandtl number
         self.params['Pr'] = self.props['c_pm'] * self.props['mu_m'] /\
             self.props['k_m']
+
+        # Grashof number for heat transfer
+        self.params['Gr_h'] = const.ACC_GRAV * self.props['beta_m'] *\
+            delta_t * pow(self.settings['L_t'], 3) / pow(self.props['nu_m'], 2)
 
     def solve(self):
         """Docstring."""

@@ -169,7 +169,8 @@ REF_STATE = ('-------- Ref. State --------\n'
 
 PARAMS = ('-------- Parameters --------\n'
           'Ra:\t-8252.4\t[-]\n'
-          'Pr:\t0.711665\t[-]\n')
+          'Pr:\t0.711665\t[-]\n'
+          'Gr_h:\t-13406.1\t[-]\n')
 
 SOLUTION_01 = ('------------- Solution -------------\n'
                'mddp:\t1.65264e-06\t[kg / m^2 s]\n'
