@@ -236,7 +236,7 @@ class Model(object):
         # properties; e.g., alpha = k / (rho * c)
         self.props['beta_m'] = 1 / self.ref_state['T_m']
 
-        self.props['c_pm'] = HAPropsSI('cp',
+        self.props['c_pm'] = HAPropsSI('cp_ha',
                                        'T', self.ref_state['T_m'],
                                        'Y', self.ref_state['x_1'],
                                        'P', self.settings['P'])

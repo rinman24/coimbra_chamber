@@ -28,10 +28,10 @@ class Test_Models(object):
 
         # Test properties
         assert isclose(MODEL.props['T_s'], 291.5)
-        assert isclose(MODEL.props['alpha_m'], 2.157398944861877e-05)
+        assert isclose(MODEL.props['alpha_m'], 2.1316027351382746e-05)
         assert isclose(MODEL.props['beta_m'], 0.0034100596760443308)
         assert isclose(MODEL.props['beta*_m'], 0.6033861519510446)
-        assert isclose(MODEL.props['c_pm'], 1016.6738656679439)
+        assert isclose(MODEL.props['c_pm'], 1028.977439794093)
         assert isclose(MODEL.props['D_12'], 2.510797939645015e-05)
         assert isclose(MODEL.props['h_fg'], 2457424.545412025)
         assert isclose(MODEL.props['k_m'], 0.025867252254694034)
@@ -54,9 +54,9 @@ class Test_Models(object):
         assert isclose(MODEL.ref_state['x_1'], 0.019086589000686643)
 
         # Test dimensionless parameters
-        assert isclose(MODEL.params['Ra'], -8252.400804563847)
-        assert isclose(MODEL.params['Pr'], 0.7116651275643526)
-        assert isclose(MODEL.params['Le'], 1.1638079019296839)
+        assert isclose(MODEL.params['Ra'], -8352.269630198443)
+        assert isclose(MODEL.params['Pr'], 0.7202775498421996)
+        assert isclose(MODEL.params['Le'], 1.1778920613376593)
         assert isclose(MODEL.params['Gr_h'], -13406.091168735455)
 
         # Test solution is None
@@ -115,10 +115,10 @@ class Test_Models(object):
         """Test the calculation of all of the thermophysical properties."""
         MODEL.props['T_s'] = 293
         MODEL.eval_props()
-        assert isclose(MODEL.props['alpha_m'], 2.167008152326072e-05)
+        assert isclose(MODEL.props['alpha_m'], 2.139674209293613e-05)
         assert isclose(MODEL.props['beta_m'], 0.003401360544217687)
         assert isclose(MODEL.props['beta*_m'], 0.603147186094405)
-        assert isclose(MODEL.props['c_pm'], 1017.2873735694611)
+        assert isclose(MODEL.props['c_pm'], 1030.2830319720397)
         assert isclose(MODEL.props['D_12'], 2.521627605755569e-05)
         assert isclose(MODEL.props['h_fg'], 2453874.327285723)
         assert isclose(MODEL.props['k_m'], 0.02592145926625826)
@@ -137,9 +137,9 @@ class Test_Models(object):
         """Test the calculation of all the dimensionless parameters"""
         MODEL.props['T_s'] = 293
         MODEL.eval_params()
-        assert isclose(MODEL.params['Ra'], -3484.0297271546015)
-        assert isclose(MODEL.params['Pr'], 0.7117823124614187)
-        assert isclose(MODEL.params['Le'], 1.1636447251242907)
+        assert isclose(MODEL.params['Ra'], -3528.537563755052)
+        assert isclose(MODEL.params['Pr'], 0.7208752001056339)
+        assert isclose(MODEL.params['Le'], 1.1785100716749086)
         assert isclose(MODEL.params['Gr_h'], -7570.9718465628275)
         MODEL.props['T_s'] = 291.5
         assert isclose(MODEL.props['T_s'], 291.5)

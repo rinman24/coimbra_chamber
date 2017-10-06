@@ -141,10 +141,10 @@ STR = ('------ Settings ------\n'
        'rule:\tmean\t[-]\n')
 
 PROPS = ('--------------- Properties ---------------\n'
-         'alpha_m:\t2.1574e-05\t[m^2 / s]\n'
+         'alpha_m:\t2.1316e-05\t[m^2 / s]\n'
          'beta_m:\t\t0.00341006\t[1 / K]\n'
          'beta*_m:\t0.603386\t[-]\n'
-         'c_pm:\t\t1016.67\t\t[J / kg]\n'
+         'c_pm:\t\t1028.98\t\t[J / kg]\n'
          'D_12:\t\t2.5108e-05\t[m^2 / s]\n'
          'h_fg:\t\t2.45742e+06\t[J / kg]\n'
          'k_m:\t\t0.0258673\t[W / m K]\n'
@@ -168,9 +168,9 @@ REF_STATE = ('-------- Ref. State --------\n'
              'x_1:\t0.0190866\t[-]\n')
 
 PARAMS = ('-------- Parameters --------\n'
-          'Ra:\t-8252.4\t[-]\n'
-          'Pr:\t0.711665\t[-]\n'
-          'Le:\t1.16381\t\t[-]\n'
+          'Ra:\t-8352.27\t[-]\n'
+          'Pr:\t0.720278\t[-]\n'
+          'Le:\t1.17789\t\t[-]\n'
           'Gr_h:\t-13406.1\t[-]\n')
 
 SOLUTION_01 = ('------------- Solution -------------\n'
