@@ -54,6 +54,7 @@ class Model(object):
         # Dimensionless parameters:
         self.params = dict()
         self.params['Gr_h'] = None
+        self.params['Gr_mt'] = None
         self.params['Ja_v'] = None
         self.params['Le'] = None
         self.params['Pr'] = None
@@ -176,13 +177,14 @@ class Model(object):
         """Docstring."""
         res = ('-------- Parameters --------\n'
                'Gr_h:\t{:.6g}\t[-]\n'
+               'Gr_mt:\t{:.6g}\t\t[-]\n'
                'Ja_v:\t{:.6g}\t[-]\n'
                'Le:\t{:.6g}\t\t[-]\n'
                'Pr:\t{:.6g}\t[-]\n'
                'Ra:\t{:.6g}\t[-]\n')\
-            .format(self.params['Gr_h'], self.params['Ja_v'],
-                    self.params['Le'], self.params['Pr'],
-                    self.params['Ra'])
+            .format(self.params['Gr_h'], self.params['Gr_mt'],
+                    self.params['Ja_v'], self.params['Le'],
+                    self.params['Pr'], self.params['Ra'])
         if show_res:
             print(res)
         else:
@@ -304,8 +306,14 @@ class Model(object):
                      self.props['beta*_m'] * (delta_m))
 
         # Grashof number for heat transfer
-        self.params['Gr_h'] = const.ACC_GRAV * self.props['beta_m'] *\
-            delta_t * pow(self.settings['L_t'], 3) / pow(self.props['nu_m'], 2)
+        self.params['Gr_h'] = const.ACC_GRAV *\
+            self.props['beta_m'] * delta_t * pow(self.settings['L_t'], 3) /\
+            pow(self.props['nu_m'], 2)
+
+        # Grashof number for mass transfer
+        self.params['Gr_mt'] = const.ACC_GRAV *\
+            self.props['beta*_m'] * delta_m * pow(self.settings['L_t'], 3) /\
+            pow(self.props['nu_m'], 2)
 
         # vapor-phase Jakob number
         if self.settings['rule'] == 'mean':

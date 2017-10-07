@@ -57,6 +57,7 @@ class Test_Models(object):
 
         # Test dimensionless parameters
         assert isclose(MODEL.params['Gr_h'], -13406.091168735455)
+        assert isclose(MODEL.params['Gr_mt'], 1810.1867399103678)
         assert isclose(MODEL.params['Ja_v'], 0.002709173820335637)
         assert isclose(MODEL.params['Le'], 1.1778920613376593)
         assert isclose(MODEL.params['Pr'], 0.7202775498421996)
@@ -142,6 +143,7 @@ class Test_Models(object):
         MODEL.props['T_s'] = 293
         MODEL.eval_params()
         assert isclose(MODEL.params['Gr_h'], -7570.9718465628275)
+        assert isclose(MODEL.params['Gr_mt'], 2676.1751282987025)
         assert isclose(MODEL.params['Ja_v'], 0.0015511158078812314)
         assert isclose(MODEL.params['Le'], 1.1785100716749086)
         assert isclose(MODEL.params['Pr'], 0.7208752001056339)
