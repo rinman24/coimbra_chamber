@@ -31,6 +31,7 @@ class Model(object):
         self.props['beta_m'] = None
         self.props['beta*_m'] = None
         self.props['c_pm'] = None
+        self.props['c_p1'] = None
         self.props['D_12'] = None
         self.props['h_fg'] = None
         self.props['k_m'] = None
@@ -52,10 +53,14 @@ class Model(object):
 
         # Dimensionless parameters:
         self.params = dict()
-        self.params['Ra'] = None
-        self.params['Pr'] = None
-        self.params['Le'] = None
         self.params['Gr_h'] = None
+        self.params['Gr_mt'] = None
+        self.params['Ja_v'] = None
+        self.params['Le'] = None
+        self.params['Pr'] = None
+        self.params['Ra'] = None
+        self.params['Ra_h'] = None
+        self.params['Ra_mt'] = None
 
         # Radiation properties, default to black surfaces:
         self.rad_props = dict()
@@ -122,6 +127,7 @@ class Model(object):
                'beta_m:\t\t{:.6g}\t[1 / K]\n'
                'beta*_m:\t{:.6g}\t[-]\n'
                'c_pm:\t\t{:.6g}\t\t[J / kg]\n'
+               'c_p1:\t\t{:.6g}\t\t[J / kg]\n'
                'D_12:\t\t{:.6g}\t[m^2 / s]\n'
                'h_fg:\t\t{:.6g}\t[J / kg]\n'
                'k_m:\t\t{:.6g}\t[W / m K]\n'
@@ -135,9 +141,11 @@ class Model(object):
                'x_1s:\t\t{:.6g}\t[-]\n')\
             .format(self.props['alpha_m'], self.props['beta_m'],
                     self.props['beta*_m'], self.props['c_pm'],
-                    self.props['D_12'], self.props['h_fg'], self.props['k_m'],
-                    self.props['m_1e'], self.props['m_1s'], self.props['mu_m'],
-                    self.props['nu_m'], self.props['rho_m'], self.props['T_s'],
+                    self.props['c_p1'], self.props['D_12'],
+                    self.props['h_fg'], self.props['k_m'],
+                    self.props['m_1e'], self.props['m_1s'],
+                    self.props['mu_m'], self.props['nu_m'],
+                    self.props['rho_m'], self.props['T_s'],
                     self.props['x_1e'], self.props['x_1s'])
         if show_res:
             print(res)
@@ -173,12 +181,18 @@ class Model(object):
     def show_params(self, show_res=True):
         """Docstring."""
         res = ('-------- Parameters --------\n'
-               'Ra:\t{:.6g}\t[-]\n'
-               'Pr:\t{:.6g}\t[-]\n'
+               'Gr_h:\t{:.6g}\t[-]\n'
+               'Gr_mt:\t{:.6g}\t\t[-]\n'
+               'Ja_v:\t{:.6g}\t[-]\n'
                'Le:\t{:.6g}\t\t[-]\n'
-               'Gr_h:\t{:.6g}\t[-]\n')\
-            .format(self.params['Ra'], self.params['Pr'],
-                    self.params['Le'], self.params['Gr_h'])
+               'Pr:\t{:.6g}\t[-]\n'
+               'Ra:\t{:.6g}\t[-]\n'
+               'Ra_h:\t{:.6g}\t[-]\n'
+               'Ra_mt:\t{:.6g}\t\t[-]\n')\
+            .format(self.params['Gr_h'], self.params['Gr_mt'],
+                    self.params['Ja_v'], self.params['Le'],
+                    self.params['Pr'], self.params['Ra'],
+                    self.params['Ra_h'], self.params['Ra_mt'])
         if show_res:
             print(res)
         else:
@@ -239,10 +253,16 @@ class Model(object):
         # properties; e.g., alpha = k / (rho * c)
         self.props['beta_m'] = 1 / self.ref_state['T_m']
 
-        self.props['c_pm'] = HAPropsSI('cp',
+        self.props['c_pm'] = HAPropsSI('cp_ha',
                                        'T', self.ref_state['T_m'],
                                        'Y', self.ref_state['x_1'],
                                        'P', self.settings['P'])
+
+        self.props['c_p1'] = PropsSI('Cpmass',
+                                     'P', self.settings['P'] *
+                                     self.ref_state['x_1'],
+                                     'Q', 1,
+                                     'Water')
 
         self.props['D_12'] = self.get_bin_diff_coeff(self.ref_state['T_m'],
                                                      self.settings['P'],
@@ -293,22 +313,46 @@ class Model(object):
         beta_term = (self.props['beta_m'] * (delta_t) +
                      self.props['beta*_m'] * (delta_m))
 
-        # Rayleigh number
-        self.params['Ra'] = const.ACC_GRAV * beta_term * \
-            pow(self.settings['L_t'], 3) /\
-            (self.props['alpha_m'] * self.props['nu_m'])
+        # Grashof number for heat transfer
+        self.params['Gr_h'] = const.ACC_GRAV *\
+            self.props['beta_m'] * delta_t * pow(self.settings['L_t'], 3) /\
+            pow(self.props['nu_m'], 2)
 
-        # Prandtl number
-        self.params['Pr'] = self.props['c_pm'] * self.props['mu_m'] /\
-            self.props['k_m']
+        # Grashof number for mass transfer
+        self.params['Gr_mt'] = const.ACC_GRAV *\
+            self.props['beta*_m'] * delta_m * pow(self.settings['L_t'], 3) /\
+            pow(self.props['nu_m'], 2)
+
+        # vapor-phase Jakob number
+        if self.settings['rule'] == 'mean':
+            self.params['Ja_v'] = self.props['c_p1'] * abs(delta_t) /\
+                self.props['h_fg']
+        elif self.settings['rule'] == 'one-third':
+            self.params['Ja_v'] = self.props['c_pm'] * abs(delta_t) /\
+                self.props['h_fg']
 
         # Le number
         self.params['Le'] = self.props['D_12'] * self.props['rho_m'] /\
             (self.props['k_m'] / self.props['c_pm'])
 
-        # Grashof number for heat transfer
-        self.params['Gr_h'] = const.ACC_GRAV * self.props['beta_m'] *\
-            delta_t * pow(self.settings['L_t'], 3) / pow(self.props['nu_m'], 2)
+        # Prandtl number
+        self.params['Pr'] = self.props['c_pm'] * self.props['mu_m'] /\
+            self.props['k_m']
+
+        # Rayleigh number
+        self.params['Ra'] = const.ACC_GRAV * beta_term * \
+            pow(self.settings['L_t'], 3) /\
+            (self.props['alpha_m'] * self.props['nu_m'])
+
+        # Rayleigh number for heat transfer
+        self.params['Ra_h'] = const.ACC_GRAV *\
+            self.props['beta_m'] * delta_t * pow(self.settings['L_t'], 3) /\
+            (self.props['alpha_m'] * self.props['nu_m'])
+
+        # Rayleigh number for heat transfer
+        self.params['Ra_mt'] = const.ACC_GRAV *\
+            self.props['beta*_m'] * delta_m * pow(self.settings['L_t'], 3) /\
+            (self.props['alpha_m'] * self.props['nu_m'])
 
     def solve(self):
         """Docstring."""
@@ -454,5 +498,5 @@ class OneDimIsoLiqBlackRad(Model):
             return res
 
 
-# class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
-#     """Docstring."""
+ class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
+    """Docstring."""
