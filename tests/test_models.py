@@ -62,6 +62,8 @@ class Test_Models(object):
         assert isclose(MODEL.params['Le'], 1.1778920613376593)
         assert isclose(MODEL.params['Pr'], 0.7202775498421996)
         assert isclose(MODEL.params['Ra'], -8352.269630198443)
+        assert isclose(MODEL.params['Ra_h'], -9656.106499977923)
+        assert isclose(MODEL.params['Ra_mt'], 1303.8368697794788)
 
         # Test solution is None
         assert MODEL.solution is None
@@ -148,6 +150,8 @@ class Test_Models(object):
         assert isclose(MODEL.params['Le'], 1.1785100716749086)
         assert isclose(MODEL.params['Pr'], 0.7208752001056339)
         assert isclose(MODEL.params['Ra'], -3528.537563755052)
+        assert isclose(MODEL.params['Ra_h'], -5457.725844885098)
+        assert isclose(MODEL.params['Ra_mt'], 1929.1882811300475)
         MODEL.props['T_s'] = 291.5
         assert isclose(MODEL.props['T_s'], 291.5)
 

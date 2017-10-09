@@ -59,6 +59,8 @@ class Model(object):
         self.params['Le'] = None
         self.params['Pr'] = None
         self.params['Ra'] = None
+        self.params['Ra_h'] = None
+        self.params['Ra_mt'] = None
 
         # Radiation properties, default to black surfaces.
         self.rad_props = dict()
@@ -181,10 +183,13 @@ class Model(object):
                'Ja_v:\t{:.6g}\t[-]\n'
                'Le:\t{:.6g}\t\t[-]\n'
                'Pr:\t{:.6g}\t[-]\n'
-               'Ra:\t{:.6g}\t[-]\n')\
+               'Ra:\t{:.6g}\t[-]\n'
+               'Ra_h:\t{:.6g}\t[-]\n'
+               'Ra_mt:\t{:.6g}\t\t[-]\n')\
             .format(self.params['Gr_h'], self.params['Gr_mt'],
                     self.params['Ja_v'], self.params['Le'],
-                    self.params['Pr'], self.params['Ra'])
+                    self.params['Pr'], self.params['Ra'],
+                    self.params['Ra_h'], self.params['Ra_mt'])
         if show_res:
             print(res)
         else:
@@ -334,6 +339,16 @@ class Model(object):
         # Rayleigh number
         self.params['Ra'] = const.ACC_GRAV * beta_term * \
             pow(self.settings['L_t'], 3) /\
+            (self.props['alpha_m'] * self.props['nu_m'])
+
+        # Rayleigh number for heat transfer
+        self.params['Ra_h'] = const.ACC_GRAV *\
+            self.props['beta_m'] * delta_t * pow(self.settings['L_t'], 3) /\
+            (self.props['alpha_m'] * self.props['nu_m'])
+
+        # Rayleigh number for heat transfer
+        self.params['Ra_mt'] = const.ACC_GRAV *\
+            self.props['beta*_m'] * delta_m * pow(self.settings['L_t'], 3) /\
             (self.props['alpha_m'] * self.props['nu_m'])
 
     def solve(self):
@@ -490,5 +505,5 @@ class OneDimIsoLiqBlackRad(Model):
             return res
 
 
-class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
+ class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
     """Docstring."""
