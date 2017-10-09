@@ -57,14 +57,17 @@ class Model(object):
         self.params['Le'] = None
         self.params['Gr_h'] = None
 
-        # Radiation properties, default to black surfaces.
+        # Radiation properties, default to black surfaces:
         self.rad_props = dict()
         self.rad_props['eps_1'] = 1
         self.rad_props['eps_2'] = 1
         self.rad_props['eps_3'] = 1
 
-        # Container for solution of model
-        self.solution = None
+        # Attribute for solution of model:
+        self.solution = dict()
+
+        # Hidden attribute for unknowns in model:
+        self._unknowns = []
 
         # Populate self.props:
         self.eval_props()
@@ -334,19 +337,20 @@ class Model(object):
         self.solve()
         self.describe()
 
-    # @ staticmethod
+    @ staticmethod
     def e_b(temp):
         """Docstring."""
         return const.SIGMA * pow(temp, 4)
 
+    def set_solution(self, solution):
+        """Docstring."""
+        self.solution = {key: solution[index]
+                         for (index, key)
+                         in enumerate(self._unknowns)}
+
     # Methods that are defined here but overwritten by children.
 
     def eval_model(self, vec_in):
-        """Docstring."""
-        # These are overridden by the sub-classes that extend this class
-        pass
-
-    def set_solution(self):
         """Docstring."""
         # These are overridden by the sub-classes that extend this class
         pass
@@ -365,7 +369,8 @@ class OneDimIsoLiqNoRad(Model):
         super(OneDimIsoLiqNoRad, self)\
             .__init__(settings, ref=ref, rule=rule)
 
-        self.solution = dict(mddp=None, q_cs=None, T_s=None)
+        self._unknowns = ['mddp', 'q_cs', 'T_s']
+        self.set_solution([None] * len(self._unknowns))
 
     def eval_model(self, vec_in):
         """Docstring."""
@@ -380,12 +385,6 @@ class OneDimIsoLiqNoRad(Model):
             (self.props['m_1e'] - self.props['m_1s'])
         res[2] = mddp * self.props['h_fg'] + q_cs
         return res
-
-    def set_solution(self, solution):
-        """Docstring."""
-        self.solution['mddp'] = solution[0]
-        self.solution['q_cs'] = solution[1]
-        self.solution['T_s'] = solution[2]
 
     def show_solution(self, show_res=True):
         """Docstring."""
@@ -415,7 +414,8 @@ class OneDimIsoLiqBlackRad(Model):
         super(OneDimIsoLiqBlackRad, self)\
             .__init__(settings, ref=ref, rule=rule)
 
-        self.solution = dict(mddp=None, q_cs=None, q_rad=None, T_s=None)
+        self._unknowns = ['mddp', 'q_cs', 'q_rad', 'T_s']
+        self.set_solution([None] * len(self._unknowns))
 
     def eval_model(self, vec_in):
         """Docstring."""
@@ -432,13 +432,6 @@ class OneDimIsoLiqBlackRad(Model):
         res[3] = q_rad + \
             const.SIGMA * (pow(self.settings['T_e'], 4) - pow(T_s, 4))
         return res
-
-    def set_solution(self, solution):
-        """Docstring."""
-        self.solution['mddp'] = solution[0]
-        self.solution['q_cs'] = solution[1]
-        self.solution['q_rad'] = solution[2]
-        self.solution['T_s'] = solution[3]
 
     def show_solution(self, show_res=True):
         """Docstring."""
