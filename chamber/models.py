@@ -498,5 +498,6 @@ class OneDimIsoLiqBlackRad(Model):
             return res
 
 
- class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
+class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
     """Docstring."""
+    pass
