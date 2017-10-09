@@ -141,10 +141,11 @@ STR = ('------ Settings ------\n'
        'rule:\tmean\t[-]\n')
 
 PROPS = ('--------------- Properties ---------------\n'
-         'alpha_m:\t2.1574e-05\t[m^2 / s]\n'
+         'alpha_m:\t2.1316e-05\t[m^2 / s]\n'
          'beta_m:\t\t0.00341006\t[1 / K]\n'
          'beta*_m:\t0.603386\t[-]\n'
-         'c_pm:\t\t1016.67\t\t[J / kg]\n'
+         'c_pm:\t\t1028.98\t\t[J / kg]\n'
+         'c_p1:\t\t1902.17\t\t[J / kg]\n'
          'D_12:\t\t2.5108e-05\t[m^2 / s]\n'
          'h_fg:\t\t2.45742e+06\t[J / kg]\n'
          'k_m:\t\t0.0258673\t[W / m K]\n'
@@ -157,10 +158,33 @@ PROPS = ('--------------- Properties ---------------\n'
          'x_1e:\t\t0.0169704\t[-]\n'
          'x_1s:\t\t0.0212028\t[-]\n')
 
+RAD_PROPS = ('--- Rad. Props. ---\n'
+             'eps_1:\t1\t[-]\n'
+             'eps_2:\t1\t[-]\n'
+             'eps_3:\t1\t[-]\n')
+
 REF_STATE = ('-------- Ref. State --------\n'
              'm_1:\t0.0119577\t[-]\n'
              'T_m:\t293.25\t\t[K]\n'
              'x_1:\t0.0190866\t[-]\n')
 
-PARAMS = ('---- Parameters ----\n'
-          'Ra:\t-8252.4\t[-]\n')
+PARAMS = ('-------- Parameters --------\n'
+          'Gr_h:\t-13406.1\t[-]\n'
+          'Gr_mt:\t1810.19\t\t[-]\n'
+          'Ja_v:\t0.00270917\t[-]\n'
+          'Le:\t1.17789\t\t[-]\n'
+          'Pr:\t0.720278\t[-]\n'
+          'Ra:\t-8352.27\t[-]\n'
+          'Ra_h:\t-9656.11\t[-]\n'
+          'Ra_mt:\t1303.84\t\t[-]\n')
+
+SOLUTION_01 = ('------------- Solution -------------\n'
+               'mddp:\t1.65264e-06\t[kg / m^2 s]\n'
+               'q_cs:\t-4.06602\t[W / m^2]\n'
+               'T_s:\t290.276\t\t[K]\n')
+
+SOLUTION_02 = ('------------- Solution -------------\n'
+               'mddp:\t4.31355e-06\t[kg / m^2 s]\n'
+               'q_cs:\t-1.37755\t[W / m^2]\n'
+               'q_rad:\t-9.20321\t[W / m^2]\n'
+               'T_s:\t293.407\t\t[K]\n')
