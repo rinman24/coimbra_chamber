@@ -40,22 +40,22 @@ INCORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/"
                                   "test_04.tdms_index"]
 
 
-TDMS_FF_SETTING = {'Duty': 1,
+TDMS_FF_SETTING = {'Duty': '1.0',
                    'Pressure': 100000,
                    'Temperature': 300,
                    'IsSteady': 0}
 
-TDMS_FT_SETTING = {'Duty': 2,
+TDMS_FT_SETTING = {'Duty': '2.0',
                    'Pressure': 100000,
                    'Temperature': 300,
                    'IsSteady': 1}
 
-TDMS_TF_SETTING = {'Duty': 4,
+TDMS_TF_SETTING = {'Duty': '4.0',
                    'Pressure': 100000,
                    'Temperature': 300,
                    'IsSteady': 0}
 
-TDMS_TT_SETTING = {'Duty': 3,
+TDMS_TT_SETTING = {'Duty': '3.0',
                    'Pressure': 100000,
                    'Temperature': 300,
                    'IsSteady': 1}

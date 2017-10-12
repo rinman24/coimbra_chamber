@@ -226,8 +226,8 @@ def get_setting_info(tdms_obj):
         names and values should be the value to insert.
     """
     temp_list = [float(get_temp_info(tdms_obj, 0, x)) for x in range(4, 14)]
-    setting_info = {'Duty': Decimal(
-                        tdms_obj.object("Settings", "DutyCycle").data[0]),
+    setting_info = {'Duty': '{:.1f}'.format(round(
+                        tdms_obj.object("Settings", "DutyCycle").data[0]), 1),
                     'Pressure': int((5000 * round(
                         tdms_obj.object("Data", "Pressure").data[0] / 5000))),
                     'Temperature': int(5 * round(

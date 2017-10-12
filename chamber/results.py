@@ -24,37 +24,6 @@ def connect_sqldb_chamber():
     return cnx
 
 
-def connect_sqldb_results():
-    """Use sqldb.connect_sqldb() to a MySQL server.
-
-    Returns
-    -------
-    cnx : MySQLConnection
-        Returns the MySQL connection object"""
-    cnx = sqldb.connect_sqldb("test_results")
-    return cnx
-
-
-def create_views(cur_re, views):
-    """Uses sqldb.create_tables to create tables in the database.
-
-    Parameters
-    ----------
-    cur : MySQLCursor
-        Cursor used to interact with the MySQL database.
-    tables : list
-        List of table names and DDL query language. For example:
-        [('UnitTest',
-        "CREATE TABLE UnitTest ("
-        "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
-        "    Number DECIMAL(5,2) NULL,"
-        "    String VARCHAR(30) NULL,"
-        "  PRIMARY KEY (`UnitTestID`)"
-        ");"))]
-    """
-    sqldb.create_tables(cur_re, views)
-
-
 def normalized_mass(cur_ch, cur_re, test_id):
     """Use a TestID to calculate and write the normalized mass for a given test.
 
