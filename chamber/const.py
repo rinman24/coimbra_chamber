@@ -4,8 +4,6 @@ from decimal import Decimal
 from math import log, sqrt, pi
 from os import getcwd
 
-import pytz
-
 
 # Constants for laser.py
 # ZnSe port parameters (From Spec Sheet)
