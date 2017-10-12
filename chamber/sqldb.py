@@ -141,7 +141,7 @@ def test_exists(cur, test_info):
     """
     if not test_info:
         print("File Unable to Transfer")
-        return True
+        return False
     cur.execute(const.FIND_TEST.format(
         test_info['DateTime'].replace(microsecond=0).replace(tzinfo=None)))
     result = cur.fetchall()
@@ -232,7 +232,8 @@ def get_setting_info(tdms_obj):
                         tdms_obj.object("Data", "Pressure").data[0] / 5000))),
                     'Temperature': int(5 * round(
                         sum(temp_list[x] for x in range(
-                            len(temp_list))) / len(temp_list)) / 5)}
+                            len(temp_list))) / len(temp_list)) / 5),
+                    'IsSteady': int(tdms_obj.object("Settings", "IsSteady").data[0])}
     return setting_info
 
 

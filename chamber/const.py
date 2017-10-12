@@ -78,9 +78,9 @@ ACC_GRAV = 9.80665  # m/s^2
 # CONSTANTS FOR sqldb.py
 # MySQL querry Constants
 ADD_SETTING = ("INSERT INTO Setting "
-               "(Duty, Pressure, Temperature)"
+               "(Duty, Pressure, Temperature, IsSteady)"
                " VALUES "
-               "(%(Duty)s, %(Pressure)s, %(Temperature)s)")
+               "(%(Duty)s, %(Pressure)s, %(Temperature)s, %(IsSteady)s)")
 
 ADD_TEST = ("INSERT INTO Test "
             "(Author, DateTime, Description, IsMass, TimeStep,"
@@ -170,7 +170,7 @@ TABLES.append(('Setting',
                "    Duty DECIMAL(4, 1) NOT NULL,"
                "    Pressure MEDIUMINT UNSIGNED NOT NULL,"
                "    Temperature SMALLINT UNSIGNED NOT NULL,"
-               "    IsSteady BOOLEAN NOT NULL DEFAULT 1,"
+               "    IsSteady BOOLEAN NOT NULL,"
                "  PRIMARY KEY (SettingID)"
                ");"))
 TABLES.append(('Test',
