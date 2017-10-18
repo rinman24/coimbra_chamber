@@ -29,7 +29,6 @@ def connect_sqldb(database):
     ----------
     database : str
         The name of the desired database to connect to.
-
     Returns
     -------
     cnx : MySQLConnection
