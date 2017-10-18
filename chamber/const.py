@@ -216,12 +216,13 @@ TABLES.append(('TempObservation',
 TABLES.append(('Results',
                "CREATE TABLE Results("
                "    ResultsID SERIAL,"
+               "    NormalizedMass DECIMAL(8, 7) NOT NULL,"
                "    DewPoint DECIMAL(5, 2) NOT NULL,"
-               "    RelativeHumidity DECIMAL(2, 2) NOT NULL,"
-               "    Slope DECIMAL(5, 2) NOT NULL,"
-               "    Intercept DECIMAL(6, 6) NOT NULL,"
-               "    RSquared DECIMAL(6, 6) NOT NULL,"
-               "    Temperature DECIMAL(5, 2) NOT NULL,"
+               # "    RelativeHumidity DECIMAL(2, 2) NOT NULL,"
+               # "    Slope DECIMAL(5, 2) NOT NULL,"
+               # "    Intercept DECIMAL(6, 6) NOT NULL,"
+               # "    RSquared DECIMAL(6, 6) NOT NULL,"
+               # "    Temperature DECIMAL(5, 2) NOT NULL,"
                "    Pressure MEDIUMINT UNSIGNED NOT NULL,"
                "    PowOut DECIMAL(6, 4) NOT NULL,"
                "    TestID BIGINT UNSIGNED NOT NULL,"
@@ -248,7 +249,7 @@ UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram',
 
 ADD_NORM_MASS = ("INSERT INTO Results (NormalizedMass) SELECT"
                  " ROUND((Mass-(SELECT MIN(Mass) FROM Observation WHERE"
-                 " TestID={0}})/(SELECT MAX(Mass)-MIN(Mass) FROM Observation"
+                 " TestID={0}))/(SELECT MAX(Mass)-MIN(Mass) FROM Observation"
                  " WHERE TestID={0}), 7) FROM Observation WHERE TestID={0};")
 
 GET_TEST_ID_NM = "SELECT TestID FROM NormalizedMass WHERE TestID={} LIMIT 1"
@@ -272,10 +273,7 @@ GET_AVG_TPDP = ("SELECT ("
                 " INNER JOIN Observation AS Obs ON"
                 " Temp.ObservationID=Obs.ObservationID WHERE Obs.TestID={0}"
                 "), ROUND(AVG(Pressure)), ROUND(AVG(PowOut), 4), ROUND(AVG(DewPoint), 2) FROM"
-                " Observation WHERE TestID={0} AND idx BETWEEN"
-                " {1}+(SELECT Min(idx) FROM Observation WHERE TestID={0})"
-                " AND"
-                " {1}+(SELECT Min(idx) FROM Observation WHERE TestID={0});")
+                " Observation WHERE TestID={0};")
 
 TUBE_RADIUS = 0.015    # [m]
 TUBE_AREA = pi * pow(TUBE_RADIUS, 2)

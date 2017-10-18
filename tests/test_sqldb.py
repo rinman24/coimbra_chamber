@@ -63,12 +63,11 @@ class TestSqlDb(object):
 
     def test_list_tdms(self):
         """Test correct output of all .tdms files contained in argument."""
-        assert True
-        # files = sqldb.list_tdms(test_const.TEST_DIRECTORY)
-        # for tdms_file in test_const.INCORRECT_FILE_LIST:
-        #     assert tdms_file not in files
-        # for tdms_file in test_const.CORRECT_FILE_LIST:
-        #     assert tdms_file in files
+        files = sqldb.list_tdms(test_const.TEST_DIRECTORY)
+        assert len(files) == len(test_const.CORRECT_FILE_LIST)
+        for file in files:
+            assert file not in test_const.INCORRECT_FILE_LIST or file not in test_const.INCORRECT_FILE_LIST_WIN
+            assert file in test_const.CORRECT_FILE_LIST or file in test_const.CORRECT_FILE_LIST_WIN
 
     def test_move_files(self):
         """Test that files are removed from the directory and into user."""
@@ -233,6 +232,10 @@ class TestSqlDb(object):
             "SELECT Temperature FROM TempObservation WHERE TempObservationID="
             "'{}'".format(cursor.lastrowid))
         assert cursor.fetchall()[0][0] == Decimal('299.45')
+
+    def test_normalize_mass(self, cursor):
+        """Test normalize mass querry for results table input"""
+
 
 
 def drop_tables(cursor, bol):

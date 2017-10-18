@@ -1,10 +1,13 @@
 """Docstring."""
 from decimal import Decimal
+import numpy as np
 import os
 from pathlib import Path
 from re import compile
+from scipy import stats
 import shutil
 
+from CoolProp.HumidAirProp import HAPropsSI
 import mysql.connector as conn
 from mysql.connector import errorcode
 from nptdms import TdmsFile
@@ -529,6 +532,7 @@ def add_input(cur, directory, test=False):
         This is the directory to search for tdms files.
     """
     for file_name in list_tdms(directory):
+        print(file_name)
         tdms_obj = TdmsFile(file_name)
         if not test_exists(cur, get_test_info(tdms_obj)):
             test_id = add_test_info(
@@ -538,3 +542,77 @@ def add_input(cur, directory, test=False):
                 add_temp(cur, tdms_obj, obs_id, obs_idx)
     if not test:
         move_files(directory)
+
+
+def add_results(cur, test_id):
+    """Docstring"""
+
+
+
+def normalize_mass(cur, test_id):
+    """Use a TestID to calculate and write the normalized mass for a given test.
+
+    This function uses a MySql querry to calculate and write the normalized mass
+    from the observation table to the results table in the chamber database.
+
+    Parameters
+    ----------
+    cur : MySQLCursor
+        Cursor used to interact with the chamber MySQL database.
+    test_id : int
+        The TestID which normalized mass will be calculated and recorded for.
+        Note: TestID must be for a IsMass True test.
+    """
+    cur.execute(const.NORMALIZE_MASS.format(test_id))
+    print(cur.fetchall())
+
+
+def get_mass(cur, test_id):
+    """Use a TestID to get the mass observations from a given test.
+
+    This function searches the chamber database for the masses recorded for the
+    given TestID.
+
+    Parameters
+    ----------
+    cur : MySQLCursor
+        Cursor used to interact with the chamber MySQL database.
+    test_id : int
+        The TestID which normalized mass will be calculated and recorded for.
+
+    Returns
+    -------
+    mass : list of floats
+        List of mass observations for the given TestID.
+    """
+    cur.execute(const.GET_MASS.format(test_id))
+    mass = [float(mass[0]) for mass in cur.fetchall()]
+    return mass
+
+
+def get_rel_hum(cur, test_id):
+    """Get the relative humidity calcilated for observations in a given test.
+
+    This finction uses the CoolProp module to calculate the realative humidity
+    for each observation in the test mathcing the give TestID.
+
+    Parameters
+    ----------
+    cur : MySQLCursor
+        Cursor used to interact with the chamber MySQL database.
+    test_id : int
+        The TestID which normalized mass will be calculated and recorded for.
+
+    Returns
+    -------
+    hum : list of floats
+        List of relative humidity percentages for each observation in the given
+        test.
+    """
+    hum = []
+    cur.execute(const.GET_AVG_TPDP.format(test_id))
+    avg_temp, pressure, dew_point = cur.fetchall()
+    for idx in range(len(pressure)):
+        hum.append(HAPropsSI('RH', 'P', pressure[idx],
+                             'T', avg_temp[idx], 'D', dew_point[idx]))
+    return hum

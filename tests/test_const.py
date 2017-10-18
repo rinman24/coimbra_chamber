@@ -28,6 +28,17 @@ CORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/"
                      getcwd() + "/tests/data_transfer_test_files/"
                                 "test_03.tdms"]
 
+CORRECT_FILE_LIST_WIN = [getcwd() + "/tests/data_transfer_test_files\\"
+                                "test_01.tdms",
+                     getcwd() + "/tests/data_transfer_test_files\\"
+                                "tdms_test_folder\\"
+                                "test_02.tdms",                     
+                     getcwd() + "/tests/data_transfer_test_files\\"
+                                "tdms_test_folder\\tdms_test_folder_full\\"
+                                "test_04.tdms",
+                     getcwd() + "/tests/data_transfer_test_files\\"
+                                "test_03.tdms"]
+
 INCORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/"
                                   "test_01.tdms_index",
                        getcwd() + "/tests/data_transfer_test_files/"
@@ -39,6 +50,16 @@ INCORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/"
                                   "tdms_test_folder/tdms_test_folder_full/"
                                   "test_04.tdms_index"]
 
+INCORRECT_FILE_LIST_WIN = [getcwd() + "/tests/data_transfer_test_files\\"
+                                  "test_01.tdms_index",
+                       getcwd() + "/tests/data_transfer_test_files\\"
+                                  "test_03.tdms_index",
+                       getcwd() + "/tests/data_transfer_test_files\\"
+                                  "tdms_test_folder\\"
+                                  "test_02.tdms_index",
+                       getcwd() + "/tests/data_transfer_test_files\\"
+                                  "tdms_test_folder\\tdms_test_folder_full\\"
+                                  "test_04.tdms_index"]
 
 TDMS_FF_SETTING = {'Duty': '1.0',
                    'Pressure': 100000,
