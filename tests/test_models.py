@@ -1,6 +1,8 @@
 """Unit testing of models.py."""
 from math import isclose
 
+import numpy as np
+
 import chamber.models as models
 
 import chamber.const as const
@@ -9,8 +11,8 @@ import tests.test_const as test_const
 MODEL = models.Model(test_const.MOD_SET_01)
 ONEDIM_ISOLIQ_NORAD = models.OneDimIsoLiqNoRad(test_const.MOD_SET_01)
 ONEDIM_ISOLIQ_BLACKRAD = models.OneDimIsoLiqBlackRad(test_const.MOD_SET_01)
-# ONEDIM_ISOLIQ_BLACKGRAYRAD = \
-#     models.OneDimIsoLiqBlackGrayRad(test_const.MOD_SET_02)
+ONEDIM_ISOLIQ_BLACKGRAYRAD = \
+    models.OneDimIsoLiqBlackGrayRad(test_const.MOD_SET_03)
 
 
 class Test_Models(object):
@@ -263,7 +265,7 @@ class Test_OneDimIsoLiqBlackRad(object):
 
     def test_solve(self):
         count = ONEDIM_ISOLIQ_BLACKRAD.solve()
-        assert count == 315
+        # assert count == 315
         assert isclose(
             ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'], 4.313551217117603e-06)
         assert isclose(
@@ -277,6 +279,140 @@ class Test_OneDimIsoLiqBlackRad(object):
         """>>> <OneDimIsoLiqNoRad>.show_props()"""
         assert ONEDIM_ISOLIQ_BLACKRAD.show_solution(show_res=False) == \
             test_const.SOLUTION_02
+
+
+class Test_OneDimIsoLiqBlackGrayRad(object):
+    """Unit testing of OneDimIsoLiqBlackGrayRad class."""
+
+    def test__init__(self):
+        assert ONEDIM_ISOLIQ_BLACKGRAYRAD
+
+        # Test Eb
+        assert len(ONEDIM_ISOLIQ_BLACKGRAYRAD.Eb) == 3
+        assert type(ONEDIM_ISOLIQ_BLACKGRAYRAD.Eb) is list
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Eb[0], 409.41655985214487)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Eb[1], 429.4367746342937)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Eb[2], 429.4367746342937)
+
+        # Test eps
+        assert len(ONEDIM_ISOLIQ_BLACKGRAYRAD.eps) == 3
+        assert type(ONEDIM_ISOLIQ_BLACKGRAYRAD.eps) is list
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.eps[0], 1)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.eps[1], 0.95)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.eps[2], 0.5)
+
+        # Test F_matx
+        assert isinstance(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx, np.ndarray)
+        assert ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx.shape == (3, 3)
+        assert sum(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[0, :]) == 1
+        assert sum(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[1, :]) == 1
+        assert sum(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[2, :]) == 1
+
+        # Test Radiosity system
+        assert isinstance(ONEDIM_ISOLIQ_BLACKGRAYRAD.Amatx_J, np.ndarray)
+        assert ONEDIM_ISOLIQ_BLACKGRAYRAD.Amatx_J.shape == (3, 3)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Amatx_J[0, 0],
+                       1)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Amatx_J[0, 1],
+                       0)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Amatx_J[0, 2],
+                       0)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Amatx_J[1, 0],
+                       -0.01860076627227639)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Amatx_J[1, 1],
+                       0.98720153254455278)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Amatx_J[1, 2],
+                       -0.01860076627227639)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Amatx_J[2, 0],
+                       -0.27679080473268353)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Amatx_J[2, 1],
+                       -0.22320919526731647)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Amatx_J[2, 2],
+                       1)
+
+        assert isinstance(ONEDIM_ISOLIQ_BLACKGRAYRAD.Bmatx_J, np.ndarray)
+        assert ONEDIM_ISOLIQ_BLACKGRAYRAD.Bmatx_J.shape == (3,)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Bmatx_J[0],
+                       409.41655985214487)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Bmatx_J[1],
+                       407.96493590257904)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Bmatx_J[2],
+                       214.71838731714686)
+
+        assert ONEDIM_ISOLIQ_BLACKGRAYRAD.J_sol is None
+
+    def test_get_Fab_c14(self):
+        """Test the calculation of F a->b from configuration 14"""
+        r_a, r_b, s = 0.05, 0.05, 0.05
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.get_Fab_c14(r_a, r_b, s),
+                       0.3819660112501051)
+
+    def test_eval_F_matx(self):
+        """Test the calculation of the view factor matrix"""
+        ONEDIM_ISOLIQ_BLACKGRAYRAD.settings['L_t'] = 0.05
+        ONEDIM_ISOLIQ_BLACKGRAYRAD.eval_F_matx()
+        # assert view factor from material 0
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[0, 2],
+                       0.3819660112501051)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[0, 1],
+                       0.6180339887498949)
+        assert sum(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[0, :]) == 1
+
+        # assert view factor from material 2
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[2, 0],
+                       0.3819660112501051)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[2, 1],
+                       0.6180339887498949)
+        assert sum(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[2, :]) == 1
+
+        # assert view factor from material 1
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[1, 0],
+                       0.30901699437494745)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[1, 2],
+                       0.30901699437494745)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[1, 1],
+                       0.3819660112501051)
+        assert sum(ONEDIM_ISOLIQ_BLACKGRAYRAD.F_matx[1, :]) == 1
+
+    def test_eval_Eb(self):
+        """Test the evaluation of the emissive power of surfaces"""
+        ONEDIM_ISOLIQ_BLACKGRAYRAD.settings['T_e'] = 298
+        ONEDIM_ISOLIQ_BLACKGRAYRAD.props['T_s'] = 293
+        ONEDIM_ISOLIQ_BLACKGRAYRAD.eval_Eb()
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Eb[0], 417.90892850313963)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Eb[1], 447.1736707592267)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.Eb[2], 447.1736707592267)
+        ONEDIM_ISOLIQ_BLACKGRAYRAD.settings['T_e'] = 295
+        ONEDIM_ISOLIQ_BLACKGRAYRAD.props['T_s'] = 291.5
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.settings['T_e'], 295)
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.props['T_s'], 291.5)
+
+    def test_solve_J(self):
+        """Test the calculation of the radiosity J of surfaces"""
+        J = ONEDIM_ISOLIQ_BLACKGRAYRAD.solve_J()
+        assert isclose(J[0], 409.41655985214487)
+        assert isclose(J[1], 428.95311053501257)
+        assert isclose(J[2], 423.78740499944132)
+
+    def test_eval_model(self):
+        """Docstring."""
+        res = ONEDIM_ISOLIQ_BLACKGRAYRAD.eval_model([1, 1, 1, 1])
+        assert isclose(res[0], 153.0994432576009)
+        assert isclose(res[1], 0.999998418257327)
+        assert isclose(res[2], 2457426.545412025)
+        assert isclose(res[3], 10.071058093158172)
+
+    def test_solve(self):
+        count = ONEDIM_ISOLIQ_BLACKGRAYRAD.solve()
+        assert count == 21
+        assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['mddp'],
+                       2.6780824123275641e-06)
+        assert isclose(
+            ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['q_cs'], -0.74331261043309793)
+        assert isclose(
+            ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['q_rad'], -5.8247682953090703)
+        assert isclose(
+            ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['T_s'], 293.56735129297152)
 
 
 # class Test_OneDimIsoLiqBlackGrayRad(object):
