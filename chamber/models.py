@@ -398,6 +398,7 @@ class Model(object):
     # Methods that are defined here but overwritten by children.
     def eval_Eb(self):
         """Docstring."""
+        # These are overridden by the sub-classes that extend this class
         pass
 
     def eval_model(self, vec_in):
@@ -504,7 +505,7 @@ class OneDimIsoLiqBlackRad(Model):
             return res
 
 
-class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
+class OneDimIsoLiqBlackGrayRad(Model):
     """Docstring."""
 
     def __init__(self, settings, ref='Mills', rule='mean'):
@@ -624,3 +625,6 @@ class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
             print(res)
         else:
             return res
+
+
+# class OneDimIsoIntEmitt(Model):
