@@ -4,7 +4,10 @@ from CoolProp.CoolProp import PropsSI
 
 import numpy as np
 
+from scipy import integrate
 import scipy.optimize as opt
+import sympy as sp
+from sympy import exp, pi, oo
 
 import chamber.const as const
 
@@ -627,4 +630,18 @@ class OneDimIsoLiqBlackGrayRad(Model):
             return res
 
 
-# class OneDimIsoIntEmitt(Model):
+class OneDimIsoLiqIntEmitt(Model):
+
+    def __init__(self, settings, ref='Mills', rule='mean'):
+        """Docstring."""
+        super(OneDimIsoLiqIntEmitt, self)\
+            .__init__(settings, ref=ref, rule=rule)
+
+    @staticmethod
+    def get_internal_fractional_value(a):
+        """Integrate internal fractional function."""
+        def fun(x): return (15 / (4 * np.pi**4)) * pow(x, 4) * np.exp(x) /\
+            pow(np.exp(x) - 1, 2)
+        x_vec = np.arange(a, 100., 0.01)
+        y_vec = [fun(x) for x in x_vec]
+        return integrate.trapz(y_vec, x_vec)
