@@ -24,7 +24,7 @@ def connect_sqldb_chamber():
     return cnx
 
 
-def normalized_mass(cur, test_id):
+def normalize_mass(cur, test_id):
     """Use a TestID to calculate and write the normalized mass for a given test.
 
     This function uses a MySql querry to calculate and write the normalized mass
@@ -38,7 +38,7 @@ def normalized_mass(cur, test_id):
         The TestID which normalized mass will be calculated and recorded for.
         Note: TestID must be for a IsMass True test.
     """
-    cur.execute(const.NORMALIZE_MASS.format(const.GET_TEST_ID_NM.format(test_id)))
+    cur.execute(const.NORMALIZE_MASS.format(test_id))
 
 
 def get_mass(cur, test_id):
@@ -154,8 +154,18 @@ def get_rel_hum(cur, test_id):
         test.
     """
     hum = []
-    cur.execute(const.GET_AVG_TPDP.format(test_id))
-    avg_temp, pressure, dew_point = cur.fetchall()
+    avg_temp = []
+    pressure = []
+    dew_point = []
+
+    cur.execute(const.GET_TPDP.format(test_id))
+    results = cur.fetchall()
+
+    for idx in range(len(results)):
+        avg_temp.append(float(results[idx][0]))
+        pressure.append(float(results[idx][1]))
+        dew_point.append(float(results[idx][2]))
+
     for idx in range(len(pressure)):
         hum.append(HAPropsSI('RH', 'P', pressure[idx],
                              'T', avg_temp[idx], 'D', dew_point[idx]))
@@ -178,3 +188,9 @@ def normalize(vals):
     vals = np.array(vals)
     norm_vals = (vals-min(vals))/(max(vals)-min(vals))
     return norm_vals
+
+
+# if __name__=='__main__':
+#     from scipy import stats
+
+#     from CoolProp.HumidAirProp import HAPropsSI

@@ -275,6 +275,13 @@ GET_AVG_TPDP = ("SELECT ("
                 "), ROUND(AVG(Pressure)), ROUND(AVG(PowOut), 4), ROUND(AVG(DewPoint), 2) FROM"
                 " Observation WHERE TestID={0};")
 
+GET_TPDP = ("SELECT ("
+                "SELECT ROUND(AVG(Temperature), 2) FROM TempObservation AS Temp"
+                " INNER JOIN Observation AS Obs ON"
+                " Temp.ObservationID=Obs.ObservationID WHERE Obs.TestID={0}"
+                "), Pressure, DewPoint FROM"
+                " Observation WHERE TestID={0};")
+
 TUBE_RADIUS = 0.015    # [m]
 TUBE_AREA = pi * pow(TUBE_RADIUS, 2)
 TUBE_CIRCUM = 2 * pi * TUBE_RADIUS

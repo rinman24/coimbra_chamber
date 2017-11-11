@@ -8,10 +8,8 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from tabulate import tabulate
 
-# import results
-import chamber.results as results
-# import sqldb
-import chamber.sqldb as sqldb
+import sqldb
+# import chamber.sqldb as sqldb
 
 
 def meshgrid(i_points, j_points):
@@ -71,11 +69,11 @@ def get_db_data(test_id):
     rel_hum: list of floats
         List of calculated relative humidity data pertaining to the TestID.
     """
-    cnx = results.connect_sqldb_chamber()
+    cnx = sqldb.connect_sqldb('test_chamber')
     cur = cnx.cursor()
 
-    mass = results.get_mass(cur, test_id)
-    rel_hum = results.get_rel_hum(cur, test_id)
+    mass = sqldb.get_mass(cur, test_id)
+    rel_hum = sqldb.get_rel_hum(cur, test_id)
 
     cnx.commit()
     cur.close()
@@ -197,7 +195,7 @@ def get_lin(mass, hum_idx, tol=0.99, get_one=False):
     for end_idx in range(5, int(end)):
         lin = lin_reg(mass, hum_idx, end_idx, tol=tol)
         if lin:
-            if(get_one is True):
+            if get_one is True:
                 return lin
             else:
                 slope_r.append(lin)
@@ -265,6 +263,8 @@ def get_set_width(mass, hum_idx, idx):
         y-intercept of the calculated linear regression at the argument index.
     """
     slope, r_squared, intercept, end = get_lin(mass, hum_idx)
+    if len(slope) < idx:
+        return None, None, None
     return slope[idx], r_squared[idx], intercept[idx]
 
 
@@ -329,7 +329,7 @@ def subplot_3_EvR(fig, ends, slope, hum_per_list):
 def subplot_4_change(fig, ends, slope, hum_per_list):
     """Adds the Percent Change of Fits subplot to argument figure."""
     sub_4 = fig.add_subplot(3, 2, 4)
-    sub_4.set_title('% Change [%]/ (BW/2) [s]')
+    sub_4.set_title('% Change [%] / (BW/2) [s]')
     for key in hum_per_list:
         sub_4.plot(ends[key][1:501],
                    get_change(slope[key][:501]), label="RH = {}%".format(key))
@@ -378,6 +378,8 @@ def generate_summary(test_id):
         various methods described in the tabular output.
     """
     mass, rel_hum = get_db_data(test_id)
+
+    print(len(mass), len(rel_hum))
 
     hum_per_list = []
     slope, r_squared, ends, hum_dict = [{} for i in range(4)]

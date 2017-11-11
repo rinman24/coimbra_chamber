@@ -37,7 +37,7 @@ def job():
 
 def execute_job():
     """Calls build_test_tables once and calls job() every day at 23:00."""
-    buildt_tables()
+    build_tables()
     schedule.every().day.at("23:00").do(job)
     while True:
         schedule.run_pending()
