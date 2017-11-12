@@ -14,7 +14,7 @@ ONEDIM_ISOLIQ_BLACKRAD = models.OneDimIsoLiqBlackRad(test_const.MOD_SET_01)
 ONEDIM_ISOLIQ_BLACKGRAYRAD = \
     models.OneDimIsoLiqBlackGrayRad(test_const.MOD_SET_03)
 ONEDIM_ISOLIQ_INTEMITT = \
-    models.OneDimIsoLiqIntEmitt(test_const.MOD_SET_03)
+    models.OneDimIsoLiqIntEmitt(test_const.MOD_SET_04)
 
 
 class Test_Models(object):
@@ -426,3 +426,33 @@ class Test_OneDimIsoLiqIntEmitt(object):
     def test_get_internal_fractional_value(self):
         value = ONEDIM_ISOLIQ_INTEMITT.get_internal_fractional_value(0.577871)
         assert isclose(value, 0.99756420762388165)
+
+    def test_get_stigma(self):
+        stigma = ONEDIM_ISOLIQ_INTEMITT.get_stigma(3.58, 300)
+        assert isclose(stigma, 13.3975791433892)
+
+    def test_eval_eps(self):
+
+        ONEDIM_ISOLIQ_INTEMITT.eval_eps(ONEDIM_ISOLIQ_INTEMITT.alpha_w,
+                                        ONEDIM_ISOLIQ_INTEMITT.lamb)
+        assert isclose(ONEDIM_ISOLIQ_INTEMITT.eps, 0.0096677665248399505)
+
+    def test_eval_model(self):
+        """Docstring."""
+        res = ONEDIM_ISOLIQ_INTEMITT.eval_model([1, 1, 1, 1])
+        assert isclose(res[0], 254.49907209600156)
+        assert isclose(res[1], 0.9999973637622117)
+        assert isclose(res[2], 2457426.545412025)
+        assert isclose(res[3], 1.0000006446806631)
+
+    def test_solve(self):
+        count = ONEDIM_ISOLIQ_INTEMITT.solve()
+        assert count == 131
+        assert isclose(ONEDIM_ISOLIQ_INTEMITT.solution['mddp'],
+                       1.7214119576236839e-06)
+        assert isclose(
+            ONEDIM_ISOLIQ_INTEMITT.solution['q_cs'], -3.990387554167119)
+        assert isclose(
+            ONEDIM_ISOLIQ_INTEMITT.solution['q_rad'], -0.24447723442138619)
+        assert isclose(
+            ONEDIM_ISOLIQ_INTEMITT.solution['T_s'], 290.36469952981787)

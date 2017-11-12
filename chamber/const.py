@@ -298,3 +298,5 @@ TUBE_CIRCUM = 2 * pi * TUBE_RADIUS
 
 # Radiative Properties
 SIGMA = 5.670367e-8
+
+C_2 = 1.4389e4  # [mu*m K]

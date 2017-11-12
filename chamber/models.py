@@ -376,6 +376,7 @@ class Model(object):
             # Evaluate the new properties before solving again:
             self.eval_props()
             self.eval_Eb()
+            self.eval_Jsys()
 
             # Bookkeeping
             count += 1
@@ -400,6 +401,11 @@ class Model(object):
 
     # Methods that are defined here but overwritten by children.
     def eval_Eb(self):
+        """Docstring."""
+        # These are overridden by the sub-classes that extend this class
+        pass
+
+    def eval_Jsys(self):
         """Docstring."""
         # These are overridden by the sub-classes that extend this class
         pass
@@ -637,11 +643,86 @@ class OneDimIsoLiqIntEmitt(Model):
         super(OneDimIsoLiqIntEmitt, self)\
             .__init__(settings, ref=ref, rule=rule)
 
+        self.alpha_w = settings['alpha_w']
+        self.lamb = settings['lamb']
+        self.eps = None
+
+        self._unknowns = ['mddp', 'q_cs', 'q_rad', 'T_s']
+        self.set_solution([None] * len(self._unknowns))
+
+    @ staticmethod
+    def get_stigma(lamb, Temp):
+        """Get stigma value."""
+        # lamb in [mu*m], Temp in [K]
+
+        return const.C_2/(lamb * Temp)
+
     @staticmethod
-    def get_internal_fractional_value(a):
+    def get_internal_fractional_value(stigma):
         """Integrate internal fractional function."""
+        # stigma must be a floting point
+
         def fun(x): return (15 / (4 * np.pi**4)) * pow(x, 4) * np.exp(x) /\
             pow(np.exp(x) - 1, 2)
-        x_vec = np.arange(a, 100., 0.01)
+
+        x_vec = np.arange(stigma, 100., 0.01)
         y_vec = [fun(x) for x in x_vec]
+
         return integrate.trapz(y_vec, x_vec)
+
+    def eval_eps(self, alpha, lamb):
+        """Evaluate the emissivity using the internal emittance method."""
+
+        self.eps = alpha[1] * 0.005
+
+        for k in range(1, len(alpha)):
+
+            stigma_0 = self.get_stigma(lamb[k - 1], self.props['T_s'])
+            stigma_1 = self.get_stigma(lamb[k], self.props['T_s'])
+
+            fi_0 = self.get_internal_fractional_value(stigma_0)
+            fi_1 = self.get_internal_fractional_value(stigma_1)
+
+            self.eps += alpha[k] * (fi_1 - fi_0)
+
+    def eval_model(self, vec_in):
+        """Docstring."""
+        mddp, q_cs, q_rad, T_s = vec_in
+
+        # Evaluate the emissivity of the water
+        self.eval_eps(self.alpha_w, self.lamb)
+
+        # Solve the model
+        res = [0 for _ in range(len(self.solution))]
+        res[0] = q_cs + \
+            (self.props['k_m'] / self.settings['L_t']) * \
+            (self.settings['T_e'] - T_s)
+        res[1] = mddp + \
+            (self.props['rho_m'] * self.props['D_12'] /
+             self.settings['L_t']) * \
+            (self.props['m_1e'] - self.props['m_1s'])
+        res[2] = mddp * self.props['h_fg'] + q_cs + q_rad
+        res[3] = q_rad + \
+            (- self.eps * 4 * const.SIGMA * pow(T_s, 3) *
+             (T_s - self.settings['T_e']))
+        return res
+
+    def show_solution(self, show_res=True):
+        """Docstring."""
+        # If the model has been solved
+        if self.solution['mddp']:
+            res = ('------------- Solution -------------\n'
+                   'mddp:\t{:.6g}\t[kg / m^2 s]\n'
+                   'q_cs:\t{:.6g}\t[W / m^2]\n'
+                   'q_rad:\t{:.6g}\t[W / m^2]\n'
+                   'T_s:\t{:.6g}\t\t[K]\n')\
+                .format(self.solution['mddp'], self.solution['q_cs'],
+                        self.solution['q_rad'], self.solution['T_s'])
+        else:
+            res = ('------------- Solution -------------\n'
+                   '......... Not solved yet ...........\n')
+
+        if show_res:
+            print(res)
+        else:
+            return res
