@@ -406,53 +406,53 @@ class Test_OneDimIsoLiqBlackGrayRad(object):
 
     def test_solve(self):
         count = ONEDIM_ISOLIQ_BLACKGRAYRAD.solve()
-        assert count == 21
+        assert count == 23
         assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['mddp'],
-                       2.6780824123275641e-06)
+                       2.8157247162849299e-06)
         assert isclose(
-            ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['q_cs'], -0.74331261043309793)
+            ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['q_cs'], -0.6173561436231475)
         assert isclose(
-            ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['q_rad'], -5.8247682953090703)
+            ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['q_rad'], -6.2866758777740301)
         assert isclose(
-            ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['T_s'], 293.56735129297152)
+            ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['T_s'], 293.81051897402887)
 
 
-class Test_OneDimIsoLiqIntEmitt(object):
-    """Unit testing of OneDimIsoLiqIntEmitt class."""
+# class Test_OneDimIsoLiqIntEmitt(object):
+#     """Unit testing of OneDimIsoLiqIntEmitt class."""
 
-    def test__init__(self):
-        assert ONEDIM_ISOLIQ_INTEMITT
+#     def test__init__(self):
+#         assert ONEDIM_ISOLIQ_INTEMITT
 
-    def test_get_internal_fractional_value(self):
-        value = ONEDIM_ISOLIQ_INTEMITT.get_internal_fractional_value(0.577871)
-        assert isclose(value, 0.99756420762388165)
+#     def test_get_internal_fractional_value(self):
+#         value = ONEDIM_ISOLIQ_INTEMITT.get_internal_fractional_value(0.577871)
+#         assert isclose(value, 0.99756420762388165)
 
-    def test_get_stigma(self):
-        stigma = ONEDIM_ISOLIQ_INTEMITT.get_stigma(3.58, 300)
-        assert isclose(stigma, 13.3975791433892)
+#     def test_get_stigma(self):
+#         stigma = ONEDIM_ISOLIQ_INTEMITT.get_stigma(3.58, 300)
+#         assert isclose(stigma, 13.3975791433892)
 
-    def test_eval_eps(self):
+#     def test_eval_eps(self):
 
-        ONEDIM_ISOLIQ_INTEMITT.eval_eps(ONEDIM_ISOLIQ_INTEMITT.alpha_w,
-                                        ONEDIM_ISOLIQ_INTEMITT.lamb)
-        assert isclose(ONEDIM_ISOLIQ_INTEMITT.eps, 0.0096677665248399505)
+#         ONEDIM_ISOLIQ_INTEMITT.eval_eps(ONEDIM_ISOLIQ_INTEMITT.alpha_w,
+#                                         ONEDIM_ISOLIQ_INTEMITT.lamb)
+#         assert isclose(ONEDIM_ISOLIQ_INTEMITT.eps, 0.0096677665248399505)
 
-    def test_eval_model(self):
-        """Docstring."""
-        res = ONEDIM_ISOLIQ_INTEMITT.eval_model([1, 1, 1, 1])
-        assert isclose(res[0], 254.49907209600156)
-        assert isclose(res[1], 0.9999973637622117)
-        assert isclose(res[2], 2457426.545412025)
-        assert isclose(res[3], 1.0000006446806631)
+#     def test_eval_model(self):
+#         """Docstring."""
+#         res = ONEDIM_ISOLIQ_INTEMITT.eval_model([1, 1, 1, 1])
+#         assert isclose(res[0], 254.49907209600156)
+#         assert isclose(res[1], 0.9999973637622117)
+#         assert isclose(res[2], 2457426.545412025)
+#         assert isclose(res[3], 1.0000006446806631)
 
-    def test_solve(self):
-        count = ONEDIM_ISOLIQ_INTEMITT.solve()
-        assert count == 131
-        assert isclose(ONEDIM_ISOLIQ_INTEMITT.solution['mddp'],
-                       1.7214119576236839e-06)
-        assert isclose(
-            ONEDIM_ISOLIQ_INTEMITT.solution['q_cs'], -3.990387554167119)
-        assert isclose(
-            ONEDIM_ISOLIQ_INTEMITT.solution['q_rad'], -0.24447723442138619)
-        assert isclose(
-            ONEDIM_ISOLIQ_INTEMITT.solution['T_s'], 290.36469952981787)
+#     def test_solve(self):
+#         count = ONEDIM_ISOLIQ_INTEMITT.solve()
+#         assert count == 131
+#         assert isclose(ONEDIM_ISOLIQ_INTEMITT.solution['mddp'],
+#                        1.7214119576236839e-06)
+#         assert isclose(
+#             ONEDIM_ISOLIQ_INTEMITT.solution['q_cs'], -3.990387554167119)
+#         assert isclose(
+#             ONEDIM_ISOLIQ_INTEMITT.solution['q_rad'], -0.24447723442138619)
+#         assert isclose(
+#             ONEDIM_ISOLIQ_INTEMITT.solution['T_s'], 290.36469952981787)
