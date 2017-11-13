@@ -6,8 +6,6 @@ import numpy as np
 
 from scipy import integrate
 import scipy.optimize as opt
-import sympy as sp
-from sympy import exp, pi, oo
 
 import chamber.const as const
 
