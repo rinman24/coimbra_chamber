@@ -435,7 +435,7 @@ class Test_OneDimIsoLiqIntEmitt(object):
 
         ONEDIM_ISOLIQ_INTEMITT.eval_eps(ONEDIM_ISOLIQ_INTEMITT.alpha_w,
                                         ONEDIM_ISOLIQ_INTEMITT.lamb)
-        assert isclose(ONEDIM_ISOLIQ_INTEMITT.eps, 0.0096677665248399505)
+        assert isclose(ONEDIM_ISOLIQ_INTEMITT.eps, 0.00028685082322367456)
 
     def test_eval_model(self):
         """Docstring."""
@@ -443,16 +443,16 @@ class Test_OneDimIsoLiqIntEmitt(object):
         assert isclose(res[0], 254.49907209600156)
         assert isclose(res[1], 0.9999973637622117)
         assert isclose(res[2], 2457426.545412025)
-        assert isclose(res[3], 1.0000006446806631)
+        assert isclose(res[3], 1.0000000191282215)
 
     def test_solve(self):
         count = ONEDIM_ISOLIQ_INTEMITT.solve()
-        assert count == 131
+        assert count == 122
         assert isclose(ONEDIM_ISOLIQ_INTEMITT.solution['mddp'],
-                       1.7214119576236839e-06)
+                       1.6547116138259197e-06)
         assert isclose(
-            ONEDIM_ISOLIQ_INTEMITT.solution['q_cs'], -3.990387554167119)
+            ONEDIM_ISOLIQ_INTEMITT.solution['q_cs'], -4.0637386967065616)
         assert isclose(
-            ONEDIM_ISOLIQ_INTEMITT.solution['q_rad'], -0.24447723442138619)
+            ONEDIM_ISOLIQ_INTEMITT.solution['q_rad'], -0.0073716933238302459)
         assert isclose(
-            ONEDIM_ISOLIQ_INTEMITT.solution['T_s'], 290.36469952981787)
+            ONEDIM_ISOLIQ_INTEMITT.solution['T_s'], 290.27892404016342)

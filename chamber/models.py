@@ -651,8 +651,9 @@ class OneDimIsoLiqIntEmitt(Model):
     @ staticmethod
     def get_stigma(lamb, Temp):
         """Get stigma value."""
-        # lamb in [mu*m], Temp in [K]
-
+        # lamb in [micrometer], Temp in [Kelvin]
+        # C_2 is the constant appearing in the Planck's law
+        # for the monochromatic emissive power for a black surface
         return const.C_2/(lamb * Temp)
 
     @staticmethod
@@ -671,9 +672,11 @@ class OneDimIsoLiqIntEmitt(Model):
     def eval_eps(self, alpha, lamb):
         """Evaluate the emissivity using the internal emittance method."""
 
-        self.eps = alpha[1] * 0.005
+        absorptance = [1 - pow(10, - alpha * self.settings['L_t'] / np.log(10))
+                       for alpha in alpha]
+        self.eps = absorptance[1] * 0.005
 
-        for k in range(1, len(alpha)):
+        for k in range(1, len(absorptance)):
 
             stigma_0 = self.get_stigma(lamb[k - 1], self.props['T_s'])
             stigma_1 = self.get_stigma(lamb[k], self.props['T_s'])
@@ -681,7 +684,7 @@ class OneDimIsoLiqIntEmitt(Model):
             fi_0 = self.get_internal_fractional_value(stigma_0)
             fi_1 = self.get_internal_fractional_value(stigma_1)
 
-            self.eps += alpha[k] * (fi_1 - fi_0)
+            self.eps += absorptance[k] * (fi_1 - fi_0)
 
     def eval_model(self, vec_in):
         """Docstring."""
