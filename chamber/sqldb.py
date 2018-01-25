@@ -1,10 +1,13 @@
 """Docstring."""
 from decimal import Decimal
+import numpy as np
 import os
 from pathlib import Path
 from re import compile
+from scipy import stats
 import shutil
 
+from CoolProp.HumidAirProp import HAPropsSI
 import mysql.connector as conn
 from mysql.connector import errorcode
 from nptdms import TdmsFile
@@ -26,7 +29,6 @@ def connect_sqldb(database):
     ----------
     database : str
         The name of the desired database to connect to.
-
     Returns
     -------
     cnx : MySQLConnection
@@ -108,15 +110,12 @@ def setting_exists(cur, setting_info):
         IsMass. If the setting does not exist in the database the function
         returns False.
     """
-    if setting_info['IsMass'] == 1:
-        cur.execute(const.FIND_SETTING_M_T, setting_info)
-    else:
-        cur.execute(const.FIND_SETTING_M_F, setting_info)
+    cur.execute(const.FIND_SETTING, setting_info)
     result = cur.fetchall()
     if not result:
         return False
     else:
-        setting_id = result[0][0], setting_info['IsMass']
+        setting_id = result[0][0]
         return setting_id
 
 
@@ -144,7 +143,7 @@ def test_exists(cur, test_info):
     """
     if not test_info:
         print("File Unable to Transfer")
-        return True
+        return False
     cur.execute(const.FIND_TEST.format(
         test_info['DateTime'].replace(microsecond=0).replace(tzinfo=None)))
     result = cur.fetchall()
@@ -229,29 +228,14 @@ def get_setting_info(tdms_obj):
         names and values should be the value to insert.
     """
     temp_list = [float(get_temp_info(tdms_obj, 0, x)) for x in range(4, 14)]
-    setting_info = {'InitialDewPoint':
-                    '{:.2f}'.format(tdms_obj.object("Data",
-                                                    "DewPoint").data[0]),
-                    'InitialDuty':
-                    '{:.1f}'.format(tdms_obj.object("Data",
-                                                    "DutyCycle").data[0]),
-                    'InitialPressure':
-                    int(tdms_obj.object("Data", "Pressure").data[0]),
-                    'InitialTemp':
-                    '{:.2f}'.format(
+    setting_info = {'Duty': '{:.1f}'.format(round(
+                        tdms_obj.object("Settings", "DutyCycle").data[0]), 1),
+                    'Pressure': int((5000 * round(
+                        tdms_obj.object("Data", "Pressure").data[0] / 5000))),
+                    'Temperature': int(5 * round(
                         sum(temp_list[x] for x in range(
-                            len(temp_list)))/len(temp_list)),
-                    'TimeStep':
-                    '{:.2f}'.format(tdms_obj.object("Settings",
-                                                    "TimeStep").data[0])}
-    try:
-        setting_info['IsMass'] = int(tdms_obj.object("Settings",
-                                                     "IsMass").data[0])
-    except KeyError:
-        setting_info['IsMass'] = 1
-    if setting_info['IsMass'] == 1:
-        setting_info['InitialMass'] = '{:.7f}'.format(
-            tdms_obj.object("Data", "Mass").data[0])
+                            len(temp_list))) / len(temp_list)) / 5),
+                    'IsSteady': int(tdms_obj.object("Settings", "IsSteady").data[0])}
     return setting_info
 
 
@@ -276,12 +260,15 @@ def get_test_info(tdms_obj):
         Set of values to insert into the Test table. Keys should be column
         names and values should be the value to insert.
      """
-    try:
-        test_info = {'Author': '',
-                     'DateTime': tdms_obj.object().properties['DateTime'],
-                     'Description': ''}
-    except KeyError:
-        return None
+    test_info = {'Author': '',
+                 'DateTime': tdms_obj.object().properties['DateTime'].replace(
+                                 microsecond=0).replace(tzinfo=None),
+                 'Description': '',
+                 'IsMass': int(
+                    tdms_obj.object("Settings", "IsMass").data[0]),
+                 'TimeStep': int(
+                    tdms_obj.object("Settings", "TimeStep").data[0])}
+
     for name, value in tdms_obj.object().properties.items():
         if name == "author":
             test_info['Author'] = value
@@ -290,7 +277,7 @@ def get_test_info(tdms_obj):
     return test_info
 
 
-def get_obs_info(tdms_obj, obs_idx, is_mass=True):
+def get_obs_info(tdms_obj, obs_idx):
     """Return a dictionary of observation data.
 
     Builds a dictionary containing the observation for a given index (time) in
@@ -314,26 +301,20 @@ def get_obs_info(tdms_obj, obs_idx, is_mass=True):
         should be the value to insert.
     """
     obs_info = {'CapManOk': int(
-                        tdms_obj.object("Data", "CapManOk").data[obs_idx]),
-                'DewPoint':
-                    '{:.2f}'.format(
-                        tdms_obj.object("Data", "DewPoint").data[obs_idx]),
-                'Duty':
-                    '{:.1f}'.format(
-                        tdms_obj.object("Data", "DutyCycle").data[obs_idx]),
-                'Idx':
-                    int(tdms_obj.object("Data", "Idx").data[obs_idx]),
-                'OptidewOk':
-                    int(tdms_obj.object("Data", "OptidewOk").data[obs_idx]),
-                'PowOut':
-                    '{:.4f}'.format(
-                        tdms_obj.object("Data", "PowOut").data[obs_idx]),
-                'PowRef':
-                    '{:.4f}'.format(
-                        tdms_obj.object("Data", "PowRef").data[obs_idx]),
+                    tdms_obj.object("Data", "CapManOk").data[obs_idx]),
+                'DewPoint': '{:.2f}'.format(
+                    tdms_obj.object("Data", "DewPoint").data[obs_idx]),
+                'Idx': int(
+                    tdms_obj.object("Data", "Idx").data[obs_idx]),
+                'OptidewOk': int(
+                    tdms_obj.object("Data", "OptidewOk").data[obs_idx]),
+                'PowOut': '{:.4f}'.format(
+                    tdms_obj.object("Data", "PowOut").data[obs_idx]),
+                'PowRef': '{:.4f}'.format(
+                    tdms_obj.object("Data", "PowRef").data[obs_idx]),
                 'Pressure': int(
-                        tdms_obj.object("Data", "Pressure").data[obs_idx])}
-    if is_mass:
+                    tdms_obj.object("Data", "Pressure").data[obs_idx])}
+    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
         obs_info['Mass'] = '{:.7f}'.format(
             tdms_obj.object("Data", "Mass").data[obs_idx])
     return obs_info
@@ -420,11 +401,8 @@ def add_setting_info(cur, tdms_obj):
     setting_info = get_setting_info(tdms_obj)
     setting_id = setting_exists(cur, setting_info)
     if not setting_id:
-        if setting_info['IsMass'] == 1:
-            cur.execute(const.ADD_SETTING_M_T, setting_info)
-        else:
-            cur.execute(const.ADD_SETTING_M_F, setting_info)
-        setting_id = cur.lastrowid, setting_info['IsMass']
+        cur.execute(const.ADD_SETTING, setting_info)
+        setting_id = cur.lastrowid
     return setting_id
 
 
@@ -457,11 +435,11 @@ def add_test_info(cur, tdms_obj, setting_id):
     test_info = get_test_info(tdms_obj)
     test_id = test_exists(cur, test_info)
     if not test_id:
-        test_info["SettingID"] = setting_id[0]
-        test_info["TubeID"] = 1
-        # str(tdms_obj.object("Settings", "TubeID").data[0])
+        test_info["SettingID"] = setting_id
+        test_info["TubeID"] = str(
+            tdms_obj.object("Settings", "TubeID").data[0])
         cur.execute(const.ADD_TEST, test_info)
-        test_id = cur.lastrowid, setting_id[1]
+        test_id = cur.lastrowid
     return test_id
 
 
@@ -493,18 +471,13 @@ def add_obs_info(cur, tdms_obj, test_id, obs_idx):
         obs_id[0] is the ObservationID which is the primary key for the
         Observation table. obs_id[1] is the boolean representation of IsMass.
     """
-    test_boolean = True
-    if test_id[1] == 0:
-        test_boolean = False
-        obs_info = get_obs_info(tdms_obj, obs_idx, False)
-    else:
-        obs_info = get_obs_info(tdms_obj, obs_idx)
-    obs_info['TestID'] = test_id[0]
-    if test_boolean:
+    obs_info = get_obs_info(tdms_obj, obs_idx)
+    obs_info['TestID'] = test_id
+    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
         cur.execute(const.ADD_OBS_M_T, obs_info)
     else:
         cur.execute(const.ADD_OBS_M_F, obs_info)
-    obs_id = cur.lastrowid, test_boolean
+    obs_id = cur.lastrowid
     return obs_id
 
 
@@ -532,12 +505,13 @@ def add_temp(cur, tdms_obj, obs_id, temp_idx):
         This is the temperature index in the tdms file, which represents a
         single time.
     """
-    if obs_id[1]:
-        temp_data = [(obs_id[0], couple_idx, get_temp_info(
-            tdms_obj, temp_idx, couple_idx)) for couple_idx in range(14)]
-    else:
-        temp_data = [(obs_id[0], couple_idx, get_temp_info(
+    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
+        temp_data = [(obs_id, couple_idx, get_temp_info(
             tdms_obj, temp_idx, couple_idx)) for couple_idx in range(4, 14)]
+    else:
+        temp_data = [(obs_id, couple_idx, get_temp_info(
+            tdms_obj, temp_idx, couple_idx)) for couple_idx in range(14)]
+
     cur.executemany(const.ADD_TEMP, temp_data)
 
 
@@ -557,6 +531,7 @@ def add_input(cur, directory, test=False):
         This is the directory to search for tdms files.
     """
     for file_name in list_tdms(directory):
+        print(file_name)
         tdms_obj = TdmsFile(file_name)
         if not test_exists(cur, get_test_info(tdms_obj)):
             test_id = add_test_info(

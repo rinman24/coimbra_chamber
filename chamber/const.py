@@ -4,8 +4,6 @@ from decimal import Decimal
 from math import log, sqrt, pi
 from os import getcwd
 
-import pytz
-
 
 # Constants for laser.py
 # ZnSe port parameters (From Spec Sheet)
@@ -77,34 +75,31 @@ ACC_GRAV = 9.80665  # m/s^2
 
 # CONSTANTS FOR sqldb.py
 # MySQL querry Constants
-ADD_SETTING_M_F = ("INSERT INTO Setting "
-                   "(IsMass, InitialDewPoint, InitialDuty, InitialPressure, InitialTemp, TimeStep)"
-                   " VALUES "
-                   "(%(IsMass)s, %(InitialDewPoint)s, %(InitialDuty)s, %(InitialPressure)s, "
-                   "%(InitialTemp)s, %(TimeStep)s)")
-
-ADD_SETTING_M_T = ("INSERT INTO Setting "
-                   "(IsMass, InitialDewPoint, InitialDuty, InitialMass, InitialPressure, InitialTemp, TimeStep)"
-                   " VALUES "
-                   "(%(IsMass)s, %(InitialDewPoint)s, %(InitialDuty)s, %(InitialMass)s, %(InitialPressure)s, "
-                   "%(InitialTemp)s, %(TimeStep)s)")
+ADD_SETTING = ("INSERT INTO Setting "
+               "(Duty, Pressure, Temperature, IsSteady)"
+               " VALUES "
+               "(%(Duty)s, %(Pressure)s, %(Temperature)s, %(IsSteady)s)")
 
 ADD_TEST = ("INSERT INTO Test "
-            "(Author, DateTime, Description, SettingID, TubeID)"
+            "(Author, DateTime, Description, IsMass, TimeStep,"
+            " SettingID, TubeID)"
             " VALUES "
-            "(%(Author)s, %(DateTime)s, %(Description)s, %(SettingID)s, %(TubeID)s)")
+            "(%(Author)s, %(DateTime)s, %(Description)s, %(IsMass)s,"
+            " %(TimeStep)s, %(SettingID)s, %(TubeID)s)")
 
 ADD_OBS_M_T = ("INSERT INTO Observation "
-               "(CapManOk, DewPoint, Duty, Idx, Mass, OptidewOk, PowOut, PowRef, Pressure, TestID)"
+               "(CapManOk, DewPoint, Idx, Mass, OptidewOk, PowOut, PowRef,"
+               " Pressure, TestID)"
                " VALUES "
-               "(%(CapManOk)s, %(DewPoint)s, %(Duty)s, %(Idx)s, %(Mass)s, %(OptidewOk)s, %(PowOut)s,"
-               " %(PowRef)s, %(Pressure)s, %(TestID)s)")
+               "(%(CapManOk)s, %(DewPoint)s, %(Idx)s, %(Mass)s, %(OptidewOk)s,"
+               " %(PowOut)s, %(PowRef)s, %(Pressure)s, %(TestID)s)")
 
 ADD_OBS_M_F = ("INSERT INTO Observation "
-               "(CapManOk, DewPoint, Duty, Idx, OptidewOk, PowOut, PowRef, Pressure, TestID)"
+               "(CapManOk, DewPoint, Idx, OptidewOk, PowOut, PowRef,"
+               " Pressure, TestID)"
                " VALUES "
-               "(%(CapManOk)s, %(DewPoint)s, %(Duty)s, %(Idx)s, %(OptidewOk)s, %(PowOut)s,"
-               " %(PowRef)s, %(Pressure)s, %(TestID)s)")
+               "(%(CapManOk)s, %(DewPoint)s, %(Idx)s, %(OptidewOk)s,"
+               " %(PowOut)s, %(PowRef)s, %(Pressure)s, %(TestID)s)")
 
 ADD_TEMP = ("INSERT INTO TempObservation "
             "(ObservationID, ThermocoupleNum, Temperature)"
@@ -114,29 +109,19 @@ ADD_TEMP = ("INSERT INTO TempObservation "
 ADD_TUBE = ("INSERT INTO Tube "
             "(DiameterIn, DiameterOut, Length, Material, Mass)"
             " VALUES "
-            "(%(DiameterIn)s, %(DiameterOut)s, %(Length)s, %(Material)s, %(Mass)s)")
+            "(%(DiameterIn)s, %(DiameterOut)s, %(Length)s,"
+            " %(Material)s, %(Mass)s)")
 
 ADD_UNIT = ("INSERT INTO Unit "
             "(Duty, Length, Mass, Power, Pressure, Temperature, Time)"
             " VALUES "
-            "(%(Duty)s, %(Length)s, %(Mass)s, %(Power)s, %(Pressure)s, %(Temperature)s, %(Time)s)")
+            "(%(Duty)s, %(Length)s, %(Mass)s, %(Power)s, %(Pressure)s,"
+            " %(Temperature)s, %(Time)s)")
 
-FIND_SETTING_M_F = ("SELECT SettingID FROM Setting WHERE "
-                    "    IsMass = %(IsMass)s AND"
-                    "    InitialDewPoint = %(InitialDewPoint)s AND"
-                    "    InitialDuty = %(InitialDuty)s AND"
-                    "    InitialPressure = %(InitialPressure)s AND"
-                    "    InitialTemp = %(InitialTemp)s AND"
-                    "    TimeStep = %(TimeStep)s;")
-
-FIND_SETTING_M_T = ("SELECT SettingID FROM Setting WHERE "
-                    "    IsMass = %(IsMass)s AND"
-                    "    InitialDewPoint = %(InitialDewPoint)s AND"
-                    "    InitialDuty = %(InitialDuty)s AND"
-                    "    InitialMass = %(InitialMass)s AND"
-                    "    InitialPressure = %(InitialPressure)s AND"
-                    "    InitialTemp = %(InitialTemp)s AND"
-                    "    TimeStep = %(TimeStep)s;")
+FIND_SETTING = ("SELECT SettingID FROM Setting WHERE "
+                "    Duty = %(Duty)s AND"
+                "    Pressure = %(Pressure)s AND"
+                "    Temperature = %(Temperature)s;")
 
 FIND_TEST = ("SELECT TestID FROM Test WHERE "
              "    DateTime='{}'")
@@ -180,13 +165,10 @@ TABLES.append(('Tube',
 TABLES.append(('Setting',
                "CREATE TABLE Setting("
                "    SettingID SERIAL,"
-               "    IsMass BOOLEAN DEFAULT 1,"
-               "    InitialDewPoint DECIMAL(5, 2) NOT NULL,"
-               "    InitialDuty DECIMAL(4, 1) NOT NULL,"
-               "    InitialMass DECIMAL(7, 7),"
-               "    InitialPressure MEDIUMINT UNSIGNED NOT NULL,"
-               "    InitialTemp DECIMAL(5, 2) NOT NULL,"
-               "    TimeStep DECIMAL(4, 2) NOT NULL,"
+               "    Duty DECIMAL(4, 1) NOT NULL,"
+               "    Pressure MEDIUMINT UNSIGNED NOT NULL,"
+               "    Temperature SMALLINT UNSIGNED NOT NULL,"
+               "    IsSteady BOOLEAN NOT NULL,"
                "  PRIMARY KEY (SettingID)"
                ");"))
 TABLES.append(('Test',
@@ -195,6 +177,8 @@ TABLES.append(('Test',
                "    Author VARCHAR(30) NOT NULL,"
                "    DateTime DATETIME NOT NULL,"
                "    Description VARCHAR(500) NOT NULL,"
+               "    IsMass BOOLEAN NOT NULL,"
+               "    TimeStep DECIMAL(4, 2) NOT NULL,"
                "    SettingID BIGINT UNSIGNED NOT NULL,"
                "    TubeID TINYINT UNSIGNED NOT NULL,"
                "  PRIMARY KEY (TestID),"
@@ -208,7 +192,6 @@ TABLES.append(('Observation',
                "    ObservationID SERIAL,"
                "    CapManOk TINYINT(1) NOT NULL,"
                "    DewPoint DECIMAL(5, 2) NOT NULL,"
-               "    Duty DECIMAL(4, 1) NOT NULL,"
                "    Idx MEDIUMINT UNSIGNED NOT NULL,"
                "    Mass DECIMAL(7, 7),"
                "    OptidewOk TINYINT(1) NOT NULL,"
@@ -230,6 +213,22 @@ TABLES.append(('TempObservation',
                "  FOREIGN KEY (ObservationID) REFERENCES Observation(ObservationID)"
                "    ON UPDATE CASCADE ON DELETE RESTRICT"
                ");"))
+TABLES.append(('Results',
+               "CREATE TABLE Results("
+               "    ResultsID SERIAL,"
+               "    NormalizedMass DECIMAL(8, 7) NOT NULL,"
+               "    DewPoint DECIMAL(5, 2) NOT NULL,"
+               # "    RelativeHumidity DECIMAL(2, 2) NOT NULL,"
+               # "    Slope DECIMAL(5, 2) NOT NULL,"
+               # "    Intercept DECIMAL(6, 6) NOT NULL,"
+               # "    RSquared DECIMAL(6, 6) NOT NULL,"
+               # "    Temperature DECIMAL(5, 2) NOT NULL,"
+               "    Pressure MEDIUMINT UNSIGNED NOT NULL,"
+               "    PowOut DECIMAL(6, 4) NOT NULL,"
+               "    TestID BIGINT UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`ResultsID`),"
+               "  FOREIGN KEY (TestID) REFERENCES Test(TestID)"
+               ");"))
 
 
 # Constant for Table Drop
@@ -247,34 +246,11 @@ UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram',
 
 # Constants for views.py
 # MySql Querries for views.py
-VIEWS = []
-VIEWS.append(('UnitTest',
-              "CREATE TABLE UnitTest ("
-              "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
-              "    Number DECIMAL(5,2) NULL,"
-              "    String VARCHAR(30) NULL,"
-              "  PRIMARY KEY (`UnitTestID`)"
-              ");"))
-VIEWS.append(('Results',
-              "CREATE TABLE Results("
-              "    ResultsID SERIAL,"
-              "    TestID BIGINT UNSIGNED NOT NULL,"
-              "  PRIMARY KEY (`ResultsID`)"
-              ");"))
-VIEWS.append(('NormalizedMass',
-              "CREATE TABLE NormalizedMass("
-              "    NormalizedMassID SERIAL,"
-              "    TestID BIGINT UNSIGNED NOT NULL,"
-              "    NormalizedMass DECIMAL(8, 7),"
-              "  PRIMARY KEY (`NormalizedMassID`)"
-              ");"))
 
-VIEW_NAME_LIST = [view[0] for view in VIEWS]
-
-ADD_NORM_MASS = ("INSERT INTO NormalizedMass "
-                 "(TestID, NormalizedMass)"
-                 " VALUES "
-                 "(%s, %s)")
+ADD_NORM_MASS = ("INSERT INTO Results (NormalizedMass) SELECT"
+                 " ROUND((Mass-(SELECT MIN(Mass) FROM Observation WHERE"
+                 " TestID={0}))/(SELECT MAX(Mass)-MIN(Mass) FROM Observation"
+                 " WHERE TestID={0}), 7) FROM Observation WHERE TestID={0};")
 
 GET_TEST_ID_NM = "SELECT TestID FROM NormalizedMass WHERE TestID={} LIMIT 1"
 
@@ -291,6 +267,20 @@ GET_OBS_ID = "SELECT ObservationID FROM Observation WHERE TestID={}"
 GET_AVG_TEMP = ("SELECT AVG(Temperature) FROM TempObservation AS Temp INNER JOIN Observation "
                 "AS Obs ON Temp.ObservationID=Obs.ObservationID INNER JOIN Test ON "
                 "Obs.TestID=Test.TestID WHERE Test.TestID={} GROUP BY Obs.ObservationID")
+
+GET_AVG_TPDP = ("SELECT ("
+                "SELECT ROUND(AVG(Temperature), 2) FROM TempObservation AS Temp"
+                " INNER JOIN Observation AS Obs ON"
+                " Temp.ObservationID=Obs.ObservationID WHERE Obs.TestID={0}"
+                "), ROUND(AVG(Pressure)), ROUND(AVG(PowOut), 4), ROUND(AVG(DewPoint), 2) FROM"
+                " Observation WHERE TestID={0};")
+
+GET_TPDP = ("SELECT ("
+                "SELECT ROUND(AVG(Temperature), 2) FROM TempObservation AS Temp"
+                " INNER JOIN Observation AS Obs ON"
+                " Temp.ObservationID=Obs.ObservationID WHERE Obs.TestID={0}"
+                "), Pressure, DewPoint FROM"
+                " Observation WHERE TestID={0};")
 
 TUBE_RADIUS = 0.015    # [m]
 TUBE_AREA = pi * pow(TUBE_RADIUS, 2)

@@ -10,9 +10,9 @@ import const
 import sqldb
 
 
-def build_test_tables():
+def build_tables():
     """Checks for and builds tables from const.TABLES in database."""
-    cnx = sqldb.connect_sqldb()
+    cnx = sqldb.connect_sqldb('test_chamber')
     cur = cnx.cursor()
     sqldb.create_tables(cur, const.TABLES)
     sqldb.add_tube_info(cur)
@@ -24,7 +24,7 @@ def build_test_tables():
 def job():
     """Writes .tdms files from argument directory to database."""
     print("\nConnecting to MySQL...")
-    cnx = sqldb.connect_sqldb()
+    cnx = sqldb.connect_sqldb('test_chamber')
     cur = cnx.cursor()
     print("Connected.")
     sqldb.add_input(cur, sys.argv[1])
@@ -37,7 +37,7 @@ def job():
 
 def execute_job():
     """Calls build_test_tables once and calls job() every day at 23:00."""
-    build_test_tables()
+    build_tables()
     schedule.every().day.at("23:00").do(job)
     while True:
         schedule.run_pending()
