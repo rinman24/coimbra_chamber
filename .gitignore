@@ -6,3 +6,6 @@
 ###############
 .cache/
 __pycache__/
+chamber/example.py
+example.py
+abs_water.csv

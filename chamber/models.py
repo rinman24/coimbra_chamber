@@ -2,6 +2,9 @@
 from CoolProp.HumidAirProp import HAPropsSI
 from CoolProp.CoolProp import PropsSI
 
+import numpy as np
+
+from scipy import integrate
 import scipy.optimize as opt
 
 import chamber.const as const
@@ -357,7 +360,7 @@ class Model(object):
     def solve(self):
         """Docstring."""
         delta, count = 1, 0
-        sol = [1 for _ in range(len(self.solution))]
+        sol = [280 for _ in range(len(self.solution))]
         while abs(delta) > 1e-9:
             # Get the solution with the current properties evaluated at
             # self.temp_s:
@@ -370,6 +373,8 @@ class Model(object):
 
             # Evaluate the new properties before solving again:
             self.eval_props()
+            self.eval_Eb()
+            self.eval_Jsys()
 
             # Bookkeeping
             count += 1
@@ -393,6 +398,15 @@ class Model(object):
                          in enumerate(self._unknowns)}
 
     # Methods that are defined here but overwritten by children.
+    def eval_Eb(self):
+        """Docstring."""
+        # These are overridden by the sub-classes that extend this class
+        pass
+
+    def eval_Jsys(self):
+        """Docstring."""
+        # These are overridden by the sub-classes that extend this class
+        pass
 
     def eval_model(self, vec_in):
         """Docstring."""
@@ -498,6 +512,218 @@ class OneDimIsoLiqBlackRad(Model):
             return res
 
 
-class OneDimIsoLiqBlackGrayRad(OneDimIsoLiqBlackRad):
+class OneDimIsoLiqBlackGrayRad(Model):
     """Docstring."""
-    pass
+
+    def __init__(self, settings, ref='Mills', rule='mean'):
+        """Docstring."""
+        super(OneDimIsoLiqBlackGrayRad, self)\
+            .__init__(settings, ref=ref, rule=rule)
+
+        # Blackbody emissive power
+        self.Eb = [0 for _ in range(3)]
+
+        # Emissivity
+        self.eps = settings['eps']
+
+        # View factor matrix
+        self.F_matx = np.zeros((3, 3))
+
+        # Radiosity system
+        self.Amatx_J = np.zeros(shape=(3, 3))
+        self.Bmatx_J = np.zeros(shape=(3,))
+        self.J_sol = None
+
+        self._unknowns = ['mddp', 'q_cs', 'q_rad', 'T_s']
+        self.set_solution([None] * len(self._unknowns))
+
+        # Populate self.Eb
+        self.eval_Eb()
+
+        # Populate self.F_matx
+        self.eval_F_matx()
+
+        # Populate radiosity system
+        self.eval_Jsys()
+
+    @staticmethod
+    def get_Fab_c14(r_a, r_b, s):
+        """Docstring."""
+
+        # Get view factor a->b from configuration 14
+        R_a = r_a/s
+        R_b = r_b/s
+        x = 1 + ((1 + pow(R_b, 2)) / (pow(R_a, 2)))
+        return 0.5 * (x - pow(pow(x, 2) - 4 * pow(R_b / R_a, 2), 1/2))
+
+    def eval_F_matx(self):
+        """Calculate the view factor matrix"""
+        # View factors from material 0
+        self.F_matx[0, 2] = self.get_Fab_c14(0.05, 0.05, self.settings['L_t'])
+        self.F_matx[0, 1] = 1 - self.F_matx[0, 2]
+
+        # View factors from material 2
+        self.F_matx[2, 0] = self.get_Fab_c14(0.05, 0.05, self.settings['L_t'])
+        self.F_matx[2, 1] = 1 - self.F_matx[2, 0]
+
+        # View factors from material 1
+        self.F_matx[1, 0] = np.pi * pow(0.05, 2) * self.F_matx[0, 1] /\
+            (2 * np.pi * 0.05 * self.settings['L_t'])
+        self.F_matx[1, 2] = np.pi * pow(0.05, 2) * self.F_matx[2, 1] /\
+            (2 * np.pi * 0.05 * self.settings['L_t'])
+        self.F_matx[1, 1] = 1 - self.F_matx[1, 2] - self.F_matx[1, 0]
+
+    def eval_Eb(self):
+        """Evaluate the blackbody emissive power for each surface"""
+        self.Eb[0] = self.e_b(self.props['T_s'])
+        self.Eb[1] = self.e_b(self.settings['T_e'])
+        self.Eb[2] = self.e_b(self.settings['T_e'])
+
+    def eval_Jsys(self):
+        """Evaluate matrices A and B from radiosity system (J system)"""
+        ident = np.identity(3)
+        for m in range(3):
+            self.Bmatx_J[m] = self.eps[m] * self.Eb[m]
+            for n in range(3):
+                self.Amatx_J[m, n] = - (1 - self.eps[m]) * self.F_matx[m, n] +\
+                    ident[m, n]
+
+    def solve_J(self):
+        """Solve the radiosity system to obtain the J at each surface"""
+        return np.linalg.solve(self.Amatx_J, self.Bmatx_J)
+
+    def eval_model(self, vec_in):
+        """Docstring."""
+        mddp, q_cs, q_rad, T_s = vec_in
+
+        # Solve the J system first
+        self.J_sol = self.solve_J()
+
+        # Solve the model
+        res = [0 for _ in range(len(self.solution))]
+        res[0] = q_cs + \
+            (self.props['k_m'] / self.settings['L_t']) * \
+            (self.settings['T_e'] - T_s)
+        res[1] = mddp + \
+            (self.props['rho_m'] * self.props['D_12'] /
+             self.settings['L_t']) * \
+            (self.props['m_1e'] - self.props['m_1s'])
+        res[2] = mddp * self.props['h_fg'] + q_cs + q_rad
+        res[3] = q_rad + \
+            (- self.Eb[0] + sum(self.J_sol[:] * self.F_matx[0, :]))
+        return res
+
+    def show_solution(self, show_res=True):
+        """Docstring."""
+        # If the model has been solved
+        if self.solution['mddp']:
+            res = ('------------- Solution -------------\n'
+                   'mddp:\t{:.6g}\t[kg / m^2 s]\n'
+                   'q_cs:\t{:.6g}\t[W / m^2]\n'
+                   'q_rad:\t{:.6g}\t[W / m^2]\n'
+                   'T_s:\t{:.6g}\t\t[K]\n')\
+                .format(self.solution['mddp'], self.solution['q_cs'],
+                        self.solution['q_rad'], self.solution['T_s'])
+        else:
+            res = ('------------- Solution -------------\n'
+                   '......... Not solved yet ...........\n')
+
+        if show_res:
+            print(res)
+        else:
+            return res
+
+
+class OneDimIsoLiqIntEmitt(Model):
+
+    def __init__(self, settings, ref='Mills', rule='mean'):
+        """Docstring."""
+        super(OneDimIsoLiqIntEmitt, self)\
+            .__init__(settings, ref=ref, rule=rule)
+
+        self.alpha_w = settings['alpha_w']
+        self.lamb = settings['lamb']
+        self.eps = None
+
+        self._unknowns = ['mddp', 'q_cs', 'q_rad', 'T_s']
+        self.set_solution([None] * len(self._unknowns))
+
+    @ staticmethod
+    def get_stigma(lamb, Temp):
+        """Get stigma value."""
+        # lamb in [micrometer], Temp in [Kelvin]
+        # C_2 is the constant appearing in the Planck's law
+        # for the monochromatic emissive power for a black surface
+        return const.C_2/(lamb * Temp)
+
+    @staticmethod
+    def get_internal_fractional_value(stigma):
+        """Integrate internal fractional function."""
+        # stigma must be a floting point
+
+        def fun(x): return (15 / (4 * np.pi**4)) * pow(x, 4) * np.exp(x) /\
+            pow(np.exp(x) - 1, 2)
+
+        x_vec = np.arange(stigma, 100., 0.01)
+        y_vec = [fun(x) for x in x_vec]
+
+        return integrate.trapz(y_vec, x_vec)
+
+    def eval_eps(self, alpha, lamb):
+        """Evaluate the emissivity using the internal emittance method."""
+
+        absorptance = [1 - pow(10, - alpha * self.settings['L_t'] / np.log(10))
+                       for alpha in alpha]
+        self.eps = absorptance[1] * 0.005
+
+        for k in range(1, len(absorptance)):
+
+            stigma_0 = self.get_stigma(lamb[k - 1], self.props['T_s'])
+            stigma_1 = self.get_stigma(lamb[k], self.props['T_s'])
+
+            fi_0 = self.get_internal_fractional_value(stigma_0)
+            fi_1 = self.get_internal_fractional_value(stigma_1)
+
+            self.eps += absorptance[k] * (fi_1 - fi_0)
+
+    def eval_model(self, vec_in):
+        """Docstring."""
+        mddp, q_cs, q_rad, T_s = vec_in
+
+        # Evaluate the emissivity of the water
+        self.eval_eps(self.alpha_w, self.lamb)
+
+        # Solve the model
+        res = [0 for _ in range(len(self.solution))]
+        res[0] = q_cs + \
+            (self.props['k_m'] / self.settings['L_t']) * \
+            (self.settings['T_e'] - T_s)
+        res[1] = mddp + \
+            (self.props['rho_m'] * self.props['D_12'] /
+             self.settings['L_t']) * \
+            (self.props['m_1e'] - self.props['m_1s'])
+        res[2] = mddp * self.props['h_fg'] + q_cs + q_rad
+        res[3] = q_rad + \
+            (- self.eps * 4 * const.SIGMA * pow(T_s, 3) *
+             (T_s - self.settings['T_e']))
+        return res
+
+    def show_solution(self, show_res=True):
+        """Docstring."""
+        # If the model has been solved
+        if self.solution['mddp']:
+            res = ('------------- Solution -------------\n'
+                   'mddp:\t{:.6g}\t[kg / m^2 s]\n'
+                   'q_cs:\t{:.6g}\t[W / m^2]\n'
+                   'q_rad:\t{:.6g}\t[W / m^2]\n'
+                   'T_s:\t{:.6g}\t\t[K]\n')\
+                .format(self.solution['mddp'], self.solution['q_cs'],
+                        self.solution['q_rad'], self.solution['T_s'])
+        else:
+            res = ('------------- Solution -------------\n'
+                   '......... Not solved yet ...........\n')
+
+        if show_res:
+            print(res)
+        else:
+            return res
