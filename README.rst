@@ -60,9 +60,11 @@ Setting up the initial state of the MySQL Server is handled by the setup_sqldb.p
 Simply run the following command from the root directory; e.g., ucsd_ch:
 ::
 
-  $ python chamber/setup_sqldb.py
+  $ python chamber/setup_sqldb.py <database_name>
 
-This will create all tables and populate the Unit table as well.
+
+Where <database_name> is replaced with the name of the MySQL database schema.
+This will create all tables and populate the Unit table and add Tube 1 (default tube used in experiments).
 
 The database schema is described below:
 
@@ -118,6 +120,8 @@ Back to `Table of Contents`_
 ::
 
     $ python -m pytest tests/<your-test-name>.py -v --capture=no
+
+It should also be noted that the test_const.py file in the test directory does not acctually contain tests, but rather the constants that are needed for testing.
 
 Images
 ------
