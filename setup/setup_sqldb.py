@@ -1,5 +1,9 @@
 """Docstring. This module sets up the initial state of the database.
 Be sure to only run onece."""
+
+import sys
+
+import chamber.const as const
 import chamber.sqldb as sqldb
 
 
@@ -27,12 +31,9 @@ TABLES.append(('Tube',
 TABLES.append(('Setting',
                "CREATE TABLE Setting("
                "    SettingID SERIAL,"
-               "    InitialDewPoint DECIMAL(5, 2) NOT NULL,"
-               "    InitialDuty DECIMAL(4, 1) NOT NULL,"
-               "    InitialMass DECIMAL(7, 7) NOT NULL,"
-               "    InitialPressure MEDIUMINT UNSIGNED NOT NULL,"
-               "    InitialTemp DECIMAL(5, 2) NOT NULL,"
-               "    TimeStep DECIMAL(4, 2) NOT NULL,"
+               "    Duty DECIMAL(4, 1) NOT NULL,"
+               "    Pressure MEDIUMINT UNSIGNED NOT NULL,"
+               "    Temperature DECIMAL(5, 2) NOT NULL,"
                "  PRIMARY KEY (SettingID)"
                ");"))
 TABLES.append(('Test',
@@ -41,6 +42,8 @@ TABLES.append(('Test',
                "    Author VARCHAR(30) NOT NULL,"
                "    DateTime DATETIME NOT NULL,"
                "    Description VARCHAR(200) NOT NULL,"
+               "    IsMass BIT(1) NOT NULL,"
+               "    TimeStep DECIMAL(4, 2) NOT NULL,"
                "    SettingID BIGINT UNSIGNED NOT NULL,"
                "    TubeID TINYINT UNSIGNED NOT NULL,"
                "  PRIMARY KEY (TestID),"
@@ -68,11 +71,10 @@ TABLES.append(('Observation',
                ");"))
 TABLES.append(('TempObservation',
                "CREATE TABLE TempObservation("
-               "    TempObservationID SERIAL,"
-               "    Temperature DECIMAL(5, 2) NOT NULL,"
-               "    ThermocoupleNum TINYINT(2) UNSIGNED NOT NULL,"
                "    ObservationID BIGINT UNSIGNED NOT NULL,"
-               "  PRIMARY KEY (TempObservationID),"
+               "    ThermocoupleNum TINYINT(2) UNSIGNED NOT NULL,"
+               "    Temperature DECIMAL(5, 2) NOT NULL,"
+               "  PRIMARY KEY (ObservationID, ThermocoupleNum),"
                "  FOREIGN KEY (ObservationID) REFERENCES Observation(ObservationID)"
                "    ON UPDATE CASCADE ON DELETE RESTRICT"
                ");"))
@@ -82,10 +84,10 @@ UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram',
              'Time': 'Second'}
 
 TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
-             'Material': 'Delrin', 'Mass': 0.0657957}
+             'Material': 'Delrin', 'Mass': 0.0873832}
 
 if __name__ == '__main__':
-    cnx = sqldb.connect_sqldb()
+    cnx = sqldb.connect_sqldb(sys.argv[1])
     print("Sucessfully created a connection to the database")
 
     cur = cnx.cursor()
@@ -93,10 +95,13 @@ if __name__ == '__main__':
     sqldb.create_tables(cur, TABLES)
 
     print("Populating Units table...")
-    cur.execute(sqldb.insert_dml('Unit', UNIT_DATA))
+    cur.execute(const.ADD_UNIT, dict(Duty='Percent', Length='Meter', Mass='Meter',
+                                     Power='Watt', Pressure='Pascal', Temperature='Kelvin',
+                                     Time='Second'))
 
     print("Populating Tube table with initial tube...")
-    cur.execute(sqldb.insert_dml('Tube', TUBE_DATA))
+    cur.execute(const.ADD_TUBE, dict(DiameterIn=0.03, DiameterOut=0.04, Length='0.06',
+                                     Material='Delrin', Mass=0.0873832))
 
     print("Committing changes to Unit table...")
     cnx.commit()
