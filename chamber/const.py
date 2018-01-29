@@ -5,6 +5,15 @@ from math import log, sqrt, pi
 from os import getcwd
 
 
+# For setup/setup_sqldb,py
+ADD_UNIT = ("INSERT INTO Unit "
+               "(Duty, Length, Mass, Power, Pressure, Temperature, Time)"
+               " VALUES "
+               "(Percent, Meter, Kilogram, Watt, Pascal, Kelvin, Second);")
+
+TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
+             'Material': 'Delrin', 'Mass': 0.0873832}
+
 # Constants for laser.py
 # ZnSe port parameters (From Spec Sheet)
 D_PORT = 2.286e-2    # 2.286 cm         [X]
@@ -65,20 +74,108 @@ M2 = 28.964
 #                -3.3746407e-05, 2.0814924e-08]
 
 # Hardy Equation Constants
-G_COEF = (-2.8365744e3, -6.028076559e3, 1.954263612e1, -2.737830188e-2,
-          1.6261698e-5, 7.0229056e-10, -1.8680009e-13, 2.7150305)
-A_COEF = (-1.6302041e-1, 1.8071570e-3, -6.7703064e-6, 8.5813609e-9)
-B_COEF = (-5.9890467e1, 3.4378043e-1, -7.7326396e-4, 6.3405286e-7)
+#G_COEF = (-2.8365744e3, -6.028076559e3, 1.954263612e1, -2.737830188e-2,
+#          1.6261698e-5, 7.0229056e-10, -1.8680009e-13, 2.7150305)
+#A_COEF = (-1.6302041e-1, 1.8071570e-3, -6.7703064e-6, 8.5813609e-9)
+#B_COEF = (-5.9890467e1, 3.4378043e-1, -7.7326396e-4, 6.3405286e-7)
 
 # Gravitational acceleration
 ACC_GRAV = 9.80665  # m/s^2
 
+
+# MySQL Tables Constants
+TABLES = []
+TABLES.append(("Setting",
+               "CREATE TABLE IF NOT EXISTS `Setting` ("
+               "  `SettingId` SMALLINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "  `Duty` DECIMAL(4,1) UNSIGNED NOT NULL,"
+               "  `Pressure` MEDIUMINT(6) UNSIGNED NOT NULL,"
+               "  `Temperature` DECIMAL(5,2) UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`SettingId`));"))
+
+TABLES.append(("Tube",
+               "CREATE TABLE IF NOT EXISTS `Tube` ("
+               "  `TubeId` TINYINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "  `DiameterIn` DECIMAL(7,7) UNSIGNED NOT NULL,"
+               "  `DiameterOut` DECIMAL(7,7) UNSIGNED NOT NULL,"
+               "  `Length` DECIMAL(4,4) UNSIGNED NOT NULL,"
+               "  `Material` VARCHAR(50) NOT NULL,"
+               "  `Mass` DECIMAL(7,7) UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`TubeId`));"))
+
+TABLES.append(("Test",
+               "CREATE TABLE IF NOT EXISTS `Test` ("
+               "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  `Author` VARCHAR(50) NOT NULL,"
+               "  `DateTime` DATETIME NOT NULL,"
+               "  `Description` VARCHAR(500) NOT NULL,"
+               "  `IsMass` TINYINT(1) NOT NULL,"
+               "  `TimeStep` DECIMAL(4,2) UNSIGNED NOT NULL,"
+               "  `SettingId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  `TubeId` TINYINT(3) UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`TestId`),"
+               "  INDEX `fk_Test_Setting_idx` (`SettingId` ASC),"
+               "  INDEX `fk_Test_Tube_idx` (`TubeId` ASC),"
+               "  CONSTRAINT `fk_Test_Setting`"
+               "    FOREIGN KEY (`SettingId`)"
+               "    REFERENCES `Setting` (`SettingId`)"
+               "    ON DELETE RESTRICT"
+               "    ON UPDATE CASCADE,"
+               "  CONSTRAINT `fk_Test_Tube`"
+               "    FOREIGN KEY (`TubeId`)"
+               "    REFERENCES `Tube` (`TubeId`)"
+               "    ON DELETE RESTRICT"
+               "    ON UPDATE CASCADE);"))
+
+TABLES.append(("Observation",
+               "CREATE TABLE IF NOT EXISTS `Observation` ("
+               "  `CapManOk` BIT(1) NOT NULL,"
+               "  `DewPoint` DECIMAL(5,2) UNSIGNED NOT NULL,"
+               "  `Duty` DECIMAL(4,1) UNSIGNED NOT NULL,"
+               "  `Idx` MEDIUMINT(6) UNSIGNED NOT NULL,"
+               "  `Mass` DECIMAL(7,7) UNSIGNED NOT NULL,"
+               "  `OptidewOk` BIT(1) NOT NULL,"
+               "  `PowOut` DECIMAL(6,4) NOT NULL,"
+               "  `PowRef` DECIMAL(6,4) NOT NULL,"
+               "  `Pressure` MEDIUMINT(6) UNSIGNED NOT NULL,"
+               "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  INDEX `fk_Observation_Test_idx` (`TestId` ASC),"
+               "  PRIMARY KEY (`Idx`, `TestId`),"
+               "  CONSTRAINT `fk_Observation_Test`"
+               "    FOREIGN KEY (`TestId`)"
+               "    REFERENCES `Test` (`TestId`)"
+               "    ON DELETE RESTRICT"
+               "    ON UPDATE CASCADE);"))
+
+TABLES.append(("TempObservation",
+               "CREATE TABLE IF NOT EXISTS `TempObservation` ("
+               "  `ThermocoupleNum` TINYINT(2) UNSIGNED NOT NULL,"
+               "  `Temperature` DECIMAL(5,2) NOT NULL,"
+               "  `Idx` MEDIUMINT(6) UNSIGNED NOT NULL,"
+               "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`Idx`, `TestId`, `ThermocoupleNum`),"
+               "  CONSTRAINT `fk_TempObservation_Observation`"
+               "    FOREIGN KEY (`Idx` , `TestId`)"
+               "    REFERENCES `Observation` (`Idx` , `TestId`)"
+               "    ON DELETE RESTRICT"
+               "    ON UPDATE CASCADE);"))
+
+TABLES.append(("Unit",
+               "CREATE TABLE IF NOT EXISTS `Unit` ("
+               "  `Duty` VARCHAR(50) NOT NULL,"
+               "  `Length` VARCHAR(50) NOT NULL,"
+               "  `Mass` VARCHAR(50) NOT NULL,"
+               "  `Power` VARCHAR(50) NOT NULL,"
+               "  `Pressure` VARCHAR(50) NOT NULL,"
+               "  `Temperature` VARCHAR(50) NOT NULL,"
+               "  `Time` VARCHAR(50) NOT NULL);"))
+
 # CONSTANTS FOR sqldb.py
 # MySQL querry Constants
 ADD_SETTING = ("INSERT INTO Setting "
-               "(Duty, Pressure, Temperature, IsSteady)"
+               "(Duty, Pressure, Temperature)"
                " VALUES "
-               "(%(Duty)s, %(Pressure)s, %(Temperature)s, %(IsSteady)s)")
+               "(%(Duty)s, %(Pressure)s, %(Temperature)s)")
 
 ADD_TEST = ("INSERT INTO Test "
             "(Author, DateTime, Description, IsMass, TimeStep,"
@@ -132,104 +229,6 @@ FIND_TUBE = ("SELECT TubeID FROM Tube WHERE "
              "    Length = %(Length)s AND"
              "    Material = %(Material)s AND"
              "    Mass = %(Mass)s")
-
-# MySQL Tables Constants
-TABLES = []
-TABLES.append(('UnitTest',
-               "CREATE TABLE UnitTest ("
-               "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
-               "    Number DECIMAL(5,2) NULL,"
-               "    String VARCHAR(30) NULL,"
-               "  PRIMARY KEY (`UnitTestID`)"
-               ");"))
-TABLES.append(('Unit',
-               "CREATE TABLE Unit ("
-               "    Duty VARCHAR(30) NOT NULL,"
-               "    Length VARCHAR(30) NOT NULL,"
-               "    Mass VARCHAR(30) NOT NULL,"
-               "    Power VARCHAR(30) NOT NULL,"
-               "    Pressure VARCHAR(30) NOT NULL,"
-               "    Temperature VARCHAR(30) NOT NULL,"
-               "    Time VARCHAR(30) NOT NULL"
-               ");"))
-TABLES.append(('Tube',
-               "CREATE TABLE Tube("
-               "    TubeID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
-               "    DiameterIn DECIMAL(7, 7) NOT NULL,"
-               "    DiameterOut DECIMAL(7, 7) NOT NULL,"
-               "    Length DECIMAL(4, 4) NOT NULL,"
-               "    Material VARCHAR(30) NOT NULL,"
-               "    Mass DECIMAL(7, 7) NOT NULL,"
-               "  PRIMARY KEY (TubeID)"
-               ");"))
-TABLES.append(('Setting',
-               "CREATE TABLE Setting("
-               "    SettingID SERIAL,"
-               "    Duty DECIMAL(4, 1) NOT NULL,"
-               "    Pressure MEDIUMINT UNSIGNED NOT NULL,"
-               "    Temperature SMALLINT UNSIGNED NOT NULL,"
-               "    IsSteady BOOLEAN NOT NULL,"
-               "  PRIMARY KEY (SettingID)"
-               ");"))
-TABLES.append(('Test',
-               "CREATE TABLE Test("
-               "    TestID SERIAL,"
-               "    Author VARCHAR(30) NOT NULL,"
-               "    DateTime DATETIME NOT NULL,"
-               "    Description VARCHAR(500) NOT NULL,"
-               "    IsMass BOOLEAN NOT NULL,"
-               "    TimeStep DECIMAL(4, 2) NOT NULL,"
-               "    SettingID BIGINT UNSIGNED NOT NULL,"
-               "    TubeID TINYINT UNSIGNED NOT NULL,"
-               "  PRIMARY KEY (TestID),"
-               "  FOREIGN KEY (SettingID) REFERENCES Setting(SettingID)"
-               "    ON UPDATE CASCADE ON DELETE RESTRICT,"
-               "  FOREIGN KEY (TubeID) REFERENCES Tube(TubeID)"
-               "    ON UPDATE CASCADE ON DELETE RESTRICT"
-               ");"))
-TABLES.append(('Observation',
-               "CREATE TABLE Observation("
-               "    ObservationID SERIAL,"
-               "    CapManOk TINYINT(1) NOT NULL,"
-               "    DewPoint DECIMAL(5, 2) NOT NULL,"
-               "    Idx MEDIUMINT UNSIGNED NOT NULL,"
-               "    Mass DECIMAL(7, 7),"
-               "    OptidewOk TINYINT(1) NOT NULL,"
-               "    PowOut DECIMAL(6, 4) NOT NULL,"
-               "    PowRef DECIMAL(6, 4) NOT NULL,"
-               "    Pressure MEDIUMINT UNSIGNED NOT NULL,"
-               "    TestID BIGINT UNSIGNED NOT NULL,"
-               "  PRIMARY KEY (ObservationID),"
-               "  FOREIGN KEY (TestID) REFERENCES Test(TestID)"
-               "    ON UPDATE CASCADE ON DELETE RESTRICT"
-               ");"))
-TABLES.append(('TempObservation',
-               "CREATE TABLE TempObservation("
-               "    TempObservationID SERIAL,"
-               "    Temperature DECIMAL(5, 2),"
-               "    ThermocoupleNum TINYINT(2) UNSIGNED NOT NULL,"
-               "    ObservationID BIGINT UNSIGNED NOT NULL,"
-               "  PRIMARY KEY (TempObservationID),"
-               "  FOREIGN KEY (ObservationID) REFERENCES Observation(ObservationID)"
-               "    ON UPDATE CASCADE ON DELETE RESTRICT"
-               ");"))
-TABLES.append(('Results',
-               "CREATE TABLE Results("
-               "    ResultsID SERIAL,"
-               "    NormalizedMass DECIMAL(8, 7) NOT NULL,"
-               "    DewPoint DECIMAL(5, 2) NOT NULL,"
-               # "    RelativeHumidity DECIMAL(2, 2) NOT NULL,"
-               # "    Slope DECIMAL(5, 2) NOT NULL,"
-               # "    Intercept DECIMAL(6, 6) NOT NULL,"
-               # "    RSquared DECIMAL(6, 6) NOT NULL,"
-               # "    Temperature DECIMAL(5, 2) NOT NULL,"
-               "    Pressure MEDIUMINT UNSIGNED NOT NULL,"
-               "    PowOut DECIMAL(6, 4) NOT NULL,"
-               "    TestID BIGINT UNSIGNED NOT NULL,"
-               "  PRIMARY KEY (`ResultsID`),"
-               "  FOREIGN KEY (TestID) REFERENCES Test(TestID)"
-               ");"))
-
 
 # Constant for Table Drop
 TABLE_NAME_LIST = [table[0] for table in reversed(TABLES)]

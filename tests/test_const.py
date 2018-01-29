@@ -6,27 +6,34 @@ from os import getcwd
 # Constants for test_sqldb.py
 SETTINGS_TEST_1 = {'Duty': 10,
                    'Pressure': 100000,
-                   'Temperature': 300,
-                   'IsSteady': 1}
+                   'Temperature': 300}
 
 SETTINGS_TEST_2 = {'Duty': 20,
                    'Pressure': 110000,
-                   'Temperature': 270,
-                   'IsSteady': 0}
+                   'Temperature': 270}
 
 
 TEST_DIRECTORY = getcwd() + "/tests/data_transfer_test_files"
+
+#TABLES = []
+#TABLES.append(('UnitTest',
+#               "CREATE TABLE UnitTest ("
+#               "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+#               "    Number DECIMAL(5,2) NULL,"
+#               "    String VARCHAR(30) NULL,"
+#               "  PRIMARY KEY (`UnitTestID`)"
+#               ");"))
 
 CORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/"
                                 "test_01.tdms",
                      getcwd() + "/tests/data_transfer_test_files/"
                                 "tdms_test_folder/"
                                 "test_02.tdms",                     
+                     getcwd() + "/tests/data_transfer_test_files/"
+                                "test_03.tdms",
                      getcwd() + "/tests/data_transfer_test_files"
                                 "/tdms_test_folder/tdms_test_folder_full/"
-                                "test_04.tdms",
-                     getcwd() + "/tests/data_transfer_test_files/"
-                                "test_03.tdms"]
+                                "test_04.tdms"]
 
 CORRECT_FILE_LIST_WIN = [getcwd() + "/tests/data_transfer_test_files\\"
                                 "test_01.tdms",
@@ -61,25 +68,21 @@ INCORRECT_FILE_LIST_WIN = [getcwd() + "/tests/data_transfer_test_files\\"
                                   "tdms_test_folder\\tdms_test_folder_full\\"
                                   "test_04.tdms_index"]
 
-TDMS_FF_SETTING = {'Duty': '1.0',
+TDMS_1_SETTING = {'Duty': '1.0',
                    'Pressure': 100000,
-                   'Temperature': 300,
-                   'IsSteady': 0}
+                   'Temperature': 300}
 
-TDMS_FT_SETTING = {'Duty': '2.0',
+TDMS_2_SETTING = {'Duty': '2.0',
                    'Pressure': 100000,
-                   'Temperature': 300,
-                   'IsSteady': 1}
+                   'Temperature': 300}
 
-TDMS_TF_SETTING = {'Duty': '4.0',
+TDMS_3_SETTING = {'Duty': '3.0',
                    'Pressure': 100000,
-                   'Temperature': 300,
-                   'IsSteady': 0}
+                   'Temperature': 300}
 
-TDMS_TT_SETTING = {'Duty': '3.0',
+TDMS_4_SETTING = {'Duty': '4.0',
                    'Pressure': 100000,
-                   'Temperature': 300,
-                   'IsSteady': 1}
+                   'Temperature': 300}
 
 TDMS_FF_TEST = {'Author': 'TEST',
                 'DateTime':

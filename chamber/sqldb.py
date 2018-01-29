@@ -73,6 +73,7 @@ def create_tables(cur, tables):
         "  PRIMARY KEY (`UnitTestID`)"
         ");"))]
     """
+    print('Setting up tables...')
     for table in tables:
         name, ddl = table
         try:
@@ -210,9 +211,9 @@ def get_setting_info(tdms_obj):
     """Return a dictionary containg the initial state of the test.
 
     This function searches through the TdmsFile object for the initial settings
-    including: InitialDewPoint, InitialDuty, InitialMass, InitialPressure,
-    InitialTemp, and TimeStep. The function returns a dictionary of settings
-    formatted for use with the ADD_SETTING querry in const.py.
+    including: Duty, Mass, Pressure, Temp, and TimeStep. The function returns a
+    dictionary of settings formatted for use with the ADD_SETTING querry in 
+    const.py.
 
     Parameters
     ----------
@@ -234,8 +235,7 @@ def get_setting_info(tdms_obj):
                         tdms_obj.object("Data", "Pressure").data[0] / 5000))),
                     'Temperature': int(5 * round(
                         sum(temp_list[x] for x in range(
-                            len(temp_list))) / len(temp_list)) / 5),
-                    'IsSteady': int(tdms_obj.object("Settings", "IsSteady").data[0])}
+                            len(temp_list))) / len(temp_list)) / 5)}
     return setting_info
 
 

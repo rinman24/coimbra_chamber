@@ -60,7 +60,7 @@ Setting up the initial state of the MySQL Server is handled by the setup_sqldb.p
 Simply run the following command from the root directory; e.g., ucsd_ch:
 ::
 
-  $ python chamber/setup_sqldb.py <database_name>
+  $ python setup/setup_sqldb.py <database_name>
 
 
 Where <database_name> is replaced with the name of the MySQL database schema.
