@@ -15,3 +15,7 @@ chamber/.ipynb_checkpoints/
 example.py
 abs_water.csv
 .vscode/settings.json
+
+# OSX Attributes #
+##################
+*.DS_Store
