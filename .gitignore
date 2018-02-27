@@ -1,12 +1,17 @@
-# Compiled source #
+# Compiled Source #
 ###################
 *.pyc
+
+# Jupyter Notebooks #
+#####################
+*.ipynb
 
 # Directories #
 ###############
 .cache/
 __pycache__/
 chamber/example.py
+chamber/.ipynb_checkpoints/
 example.py
 abs_water.csv
 .vscode/settings.json
