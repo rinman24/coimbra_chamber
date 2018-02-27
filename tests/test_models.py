@@ -226,7 +226,9 @@ class Test_SpaldingIsoNoRadHydroStatic(object):
         count = SPALDING_ISO_NORAD_HYDROSTATIC.solve()
         assert count == 1310
         assert isclose(
-            SPALDING_ISO_NORAD_HYDROSTATIC.solution['mddp'], 1.6589283600104213e-06)
+            SPALDING_ISO_NORAD_HYDROSTATIC.solution['mddp'],
+            1.6589283600104213e-06
+            )
         assert isclose(
             SPALDING_ISO_NORAD_HYDROSTATIC.solution['T_s'], 290.25807305830858)
         assert isclose(SPALDING_ISO_NORAD_HYDROSTATIC.props['T_s'],
@@ -234,9 +236,9 @@ class Test_SpaldingIsoNoRadHydroStatic(object):
 
     def test_show_solution(self):
         """>>> <OneDimIsoLiqNoRad>.show_props()"""
-        #SPALDING_ISO_NORAD_HYDROSTATIC.show_solution()
-        assert SPALDING_ISO_NORAD_HYDROSTATIC.show_solution(show_res=False) == \
-            test_const.SOLUTION_03
+        assert SPALDING_ISO_NORAD_HYDROSTATIC.show_solution(
+                show_res=False
+                ) == test_const.SOLUTION_03
 
 
 class Test_SpaldingIsoHydroStatic(object):

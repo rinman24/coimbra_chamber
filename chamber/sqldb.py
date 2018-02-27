@@ -12,7 +12,6 @@ import mysql.connector as conn
 from mysql.connector import errorcode
 from nptdms import TdmsFile
 
-# import const
 import chamber.const as const
 
 
@@ -80,7 +79,7 @@ def create_tables(cur, tables):
             cur.execute(ddl)
         except conn.Error as err:
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-                print(table[0], 'already exists.')
+                print(name, 'already exists.')
             else:
                 print(err.msg)
         else:
@@ -120,6 +119,38 @@ def setting_exists(cur, setting_info):
         return setting_id
 
 
+# def list_tdms(file_path, file_list=None):
+#     """Use the file_path to find tdms files.
+
+#     This function recursively searches through the argument directory and
+#     returns a list of all filepaths for files with the tdms extension.
+
+#     Parameters
+#     ----------
+#     file_path : string
+#         This is the directory to search for tdms files.
+#     file_list : empty list
+#         This is an empty list when the function is called with only a directory
+#         argument. File_list is then populated recursively.
+
+#     Returns
+#     -------
+#     file_list : list of strings
+#         List of absolute filepaths of files with a .tdms extension. Elements of
+#         list are type string.
+#     """
+#     if file_list is None:
+#         file_list = []
+#     try:
+#         for file_name in os.listdir(file_path):
+#             list_tdms(os.path.join(file_path, file_name), file_list)
+#     except NotADirectoryError:
+#         regex = compile(r".tdms$")
+#         if regex.search(file_path):
+#             return file_list.append(file_path)
+#     return file_list
+
+
 def test_exists(cur, test_info):
     """Check if a test already exists.
 
@@ -154,57 +185,25 @@ def test_exists(cur, test_info):
         return result[0][0]
 
 
-def list_tdms(file_path, file_list=None):
-    """Use the file_path to find tdms files.
+# def move_files(directory):
+#     """Move all tdms files into new directory maintaining file structure.
 
-    This function recursively searches through the argument directory and
-    returns a list of all filepaths for files with the tdms extension.
+#     This function moves all tdms files in directory into the directory
+#     '/home/user/read_files/'.
 
-    Parameters
-    ----------
-    file_path : string
-        This is the directory to search for tdms files.
-    file_list : empty list
-        This is an empty list when the function is called with only a directory
-        argument. File_list is then populated recursively.
-
-    Returns
-    -------
-    file_list : list of strings
-        List of absolute filepaths of files with a .tdms extension. Elements of
-        list are type string.
-    """
-    if file_list is None:
-        file_list = []
-    try:
-        for file_name in os.listdir(file_path):
-            list_tdms(os.path.join(file_path, file_name), file_list)
-    except NotADirectoryError:
-        regex = compile(r".tdms$")
-        if regex.search(file_path):
-            return file_list.append(file_path)
-    return file_list
-
-
-def move_files(directory):
-    """Move all tdms files into new directory maintaining file structure.
-
-    This function moves all tdms files in directory into the directory
-    '/home/user/read_files/'.
-
-    Parameters
-    ----------
-    directory : string
-        This is the directory to move tdms files from.
-    """
-    for file_path in list_tdms(directory):
-        if not os.stat(file_path).st_size == 0:
-            new_file_path = os.path.join(os.path.join(
-                            str(Path.home()), "read_files"),
-                            os.path.relpath(file_path)[3:])
-            if not os.path.exists(os.path.split(new_file_path)[0]):
-                os.makedirs(os.path.split(new_file_path)[0])
-            shutil.move(file_path, new_file_path)
+#     Parameters
+#     ----------
+#     directory : string
+#         This is the directory to move tdms files from.
+#     """
+#     for file_path in list_tdms(directory):
+#         if not os.stat(file_path).st_size == 0:
+#             new_file_path = os.path.join(os.path.join(
+#                             str(Path.home()), "read_files"),
+#                             os.path.relpath(file_path)[3:])
+#             if not os.path.exists(os.path.split(new_file_path)[0]):
+#                 os.makedirs(os.path.split(new_file_path)[0])
+#             shutil.move(file_path, new_file_path)
 
 
 def get_setting_info(tdms_obj):
@@ -212,7 +211,7 @@ def get_setting_info(tdms_obj):
 
     This function searches through the TdmsFile object for the initial settings
     including: Duty, Mass, Pressure, Temp, and TimeStep. The function returns a
-    dictionary of settings formatted for use with the ADD_SETTING querry in 
+    dictionary of settings formatted for use with the ADD_SETTING querry in
     const.py.
 
     Parameters
@@ -229,13 +228,11 @@ def get_setting_info(tdms_obj):
         names and values should be the value to insert.
     """
     temp_list = [float(get_temp_info(tdms_obj, 0, x)) for x in range(4, 14)]
-    setting_info = {'Duty': '{:.1f}'.format(round(
-                        tdms_obj.object("Settings", "DutyCycle").data[0]), 1),
-                    'Pressure': int((5000 * round(
-                        tdms_obj.object("Data", "Pressure").data[0] / 5000))),
-                    'Temperature': int(5 * round(
-                        sum(temp_list[x] for x in range(
-                            len(temp_list))) / len(temp_list)) / 5)}
+    duty = tdms_obj.object('Settings', 'DutyCycle').data[0]
+    pressure = tdms_obj.object('Data', 'Pressure').data[0]
+    setting_info = {'Duty': '{:.1f}'.format(round(duty, 1)),
+                    'Pressure': 5000*round(float(pressure)/5000),
+                    'Temperature': 5*round(float(np.mean(temp_list))/5)}
     return setting_info
 
 
@@ -277,7 +274,7 @@ def get_test_info(tdms_obj):
     return test_info
 
 
-def get_obs_info(tdms_obj, obs_idx):
+def get_obs_info(tdms_obj, tdms_idx):
     """Return a dictionary of observation data.
 
     Builds a dictionary containing the observation for a given index (time) in
@@ -290,7 +287,7 @@ def get_obs_info(tdms_obj, obs_idx):
         TdmsFile object containg the data from the tdms test file. Original
         tdms files were created from UCSD Chamber experiments in the Coimbra
         Lab in SERF 159.
-    obs_idx : int
+    tdms_idx : int
         This is the index in the tdms file, which represents a single time.
 
     Returns
@@ -301,26 +298,26 @@ def get_obs_info(tdms_obj, obs_idx):
         should be the value to insert.
     """
     obs_info = {'CapManOk': int(
-                    tdms_obj.object("Data", "CapManOk").data[obs_idx]),
+                    tdms_obj.object("Data", "CapManOk").data[tdms_idx]),
                 'DewPoint': '{:.2f}'.format(
-                    tdms_obj.object("Data", "DewPoint").data[obs_idx]),
+                    tdms_obj.object("Data", "DewPoint").data[tdms_idx]),
                 'Idx': int(
-                    tdms_obj.object("Data", "Idx").data[obs_idx]),
+                    tdms_obj.object("Data", "Idx").data[tdms_idx]),
                 'OptidewOk': int(
-                    tdms_obj.object("Data", "OptidewOk").data[obs_idx]),
+                    tdms_obj.object("Data", "OptidewOk").data[tdms_idx]),
                 'PowOut': '{:.4f}'.format(
-                    tdms_obj.object("Data", "PowOut").data[obs_idx]),
+                    tdms_obj.object("Data", "PowOut").data[tdms_idx]),
                 'PowRef': '{:.4f}'.format(
-                    tdms_obj.object("Data", "PowRef").data[obs_idx]),
+                    tdms_obj.object("Data", "PowRef").data[tdms_idx]),
                 'Pressure': int(
-                    tdms_obj.object("Data", "Pressure").data[obs_idx])}
+                    tdms_obj.object("Data", "Pressure").data[tdms_idx])}
     if tdms_obj.object("Settings", "IsMass").data[0] == 1:
         obs_info['Mass'] = '{:.7f}'.format(
-            tdms_obj.object("Data", "Mass").data[obs_idx])
+            tdms_obj.object("Data", "Mass").data[tdms_idx])
     return obs_info
 
 
-def get_temp_info(tdms_obj, temp_idx, couple_idx):
+def get_temp_info(tdms_obj, tdms_idx, couple_idx):
     """Get a thermocouple observation.
 
     Returns temperature data for the provided index (time) and thermocouple
@@ -334,7 +331,7 @@ def get_temp_info(tdms_obj, temp_idx, couple_idx):
         TdmsFile object containg the data from the tdms test file. Original
         tdms files were created from UCSD Chamber experiments in the Coimbra
         Lab in SERF 159.
-    temp_idx : int
+    tdms_idx : int
         This is the index in the tdms file, which represents a single time.
     couple_idx : int
         This is the thermocouple index for a specific observation in the tdms
@@ -350,7 +347,7 @@ def get_temp_info(tdms_obj, temp_idx, couple_idx):
     """
     regex = compile(r'^(\d){3}.(\d){2}$')
     temp_info = '{:.2f}'.format(
-        tdms_obj.object("Data", "TC{}".format(couple_idx)).data[temp_idx])
+        tdms_obj.object("Data", "TC{}".format(couple_idx)).data[tdms_idx])
     if not regex.search(temp_info):
         return
     return temp_info
@@ -443,7 +440,7 @@ def add_test_info(cur, tdms_obj, setting_id):
     return test_id
 
 
-def add_obs_info(cur, tdms_obj, test_id, obs_idx):
+def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
     """Add an Observation to the database.
 
     Uses cursor's .execute function on a MySQL insert query and dictionary of
@@ -471,17 +468,15 @@ def add_obs_info(cur, tdms_obj, test_id, obs_idx):
         obs_id[0] is the ObservationID which is the primary key for the
         Observation table. obs_id[1] is the boolean representation of IsMass.
     """
-    obs_info = get_obs_info(tdms_obj, obs_idx)
-    obs_info['TestID'] = test_id
+    obs_info = get_obs_info(tdms_obj, tdms_idx)
+    obs_info['TestId'] = test_id
     if tdms_obj.object("Settings", "IsMass").data[0] == 1:
         cur.execute(const.ADD_OBS_M_T, obs_info)
     else:
         cur.execute(const.ADD_OBS_M_F, obs_info)
-    obs_id = cur.lastrowid
-    return obs_id
 
 
-def add_temp(cur, tdms_obj, obs_id, temp_idx):
+def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
     """Add a TempObservation to the database.
 
     Uses cursor's .execute function on a MySQL insert query and dictionary of
@@ -506,16 +501,20 @@ def add_temp(cur, tdms_obj, obs_id, temp_idx):
         single time.
     """
     if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        temp_data = [(obs_id, couple_idx, get_temp_info(
-            tdms_obj, temp_idx, couple_idx)) for couple_idx in range(4, 14)]
+        temp_data = [(couple_idx,
+                      get_temp_info(tdms_obj, tdms_idx, couple_idx),
+                      idx,
+                      test_id) for couple_idx in range(4, 14)]
     else:
-        temp_data = [(obs_id, couple_idx, get_temp_info(
-            tdms_obj, temp_idx, couple_idx)) for couple_idx in range(14)]
+        temp_data = [(couple_idx,
+                      get_temp_info(tdms_obj, tdms_idx, couple_idx),
+                      idx,
+                      test_id) for couple_idx in range(14)]
 
     cur.executemany(const.ADD_TEMP, temp_data)
 
 
-def add_input(cur, directory, test=False):
+def add_data(cur, file_name, test=False):
     """Insert tdms files into the MySQL database from argument directory.
 
     Uses loops to structure calls to add_setting, add_test, add_obs, and
@@ -530,14 +529,44 @@ def add_input(cur, directory, test=False):
     directory : string
         This is the directory to search for tdms files.
     """
-    for file_name in list_tdms(directory):
-        print(file_name)
-        tdms_obj = TdmsFile(file_name)
-        if not test_exists(cur, get_test_info(tdms_obj)):
-            test_id = add_test_info(
-                cur, tdms_obj, add_setting_info(cur, tdms_obj))
-            for obs_idx in range(len(tdms_obj.object("Data", "Idx").data)):
-                obs_id = add_obs_info(cur, tdms_obj, test_id, obs_idx)
-                add_temp(cur, tdms_obj, obs_id, obs_idx)
-    if not test:
-        move_files(directory)
+    tdms_obj = TdmsFile(file_name)
+    if not test_exists(cur, get_test_info(tdms_obj)):
+        # print("WE GOT IN THE LOOP")
+        test_id = add_test_info(cur, tdms_obj, add_setting_info(cur, tdms_obj))
+        # print("TestID = ", test_id)
+        for tdms_idx in range(len(tdms_obj.object("Data", "Idx").data)):
+            add_obs_info(cur, tdms_obj, test_id, tdms_idx)
+        #   add_temp(cur, tdms_obj, obs_id, obs_idx)
+    # if not test:
+    #    move_files(directory)
+
+
+# def add_input(cur, directory, test=False):
+#     """Insert tdms files into the MySQL database from argument directory.
+
+#     Uses loops to structure calls to add_setting, add_test, add_obs, and
+#     add_temp to build and execute queries using constants in const.py and
+#     populate the MySQL database for all tdms files in the argument directory.
+#     Passes cursor into helper functions.
+
+#     Parameters
+#     ----------
+#     cur : MySQLCursor
+#         Cursor used to interact with the MySQL database.
+#     directory : string
+#         This is the directory to search for tdms files.
+#     """
+#     for file_name in list_tdms(directory):
+#         # print(file_name)
+#         tdms_obj = TdmsFile(file_name)
+#         # print(test_exists(cur, get_test_info(tdms_obj))) # DELEDTE
+#         if not test_exists(cur, get_test_info(tdms_obj)):
+#             # print("WE GOT IN THE LOOP")
+#             test_id = add_test_info(
+#                 cur, tdms_obj, add_setting_info(cur, tdms_obj))
+#             # print("TestID = ", test_id)
+#             for obs_idx in range(len(tdms_obj.object("Data", "Idx").data)):
+#                 obs_id = add_obs_info(cur, tdms_obj, test_id, obs_idx)
+#         #        add_temp(cur, tdms_obj, obs_id, obs_idx)
+#     # if not test:
+#     #    move_files(directory)

@@ -530,7 +530,9 @@ class SpaldingIsoHydroStatic(Model):
                    'mddp:\t{:.6g}\t[kg / m^2 s]\n'
                    'q_rs:\t{:.6g}\t[W / m^2]\n'
                    'T_s:\t{:.6g}\t\t[K]\n')\
-                .format(self.solution['mddp'], self.solution['q_rs'], self.solution['T_s'])
+                .format(self.solution['mddp'],
+                        self.solution['q_rs'],
+                        self.solution['T_s'])
         else:
             res = ('------------- Solution -------------\n'
                    '......... Not solved yet ...........\n')
