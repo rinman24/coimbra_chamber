@@ -15,6 +15,12 @@ ONEDIM_ISOLIQ_BLACKGRAYRAD = \
     models.OneDimIsoLiqBlackGrayRad(test_const.MOD_SET_03)
 ONEDIM_ISOLIQ_INTEMITT = \
     models.OneDimIsoLiqIntEmitt(test_const.MOD_SET_04)
+SPALDING_ISO_NORAD_HYDROSTATIC = \
+    models.SpaldingIsoNoRadHydroStatic(test_const.MOD_SET_01)
+SPALDING_ISO_HYDROSTATIC = \
+    models.SpaldingIsoHydroStatic(test_const.MOD_SET_01)
+SPALDING_HYDROSTATIC = \
+    models.SpaldingHydroStatic(test_const.MOD_SET_01)
 
 
 class Test_Models(object):
@@ -38,6 +44,7 @@ class Test_Models(object):
         assert isclose(MODEL.props['beta*_m'], 0.6033861519510446)
         assert isclose(MODEL.props['c_pm'], 1028.977439794093)
         assert isclose(MODEL.props['c_p1'], 1902.1686411087035)
+        assert isclose(MODEL.props['c_pliq'], 4184.290535982685)
         assert isclose(MODEL.props['D_12'], 2.510797939645015e-05)
         assert isclose(MODEL.props['h_fg'], 2457424.545412025)
         assert isclose(MODEL.props['k_m'], 0.025867252254694034)
@@ -77,6 +84,10 @@ class Test_Models(object):
         assert type(MODEL._unknowns) is list
         assert not MODEL._unknowns
 
+        # Test initial guess is an empty list
+        assert type(MODEL.initial_guess) is list
+        assert not MODEL.initial_guess
+
     def test___repr__(self):
         """>>> <MODEL>"""
         assert MODEL.__repr__() == test_const.REPR
@@ -103,8 +114,6 @@ class Test_Models(object):
 
     def test_show_params(self):
         """>>> print(<MODEL>.show_params())"""
-        # MODEL.show_params()
-        # print(test_const.PARAMS)
         assert MODEL.show_params(show_res=False) == test_const.PARAMS
 
     def test_describe(self):
@@ -135,6 +144,7 @@ class Test_Models(object):
         assert isclose(MODEL.props['beta*_m'], 0.603147186094405)
         assert isclose(MODEL.props['c_pm'], 1030.2830319720397)
         assert isclose(MODEL.props['c_p1'], 1903.1216298034035)
+        assert isclose(MODEL.props['c_pliq'], 4183.786522742774)
         assert isclose(MODEL.props['D_12'], 2.521627605755569e-05)
         assert isclose(MODEL.props['h_fg'], 2453874.327285723)
         assert isclose(MODEL.props['k_m'], 0.02592145926625826)
@@ -189,6 +199,140 @@ class Test_Models(object):
         pass
 
 
+class Test_SpaldingIsoNoRadHydroStatic(object):
+    """Unit testing of SpaldingIsoNoRadHydroStatic class."""
+
+    def test__init__(self):
+        """Docstring."""
+        assert SPALDING_ISO_NORAD_HYDROSTATIC
+
+        assert SPALDING_ISO_NORAD_HYDROSTATIC._unknowns == ['mddp', 'T_s']
+
+        assert len(SPALDING_ISO_NORAD_HYDROSTATIC.solution) == 2
+        assert SPALDING_ISO_NORAD_HYDROSTATIC.solution['mddp'] is None
+        assert SPALDING_ISO_NORAD_HYDROSTATIC.solution['T_s'] is None
+
+    def test_eval_model(self):
+        sol = SPALDING_ISO_NORAD_HYDROSTATIC.eval_model([1, 1])
+        assert isclose(sol[0], 0.999997328243195)
+        assert isclose(sol[1], 0.9998968435988933)
+
+    def test_set_solution(self):
+        SPALDING_ISO_NORAD_HYDROSTATIC.set_solution([1, 2, 3])
+        assert SPALDING_ISO_NORAD_HYDROSTATIC.solution['mddp'] == 1
+        assert SPALDING_ISO_NORAD_HYDROSTATIC.solution['T_s'] == 2
+
+    def test_solve(self):
+        count = SPALDING_ISO_NORAD_HYDROSTATIC.solve()
+        assert count == 1310
+        assert isclose(
+            SPALDING_ISO_NORAD_HYDROSTATIC.solution['mddp'], 1.6589283600104213e-06)
+        assert isclose(
+            SPALDING_ISO_NORAD_HYDROSTATIC.solution['T_s'], 290.25807305830858)
+        assert isclose(SPALDING_ISO_NORAD_HYDROSTATIC.props['T_s'],
+                       SPALDING_ISO_NORAD_HYDROSTATIC.solution['T_s'])
+
+    def test_show_solution(self):
+        """>>> <OneDimIsoLiqNoRad>.show_props()"""
+        #SPALDING_ISO_NORAD_HYDROSTATIC.show_solution()
+        assert SPALDING_ISO_NORAD_HYDROSTATIC.show_solution(show_res=False) == \
+            test_const.SOLUTION_03
+
+
+class Test_SpaldingIsoHydroStatic(object):
+    """Unit testing of SpaldingIsoNoRadHydroStatic class."""
+
+    def test__init__(self):
+        """Docstring."""
+        assert SPALDING_ISO_HYDROSTATIC
+
+        assert SPALDING_ISO_HYDROSTATIC._unknowns == ['mddp', 'q_rs', 'T_s']
+
+        assert len(SPALDING_ISO_HYDROSTATIC.solution) == 3
+        assert SPALDING_ISO_HYDROSTATIC.solution['mddp'] is None
+        assert SPALDING_ISO_HYDROSTATIC.solution['q_rs'] is None
+        assert SPALDING_ISO_HYDROSTATIC.solution['T_s'] is None
+
+    def test_eval_model(self):
+        sol = SPALDING_ISO_HYDROSTATIC.eval_model([1, 1, 1])
+        assert isclose(sol[0], 0.999997328243195)
+        assert isclose(sol[1], -428.43677457759003)
+        assert isclose(sol[2], 0.9998968435988933)
+
+    def test_set_solution(self):
+        SPALDING_ISO_HYDROSTATIC.set_solution([1, 2, 3])
+        assert SPALDING_ISO_HYDROSTATIC.solution['mddp'] == 1
+        assert SPALDING_ISO_HYDROSTATIC.solution['q_rs'] == 2
+        assert SPALDING_ISO_HYDROSTATIC.solution['T_s'] == 3
+
+    def test_solve(self):
+        count = SPALDING_ISO_HYDROSTATIC.solve()
+        assert count == 3121
+        assert isclose(
+            SPALDING_ISO_HYDROSTATIC.solution['mddp'], 4.36206726495186e-06)
+        assert isclose(
+            SPALDING_ISO_HYDROSTATIC.solution['q_rs'], 9.3068076497042274)
+        assert isclose(
+            SPALDING_ISO_HYDROSTATIC.solution['T_s'], 293.38852442995437)
+        assert isclose(SPALDING_ISO_HYDROSTATIC.props['T_s'],
+                       SPALDING_ISO_HYDROSTATIC.solution['T_s'])
+
+    def test_show_solution(self):
+        """>>> <OneDimIsoLiqNoRad>.show_props()"""
+        assert SPALDING_ISO_HYDROSTATIC.show_solution(show_res=False) == \
+            test_const.SOLUTION_04
+
+
+class Test_SpaldingHydroStatic(object):
+    """Unit testing of SpaldingIsoNoRadHydroStatic class."""
+
+    def test__init__(self):
+        """Docstring."""
+        assert SPALDING_HYDROSTATIC
+
+        assert SPALDING_HYDROSTATIC._unknowns == ['mddp', 'q_cu',
+                                                  'q_rs', 'T_s']
+
+        assert len(SPALDING_HYDROSTATIC.solution) == 4
+        assert SPALDING_HYDROSTATIC.solution['mddp'] is None
+        assert SPALDING_HYDROSTATIC.solution['q_cu'] is None
+        assert SPALDING_HYDROSTATIC.solution['q_rs'] is None
+        assert SPALDING_HYDROSTATIC.solution['T_s'] is None
+
+    def test_eval_model(self):
+        sol = SPALDING_HYDROSTATIC.eval_model([1, 1, 1, 1])
+        assert isclose(sol[0], 0.9999973282431955)
+        assert isclose(sol[1], -1230180.4175789093)
+        assert isclose(sol[2], -428.43677457759003)
+        assert isclose(sol[3], 0.9998968435988933)
+
+    def test_set_solution(self):
+        SPALDING_HYDROSTATIC.set_solution([1, 2, 3, 4])
+        assert SPALDING_HYDROSTATIC.solution['mddp'] == 1
+        assert SPALDING_HYDROSTATIC.solution['q_cu'] == 2
+        assert SPALDING_HYDROSTATIC.solution['q_rs'] == 3
+        assert SPALDING_HYDROSTATIC.solution['T_s'] == 4
+
+    def test_solve(self):
+        count = SPALDING_HYDROSTATIC.solve()
+        assert count == 3172
+        assert isclose(
+            SPALDING_HYDROSTATIC.solution['mddp'], 4.3651881976465652e-06)
+        assert isclose(
+            SPALDING_HYDROSTATIC.solution['q_cu'], 0.029369256400590626)
+        assert isclose(
+            SPALDING_HYDROSTATIC.solution['q_rs'], 9.2879061611442157)
+        assert isclose(
+            SPALDING_HYDROSTATIC.solution['T_s'], 293.39182423401382)
+        assert isclose(SPALDING_HYDROSTATIC.props['T_s'],
+                       SPALDING_HYDROSTATIC.solution['T_s'])
+
+    def test_show_solution(self):
+        """>>> <OneDimIsoLiqNoRad>.show_props()"""
+        assert SPALDING_HYDROSTATIC.show_solution(show_res=False) == \
+            test_const.SOLUTION_05
+
+
 class Test_OneDimIsoLiqNoRad(object):
     """Unit testing of OneDimIsoLiqNoRad class."""
 
@@ -217,7 +361,7 @@ class Test_OneDimIsoLiqNoRad(object):
 
     def test_solve(self):
         count = ONEDIM_ISOLIQ_NORAD.solve()
-        assert count == 126
+        assert count == 1322
         assert isclose(
             ONEDIM_ISOLIQ_NORAD.solution['mddp'], 1.6526395638614737e-06)
         assert isclose(
@@ -267,7 +411,7 @@ class Test_OneDimIsoLiqBlackRad(object):
 
     def test_solve(self):
         count = ONEDIM_ISOLIQ_BLACKRAD.solve()
-        # assert count == 315
+        assert count == 3206
         assert isclose(
             ONEDIM_ISOLIQ_BLACKRAD.solution['mddp'], 4.313551217117603e-06)
         assert isclose(
@@ -406,7 +550,7 @@ class Test_OneDimIsoLiqBlackGrayRad(object):
 
     def test_solve(self):
         count = ONEDIM_ISOLIQ_BLACKGRAYRAD.solve()
-        assert count == 23
+        assert count == 337
         assert isclose(ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['mddp'],
                        2.8157247162849299e-06)
         assert isclose(
@@ -415,44 +559,3 @@ class Test_OneDimIsoLiqBlackGrayRad(object):
             ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['q_rad'], -6.2866758777740301)
         assert isclose(
             ONEDIM_ISOLIQ_BLACKGRAYRAD.solution['T_s'], 293.81051897402887)
-
-
-class Test_OneDimIsoLiqIntEmitt(object):
-    """Unit testing of OneDimIsoLiqIntEmitt class."""
-
-    def test__init__(self):
-        assert ONEDIM_ISOLIQ_INTEMITT
-
-    def test_get_internal_fractional_value(self):
-        value = ONEDIM_ISOLIQ_INTEMITT.get_internal_fractional_value(0.577871)
-        assert isclose(value, 0.99756420762388165)
-
-    def test_get_stigma(self):
-        stigma = ONEDIM_ISOLIQ_INTEMITT.get_stigma(3.58, 300)
-        assert isclose(stigma, 13.3975791433892)
-
-    def test_eval_eps(self):
-
-        ONEDIM_ISOLIQ_INTEMITT.eval_eps(ONEDIM_ISOLIQ_INTEMITT.alpha_w,
-                                        ONEDIM_ISOLIQ_INTEMITT.lamb)
-        assert isclose(ONEDIM_ISOLIQ_INTEMITT.eps, 0.00028685082322367456)
-
-    def test_eval_model(self):
-        """Docstring."""
-        res = ONEDIM_ISOLIQ_INTEMITT.eval_model([1, 1, 1, 1])
-        assert isclose(res[0], 254.49907209600156)
-        assert isclose(res[1], 0.9999973637622117)
-        assert isclose(res[2], 2457426.545412025)
-        assert isclose(res[3], 1.0000000191282215)
-
-    def test_solve(self):
-        count = ONEDIM_ISOLIQ_INTEMITT.solve()
-        assert count == 122
-        assert isclose(ONEDIM_ISOLIQ_INTEMITT.solution['mddp'],
-                       1.6547116138259197e-06)
-        assert isclose(
-            ONEDIM_ISOLIQ_INTEMITT.solution['q_cs'], -4.0637386967065616)
-        assert isclose(
-            ONEDIM_ISOLIQ_INTEMITT.solution['q_rad'], -0.0073716933238302459)
-        assert isclose(
-            ONEDIM_ISOLIQ_INTEMITT.solution['T_s'], 290.27892404016342)

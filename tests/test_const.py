@@ -1,6 +1,6 @@
 """Constants for the UCSD Chamber Experiment."""
 from datetime import datetime
-from os import getcwd
+import os
 
 
 # Constants for test_sqldb.py
@@ -12,169 +12,189 @@ SETTINGS_TEST_2 = {'Duty': 20,
                    'Pressure': 110000,
                    'Temperature': 270}
 
+TEST_DIRECTORY = os.path.join(os.getcwd(), 'tests', 'data_transfer_test_files')
 
-TEST_DIRECTORY = getcwd() + "/tests/data_transfer_test_files"
+CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
+                                               'data_transfer_test_files',
+                                               'test_01.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_transfer_test_files',
+                                               'tdms_test_folder',
+                                               'test_02.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_transfer_test_files',
+                                               'test_03.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_transfer_test_files',
+                                               'tdms_test_folder',
+                                               'tdms_test_folder_full',
+                                               'test_04.tdms')]
 
-#TABLES = []
-#TABLES.append(('UnitTest',
-#               "CREATE TABLE UnitTest ("
-#               "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
-#               "    Number DECIMAL(5,2) NULL,"
-#               "    String VARCHAR(30) NULL,"
-#               "  PRIMARY KEY (`UnitTestID`)"
-#               ");"))
+INCORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
+                                                 'data_transfer_test_files',
+                                                 'test_01.tdms_index'),
+                       os.path.join(os.getcwd(), 'tests',
+                                                 'data_transfer_test_files',
+                                                 'test_03.tdms_index'),
+                       os.path.join(os.getcwd(), 'tests',
+                                                 'data_transfer_test_files',
+                                                 'tdms_test_folder',
+                                                 'test_02.tdms_index'),
+                       os.path.join(os.getcwd(), 'tests',
+                                                 'data_transfer_test_files',
+                                                 'tdms_test_folder',
+                                                 'tdms_test_folder_full',
+                                                 'test_04.tdms_index')]
 
-CORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/"
-                                "test_01.tdms",
-                     getcwd() + "/tests/data_transfer_test_files/"
-                                "tdms_test_folder/"
-                                "test_02.tdms",                     
-                     getcwd() + "/tests/data_transfer_test_files/"
-                                "test_03.tdms",
-                     getcwd() + "/tests/data_transfer_test_files"
-                                "/tdms_test_folder/tdms_test_folder_full/"
-                                "test_04.tdms"]
-
-CORRECT_FILE_LIST_WIN = [getcwd() + "/tests/data_transfer_test_files\\"
-                                "test_01.tdms",
-                     getcwd() + "/tests/data_transfer_test_files\\"
-                                "tdms_test_folder\\"
-                                "test_02.tdms",                     
-                     getcwd() + "/tests/data_transfer_test_files\\"
-                                "tdms_test_folder\\tdms_test_folder_full\\"
-                                "test_04.tdms",
-                     getcwd() + "/tests/data_transfer_test_files\\"
-                                "test_03.tdms"]
-
-INCORRECT_FILE_LIST = [getcwd() + "/tests/data_transfer_test_files/"
-                                  "test_01.tdms_index",
-                       getcwd() + "/tests/data_transfer_test_files/"
-                                  "test_03.tdms_index",
-                       getcwd() + "/tests/data_transfer_test_files/"
-                                  "tdms_test_folder/"
-                                  "test_02.tdms_index",
-                       getcwd() + "/tests/data_transfer_test_files/"
-                                  "tdms_test_folder/tdms_test_folder_full/"
-                                  "test_04.tdms_index"]
-
-INCORRECT_FILE_LIST_WIN = [getcwd() + "/tests/data_transfer_test_files\\"
-                                  "test_01.tdms_index",
-                       getcwd() + "/tests/data_transfer_test_files\\"
-                                  "test_03.tdms_index",
-                       getcwd() + "/tests/data_transfer_test_files\\"
-                                  "tdms_test_folder\\"
-                                  "test_02.tdms_index",
-                       getcwd() + "/tests/data_transfer_test_files\\"
-                                  "tdms_test_folder\\tdms_test_folder_full\\"
-                                  "test_04.tdms_index"]
-
-TDMS_1_SETTING = {'Duty': '1.0',
+TDMS_01_SETTING = {'Duty': '5.0',
                    'Pressure': 100000,
-                   'Temperature': 300}
+                   'Temperature': 285}
 
-TDMS_2_SETTING = {'Duty': '2.0',
+TDMS_02_SETTING = {'Duty': '0.0',
                    'Pressure': 100000,
-                   'Temperature': 300}
+                   'Temperature': 280}
 
-TDMS_3_SETTING = {'Duty': '3.0',
+TDMS_03_SETTING = {'Duty': '5.0',
                    'Pressure': 100000,
-                   'Temperature': 300}
+                   'Temperature': 280}
 
-TDMS_4_SETTING = {'Duty': '4.0',
-                   'Pressure': 100000,
-                   'Temperature': 300}
-
-TDMS_FF_TEST = {'Author': 'TEST',
+TDMS_01_TEST = {'Author': 'author_01',
                 'DateTime':
-                    datetime(2017, 10, 2, 16, 23, 57),
-                'Description': 'Description for test 1',
-                'IsMass': 0,
-                'TimeStep': 1}
-
-TDMS_FT_TEST = {'Author': 'TEST',
-                'DateTime':
-                    datetime(2017, 10, 2, 16, 25, 4),
-                'Description': 'Description for test 2',
-                'IsMass': 0,
-                'TimeStep': 1}
-
-TDMS_TF_TEST = {'Author': 'TEST',
-                'DateTime':
-                    datetime(2017, 10, 2, 16, 27, 51),
-                'Description': 'Description for test 4',
+                    datetime(2018, 1, 29, 17, 54, 12),
+                'Description': 'description_01',
                 'IsMass': 1,
                 'TimeStep': 1}
 
-TDMS_TT_TEST = {'Author': 'TEST',
+TDMS_02_TEST = {'Author': 'author_02',
                 'DateTime':
-                     datetime(2017, 10, 2, 16, 27, 3),
-                'Description': 'Description for test 3',
+                    datetime(2018, 1, 29, 17, 55, 10),
+                'Description': 'description_02',
                 'IsMass': 1,
                 'TimeStep': 1}
 
-TEST_EXISTS_CONST = {'Author': 'TEST',
-                     'DateTime':
-                          datetime(2017, 11, 2, 15, 27, 3),
-                     'Description': 'Description for test 3',
-                     'IsMass': 1,
-                     'TimeStep': 1}
+TDMS_03_TEST = {'Author': 'author_03',
+                'DateTime':
+                    datetime(2018, 1, 29, 17, 50, 58),
+                'Description': 'description_03',
+                'IsMass': 0,
+                'TimeStep': 1}
 
-TDMS_FF_ADD_TEST = [(1, 'TEST', datetime(2017, 10, 2, 16, 23, 57),
-                     'Description for test 1', 0, 1.00, 1, 1)]
+TDMS_04_TEST = {'Author': 'author_04',
+                'DateTime': datetime(2018, 1, 29, 17, 52, 24),
+                'Description': 'description_04',
+                'IsMass': 0,
+                'TimeStep': 1}
 
-TDMS_FT_ADD_TEST = [(2, 'TEST', datetime(2017, 10, 2, 16, 25, 4),
-                     'Description for test 2', 0, 1.00, 2, 1)]
-
-TDMS_TF_ADD_TEST = [(3, 'TEST', datetime(2017, 10, 2, 16, 27, 51),
-                     'Description for test 4', 1, 1.00, 3, 1)]
-
-TDMS_TT_ADD_TEST = [(4, 'TEST', datetime(2017, 10, 2, 16, 27, 3),
-                     'Description for test 3', 1, 1.00, 4, 1)]
-
-TDMS_FF_OBS_07 = {'CapManOk': 1,
-                  'DewPoint': '285.75',
-                  'Idx': 7,
-                  'OptidewOk': 1,
-                  'PowOut': '0.0002',
-                  'PowRef': '0.0004',
-                  'Pressure': 99430}
-
-TDMS_FT_OBS_07 = {'CapManOk': 1,
-                  'DewPoint': '285.57',
-                  'Idx': 7,
-                  'OptidewOk': 1,
-                  'PowOut': '-0.0003',
-                  'PowRef': '0.0002',
-                  'Pressure': 99426}
-
-TDMS_TF_OBS_07 = {'CapManOk': 1,
-                  'DewPoint': '286.59',
+TDMS_01_OBS_07 = {'CapManOk': 1,
+                  'DewPoint': '270.69',
                   'Idx': 8,
-                  'Mass': '0.0988093',
-                  'OptidewOk': 1,
-                  'PowOut': '0.0002',
-                  'PowRef': '-0.0001',
-                  'Pressure': 99465}
-
-TDMS_TT_OBS_07 = {'CapManOk': 1,
-                  'DewPoint': '285.82',
-                  'Idx': 7,
-                  'Mass': '0.0988097',
                   'OptidewOk': 1,
                   'PowOut': '-0.0003',
+                  'PowRef': '-0.0003',
+                  'Pressure': 100393,
+                  'Mass': '0.0985090'}
+
+TDMS_02_OBS_07 = {'CapManOk': 1,
+                  'DewPoint': '270.93',
+                  'Idx': 7,
+                  'OptidewOk': 1,
+                  'PowOut': '-0.0004',
                   'PowRef': '-0.0001',
-                  'Pressure': 99518}
+                  'Pressure': 100428,
+                  'Mass': '0.0985083'}
 
-TDMS_FF_THM_07 = '299.49'
+TDMS_03_OBS_07 = {'CapManOk': 1,
+                  'DewPoint': '270.12',
+                  'Idx': 8,
+                  'OptidewOk': 1,
+                  'PowOut': '-0.0002',
+                  'PowRef': '-0.0000',
+                  'Pressure': 100463}
 
-TDMS_FT_THM_07 = '299.55'
-
-TDMS_TF_THM_07 = '299.57'
-
-TDMS_TT_THM_07 = '299.56'
+TDMS_04_OBS_07 = {'CapManOk': 1,
+                  'DewPoint': '270.22',
+                  'Idx': 8,
+                  'OptidewOk': 1,
+                  'PowOut': '-0.0003',
+                  'PowRef': '0.0001',
+                  'Pressure': 100520}
 
 TEST_INDEX = 7
 TC_INDEX = 7
+
+TDMS_01_THM_07 = '284.66'
+
+TDMS_02_THM_07 = '283.55'
+
+TDMS_03_THM_07 = '282.43'
+
+TDMS_04_THM_07 = '282.29'
+
+TDMS_01_ADD_TEST = [(1, 'author_01', datetime(2018, 1, 29, 17, 54, 12),
+                     'description_01', 1, 1.00, 1, 1)]
+
+TDMS_02_ADD_TEST = [(2, 'author_02', datetime(2018, 1, 29, 17, 55, 10),
+                     'description_02', 1, 1.00, 2, 1)]
+
+TDMS_03_ADD_TEST = [(3, 'author_03', datetime(2018, 1, 29, 17, 50, 58),
+                     'description_03', 0, 1.00, 3, 1)]
+
+TDMS_04_ADD_TEST = [(4, 'author_04', datetime(2018, 1, 29, 17, 52, 24),
+                     'description_04', 0, 1.00, 2, 1)]
+
+GET_LAST_DEW_POINT = (
+    'SELECT'
+    '    DewPoint '
+    'FROM'
+    '    Observation '
+    'WHERE'
+    '    TestID={} '
+    'ORDER BY Idx DESC '
+    'LIMIT 1;')
+
+GET_TEMP_OBS = ("SELECT"
+                "    Temperature, ThermocoupleNum "
+                "FROM"
+                "    TempObservation "
+                "WHERE"
+                "    TestId={} "
+                "AND"
+                "    Idx={} "
+                "ORDER BY ThermocoupleNum ASC;")
+
+GET_OBS_DATA_M = ("SELECT"
+                  "    CapManOk, DewPoint, Mass,"
+                  "    OptidewOk, PowOut, PowRef, Pressure "
+                  "FROM"
+                  "    Observation "
+                  "WHERE"
+                  "    TestId={} "
+                  "AND"
+                  "    Idx ={};")
+
+GET_OBS_DATA_T = ("SELECT"
+                  "    CapManOk, DewPoint, OptidewOk,"
+                  "    PowOut, PowRef, Pressure "
+                  "FROM"
+                  "    Observation "
+                  "WHERE"
+                  "    TestId={} "
+                  "AND"
+                  "    Idx ={};")
+
+TEMP_OBS_1 = [284.61, 280.93, 281.07, 284.66, 286.26,
+              281.23, 280.92, 281.32, 280.82, 284.86]
+TEMP_OBS_2 = [283.44, 280.71, 280.9, 283.55, 284.4,
+              280.96, 280.59, 280.9, 280.56, 283.65]
+TEMP_OBS_3 = [283.59, 283.46, 283.34, 283.48, 282.84, 280.51, 280.82,
+              282.43, 282.56, 280.85, 280.37, 280.76, 280.39, 282.42]
+TEMP_OBS_4 = [283.54, 283.41, 283.28, 283.44, 282.59, 280.51, 280.81,
+              282.29, 282.41, 280.84, 280.33, 280.71, 280.37, 282.27]
+
+OBS_DATA_1 = (1, 270.7, 9.8509e-2, 1, -3e-4, 0, 100353)
+OBS_DATA_2 = (1, 270.93, 9.85083e-2, 1, -4e-4, -1e-4, 100428)
+OBS_DATA_3 = (1, 270.09, 1, -3e-4, -1e-4, 100458)
+OBS_DATA_4 = (1, 270.09, 1, -0.0003, -0.0001, 100458)
 
 # Constants for test_results.py
 NORM_TEST = [1, 3, 5, 4, 7]
@@ -246,3 +266,18 @@ SOLUTION_02 = ('------------- Solution -------------\n'
                'q_cs:\t-1.37755\t[W / m^2]\n'
                'q_rad:\t-9.20321\t[W / m^2]\n'
                'T_s:\t293.407\t\t[K]\n')
+
+SOLUTION_03 = ('------------- Solution -------------\n'
+               'mddp:\t1.65893e-06\t[kg / m^2 s]\n'
+               'T_s:\t290.258\t\t[K]\n')
+
+SOLUTION_04 = ('------------- Solution -------------\n'
+               'mddp:\t4.36207e-06\t[kg / m^2 s]\n'
+               'q_rs:\t9.30681\t[W / m^2]\n'
+               'T_s:\t293.389\t\t[K]\n')
+
+SOLUTION_05 = ('------------- Solution -------------\n'
+               'mddp:\t4.36519e-06\t[kg / m^2 s]\n'
+               'q_cu:\t0.0293693\t[W / m^2]\n'
+               'q_rs:\t9.28791\t[W / m^2]\n'
+               'T_s:\t293.392\t\t[K]\n')

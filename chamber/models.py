@@ -13,7 +13,7 @@ import chamber.const as const
 class Model(object):
     """Object to hold the state of a heat and mass transfer model."""
 
-    learning_rate = 0.05
+    learning_rate = 5e-3
 
     def __init__(self, settings, ref='Mills', rule='mean'):
         """Constructor."""
@@ -76,6 +76,9 @@ class Model(object):
 
         # Hidden attribute for unknowns in model:
         self._unknowns = []
+
+        # Attribute for the initial guess
+        self.initial_guess = []
 
         # Populate self.props:
         self.eval_props()
@@ -226,7 +229,9 @@ class Model(object):
                 }[ref](ref_temp, pressure / 101325)
 
     def eval_props(self):
-        """Use CoolProp to populate self.props."""
+        """Use CoolProp to populate self.props.
+
+        Everything here associated with Ts is a guess."""
 
         # Reference states:
         self.props['x_1e'] = HAPropsSI('Y',
@@ -266,6 +271,11 @@ class Model(object):
                                      self.ref_state['x_1'],
                                      'Q', 1,
                                      'Water')
+
+        self.props['c_pliq'] = PropsSI('Cpmass',
+                                       'T', self.ref_state['T_m'],
+                                       'Q', 0,
+                                       'water')
 
         self.props['D_12'] = self.get_bin_diff_coeff(self.ref_state['T_m'],
                                                      self.settings['P'],
@@ -360,7 +370,7 @@ class Model(object):
     def solve(self):
         """Docstring."""
         delta, count = 1, 0
-        sol = [280 for _ in range(len(self.solution))]
+        sol = self.initial_guess
         while abs(delta) > 1e-9:
             # Get the solution with the current properties evaluated at
             # self.temp_s:
@@ -369,7 +379,8 @@ class Model(object):
 
             # Make new guess @ self.props['T_s'] based on self.solution['T_s']:
             delta = self.solution['T_s'] - self.props['T_s']
-            self.props['T_s'] += self.learning_rate * delta
+            # print(delta)
+            self.props['T_s'] = self.props['T_s'] + (self.learning_rate*delta)
 
             # Evaluate the new properties before solving again:
             self.eval_props()
@@ -419,6 +430,178 @@ class Model(object):
         pass
 
 
+class SpaldingIsoNoRadHydroStatic(Model):
+    """Docstring."""
+
+    def __init__(self, settings, ref='Mills', rule='mean'):
+        """Docstring."""
+        super(SpaldingIsoNoRadHydroStatic, self)\
+            .__init__(settings, ref=ref, rule=rule)
+
+        self._unknowns = ['mddp', 'T_s']
+        self.set_solution([None] * len(self._unknowns))
+        self.initial_guess = [1e-6, self.settings['T_DP']]
+
+    def eval_model(self, vec_in):
+        """Docstring."""
+        mddp,  T_s = vec_in
+        res = [0 for _ in range(len(self.solution))]
+
+        rho_m = self.props['rho_m']
+        D_12 = self.props['D_12']
+        L = self.settings['L_t']
+        m_1e = self.props['m_1e']
+        T_e = self.settings['T_e']
+        alpha_m = self.props['alpha_m']
+        c_pm = self.props['c_pm']
+        h_fg = self.props['h_fg']
+
+        g_m = rho_m * D_12 / L
+        B_m = (self.props['m_1s'] - m_1e) / (1 - self.props['m_1s'])
+
+        g_h = rho_m * alpha_m / L
+        B_h = c_pm * (T_e-T_s)/(h_fg)
+
+        res[0] = mddp - (g_m * B_m)
+        res[1] = mddp - (g_h * B_h)
+        return res
+
+    def show_solution(self, show_res=True):
+        """Docstring."""
+        # If the model has been solved
+        if self.solution['mddp']:
+            res = ('------------- Solution -------------\n'
+                   'mddp:\t{:.6g}\t[kg / m^2 s]\n'
+                   'T_s:\t{:.6g}\t\t[K]\n')\
+                .format(self.solution['mddp'], self.solution['T_s'])
+        else:
+            res = ('------------- Solution -------------\n'
+                   '......... Not solved yet ...........\n')
+
+        if show_res:
+            print(res)
+        else:
+            return res
+
+
+class SpaldingIsoHydroStatic(Model):
+    """Docstring."""
+
+    def __init__(self, settings, ref='Mills', rule='mean'):
+        """Docstring."""
+        super(SpaldingIsoHydroStatic, self)\
+            .__init__(settings, ref=ref, rule=rule)
+
+        self._unknowns = ['mddp', 'q_rs', 'T_s']
+        self.set_solution([None] * len(self._unknowns))
+        self.initial_guess = [1e-6, 0.1, self.settings['T_DP']]
+
+    def eval_model(self, vec_in):
+        """Docstring."""
+        mddp, q_rs, T_s = vec_in
+        res = [0 for _ in range(len(self.solution))]
+
+        rho_m = self.props['rho_m']
+        D_12 = self.props['D_12']
+        L = self.settings['L_t']
+        m_1e = self.props['m_1e']
+        T_e = self.settings['T_e']
+        alpha_m = self.props['alpha_m']
+        c_pm = self.props['c_pm']
+        h_fg = self.props['h_fg']
+        sig = const.SIGMA
+
+        g_m = rho_m * D_12 / L
+        B_m = (self.props['m_1s'] - m_1e) / (1 - self.props['m_1s'])
+
+        g_h = rho_m * alpha_m / L
+        B_h = c_pm * (T_e - T_s) / (h_fg - (q_rs/mddp))
+
+        res[0] = mddp - (g_m * B_m)
+        res[1] = q_rs - sig*(pow(T_e, 4) - pow(T_s, 4))
+        res[2] = mddp - (g_h * B_h)
+        return res
+
+    def show_solution(self, show_res=True):
+        """Docstring."""
+        # If the model has been solved
+        if self.solution['mddp']:
+            res = ('------------- Solution -------------\n'
+                   'mddp:\t{:.6g}\t[kg / m^2 s]\n'
+                   'q_rs:\t{:.6g}\t[W / m^2]\n'
+                   'T_s:\t{:.6g}\t\t[K]\n')\
+                .format(self.solution['mddp'], self.solution['q_rs'], self.solution['T_s'])
+        else:
+            res = ('------------- Solution -------------\n'
+                   '......... Not solved yet ...........\n')
+
+        if show_res:
+            print(res)
+        else:
+            return res
+
+
+class SpaldingHydroStatic(Model):
+    """Docstring."""
+
+    def __init__(self, settings, ref='Mills', rule='mean'):
+        """Docstring."""
+        super(SpaldingHydroStatic, self)\
+            .__init__(settings, ref=ref, rule=rule)
+
+        self._unknowns = ['mddp', 'q_cu', 'q_rs', 'T_s']
+        self.set_solution([None] * len(self._unknowns))
+        self.initial_guess = [1e-6, 0.1, 0.1, self.settings['T_DP']]
+
+    def eval_model(self, vec_in):
+        """Docstring."""
+        mddp, q_cu, q_rs, T_s = vec_in
+        res = [0 for _ in range(len(self.solution))]
+
+        rho_m = self.props['rho_m']
+        D_12 = self.props['D_12']
+        L = self.settings['L_t']
+        m_1e = self.props['m_1e']
+        T_e = self.settings['T_e']
+        alpha_m = self.props['alpha_m']
+        c_pm = self.props['c_pm']
+        h_fg = self.props['h_fg']
+        sig = const.SIGMA
+        c_pliq = self.props['c_pliq']
+
+        g_m = rho_m * D_12 / L
+        B_m = (self.props['m_1s'] - m_1e) / (1 - self.props['m_1s'])
+
+        g_h = rho_m * alpha_m / L
+        B_h = c_pm * (T_e - T_s) / (h_fg - ((q_rs+q_cu)/mddp))
+
+        res[0] = mddp - (g_m * B_m)
+        res[1] = q_cu - mddp*c_pliq*(T_e-T_s)
+        res[2] = q_rs - sig*(pow(T_e, 4) - pow(T_s, 4))
+        res[3] = mddp - (g_h * B_h)
+        return res
+
+    def show_solution(self, show_res=True):
+        """Docstring."""
+        # If the model has been solved
+        if self.solution['mddp']:
+            res = ('------------- Solution -------------\n'
+                   'mddp:\t{:.6g}\t[kg / m^2 s]\n'
+                   'q_cu:\t{:.6g}\t[W / m^2]\n'
+                   'q_rs:\t{:.6g}\t[W / m^2]\n'
+                   'T_s:\t{:.6g}\t\t[K]\n')\
+                .format(self.solution['mddp'], self.solution['q_cu'],
+                        self.solution['q_rs'], self.solution['T_s'])
+        else:
+            res = ('------------- Solution -------------\n'
+                   '......... Not solved yet ...........\n')
+
+        if show_res:
+            print(res)
+        else:
+            return res
+
+
 class OneDimIsoLiqNoRad(Model):
     """Docstring."""
 
@@ -429,6 +612,7 @@ class OneDimIsoLiqNoRad(Model):
 
         self._unknowns = ['mddp', 'q_cs', 'T_s']
         self.set_solution([None] * len(self._unknowns))
+        self.initial_guess = [1e-6, 10, self.settings['T_DP']]
 
     def eval_model(self, vec_in):
         """Docstring."""
@@ -474,6 +658,7 @@ class OneDimIsoLiqBlackRad(Model):
 
         self._unknowns = ['mddp', 'q_cs', 'q_rad', 'T_s']
         self.set_solution([None] * len(self._unknowns))
+        self.initial_guess = [1e-6, 10, 10, self.settings['T_DP']]
 
     def eval_model(self, vec_in):
         """Docstring."""
@@ -536,6 +721,7 @@ class OneDimIsoLiqBlackGrayRad(Model):
 
         self._unknowns = ['mddp', 'q_cs', 'q_rad', 'T_s']
         self.set_solution([None] * len(self._unknowns))
+        self.initial_guess = [1e-6, 10, 10, self.settings['T_DP']]
 
         # Populate self.Eb
         self.eval_Eb()
@@ -704,7 +890,7 @@ class OneDimIsoLiqIntEmitt(Model):
             (self.props['m_1e'] - self.props['m_1s'])
         res[2] = mddp * self.props['h_fg'] + q_cs + q_rad
         res[3] = q_rad + \
-            (- self.eps * 4 * const.SIGMA * pow(T_s, 3) *
+            (-1 * self.eps * 4 * const.SIGMA * pow(T_s, 3) *
              (T_s - self.settings['T_e']))
         return res
 
