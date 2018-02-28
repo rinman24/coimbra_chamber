@@ -202,6 +202,7 @@ NORM_TEST_RESULT = [0, 1 / 3, 2 / 3, 1 / 2, 1]
 
 # Constants for test_models.py
 MOD_SET_01 = dict(L_t=0.03, P=99950, T_DP=288, T_e=295)
+MOD_SET_01_RH = dict(L_t=0.03, P=99950, RH=0.6444402431157594, T_e=295)
 MOD_SET_02 = dict(L_t=0.03, P=99950, T_DP=288, T_e=295, eps=[1, 0.95, 1])
 MOD_SET_03 = dict(L_t=0.03, P=99950, T_DP=288, T_e=295, eps=[1, 0.95, 0.5])
 MOD_SET_04 = dict(L_t=0.03, P=99950, T_DP=288, T_e=295,

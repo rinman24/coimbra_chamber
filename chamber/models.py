@@ -24,7 +24,13 @@ class Model(object):
         self.settings['P'] = settings['P']
         self.settings['ref'] = ref
         self.settings['rule'] = rule
-        self.settings['T_DP'] = settings['T_DP']
+        try:
+            self.settings['T_DP'] = settings['T_DP']
+        except KeyError:
+            self.settings['T_DP'] = HAPropsSI('T_dp',
+                                              'T', settings['T_e'],
+                                              'P', settings['P'],
+                                              'RH', settings['RH'])
         self.settings['T_e'] = settings['T_e']
 
         # Properties:
