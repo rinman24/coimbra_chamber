@@ -19,3 +19,8 @@ abs_water.csv
 # OSX Attributes #
 ##################
 *.DS_Store
+
+###########
+# VS Code #
+###########
+*.vscode
