@@ -107,8 +107,8 @@ def chi2(x, y, sigma, plot=False):
     sigma_a_res = _sig_a(sxx_res, delta_res)
     sigma_b_res = _sig_b(s_res, delta_res)
     chi2_res = _chi2(x, y, a_res, b_res, sigma)
-    dof = len(x) - 2
-    q_res = scipy.stats.chi2.sf(chi2_res, dof)
+    nu = len(x) - 2
+    q_res = scipy.stats.chi2.sf(chi2_res, nu)
     if plot:
         plt.subplot(121)
         plt.errorbar(x, y, yerr=sigma, label='data', fmt='o', zorder=0)
@@ -119,20 +119,20 @@ def chi2(x, y, sigma, plot=False):
         plt.legend()
 
         plt.subplot(122)
-        chi = np.linspace(scipy.stats.chi2.ppf(0.0001, dof),
-                          scipy.stats.chi2.ppf(0.9999, dof),
+        chi = np.linspace(scipy.stats.chi2.ppf(0.0001, nu),
+                          scipy.stats.chi2.ppf(0.9999, nu),
                           100)
-        plt.plot(chi, scipy.stats.chi2.pdf(chi, dof), label=r'$\chi^2$ PDF')
+        plt.plot(chi, scipy.stats.chi2.pdf(chi, nu), label=r'$\chi^2$ PDF')
         plt.axvline(x=chi2_res, ls='--', label=r'$\chi^2$')
         plt.ylim(bottom=0)
         plt.xlabel(r'$\chi^2$')
         plt.ylabel(r'$\chi^2$ Probability Density')
         plt.legend()
 
-        plt.suptitle(r"$Q$ = {0:.4f}, $\nu$ = {1}".format(q_res, dof))
+        plt.suptitle(r"$Q$ = {0:.4f}, $\nu$ = {1}".format(q_res, nu))
 
         plt.show()
-    res = dict(a=a_res, sig_a=sigma_a_res, b=b_res, sig_b=sigma_b_res, chi2=chi2_res, q=q_res, nu=dof)
+    res = [a_res, sigma_a_res, b_res, sigma_b_res, chi2_res, q_res, nu]
     return res
 
 # --------------------------------------------------------------------------- #

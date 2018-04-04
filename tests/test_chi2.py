@@ -99,23 +99,23 @@ class TestChi2_0p06(object):
     def test_run_chi2_noplot(self):
         res = chamber.chi2.chi2(X, YP06,
                                                             self.sigma)
-        assert math.isclose(res['a'], 0.981818181818182)
-        assert math.isclose(res['sig_a'], 0.03384456448906597)
-        assert math.isclose(res['b'], -0.9654545454545456)
-        assert math.isclose(res['sig_b'], 0.05720775535473553)
-        assert math.isclose(res['chi2'], 0.827272727272728)
-        assert math.isclose(res['q'], 0.9997430671082018)
+        assert math.isclose(res[0], 0.981818181818182)
+        assert math.isclose(res[1], 0.03384456448906597)
+        assert math.isclose(res[2], -0.9654545454545456)
+        assert math.isclose(res[3], 0.05720775535473553)
+        assert math.isclose(res[4], 0.827272727272728)
+        assert math.isclose(res[5], 0.9997430671082018)
 
     def test_run_chi2_plot(self):
         res = chamber.chi2.chi2(X, YP06,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 0.981818181818182)
-        assert math.isclose(res['sig_a'], 0.03384456448906597)
-        assert math.isclose(res['b'], -0.9654545454545456)
-        assert math.isclose(res['sig_b'], 0.05720775535473553)
-        assert math.isclose(res['chi2'], 0.827272727272728)
-        assert math.isclose(res['q'], 0.9997430671082018)
+        assert math.isclose(res[0], 0.981818181818182)
+        assert math.isclose(res[1], 0.03384456448906597)
+        assert math.isclose(res[2], -0.9654545454545456)
+        assert math.isclose(res[3], 0.05720775535473553)
+        assert math.isclose(res[4], 0.827272727272728)
+        assert math.isclose(res[5], 0.9997430671082018)
 
 
 class TestChi2_0p2(object):
@@ -187,23 +187,23 @@ class TestChi2_0p2(object):
 
     def test_run_chi2_noplot(self):
         res = chamber.chi2.chi2(X, YP2, self.sigma)
-        assert math.isclose(res['a'], 1.0272727272727273)
-        assert math.isclose(res['sig_a'], 0.11281521496355325)
-        assert math.isclose(res['b'], -0.9818181818181816)
-        assert math.isclose(res['sig_b'], 0.19069251784911845)
-        assert math.isclose(res['chi2'], 1.1272727272727274)
-        assert math.isclose(res['q'], 0.999083798853131)
+        assert math.isclose(res[0], 1.0272727272727273)
+        assert math.isclose(res[1], 0.11281521496355325)
+        assert math.isclose(res[2], -0.9818181818181816)
+        assert math.isclose(res[3], 0.19069251784911845)
+        assert math.isclose(res[4], 1.1272727272727274)
+        assert math.isclose(res[5], 0.999083798853131)
 
     def test_run_chi2_plot(self):
         res = chamber.chi2.chi2(X, YP2,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 1.0272727272727273)
-        assert math.isclose(res['sig_a'], 0.11281521496355325)
-        assert math.isclose(res['b'], -0.9818181818181816)
-        assert math.isclose(res['sig_b'], 0.19069251784911845)
-        assert math.isclose(res['chi2'], 1.1272727272727274)
-        assert math.isclose(res['q'], 0.999083798853131)
+        assert math.isclose(res[0], 1.0272727272727273)
+        assert math.isclose(res[1], 0.11281521496355325)
+        assert math.isclose(res[2], -0.9818181818181816)
+        assert math.isclose(res[3], 0.19069251784911845)
+        assert math.isclose(res[4], 1.1272727272727274)
+        assert math.isclose(res[5], 0.999083798853131)
 
 
 class TestChi2_0p45(object):
@@ -215,12 +215,12 @@ class TestChi2_0p45(object):
         res = chamber.chi2.chi2(X, YP45,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 1.0431818181818182)
-        assert math.isclose(res['sig_a'], 0.2538342336679948)
-        assert math.isclose(res['b'], -0.9818181818181816)
-        assert math.isclose(res['sig_b'], 0.4290581651605166)
-        assert math.isclose(res['chi2'], 0.9454545454545453)
-        assert math.isclose(res['q'], 0.9995532579195288)
+        assert math.isclose(res[0], 1.0431818181818182)
+        assert math.isclose(res[1], 0.2538342336679948)
+        assert math.isclose(res[2], -0.9818181818181816)
+        assert math.isclose(res[3], 0.4290581651605166)
+        assert math.isclose(res[4], 0.9454545454545453)
+        assert math.isclose(res[5], 0.9995532579195288)
 
 
 class TestChi2_0p1(object):
@@ -232,12 +232,12 @@ class TestChi2_0p1(object):
         res = chamber.chi2.chi2(X, YP1,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 1.0191128267746108)
-        assert math.isclose(res['sig_a'], 0.056407607481776624)
-        assert math.isclose(res['b'], -1.0442790264620143)
-        assert math.isclose(res['sig_b'], 0.09534625892455922)
-        assert math.isclose(res['chi2'], 1.9226552415383538)
-        assert math.isclose(res['q'], 0.9926324308300408)
+        assert math.isclose(res[0], 1.0191128267746108)
+        assert math.isclose(res[1], 0.056407607481776624)
+        assert math.isclose(res[2], -1.0442790264620143)
+        assert math.isclose(res[3], 0.09534625892455922)
+        assert math.isclose(res[4], 1.9226552415383538)
+        assert math.isclose(res[5], 0.9926324308300408)
 
 
 class TestChi2_0p25(object):
@@ -249,12 +249,12 @@ class TestChi2_0p25(object):
         res = chamber.chi2.chi2(X, YP25,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 1.0989726209350092)
-        assert math.isclose(res['sig_a'], 0.14101901870444156)
-        assert math.isclose(res['b'], -1.0977625200576255)
-        assert math.isclose(res['sig_b'], 0.23836564731139806)
-        assert math.isclose(res['chi2'], 3.2040118065476277)
-        assert math.isclose(res['q'], 0.9556541198996903)
+        assert math.isclose(res[0], 1.0989726209350092)
+        assert math.isclose(res[1], 0.14101901870444156)
+        assert math.isclose(res[2], -1.0977625200576255)
+        assert math.isclose(res[3], 0.23836564731139806)
+        assert math.isclose(res[4], 3.2040118065476277)
+        assert math.isclose(res[5], 0.9556541198996903)
 
 
 class TestChi2_0p5(object):
@@ -266,12 +266,12 @@ class TestChi2_0p5(object):
         res = chamber.chi2.chi2(X, YP5,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 1.1188586115644354)
-        assert math.isclose(res['sig_a'], 0.2820380374088831)
-        assert math.isclose(res['b'], -1.281673418078595)
-        assert math.isclose(res['sig_b'], 0.4767312946227961)
-        assert math.isclose(res['chi2'], 5.674581303089316)
-        assert math.isclose(res['q'], 0.7719937978528024)
+        assert math.isclose(res[0], 1.1188586115644354)
+        assert math.isclose(res[1], 0.2820380374088831)
+        assert math.isclose(res[2], -1.281673418078595)
+        assert math.isclose(res[3], 0.4767312946227961)
+        assert math.isclose(res[4], 5.674581303089316)
+        assert math.isclose(res[5], 0.7719937978528024)
 
 
 class TestChi2_0p75(object):
@@ -283,12 +283,12 @@ class TestChi2_0p75(object):
         res = chamber.chi2.chi2(X, YP75,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 1.1847672848790627)
-        assert math.isclose(res['sig_a'], 0.4230570561133248)
-        assert math.isclose(res['b'], -1.6363451730845522)
-        assert math.isclose(res['sig_b'], 0.7150969419341944)
-        assert math.isclose(res['chi2'], 2.581546572691533)
-        assert math.isclose(res['q'], 0.9786093749846231)
+        assert math.isclose(res[0], 1.1847672848790627)
+        assert math.isclose(res[1], 0.4230570561133248)
+        assert math.isclose(res[2], -1.6363451730845522)
+        assert math.isclose(res[3], 0.7150969419341944)
+        assert math.isclose(res[4], 2.581546572691533)
+        assert math.isclose(res[5], 0.9786093749846231)
 
 
 class TestChi2_0p75_0p25(object):
@@ -300,12 +300,12 @@ class TestChi2_0p75_0p25(object):
         res = chamber.chi2.chi2(X, YP75,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 1.1847672848790618)
-        assert math.isclose(res['sig_a'], 0.14101901870444156)
-        assert math.isclose(res['b'], -1.6363451730845509)
-        assert math.isclose(res['sig_b'], 0.23836564731139806)
-        assert math.isclose(res['chi2'], 23.2339191542238)
-        assert math.isclose(res['q'], 0.0056918026170632175)
+        assert math.isclose(res[0], 1.1847672848790618)
+        assert math.isclose(res[1], 0.14101901870444156)
+        assert math.isclose(res[2], -1.6363451730845509)
+        assert math.isclose(res[3], 0.23836564731139806)
+        assert math.isclose(res[4], 23.2339191542238)
+        assert math.isclose(res[5], 0.0056918026170632175)
 
 
 class TestChi2_0p45_0p1(object):
@@ -317,12 +317,12 @@ class TestChi2_0p45_0p1(object):
         res = chamber.chi2.chi2(X, YP45,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 1.043181818181818)
-        assert math.isclose(res['sig_a'], 0.056407607481776624)
-        assert math.isclose(res['b'], -0.9818181818181816)
-        assert math.isclose(res['sig_b'], 0.09534625892455922)
-        assert math.isclose(res['chi2'], 19.145454545454548)
-        assert math.isclose(res['q'], 0.023984142487247596)
+        assert math.isclose(res[0], 1.043181818181818)
+        assert math.isclose(res[1], 0.056407607481776624)
+        assert math.isclose(res[2], -0.9818181818181816)
+        assert math.isclose(res[3], 0.09534625892455922)
+        assert math.isclose(res[4], 19.145454545454548)
+        assert math.isclose(res[5], 0.023984142487247596)
 
 
 class TestChi2_0p45_0p045(object):
@@ -334,12 +334,12 @@ class TestChi2_0p45_0p045(object):
         res = chamber.chi2.chi2(X, YP45,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 1.0431818181818193)
-        assert math.isclose(res['sig_a'], 0.025383423366799482)
-        assert math.isclose(res['b'], -0.9818181818181835)
-        assert math.isclose(res['sig_b'], 0.04290581651605166)
-        assert math.isclose(res['chi2'], 94.54545454545455)
-        assert math.isclose(res['q'], 1.9854513069227152e-16)
+        assert math.isclose(res[0], 1.0431818181818193)
+        assert math.isclose(res[1], 0.025383423366799482)
+        assert math.isclose(res[2], -0.9818181818181835)
+        assert math.isclose(res[3], 0.04290581651605166)
+        assert math.isclose(res[4], 94.54545454545455)
+        assert math.isclose(res[5], 1.9854513069227152e-16)
 
 
 class TestChi2_p11(object):
@@ -352,12 +352,12 @@ class TestChi2_p11(object):
                                                             DF11.Mass,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 0.09898892227272728)
-        assert math.isclose(res['sig_a'], 2.256304299271065e-08)
-        assert math.isclose(res['b'], -1.0454545449254118e-08)
-        assert math.isclose(res['sig_b'], 3.81385035698237e-09)
-        assert math.isclose(res['chi2'], 2.2357954553695047)
-        assert math.isclose(res['q'], 0.9871665124539309)
+        assert math.isclose(res[0], 0.09898892227272728)
+        assert math.isclose(res[1], 2.256304299271065e-08)
+        assert math.isclose(res[2], -1.0454545449254118e-08)
+        assert math.isclose(res[3], 3.81385035698237e-09)
+        assert math.isclose(res[4], 2.2357954553695047)
+        assert math.isclose(res[5], 0.9871665124539309)
 
 
 class TestChi2_p51(object):
@@ -370,12 +370,12 @@ class TestChi2_p51(object):
                                                             DF51.Mass,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 0.09898901563348429)
-        assert math.isclose(res['sig_a'], 1.1039487604783525e-08)
-        assert math.isclose(res['b'], -6.860633486941241e-09)
-        assert math.isclose(res['sig_b'], 3.805211953235955e-10)
-        assert math.isclose(res['chi2'], 17.83166855192995)
-        assert math.isclose(res['q'], 0.9999874136465203)
+        assert math.isclose(res[0], 0.09898901563348429)
+        assert math.isclose(res[1], 1.1039487604783525e-08)
+        assert math.isclose(res[2], -6.860633486941241e-09)
+        assert math.isclose(res[3], 3.805211953235955e-10)
+        assert math.isclose(res[4], 17.83166855192995)
+        assert math.isclose(res[5], 0.9999874136465203)
 
 
 class TestChi2_p101(object):
@@ -388,12 +388,12 @@ class TestChi2_p101(object):
                                                             DF101.Mass,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 0.09898911309260354)
-        assert math.isclose(res['sig_a'], 7.90154913558044e-09)
-        assert math.isclose(res['b'], -5.4064065262730515e-09)
-        assert math.isclose(res['sig_b'], 1.3651797622815265e-10)
-        assert math.isclose(res['chi2'], 39.55889924420013)
-        assert math.isclose(res['q'], 0.9999999857906134)
+        assert math.isclose(res[0], 0.09898911309260354)
+        assert math.isclose(res[1], 7.90154913558044e-09)
+        assert math.isclose(res[2], -5.4064065262730515e-09)
+        assert math.isclose(res[3], 1.3651797622815265e-10)
+        assert math.isclose(res[4], 39.55889924420013)
+        assert math.isclose(res[5], 0.9999999857906134)
 
 
 class TestChi2_p501(object):
@@ -406,12 +406,12 @@ class TestChi2_p501(object):
                                                             DF501.Mass,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 0.09899027903905232)
-        assert math.isclose(res['sig_a'], 3.568792572732848e-09)
-        assert math.isclose(res['b'], -5.7219047123584375e-09)
-        assert math.isclose(res['sig_b'], 1.2356483417375422e-11)
-        assert math.isclose(res['chi2'], 156.05728207857018)
-        assert math.isclose(res['q'], 1)
+        assert math.isclose(res[0], 0.09899027903905232)
+        assert math.isclose(res[1], 3.568792572732848e-09)
+        assert math.isclose(res[2], -5.7219047123584375e-09)
+        assert math.isclose(res[3], 1.2356483417375422e-11)
+        assert math.isclose(res[4], 156.05728207857018)
+        assert math.isclose(res[5], 1)
 
 
 class TestChi2_p1001(object):
@@ -424,12 +424,12 @@ class TestChi2_p1001(object):
                                                             DF1001.Mass,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 0.09899174702441146)
-        assert math.isclose(res['sig_a'], 2.52666482275547e-09)
-        assert math.isclose(res['b'], -5.7923705010799915e-09)
-        assert math.isclose(res['sig_b'], 4.375218178856168e-12)
-        assert math.isclose(res['chi2'], 394.1311094571072)
-        assert math.isclose(res['q'], 1)
+        assert math.isclose(res[0], 0.09899174702441146)
+        assert math.isclose(res[1], 2.52666482275547e-09)
+        assert math.isclose(res[2], -5.7923705010799915e-09)
+        assert math.isclose(res[3], 4.375218178856168e-12)
+        assert math.isclose(res[4], 394.1311094571072)
+        assert math.isclose(res[5], 1)
 
 
 class TestChi2_p5001(object):
@@ -442,12 +442,12 @@ class TestChi2_p5001(object):
                                                             DF5001.Mass,
                                                             self.sigma,
                                                             plot=True)
-        assert math.isclose(res['a'], 0.09900337269225801)
-        assert math.isclose(res['sig_a'], 1.1310880962516921e-09)
-        assert math.isclose(res['b'], -5.789575205713899e-09)
-        assert math.isclose(res['sig_b'], 3.9180082055755587e-13)
-        assert math.isclose(res['chi2'], 13673.272478061841)
-        assert math.isclose(res['q'], 0)
+        assert math.isclose(res[0], 0.09900337269225801)
+        assert math.isclose(res[1], 1.1310880962516921e-09)
+        assert math.isclose(res[2], -5.789575205713899e-09)
+        assert math.isclose(res[3], 3.9180082055755587e-13)
+        assert math.isclose(res[4], 13673.272478061841)
+        assert math.isclose(res[5], 0)
 
 
 class TestChi2_p10001(object):
@@ -460,15 +460,15 @@ class TestChi2_p10001(object):
                                                             DF10001.Mass,
                                                             self.sigma,
                                                             plot=True)
-        print('a', res['a'], res['sig_a'])
-        print('b', res['b'], res['sig_b'])
-        print('chi2', res['chi2'], res['q'])
-        assert math.isclose(res['a'], 0.09901806256496763)
-        assert math.isclose(res['sig_a'], 7.99900015747367e-10)
-        assert math.isclose(res['b'], -5.794755770688049e-09)
-        assert math.isclose(res['sig_b'], 1.3854328328616986e-13)
-        assert math.isclose(res['chi2'], 324347.8295700301)
-        assert math.isclose(res['q'], 0)
+        print('a', res[0], res[1])
+        print('b', res[2], res[3])
+        print('chi2', res[4], res[5])
+        assert math.isclose(res[0], 0.09901806256496763)
+        assert math.isclose(res[1], 7.99900015747367e-10)
+        assert math.isclose(res[2], -5.794755770688049e-09)
+        assert math.isclose(res[3], 1.3854328328616986e-13)
+        assert math.isclose(res[4], 324347.8295700301)
+        assert math.isclose(res[5], 0)
 
 
 class TestDataset(object):
