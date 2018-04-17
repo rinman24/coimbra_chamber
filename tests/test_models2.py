@@ -119,7 +119,14 @@ class Test_ReferenceState:
         assert math.isclose(ref_state.ts_guess, 285)
 
         original_ts_guess = ref_state.ts_guess
+
+        # This also updates the properties.
         assert ref_state.update_ts_guess(300)
+        assert math.isclose(ref_state.rho, 0.9267691278805217)
+        assert math.isclose(ref_state.k, 0.026100437937392484)
+        assert math.isclose(ref_state.cp, 1047.04407550437)
+        assert math.isclose(ref_state.alpha, 2.689746012139042e-05)
+        assert math.isclose(ref_state.d12, 3.204816199008461e-05)
         assert ref_state.update_ts_guess(original_ts_guess)
 
         with pytest.raises(TypeError) as excinfo:

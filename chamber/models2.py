@@ -359,9 +359,29 @@ class ReferenceState:
     # Instance Variables
     # ----------------------------------------------------------------------- #
     @property
+    def alpha(self):
+        return self._Props.alpha
+
+    @property
+    def cp(self):
+        return self._Props.cp
+
+    @property
+    def d12(self):
+        return self._Props.d12
+
+    @property
+    def k(self):
+        return self._Props.k
+
+    @property
     def p(self):
         """Reference pressure, [Pa]."""
         return self._ExpState.p
+
+    @property
+    def rho(self):
+        return self._Props.rho
 
     @property
     def rule(self):
