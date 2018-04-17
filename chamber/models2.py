@@ -297,9 +297,6 @@ class ReferenceState:
         ts_guess (`float` or `int`): Guess at surface temperature, [K].
         x_film (`float`): Film reference film mole fraction of water vapor
             with no units.
-        xe (`float`): Environmental mole fraction of water vapor with no units.
-        xs (`float`): Interfacial saturated mole fraction of water vapor based
-            on ts_guess with no units.
     """
     def __init__(self, ts_guess, exp_state, rule='one-third', ref='Mills'):
         self._ts_guess = ts_guess
@@ -424,19 +421,6 @@ class ReferenceState:
         """Film reference film mole fraction of water vapor with no units."""
         return self._x_film
 
-    @property
-    def xe(self):
-        """Environmental mole fraction of water vapor with no units."""
-        return self._xe
-
-    @property
-    def xs(self):
-        """
-        Interfacial saturated mole fraction of water vapor based on ts_guess
-        with no units.
-        """
-        return self._xs
-
     # ----------------------------------------------------------------------- #
     # Internal Methods
     # ----------------------------------------------------------------------- #
@@ -445,7 +429,7 @@ class ReferenceState:
         self._t_film = self._use_rule(self._ExpState.tm, self.ts_guess)
         self._eval_xe()
         self._eval_xs()
-        self._x_film = self._use_rule(self.xe, self.xs)
+        self._x_film = self._use_rule(self._xe, self._xs)
 
     def _eval_xe(self):
         self._xe = hap.HAPropsSI('Y',

@@ -87,8 +87,8 @@ class Test_ReferenceState:
         assert math.isclose(ref_state.p_film, 80000)
         assert math.isclose(ref_state.t_film, 287.0)
         assert ref_state.x_film is None
-        assert ref_state.xe is None
-        assert ref_state.xs is None
+        assert ref_state._xe is None
+        assert ref_state._xs is None
 
         with pytest.raises(AttributeError) as excinfo:
             ref_state.ts_guess = 290
@@ -144,11 +144,11 @@ class Test_ReferenceState:
 
     def test_eval_xe(self, ref_state):
         ref_state._eval_xe()
-        assert math.isclose(ref_state.xe, 0.012439210352397811)
+        assert math.isclose(ref_state._xe, 0.012439210352397811)
 
     def test_eval_xs(self, ref_state):
         ref_state._eval_xs()
-        assert math.isclose(ref_state.xs, 0.01742142886750153)
+        assert math.isclose(ref_state._xs, 0.01742142886750153)
 
     def test_eval(self, ref_state):
         ref_state._eval()
