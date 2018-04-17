@@ -8,11 +8,52 @@ import chamber.models2 as mods
 
 
 REF_STATE = dict(p=101325, t=295, x=0.013)
+EXP_STATE = dict(p=80000, tch=290, tdp=280, tm=291)
 
 
 @pytest.fixture(scope='module')
 def props():
     return mods.Properties()
+
+
+@pytest.fixture(scope='module')
+def exp_state():
+    return mods.ExperimentalState(**EXP_STATE)
+
+
+class Test_ExperimentalState:
+    """Unit testing of `ExperimentalState` class."""
+
+    def test__init__(self, exp_state):
+        assert math.isclose(exp_state.p, 80000)
+        assert math.isclose(exp_state.tch, 290)
+        assert math.isclose(exp_state.tdp, 280)
+        assert math.isclose(exp_state.tm, 291)
+
+        with pytest.raises(AttributeError) as excinfo:
+            exp_state.p = 90000
+        assert "can't set attribute" == str(excinfo.value)
+
+        with pytest.raises(AttributeError) as excinfo:
+            exp_state.tch = 300
+        assert "can't set attribute" == str(excinfo.value)
+
+        with pytest.raises(AttributeError) as excinfo:
+            exp_state.tdp = 300
+        assert "can't set attribute" == str(excinfo.value)
+
+        with pytest.raises(AttributeError) as excinfo:
+            exp_state.tm = 300
+        assert "can't set attribute" == str(excinfo.value)
+
+    def test_update(self, exp_state):
+        new_state = dict(p=90000, tch=290, tdp=284, tm=290.5)
+        exp_state.update(**new_state)
+
+        assert math.isclose(exp_state.p, 90000)
+        assert math.isclose(exp_state.tch, 290)
+        assert math.isclose(exp_state.tdp, 284)
+        assert math.isclose(exp_state.tm, 290.5)
 
 
 class Test_Properties:
@@ -25,6 +66,26 @@ class Test_Properties:
 
         assert props.alpha is None
         assert props.d12 is None
+
+        with pytest.raises(AttributeError) as excinfo:
+            props.rho = 1
+        assert "can't set attribute" == str(excinfo.value)
+
+        with pytest.raises(AttributeError) as excinfo:
+            props.k = 0.02
+        assert "can't set attribute" == str(excinfo.value)
+
+        with pytest.raises(AttributeError) as excinfo:
+            props.cp = 1000
+        assert "can't set attribute" == str(excinfo.value)
+
+        with pytest.raises(AttributeError) as excinfo:
+            props.alpha = 2e-5
+        assert "can't set attribute" == str(excinfo.value)
+
+        with pytest.raises(AttributeError) as excinfo:
+            props.d12 = 2.5e-5
+        assert "can't set attribute" == str(excinfo.value)
 
     def test__eval_rho(self, props):
         props._eval_rho(**REF_STATE)

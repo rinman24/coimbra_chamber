@@ -9,6 +9,82 @@ Classes:
 import CoolProp.HumidAirProp as hap
 
 
+class ExperimentalState:
+    """
+    Use `p`, `tch`, `tdp`, and `tm` store experimental state.
+
+    A custom read-only data store for experimental state. An experimental
+    state is defined by pressure `p` in Pa, chamber wall temperature `tch`
+    in K, dew point temperature `tdp` in K, and vapor mixture temperature
+    `tm` in K.
+
+    Public Methods:
+        update: update the experimental state
+    Instance Variables:
+        p (`float` or `int`): Experimental chamber pressure, [Pa].
+        tch (`float` or `int`): Experimental chamber wall temperature, [K].
+        tdp (`float` or `int`): Experimental dew point temperature, [K].
+        tm (`float` or `int`): Experimental vapor mixture temperature, [K].
+    """
+
+    def __init__(self, p, tch, tdp, tm):
+        """
+        Return a new instance of `ExperimentalState` with corresponding state.
+        """
+        self._p = p
+        self._tch = tch
+        self._tdp = tdp
+        self._tm = tm
+
+    # ----------------------------------------------------------------------- #
+    # Read only addtibutes
+    # ----------------------------------------------------------------------- #
+    @property
+    def p(self):
+        """Experimental chamber pressure, [Pa]."""
+        return self._p
+
+    @property
+    def tch(self):
+        """Experimental chamber wall temperature, [K]."""
+        return self._tch
+
+    @property
+    def tdp(self):
+        """Experimental dew point temperature, [K]."""
+        return self._tdp
+
+    @property
+    def tm(self):
+        """Experimental vapor mixture temperature, [K]."""
+        return self._tm
+
+    # ----------------------------------------------------------------------- #
+    # Public methods
+    # ----------------------------------------------------------------------- #
+    def update(self, p, tch, tdp, tm):
+        """
+        Use `p`, `tch`, `tdp`, and `tm` to update the experimental state.
+
+        Args:
+            p (`float` or `int`): Experimental chamber pressure, [Pa].
+            tch (`float` or `int`): Experimental chamber wall temperature, [K].
+            tdp (`float` or `int`): Experimental dew point temperature, [K].
+            tm (`float` or `int`): Experimental vapor mixture temperature, [K].
+
+        Returns:
+            True if successful, False otherwise.
+        """
+        try:
+            self._p = p
+            self._tch = tch
+            self._tdp = tdp
+            self._tm = tm
+            return True
+        except:
+            return False
+
+
 class Properties:
     """
     Use reference state to caclulate thermophysical properties.
@@ -28,16 +104,19 @@ class Properties:
     Public Methods:
         eval: evaluate thermophysical properties
     Instance Variables:
-        alpha: Thermal diffusivity of the humid air, [m^2/s]
-        cp: Specific heat at constant pressure per unit humid air, [J/kg K]
-        d12: Binary pecies diffusivity for water vapor and dry air, [m^2/s]
-        k: Thermal Conductivity of the humid air, [W/m K]
-        rho: Specific mass of the humid air, [kg humid air/m^3]
+        alpha (`float`): Thermal diffusivity of the humid air, [m^2/s]
+        cp (`float`): Specific heat at constant pressure per unit humid
+            air, [J/kg K]
+        d12 (`float`): Binary pecies diffusivity for water vapor and dry
+            air, [m^2/s]
+        k (`float`): Thermal Conductivity of the humid air, [W/m K]
+        rho (`float`): Specific mass of the humid air, [kg humid air/m^3]
     """
 
     def __init__(self):
         """
-        Return a new instance of `Properties` with all attributes set to `None`.
+        Return a new instance of `Properties` with all attributes set to
+        `None`.
         """
         self._rho = None
         self._k = None
