@@ -279,7 +279,7 @@ class ReferenceState:
 
     Public Methods:
         update_rule: Update the rule used to calculated the reference state.
-        update_ts_guess: Update the guess at the surface temperature.
+        update: Update the guess at the surface temperature.
 
     Instance Variables:
         p (`float` or `int`): Reference pressure, [Pa].
@@ -330,7 +330,7 @@ class ReferenceState:
                 "`rule` must be <class 'str'> not {0}.".format(type(rule))
                 )
 
-    def update_ts_guess(self, ts_guess):
+    def update(self, ts_guess):
         """
         Update the guess at the surface temperature in [K].
 
