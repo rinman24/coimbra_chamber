@@ -82,7 +82,7 @@ class Test_ReferenceState:
         assert ref_state._Props.d12 is None
         assert ref_state._Props.ref == 'Mills'
 
-        assert ref_state.rule == 'one-third'
+        assert ref_state.film_rule == 'one-third'
 
         assert math.isclose(ref_state.p_film, 80000)
         assert math.isclose(ref_state.t_film, 287.0)
@@ -95,24 +95,24 @@ class Test_ReferenceState:
         assert "can't set attribute" == str(excinfo.value)
 
         with pytest.raises(AttributeError) as excinfo:
-            ref_state.rule = 'one-half'
+            ref_state.film_rule = 'one-half'
         assert "can't set attribute" == str(excinfo.value)
 
-    def test_change_rule(self, ref_state):
-        assert ref_state.rule == 'one-third'
+    def test_change_film_rule(self, ref_state):
+        assert ref_state.film_rule == 'one-third'
 
-        original_rule = ref_state.rule
-        assert ref_state.change_rule('one-half')
-        assert ref_state.rule == 'one-half'
-        assert ref_state.change_rule(original_rule)
+        original_film_rule = ref_state.film_rule
+        assert ref_state.change_film_rule('one-half')
+        assert ref_state.film_rule == 'one-half'
+        assert ref_state.change_film_rule(original_film_rule)
 
         with pytest.raises(ValueError) as excinfo:
-            ref_state.change_rule('one')
-        assert "'one' is not a valid `rule`." == str(excinfo.value)
+            ref_state.change_film_rule('one')
+        assert "'one' is not a valid `film_rule`." == str(excinfo.value)
 
         with pytest.raises(TypeError) as excinfo:
-            ref_state.change_rule(2)
-        err_msg = "`rule` must be <class 'str'> not <class 'int'>."
+            ref_state.change_film_rule(2)
+        err_msg = "`film_rule` must be <class 'str'> not <class 'int'>."
         assert (err_msg == str(excinfo.value))
 
     def test_update(self, ref_state):
@@ -134,13 +134,13 @@ class Test_ReferenceState:
         err_msg = "`ts_guess` must be numeric not <class 'str'>."
         assert err_msg == str(excinfo.value)
 
-    def test__use_rule(self, ref_state):
-        assert ref_state.rule == 'one-third'
-        original_rule = ref_state.rule
-        assert math.isclose(ref_state._use_rule(1, 0), 1/3)
-        assert ref_state.change_rule('one-half')
-        assert math.isclose(ref_state._use_rule(1, 0), 0.5)
-        assert ref_state.change_rule(original_rule)
+    def test__use_film_rule(self, ref_state):
+        assert ref_state.film_rule == 'one-third'
+        original_film_rule = ref_state.film_rule
+        assert math.isclose(ref_state._use_film_rule(1, 0), 1/3)
+        assert ref_state.change_film_rule('one-half')
+        assert math.isclose(ref_state._use_film_rule(1, 0), 0.5)
+        assert ref_state.change_film_rule(original_film_rule)
 
     def test_eval_xe(self, ref_state):
         ref_state._eval_xe()

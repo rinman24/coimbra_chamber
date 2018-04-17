@@ -171,7 +171,7 @@ class Properties:
             True if successful, raises error otherwise.
 
         Raises:
-            ValueError: If `ref` is ``<class 'str'>`` but not valid rule.
+            ValueError: If `ref` is ``<class 'str'>`` but not valid ref.
             TypeError: If `ref` is not ``<class 'str'>``.
         """
         if ref in REFERENCES:
@@ -275,10 +275,11 @@ class ReferenceState:
     temperature `ts`. Each instance of `ReferenceState` is composed of two
     other objects: an instance of `ExperimentalState` and an instance of
     `Properties`. Finally, each instance of `ReferenceState` also contains a
-    `rule` attribute, which defaults to 'one-third'.
+    `film_rule` attribute, which defaults to 'one-third'.
 
     Public Methods:
-        change_rule: Update the rule used to calculated the reference state.
+        change_film_rule: Update the film rule used to calculated the
+            reference state.
         update: Update the guess at the surface temperature and related film
             properties.
 
@@ -292,19 +293,20 @@ class ReferenceState:
         p_film (`float` or `int`): Film pressure, [Pa].
         rho_film (`float`): Film specific mass of the humid air,
             [kg humid air/m^3].
-        rule (`str`): Rule for calculating the reference state.
+        film_rule (`str`): Rule for calculating the reference state.
         t_film (`float` or `int`): Reference film temperature, [K].
         ts_guess (`float` or `int`): Guess at surface temperature, [K].
         x_film (`float`): Film reference film mole fraction of water vapor
             with no units.
     """
-    def __init__(self, ts_guess, exp_state, rule='one-third', ref='Mills'):
+    def __init__(self, ts_guess, exp_state,
+                 film_rule='one-third', ref='Mills'):
         self._ts_guess = ts_guess
         self._ExpState = ExperimentalState(**exp_state)
         self._Props = Properties(ref=ref)
-        self._rule = rule
+        self._film_rule = film_rule
 
-        self._t_film = self._use_rule(self._ExpState.tm, self.ts_guess)
+        self._t_film = self._use_film_rule(self._ExpState.tm, self.ts_guess)
         self._x_film = None
         self._xe = None
         self._xs = None
@@ -312,30 +314,31 @@ class ReferenceState:
     # ----------------------------------------------------------------------- #
     # Public Methods
     # ----------------------------------------------------------------------- #
-    def change_rule(self, rule):
+    def change_film_rule(self, film_rule):
         """
-        Update rule used to calculate reference state attributes.
+        Update film rule used to calculate reference state attributes.
 
         Args:
-            rule (`str`): String rule. Should be either 'one-third' or
+            film_rule (`str`): Film rule. Should be either 'one-third' or
                 'one-half'.
 
         Returns:
             True if successful, raises error otherwise.
 
         Raises:
-            ValueError: If `rule` is ``<class 'str'>`` but not valid rule.
-            TypeError: If `rule` is not ``<class 'str'>``.
+            ValueError: If `film_rule` is ``<class 'str'>`` but not valid
+                film_rule.
+            TypeError: If `film_rule` is not ``<class 'str'>``.
         """
-        if rule in RULES:
-            self._rule = rule
+        if film_rule in RULES:
+            self._film_rule = film_rule
             return True
-        elif isinstance(rule, str):
-            raise ValueError("'{0}' is not a valid `rule`.".format(rule))
+        elif isinstance(film_rule, str):
+            err_msg = "'{0}' is not a valid `film_rule`."
+            raise ValueError(err_msg.format(film_rule))
         else:
-            raise TypeError(
-                "`rule` must be <class 'str'> not {0}.".format(type(rule))
-                )
+            err_msg = "`film_rule` must be <class 'str'> not {0}."
+            raise TypeError(err_msg.format(type(film_rule)))
 
     def update(self, ts_guess):
         """
@@ -402,9 +405,9 @@ class ReferenceState:
         return self._Props.rho
 
     @property
-    def rule(self):
+    def film_rule(self):
         """Rule for calculating the reference state."""
-        return self._rule
+        return self._film_rule
 
     @property
     def t_film(self):
@@ -426,10 +429,10 @@ class ReferenceState:
     # ----------------------------------------------------------------------- #
     def _eval(self):
         self._p = self._ExpState.p
-        self._t_film = self._use_rule(self._ExpState.tm, self.ts_guess)
+        self._t_film = self._use_film_rule(self._ExpState.tm, self.ts_guess)
         self._eval_xe()
         self._eval_xs()
-        self._x_film = self._use_rule(self._xe, self._xs)
+        self._x_film = self._use_film_rule(self._xe, self._xs)
 
     def _eval_xe(self):
         self._xe = hap.HAPropsSI('Y',
@@ -443,8 +446,8 @@ class ReferenceState:
                                  'P', self.p_film,
                                  'RH', 1.0)
 
-    def _use_rule(self, e_state, s_state):
+    def _use_film_rule(self, e_state, s_state):
         return {
             'one-half': lambda e, s: (e + s) / 2,
             'one-third': lambda e, s: s + (e - s) / 3
-            }[self.rule](e_state, s_state)
+            }[self.film_rule](e_state, s_state)
