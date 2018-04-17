@@ -7,8 +7,9 @@ import pytest
 import chamber.models2 as mods
 
 
-REF_STATE = dict(p=101325, t=295, x=0.013)
+PROP_STATE = dict(p=101325, t=295, x=0.013)
 EXP_STATE = dict(p=80000, tch=290, tdp=280, tm=291)
+TS_GUESS = 285
 
 
 @pytest.fixture(scope='module')
@@ -19,6 +20,11 @@ def props():
 @pytest.fixture(scope='module')
 def exp_state():
     return mods.ExperimentalState(**EXP_STATE)
+
+
+@pytest.fixture(scope='module')
+def ref_state():
+    return mods.ReferenceState(TS_GUESS, EXP_STATE)
 
 
 class Test_ExperimentalState:
@@ -48,12 +54,109 @@ class Test_ExperimentalState:
 
     def test_update(self, exp_state):
         new_state = dict(p=90000, tch=290, tdp=284, tm=290.5)
-        exp_state.update(**new_state)
+        exp_state._update(**new_state)
 
         assert math.isclose(exp_state.p, 90000)
         assert math.isclose(exp_state.tch, 290)
         assert math.isclose(exp_state.tdp, 284)
         assert math.isclose(exp_state.tm, 290.5)
+
+
+class Test_ReferenceState:
+    """Unit testing of `ExperimentalState` class."""
+
+    def test__init__(self, ref_state):
+        assert math.isclose(ref_state.ts_guess, 285)
+
+        assert isinstance(ref_state._ExpState, mods.ExperimentalState)
+        assert math.isclose(ref_state._ExpState.p, 80000)
+        assert math.isclose(ref_state._ExpState.tch, 290)
+        assert math.isclose(ref_state._ExpState.tdp, 280)
+        assert math.isclose(ref_state._ExpState.tm, 291)
+
+        assert isinstance(ref_state._Props, mods.Properties)
+        assert ref_state._Props.rho is None
+        assert ref_state._Props.k is None
+        assert ref_state._Props.cp is None
+        assert ref_state._Props.alpha is None
+        assert ref_state._Props.d12 is None
+        assert ref_state._Props.ref == 'Mills'
+
+        assert ref_state.rule == 'one-third'
+
+        assert math.isclose(ref_state.p, 80000)
+        assert math.isclose(ref_state.t, 287.0)
+        assert ref_state.x is None
+        assert ref_state.xe is None
+        assert ref_state.xs is None
+
+        with pytest.raises(AttributeError) as excinfo:
+            ref_state.ts_guess = 290
+        assert "can't set attribute" == str(excinfo.value)
+
+        with pytest.raises(AttributeError) as excinfo:
+            ref_state.rule = 'one-half'
+        assert "can't set attribute" == str(excinfo.value)
+
+    def test_update_rule(self, ref_state):
+        assert ref_state.rule == 'one-third'
+
+        original_rule = ref_state.rule
+        assert ref_state.update_rule('one-half')
+        assert ref_state.rule == 'one-half'
+        assert ref_state.update_rule(original_rule)
+
+        with pytest.raises(ValueError) as excinfo:
+            ref_state.update_rule('one')
+        assert "'one' is not a valid `rule`." == str(excinfo.value)
+
+        with pytest.raises(TypeError) as excinfo:
+            ref_state.update_rule(2)
+        err_msg = "`rule` must be <class 'str'> not <class 'int'>."
+        assert (err_msg == str(excinfo.value))
+
+    def test_update_ts_guess(self, ref_state):
+        assert math.isclose(ref_state.ts_guess, 285)
+
+        original_ts_guess = ref_state.ts_guess
+        assert ref_state.update_ts_guess(300)
+        assert math.isclose(ref_state.ts_guess, 300)
+        assert ref_state.update_ts_guess(original_ts_guess)
+
+        with pytest.raises(TypeError) as excinfo:
+            ref_state.update_ts_guess('300')
+        err_msg = "`ts_guess` must be numeric not <class 'str'>."
+        assert err_msg == str(excinfo.value)
+
+    def test__use_rule(self, ref_state):
+        assert ref_state.rule == 'one-third'
+        original_rule = ref_state.rule
+        assert math.isclose(ref_state._use_rule(1, 0), 1/3)
+        assert ref_state.update_rule('one-half')
+        assert math.isclose(ref_state._use_rule(1, 0), 0.5)
+        assert ref_state.update_rule(original_rule)
+
+    def test_eval_xe(self, ref_state):
+        assert ref_state.xe is None
+        ref_state._eval_xe()
+        assert math.isclose(ref_state.xe, 0.012439210352397811)
+
+    def test_eval_xs(self, ref_state):
+        assert ref_state.xs is None
+        ref_state._eval_xs()
+        assert math.isclose(ref_state.xs, 0.01742142886750153)
+
+    def test_eval(self, ref_state):
+        ref_state._eval()
+        assert math.isclose(ref_state.p, 80000)
+        assert math.isclose(ref_state.t, 287.0)
+        assert math.isclose(ref_state.x, 0.015760689362466957)
+
+        assert math.isclose(ref_state._Props.rho, 0.965679984964966)
+        assert math.isclose(ref_state._Props.k, 0.025391972939738265)
+        assert math.isclose(ref_state._Props.cp, 1024.3338591579427)
+        assert math.isclose(ref_state._Props.alpha, 2.5669752890094362e-05)
+        assert math.isclose(ref_state._Props.d12, 3.0250984009617275e-05)
 
 
 class Test_Properties:
@@ -66,6 +169,7 @@ class Test_Properties:
 
         assert props.alpha is None
         assert props.d12 is None
+        assert props.ref == 'Mills'
 
         with pytest.raises(AttributeError) as excinfo:
             props.rho = 1
@@ -88,27 +192,47 @@ class Test_Properties:
         assert "can't set attribute" == str(excinfo.value)
 
     def test__eval_rho(self, props):
-        props._eval_rho(**REF_STATE)
+        props._eval_rho(**PROP_STATE)
         assert math.isclose(props.rho, 1.191183667721759)
 
     def test__eval_k(self, props):
-        props._eval_k(**REF_STATE)
+        props._eval_k(**PROP_STATE)
         assert math.isclose(props.k, 0.026001674240925747)
 
     def test__eval_cp(self, props):
-        props._eval_cp(**REF_STATE)
+        props._eval_cp(**PROP_STATE)
         assert math.isclose(props.cp, 1021.6102706953045)
 
     def test__eval_alpha(self, props):
         props._eval_alpha()
         assert math.isclose(props.alpha, 2.1366694097871384e-05)
 
+    def test_change_ref(self, props):
+        assert props.ref == 'Mills'
+        original_ref = props.ref
+        assert props.change_ref('Marrero')
+        assert props.ref == 'Marrero'
+        assert props.change_ref(original_ref)
+
+        with pytest.raises(ValueError) as excinfo:
+            props.change_ref('ref')
+        err_msg = "`ref` must be in ['Mills', 'Marrero']."
+        assert (err_msg == str(excinfo.value))
+
+        with pytest.raises(TypeError) as excinfo:
+            props.change_ref(1)
+        err_msg = "`ref` must be <class 'str'> not <class 'int'>."
+        assert (err_msg == str(excinfo.value))
+
     def test__eval_d12(self, props):
-        props._eval_d12(p=REF_STATE['p'], t=REF_STATE['t'])
+        props._eval_d12(p=PROP_STATE['p'], t=PROP_STATE['t'])
         assert math.isclose(props.d12, 2.5016812959985912e-05)
 
-        props._eval_d12(p=REF_STATE['p'], t=REF_STATE['t'], ref='Marrero')
+        original_ref = props.ref
+        assert props.change_ref('Marrero')
+        props._eval_d12(p=PROP_STATE['p'], t=PROP_STATE['t'])
         assert math.isclose(props.d12, 2.450827945070588e-05)
+        assert props.change_ref(original_ref)
 
     def test_eval(self, props):
         ref_state = dict(p=80000, t=300, x=0.022)
