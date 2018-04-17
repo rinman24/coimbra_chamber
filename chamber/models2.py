@@ -133,13 +133,13 @@ class Properties:
         change_ref: Change reference used for `d12`.
 
     Instance Variables:
-        alpha (`float`): Thermal diffusivity of the humid air, [m^2/s]
+        alpha (`float`): Thermal diffusivity of the humid air, [m^2/s].
         cp (`float`): Specific heat at constant pressure per unit humid
-            air, [J/kg K]
+            air, [J/kg K].
         d12 (`float`): Binary pecies diffusivity for water vapor and dry
-            air, [m^2/s]
-        k (`float`): Thermal Conductivity of the humid air, [W/m K]
-        rho (`float`): Specific mass of the humid air, [kg humid air/m^3]
+            air, [m^2/s].
+        k (`float`): Thermal conductivity of the humid air, [W/m K].
+        rho (`float`): Specific mass of the humid air, [kg humid air/m^3].
     """
 
     def __init__(self, ref='Mills'):
@@ -279,14 +279,24 @@ class ReferenceState:
 
     Public Methods:
         change_rule: Update the rule used to calculated the reference state.
-        update: Update the guess at the surface temperature.
+        update: Update the guess at the surface temperature and related film
+            properties.
 
     Instance Variables:
-        p (`float` or `int`): Reference pressure, [Pa].
+        alpha_film (`float`): Film thermal diffusivity, [m^2/s].
+        cp_film ('float'): Film specific heat at constant pressure per unit
+            humid air, [J/kg K].
+        d12_film (`float`): Film binary pecies diffusivity for water vapor and
+            dry air, [m^2/s].
+        k_film (`float`): Film thermal conductivity of the humid air, [W/m K].
+        p_film (`float` or `int`): Film pressure, [Pa].
+        rho_film (`float`): Film specific mass of the humid air,
+            [kg humid air/m^3].
         rule (`str`): Rule for calculating the reference state.
-        t (`float` or `int`): Reference film temperature, K.
-        ts_guess (`float` or `int`): Guess at surface temperature, K.
-        x (`float`): Reference film mole fraction of water vapor with no units.
+        t_film (`float` or `int`): Reference film temperature, [K].
+        ts_guess (`float` or `int`): Guess at surface temperature, [K].
+        x_film (`float`): Film reference film mole fraction of water vapor
+            with no units.
         xe (`float`): Environmental mole fraction of water vapor with no units.
         xs (`float`): Interfacial saturated mole fraction of water vapor based
             on ts_guess with no units.
@@ -297,8 +307,8 @@ class ReferenceState:
         self._Props = Properties(ref=ref)
         self._rule = rule
 
-        self._t = self._use_rule(self._ExpState.tm, self.ts_guess)
-        self._x = None
+        self._t_film = self._use_rule(self._ExpState.tm, self.ts_guess)
+        self._x_film = None
         self._xe = None
         self._xs = None
 
@@ -348,7 +358,9 @@ class ReferenceState:
         if isinstance(ts_guess, int) or isinstance(ts_guess, float):
             self._ts_guess = ts_guess  # Update guess
             self._eval()  # Eval new film temp and mole frac
-            self._Props.eval(p=self.p, t=self.t, x=self.x)  # Eval props
+            self._Props.eval(  # Eval props
+                p=self.p_film, t=self.t_film, x=self.x_film
+                )
             return True
         else:
             raise TypeError(
@@ -359,28 +371,37 @@ class ReferenceState:
     # Instance Variables
     # ----------------------------------------------------------------------- #
     @property
-    def alpha(self):
+    def alpha_film(self):
+        """Film thermal diffusivity, [m^2/s]."""
         return self._Props.alpha
 
     @property
-    def cp(self):
+    def cp_film(self):
+        """
+        Film specific heat at constant pressure per unit humid air, [J/kg K].
+        """
         return self._Props.cp
 
     @property
-    def d12(self):
+    def d12_film(self):
+        """
+        Film binary pecies diffusivity for water vapor and dry air, [m^2/s].
+        """
         return self._Props.d12
 
     @property
-    def k(self):
+    def k_film(self):
+        """Film thermal conductivity of the humid air, [W/m K]."""
         return self._Props.k
 
     @property
-    def p(self):
-        """Reference pressure, [Pa]."""
+    def p_film(self):
+        """Film pressure, [Pa]."""
         return self._ExpState.p
 
     @property
-    def rho(self):
+    def rho_film(self):
+        """Film specific mass of the humid air, [kg humid air/m^3]."""
         return self._Props.rho
 
     @property
@@ -389,19 +410,19 @@ class ReferenceState:
         return self._rule
 
     @property
-    def t(self):
-        """Reference film temperature, K."""
-        return self._t
+    def t_film(self):
+        """Reference film temperature, [K]."""
+        return self._t_film
 
     @property
     def ts_guess(self):
-        """Guess at surface temperature, K."""
+        """Guess at surface temperature, [K]."""
         return self._ts_guess
 
     @property
-    def x(self):
-        """Reference film mole fraction of water vapor with no units."""
-        return self._x
+    def x_film(self):
+        """Film reference film mole fraction of water vapor with no units."""
+        return self._x_film
 
     @property
     def xe(self):
@@ -421,21 +442,21 @@ class ReferenceState:
     # ----------------------------------------------------------------------- #
     def _eval(self):
         self._p = self._ExpState.p
-        self._t = self._use_rule(self._ExpState.tm, self.ts_guess)
+        self._t_film = self._use_rule(self._ExpState.tm, self.ts_guess)
         self._eval_xe()
         self._eval_xs()
-        self._x = self._use_rule(self.xe, self.xs)
+        self._x_film = self._use_rule(self.xe, self.xs)
 
     def _eval_xe(self):
         self._xe = hap.HAPropsSI('Y',
-                                 'T', self.t,
-                                 'P', self.p,
+                                 'T', self.t_film,
+                                 'P', self.p_film,
                                  'Tdp', self._ExpState.tdp)
 
     def _eval_xs(self):
         self._xs = hap.HAPropsSI('Y',
                                  'T', self.ts_guess,
-                                 'P', self.p,
+                                 'P', self.p_film,
                                  'RH', 1.0)
 
     def _use_rule(self, e_state, s_state):

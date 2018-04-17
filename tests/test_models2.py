@@ -84,9 +84,9 @@ class Test_ReferenceState:
 
         assert ref_state.rule == 'one-third'
 
-        assert math.isclose(ref_state.p, 80000)
-        assert math.isclose(ref_state.t, 287.0)
-        assert ref_state.x is None
+        assert math.isclose(ref_state.p_film, 80000)
+        assert math.isclose(ref_state.t_film, 287.0)
+        assert ref_state.x_film is None
         assert ref_state.xe is None
         assert ref_state.xs is None
 
@@ -122,11 +122,11 @@ class Test_ReferenceState:
 
         # This also updates the properties.
         assert ref_state.update(300)
-        assert math.isclose(ref_state.rho, 0.9267691278805217)
-        assert math.isclose(ref_state.k, 0.026100437937392484)
-        assert math.isclose(ref_state.cp, 1047.04407550437)
-        assert math.isclose(ref_state.alpha, 2.689746012139042e-05)
-        assert math.isclose(ref_state.d12, 3.204816199008461e-05)
+        assert math.isclose(ref_state.rho_film, 0.9267691278805217)
+        assert math.isclose(ref_state.k_film, 0.026100437937392484)
+        assert math.isclose(ref_state.cp_film, 1047.04407550437)
+        assert math.isclose(ref_state.alpha_film, 2.689746012139042e-05)
+        assert math.isclose(ref_state.d12_film, 3.204816199008461e-05)
         assert ref_state.update(original_ts_guess)
 
         with pytest.raises(TypeError) as excinfo:
@@ -152,9 +152,9 @@ class Test_ReferenceState:
 
     def test_eval(self, ref_state):
         ref_state._eval()
-        assert math.isclose(ref_state.p, 80000)
-        assert math.isclose(ref_state.t, 287.0)
-        assert math.isclose(ref_state.x, 0.015760689362466957)
+        assert math.isclose(ref_state.p_film, 80000)
+        assert math.isclose(ref_state.t_film, 287.0)
+        assert math.isclose(ref_state.x_film, 0.015760689362466957)
 
         assert math.isclose(ref_state._Props.rho, 0.965679984964966)
         assert math.isclose(ref_state._Props.k, 0.025391972939738265)
