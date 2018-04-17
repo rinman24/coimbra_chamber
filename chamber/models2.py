@@ -346,7 +346,9 @@ class ReferenceState:
             ``<class 'float'>``.
         """
         if isinstance(ts_guess, int) or isinstance(ts_guess, float):
-            self._ts_guess = ts_guess
+            self._ts_guess = ts_guess  # Update guess
+            self._eval()  # Eval new film temp and mole frac
+            self._Props.eval(p=self.p, t=self.t, x=self.x)  # Eval props
             return True
         else:
             raise TypeError(
@@ -398,17 +400,11 @@ class ReferenceState:
     # Internal Methods
     # ----------------------------------------------------------------------- #
     def _eval(self):
-        """
-        Evaluate the reference based on `self.ts_guess` and `self._ExpState`
-        then update `self._Props`.
-        """
         self._p = self._ExpState.p
         self._t = self._use_rule(self._ExpState.tm, self.ts_guess)
         self._eval_xe()
         self._eval_xs()
         self._x = self._use_rule(self.xe, self.xs)
-
-        self._Props.eval(p=self.p, t=self.t, x=self.x)
 
     def _eval_xe(self):
         self._xe = hap.HAPropsSI('Y',

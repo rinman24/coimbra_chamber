@@ -120,7 +120,6 @@ class Test_ReferenceState:
 
         original_ts_guess = ref_state.ts_guess
         assert ref_state.update_ts_guess(300)
-        assert math.isclose(ref_state.ts_guess, 300)
         assert ref_state.update_ts_guess(original_ts_guess)
 
         with pytest.raises(TypeError) as excinfo:
@@ -137,12 +136,10 @@ class Test_ReferenceState:
         assert ref_state.update_rule(original_rule)
 
     def test_eval_xe(self, ref_state):
-        assert ref_state.xe is None
         ref_state._eval_xe()
         assert math.isclose(ref_state.xe, 0.012439210352397811)
 
     def test_eval_xs(self, ref_state):
-        assert ref_state.xs is None
         ref_state._eval_xs()
         assert math.isclose(ref_state.xs, 0.01742142886750153)
 
