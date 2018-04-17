@@ -278,7 +278,7 @@ class ReferenceState:
     `rule` attribute, which defaults to 'one-third'.
 
     Public Methods:
-        update_rule: Update the rule used to calculated the reference state.
+        change_rule: Update the rule used to calculated the reference state.
         update: Update the guess at the surface temperature.
 
     Instance Variables:
@@ -305,7 +305,7 @@ class ReferenceState:
     # ----------------------------------------------------------------------- #
     # Public Methods
     # ----------------------------------------------------------------------- #
-    def update_rule(self, rule):
+    def change_rule(self, rule):
         """
         Update rule used to calculate reference state attributes.
 

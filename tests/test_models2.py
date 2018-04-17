@@ -98,20 +98,20 @@ class Test_ReferenceState:
             ref_state.rule = 'one-half'
         assert "can't set attribute" == str(excinfo.value)
 
-    def test_update_rule(self, ref_state):
+    def test_change_rule(self, ref_state):
         assert ref_state.rule == 'one-third'
 
         original_rule = ref_state.rule
-        assert ref_state.update_rule('one-half')
+        assert ref_state.change_rule('one-half')
         assert ref_state.rule == 'one-half'
-        assert ref_state.update_rule(original_rule)
+        assert ref_state.change_rule(original_rule)
 
         with pytest.raises(ValueError) as excinfo:
-            ref_state.update_rule('one')
+            ref_state.change_rule('one')
         assert "'one' is not a valid `rule`." == str(excinfo.value)
 
         with pytest.raises(TypeError) as excinfo:
-            ref_state.update_rule(2)
+            ref_state.change_rule(2)
         err_msg = "`rule` must be <class 'str'> not <class 'int'>."
         assert (err_msg == str(excinfo.value))
 
@@ -138,9 +138,9 @@ class Test_ReferenceState:
         assert ref_state.rule == 'one-third'
         original_rule = ref_state.rule
         assert math.isclose(ref_state._use_rule(1, 0), 1/3)
-        assert ref_state.update_rule('one-half')
+        assert ref_state.change_rule('one-half')
         assert math.isclose(ref_state._use_rule(1, 0), 0.5)
-        assert ref_state.update_rule(original_rule)
+        assert ref_state.change_rule(original_rule)
 
     def test_eval_xe(self, ref_state):
         ref_state._eval_xe()
