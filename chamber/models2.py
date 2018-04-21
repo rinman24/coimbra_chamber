@@ -10,6 +10,7 @@ Classes:
 """
 
 import CoolProp.HumidAirProp as hap
+import scipy.optimize as opt
 
 RULES = ['one-half', 'one-third']
 REFERENCES = ['Mills', 'Marrero']
@@ -302,10 +303,10 @@ class ReferenceFilm:
             air, [J/kg K].
         d12 (`float`): Film binary pecies diffusivity for water vapor and dry
             air, [m^2/s].
+        film_rule (`str`): Rule for calculating the reference state.
         k (`float`): Film thermal conductivity of the humid air, [W/m K].
         p (`float` or `int`): Film pressure, [Pa].
         rho (`float`): Film specific mass of the humid air, [kg humid air/m^3].
-        film_rule (`str`): Rule for calculating the reference state.
         t (`float` or `int`): Reference film temperature, [K].
         ts_guess (`float` or `int`): Guess at surface temperature, [K].
         x (`float`): Film reference film mole fraction of water vapor with no
@@ -314,7 +315,7 @@ class ReferenceFilm:
     def __init__(self, exp_state, film_rule='one-third', ref='Mills'):
         self._ts_guess = None
         self._ExpState = ExperimentalState(**exp_state)
-        self._Props = FilmProperties(ref=ref)
+        self._FilmProps = FilmProperties(ref=ref)
         self._film_rule = film_rule
 
         self._t = None
@@ -369,7 +370,7 @@ class ReferenceFilm:
         if isinstance(ts_guess, int) or isinstance(ts_guess, float):
             self._ts_guess = ts_guess  # Update guess
             self._eval_state()  # Eval new film temp and mole frac
-            self._Props.eval(  # Eval props
+            self._FilmProps.eval(  # Eval props
                 p=self.p, t=self.t, x=self.x
                 )
             return True
@@ -384,26 +385,31 @@ class ReferenceFilm:
     @property
     def alpha(self):
         """Film thermal diffusivity, [m^2/s]."""
-        return self._Props.alpha
+        return self._FilmProps.alpha
 
     @property
     def cp(self):
         """
         Film specific heat at constant pressure per unit humid air, [J/kg K].
         """
-        return self._Props.cp
+        return self._FilmProps.cp
 
     @property
     def d12(self):
         """
         Film binary pecies diffusivity for water vapor and dry air, [m^2/s].
         """
-        return self._Props.d12
+        return self._FilmProps.d12
+
+    @property
+    def film_rule(self):
+        """Rule for calculating the reference state."""
+        return self._film_rule
 
     @property
     def k(self):
         """Film thermal conductivity of the humid air, [W/m K]."""
-        return self._Props.k
+        return self._FilmProps.k
 
     @property
     def p(self):
@@ -414,14 +420,14 @@ class ReferenceFilm:
             return None
 
     @property
-    def rho(self):
-        """Film specific mass of the humid air, [kg humid air/m^3]."""
-        return self._Props.rho
+    def ref(self):
+        """Rule for calculating the binary species diffusivity."""
+        return self._FilmProps.ref
 
     @property
-    def film_rule(self):
-        """Rule for calculating the reference state."""
-        return self._film_rule
+    def rho(self):
+        """Film specific mass of the humid air, [kg humid air/m^3]."""
+        return self._FilmProps.rho
 
     @property
     def t(self):
@@ -465,3 +471,14 @@ class ReferenceFilm:
             'one-half': lambda e, s: (e + s) / 2,
             'one-third': lambda e, s: s + (e - s) / 3
             }[self.film_rule](e_state, s_state)
+
+
+class Model:
+    """Model base class."""
+
+    def __init__(self, exp_state, film_rule='one-third', ref='Mills'):
+        """Return """
+
+        self._RefFilm = ReferenceFilm(
+            exp_state, ref=ref, film_rule=film_rule
+            )
