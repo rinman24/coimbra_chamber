@@ -9,12 +9,11 @@ import chamber.models2 as mods
 
 PROP_STATE = dict(p=101325, t=295, x=0.013)
 EXP_STATE = dict(p=80000, tch=290, tdp=280, tm=291)
-TS_GUESS = 285
 
 
 @pytest.fixture(scope='module')
 def props():
-    return mods.Properties()
+    return mods.FilmProperties()
 
 
 @pytest.fixture(scope='module')
@@ -24,7 +23,7 @@ def exp_state():
 
 @pytest.fixture(scope='module')
 def ref_state():
-    return mods.ReferenceState(TS_GUESS, EXP_STATE)
+    return mods.ReferenceFilm(EXP_STATE)
 
 
 class Test_ExperimentalState:
@@ -52,9 +51,9 @@ class Test_ExperimentalState:
             exp_state.tm = 300
         assert "can't set attribute" == str(excinfo.value)
 
-    def test_update(self, exp_state):
+    def test__change_state(self, exp_state):
         new_state = dict(p=90000, tch=290, tdp=284, tm=290.5)
-        exp_state._update(**new_state)
+        exp_state._change_state(**new_state)
 
         assert math.isclose(exp_state.p, 90000)
         assert math.isclose(exp_state.tch, 290)
@@ -66,7 +65,7 @@ class Test_ReferenceState:
     """Unit testing of `ExperimentalState` class."""
 
     def test__init__(self, ref_state):
-        assert math.isclose(ref_state.ts_guess, 285)
+        assert ref_state.ts_guess is None
 
         assert isinstance(ref_state._ExpState, mods.ExperimentalState)
         assert math.isclose(ref_state._ExpState.p, 80000)
@@ -74,7 +73,7 @@ class Test_ReferenceState:
         assert math.isclose(ref_state._ExpState.tdp, 280)
         assert math.isclose(ref_state._ExpState.tm, 291)
 
-        assert isinstance(ref_state._Props, mods.Properties)
+        assert isinstance(ref_state._Props, mods.FilmProperties)
         assert ref_state._Props.rho is None
         assert ref_state._Props.k is None
         assert ref_state._Props.cp is None
@@ -84,9 +83,9 @@ class Test_ReferenceState:
 
         assert ref_state.film_rule == 'one-third'
 
-        assert math.isclose(ref_state.p_film, 80000)
-        assert math.isclose(ref_state.t_film, 287.0)
-        assert ref_state.x_film is None
+        assert ref_state.p is None
+        assert ref_state.t is None
+        assert ref_state.x is None
         assert ref_state._xe is None
         assert ref_state._xs is None
 
@@ -115,22 +114,19 @@ class Test_ReferenceState:
         err_msg = "`film_rule` must be <class 'str'> not <class 'int'>."
         assert (err_msg == str(excinfo.value))
 
-    def test_update(self, ref_state):
-        assert math.isclose(ref_state.ts_guess, 285)
-
-        original_ts_guess = ref_state.ts_guess
+    def test_update_film(self, ref_state):
+        assert ref_state.ts_guess is None
 
         # This also updates the properties.
-        assert ref_state.update(300)
-        assert math.isclose(ref_state.rho_film, 0.9267691278805217)
-        assert math.isclose(ref_state.k_film, 0.026100437937392484)
-        assert math.isclose(ref_state.cp_film, 1047.04407550437)
-        assert math.isclose(ref_state.alpha_film, 2.689746012139042e-05)
-        assert math.isclose(ref_state.d12_film, 3.204816199008461e-05)
-        assert ref_state.update(original_ts_guess)
+        assert ref_state.update_film(300)
+        assert math.isclose(ref_state.rho, 0.9267691278805217)
+        assert math.isclose(ref_state.k, 0.026100437937392484)
+        assert math.isclose(ref_state.cp, 1047.04407550437)
+        assert math.isclose(ref_state.alpha, 2.689746012139042e-05)
+        assert math.isclose(ref_state.d12, 3.204816199008461e-05)
 
         with pytest.raises(TypeError) as excinfo:
-            ref_state.update('300')
+            ref_state.update_film('300')
         err_msg = "`ts_guess` must be numeric not <class 'str'>."
         assert err_msg == str(excinfo.value)
 
@@ -148,22 +144,22 @@ class Test_ReferenceState:
 
     def test_eval_xs(self, ref_state):
         ref_state._eval_xs()
-        assert math.isclose(ref_state._xs, 0.01742142886750153)
+        assert math.isclose(ref_state._xs, 0.04437177884130174)
 
-    def test_eval(self, ref_state):
-        ref_state._eval()
-        assert math.isclose(ref_state.p_film, 80000)
-        assert math.isclose(ref_state.t_film, 287.0)
-        assert math.isclose(ref_state.x_film, 0.015760689362466957)
+    def test_eval_state(self, ref_state):
+        ref_state._eval_state()
+        assert math.isclose(ref_state.p, 80000)
+        assert math.isclose(ref_state.t, 297.0)
+        assert math.isclose(ref_state.x, 0.033727589345000426)
 
-        assert math.isclose(ref_state._Props.rho, 0.965679984964966)
-        assert math.isclose(ref_state._Props.k, 0.025391972939738265)
-        assert math.isclose(ref_state._Props.cp, 1024.3338591579427)
-        assert math.isclose(ref_state._Props.alpha, 2.5669752890094362e-05)
-        assert math.isclose(ref_state._Props.d12, 3.0250984009617275e-05)
+        assert math.isclose(ref_state._Props.rho, 0.9267691278805217)
+        assert math.isclose(ref_state._Props.k, 0.026100437937392484)
+        assert math.isclose(ref_state._Props.cp, 1047.04407550437)
+        assert math.isclose(ref_state._Props.alpha, 2.689746012139042e-05)
+        assert math.isclose(ref_state._Props.d12, 3.204816199008461e-05)
 
 
-class Test_Properties:
+class Test_FilmProperties:
     """Unit testing of `Properties` class."""
 
     def test__init__(self, props):
