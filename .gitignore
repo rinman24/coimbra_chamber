@@ -24,3 +24,9 @@ abs_water.csv
 # VS Code #
 ###########
 *.vscode
+
+########
+# Sphinx
+########
+docs/_build/*
+!docs/_build/.gitkeep
