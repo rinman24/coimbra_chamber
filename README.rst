@@ -10,6 +10,7 @@ Table of Contents
 
   * `Description`_
   * `Python Version`_
+  * `Documentation`_
   * `Dependencies`_
   * `Setting up Initial State of MySQL Database`_
   * `Repo Directory Structure`_
@@ -23,7 +24,8 @@ Back to `Table of Contents`_
 
 Description will go here.
 
-Make sure that you export your MySQLCredentials environment variable for access
+Make sure that you export your MySQLCredentials environment variable for
+access
 ::
 
     $ export MySqlUserName=<user_name>
@@ -36,6 +38,13 @@ Python Version
 Back to `Table of Contents`_
 
 This module is intended to use Python 3.x.
+
+Documentation
+-------------
+
+Back to `Table of Contents`_
+
+For detailed documentaton head over to `read the docs`_.
 
 Dependencies
 ------------
@@ -57,7 +66,8 @@ Setting up Initial State of MySQL Database
 
 Back to `Table of Contents`_
 
-Setting up the initial state of the MySQL Server is handled by the setup_sqldb.py file.
+Setting up the initial state of the MySQL Server is handled by the
+setup_sqldb.py file.
 Simply run the following command from the root directory; e.g., ucsd_ch:
 ::
 
@@ -65,7 +75,8 @@ Simply run the following command from the root directory; e.g., ucsd_ch:
 
 
 Where <database_name> is replaced with the name of the MySQL database schema.
-This will create all tables and populate the Unit table and add Tube 1 (default tube used in experiments).
+This will create all tables and populate the Unit table and add Tube 1
+(default tube used in experiments).
 
 The database schema is described below:
 
@@ -122,7 +133,9 @@ Back to `Table of Contents`_
 
     $ python -m pytest tests/<your-test-name>.py -v --capture=no
 
-It should also be noted that the test_const.py file in the test directory does not acctually contain tests, but rather the constants that are needed for testing.
+It should also be noted that the test_const.py file in the test directory
+does not acctually contain tests, but rather the constants that are
+needed for testing.
 
 Images
 ------
@@ -142,3 +155,5 @@ Back to `Table of Contents`_
     :alt: Documentation Status
     :scale: 100%
     :target: https://docs.readthedocs.io/en/latest/?badge=latest
+
+.. _`read the docs`: http://chamber.readthedocs.io
