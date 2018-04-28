@@ -44,7 +44,7 @@ Documentation
 
 Back to `Table of Contents`_
 
-For detailed documentaton head over to `read the docs`_.
+For detailed documentaton head over to chamber.readthedocs.io_.
 
 Dependencies
 ------------
@@ -156,4 +156,4 @@ Back to `Table of Contents`_
     :scale: 100%
     :target: https://docs.readthedocs.io/en/latest/?badge=latest
 
-.. _`read the docs`: http://chamber.readthedocs.io
+.. _chamber.readthedocs.io: http://chamber.readthedocs.io
