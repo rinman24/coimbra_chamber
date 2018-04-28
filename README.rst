@@ -136,3 +136,9 @@ Back to `Table of Contents`_
 .. image:: images/chamber_profile.jpg
 
 .. image:: images/chamber_optics.jpg
+
+
+.. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
+    :alt: Documentation Status
+    :scale: 100%
+    :target: https://docs.readthedocs.io/en/latest/?badge=latest
