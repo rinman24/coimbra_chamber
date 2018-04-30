@@ -6,4 +6,5 @@ This section contains a **mathematical description** of variables used in the `c
 .. toctree::
     :maxdepth: 1
 
+    mathdoc/film_state
     mathdoc/variables
