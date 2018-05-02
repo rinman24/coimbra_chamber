@@ -92,6 +92,41 @@ def get_k_m(p, t, t_dp):
     return k_m
 
 
+def get_alpha_m(p, t, t_dp):
+    """The thermal diffusivity of the vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    alpha_m : float
+        The thermal diffusivity of the vapor mixture in m:math:`^2`/s.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> props.get_alpha_m(p, t, t_dp)
+    2.076201562300882e-05
+    """
+    # Get properties needed to calculate alpha_m
+    c_pm = get_cp_m(p, t, t_dp)
+    k_m = get_k_m(p, t, t_dp)
+    rho_m = get_rho_m(p, t, t_dp)
+
+    # Calculate alpha_m
+    alpha_m = k_m/(c_pm*rho_m)
+    return alpha_m
+
+
 def tdp2rh(p, t, t_dp):
     """RH based on p, t and t_dp.
 
