@@ -13,4 +13,10 @@ def test_cpm():
         props.cpm(P_VALUE, T_VALUE, TDP_VALUE),
         1017.641910841458
         )
-    
+
+
+def test_tdp2rh():
+    assert math.isclose(
+        props.tdp2rh(P_VALUE, T_VALUE, TDP_VALUE),
+        0.5165573311068835
+        )
