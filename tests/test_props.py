@@ -10,7 +10,7 @@ TDP_VALUE = 280
 
 def test_cpm():
     assert math.isclose(
-        props.cp_m(P_VALUE, T_VALUE, TDP_VALUE),
+        props.get_cp_m(P_VALUE, T_VALUE, TDP_VALUE),
         1017.641910841458
         )
 
@@ -31,13 +31,13 @@ def test_x12m1():
 
 def test_rho_m():
     assert math.isclose(
-        props.rho_m(P_VALUE, T_VALUE, TDP_VALUE),
+        props.get_rho_m(P_VALUE, T_VALUE, TDP_VALUE),
         1.213231099568598
         )
 
 
 def test_k_m():
     assert math.isclose(
-        props.k_m(P_VALUE, T_VALUE, TDP_VALUE),
+        props.get_k_m(P_VALUE, T_VALUE, TDP_VALUE),
         0.02563350730647246
         )
