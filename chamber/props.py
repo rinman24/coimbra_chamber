@@ -127,6 +127,63 @@ def get_alpha_m(p, t, t_dp):
     return alpha_m
 
 
+def get_d12(p, t, ref):
+    """The binary species diffusivity of the vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    ref : {'Mills', 'Marrero'}
+        Reference for binary species diffusiity, see ``Notes``.
+
+    Returns
+    -------
+    alpha_m : float
+        The thermal diffusivity of the vapor mixture in m:math:`^2`/s.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> ref = 'Mills'
+    >>> props.get_d12(p, t, ref)
+    2.4306504684558495e-05
+
+    >>> ref = 'Marrero'
+    >>> props.get_d12(p, t, ref)
+    2.365539793302829e-05
+
+    Raises
+    ------
+    ValueError
+        If `ref` is not in `{'Mills', 'Marrero'}`.
+    
+    Notes
+    -----
+    For more information regarding the choices for `ref` see Appendix of [1]_.
+
+    References
+    ----------
+    .. [1] Mills, A. F. and Coimbra, C. F. M., 2016
+       *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
+    """
+    p_norm = p/101325
+    if ref == 'Mills':
+        d_12 = 1.97e-5*(1/p_norm)*pow(t/256, 1.685)
+        return d_12
+    elif ref == 'Marrero':
+        d_12 = 1.87e-10*pow(t, 2.072)/p_norm
+        return d_12
+    else:
+        err_msg = (
+            "'{0}' is not a valid ref; try 'Mills' or 'Marrero'.".format(ref)
+            )
+        raise ValueError(err_msg)
+
+
 def tdp2rh(p, t, t_dp):
     """RH based on p, t and t_dp.
 
