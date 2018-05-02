@@ -1,5 +1,8 @@
 from CoolProp import HumidAirProp as hap
 
+M1 = 18.015
+M2 = 28.964
+
 
 def cpm(p, t, t_dp):
     """The specific heat of the vapor mixture.
@@ -31,7 +34,7 @@ def cpm(p, t, t_dp):
 
 
 def tdp2rh(p, t, t_dp):
-    """RH based on `p`, `t` and `t_dp`.
+    """RH based on p, t and t_dp.
 
     Parameters
     ----------
@@ -57,3 +60,28 @@ def tdp2rh(p, t, t_dp):
     """
     rh = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', t_dp)
     return rh
+
+
+def x12m1(x1):
+    """m1 based on x1.
+
+    Parameters
+    ----------
+    x1 : float
+        Mole fraction of water vapor in [0, 1]
+
+    Returns
+    -------
+    m1 : float
+        Relative humidity in [0, 1]
+
+    Examples
+    --------
+    >>> x1 = 0.01
+    >>> props.tdp2rh(x1)
+    0.006243391414375084
+    """
+    numerator = x1*M1
+    denominator = x1*M1 + (1-x1)*M2
+    m1 = numerator/denominator
+    return m1
