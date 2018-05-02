@@ -4,7 +4,7 @@ M1 = 18.015
 M2 = 28.964
 
 
-def cpm(p, t, t_dp):
+def cp_m(p, t, t_dp):
     """The specific heat of the vapor mixture.
 
     Parameters
