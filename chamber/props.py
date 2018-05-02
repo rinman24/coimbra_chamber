@@ -102,7 +102,7 @@ def rho_m(p, t, t_dp):
     Returns
     -------
     rho_m : float
-        The specific heat of the vapor mixture in J/kg K.
+        The specific mass of the vapor mixture in kg/m:math:`^3`.
 
     Examples
     --------
@@ -115,3 +115,32 @@ def rho_m(p, t, t_dp):
     v_ha = hap.HAPropsSI('Vha', 'P', p, 'T', t, 'Tdp', t_dp)
     rho_m = 1/v_ha
     return rho_m
+
+
+def k_m(p, t, t_dp):
+    """The thermal conductivity of the vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    k_m : float
+        The thermal conductivity of the vapor mixture in W/m K.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> props.k_m(p, t, t_dp)
+    0.02563350730647246
+    """
+    k_m = hap.HAPropsSI('k', 'P', p, 'T', t, 'Tdp', t_dp)
+    return k_m
