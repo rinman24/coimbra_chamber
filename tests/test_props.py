@@ -27,3 +27,10 @@ def test_x12m1():
         props.x12m1(0.01),
         0.006243391414375084
     )
+    
+
+def test_rho_m():
+    assert math.isclose(
+        props.rho_m(P_VALUE, T_VALUE, TDP_VALUE),
+        1.213231099568598
+        )

@@ -18,7 +18,7 @@ def cp_m(p, t, t_dp):
 
     Returns
     -------
-    cpm : float
+    cp_m : float
         The specific heat of the vapor mixture in J/kg K.
 
     Examples
@@ -26,11 +26,11 @@ def cp_m(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.cpm(p, t, t_dp)
+    >>> props.cp_m(p, t, t_dp)
     1017.641910841458
     """
-    cpm = hap.HAPropsSI('cp_ha', 'P', p, 'T', t, 'Tdp', t_dp)
-    return cpm
+    cp_m = hap.HAPropsSI('cp_ha', 'P', p, 'T', t, 'Tdp', t_dp)
+    return cp_m
 
 
 def tdp2rh(p, t, t_dp):
@@ -85,3 +85,33 @@ def x12m1(x1):
     denominator = x1*M1 + (1-x1)*M2
     m1 = numerator/denominator
     return m1
+
+
+def rho_m(p, t, t_dp):
+    """The specific mass of the vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    rho_m : float
+        The specific heat of the vapor mixture in J/kg K.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> props.rho_m(p, t, t_dp)
+    1.213231099568598
+    """
+    v_ha = hap.HAPropsSI('Vha', 'P', p, 'T', t, 'Tdp', t_dp)
+    rho_m = 1/v_ha
+    return rho_m
