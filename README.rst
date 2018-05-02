@@ -56,6 +56,7 @@ Back to `Table of Contents`_
   * matplotlib.legend_handler.HandlerLine2D
   * mysql.connector (for access to MySQL databases)
   * nptdms (for interacting with LabVIEW TDMS files)
+  * pandas (for loading data into DataFrames)
   * pytest (for testing)
   * pytz (for datetime testing)
   * schedule (for autonomous execution)
