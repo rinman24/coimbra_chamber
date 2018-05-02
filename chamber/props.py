@@ -1,3 +1,30 @@
+"""
+Thermophysical properties of water and humid air.
+
+This module provides a convenient wrapper around specific funtionality of the
+`CoolProp package`_.
+
+Attributes
+----------
+    M1 : float
+        Molecular weight of H:math:`_2`O (species-1) in kg/kmol.
+    M2 : float
+        Molecular weight of dry-air (species-2) in kg/kmol.
+
+Functions
+---------
+    get_cp_m
+    get_rho_m
+    get_k_m
+    get_alpha_m
+    get_d12
+    tdp2rh
+    x12m1
+
+.. _CoolProp package:
+   http://www.coolprop.org/
+"""
+
 from CoolProp import HumidAirProp as hap
 
 M1 = 18.015
@@ -160,7 +187,7 @@ def get_d12(p, t, ref):
     ------
     ValueError
         If `ref` is not in `{'Mills', 'Marrero'}`.
-    
+
     Notes
     -----
     For more information regarding the choices for `ref` see Appendix of [1]_.
