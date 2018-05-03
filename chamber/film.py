@@ -1,7 +1,7 @@
 from chamber import props
 
 """
-Thermophysical film properties of water and humid air.
+Thermophysical film properties of humid air.
 
 This module provides a convenient wrapper around specific funtionality of the
 `CoolProp package`_. Specifically, the ability to calulate approximate constant
@@ -18,10 +18,10 @@ Functions
 
 
 def use_rule(e_value, s_value, rule):
-    """The film property given a rule.
+    """Calculate film state by applying the given rule.
 
-    This function returns the value of a film property given the `e_state`,
-    `s_state`, and a `rule`.
+    This function returns the value of a film property given the `e_value`,
+    `s_value`, and a `rule`.
 
     Parameters
     ----------
@@ -77,9 +77,18 @@ def use_rule(e_value, s_value, rule):
 
 
 def est_props(p, t, t_dp, t_s, ref, rule):
-    """Estimates of the film properties.
+    """Estimates of film properties.
 
-    This function returns estimations of the the value of a film properties.
+    This function calculates estimations of constant film properties based on
+    input parameters. Properties are returned in a `dict` with the follwoing
+    keys:
+        * 'c_pm': Specific heat of vapor mixture film in J/kg K
+        * 'rho_m': Specific mass of vapor mixture film in kg/m:math:`^3`
+        * 'k_m': Thermal conductivity of the vapor mixture film in W/m K.
+        * 'alpha_m': Thermal diffusivity of the vapor mixture film in
+          m:math:`^2`/s
+        * 'd_12': Binary species diffusivity of the vapor mixture film in
+          m:math:`^2`/s
 
     Parameters
     ----------
@@ -175,7 +184,7 @@ def est_props(p, t, t_dp, t_s, ref, rule):
 
 
 def _est_c_pm(p, t, t_dp, t_s, rule):
-    """The specific heat of the vapor film mixture."""
+    """The specific heat of the vapor mixture film."""
     c_pme = props.get_c_pm(p, t, t_dp)
     c_pms = props.get_c_pm_sat(p, t_s)
 
@@ -184,7 +193,7 @@ def _est_c_pm(p, t, t_dp, t_s, rule):
 
 
 def _est_rho_m(p, t, t_dp, t_s, rule):
-    """The specific mass of the vapor film mixture."""
+    """The specific mass of the vapor mixture film."""
     rho_me = props.get_rho_m(p, t, t_dp)
     rho_ms = props.get_rho_m_sat(p, t_s)
 
@@ -193,7 +202,7 @@ def _est_rho_m(p, t, t_dp, t_s, rule):
 
 
 def _est_k_m(p, t, t_dp, t_s, rule):
-    """The thermal conductivity of the vapor film mixture."""
+    """The thermal conductivity of the vapor mixture film."""
     k_me = props.get_k_m(p, t, t_dp)
     k_ms = props.get_k_m_sat(p, t_s)
 
@@ -202,7 +211,7 @@ def _est_k_m(p, t, t_dp, t_s, rule):
 
 
 def _est_alpha_m(p, t, t_dp, t_s, rule):
-    """The thermal diffusivity of the vapor film mixture."""
+    """The thermal diffusivity of the vapor mixture film."""
     alpha_me = props.get_alpha_m(p, t, t_dp)
     alpha_ms = props.get_alpha_m_sat(p, t_s)
 
@@ -211,7 +220,7 @@ def _est_alpha_m(p, t, t_dp, t_s, rule):
 
 
 def _est_d_12(p, t, t_s, ref, rule):
-    """The binary species diffusivity of the vapor film mixture."""
+    """The binary species diffusivity of the vapor mixture film."""
     d_12e = props.get_d_12(p, t, ref)
     d_12s = props.get_d_12(p, t_s, ref)
 
