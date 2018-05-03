@@ -1,3 +1,5 @@
+from chamber import props
+
 """
 Thermophysical film properties of water and humid air.
 
@@ -73,3 +75,10 @@ def use_rule(e_value, s_value, rule):
         raise ValueError(err_msg)
 
 
+def _est_c_pm(p, t, t_dp, t_s, rule):
+    """Use `rule` and `props` module to estimate film c_pm."""
+    c_pm_e = props.get_c_pm(p, t, t_dp)
+    c_pm_s = props.get_c_pm_sat(p, t_s)
+
+    c_pm_film = use_rule(c_pm_e, c_pm_s, rule)
+    return c_pm_film
