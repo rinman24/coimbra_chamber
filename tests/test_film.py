@@ -108,3 +108,23 @@ def test__est_k_m():
         film._est_k_m(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, '20 Mar 1987')
     err_msg = "'20 Mar 1987' is not a valid rule; try '1/2' or '1/3'."
     assert err_msg in str(err.value)
+
+
+def test__est_alpha_m():
+    # Test rule = '1/2'
+    assert math.isclose(
+        film._est_alpha_m(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, '1/2'),
+        2.040317009201964e-05
+    )
+
+    # Test rule = '1/3'
+    assert math.isclose(
+        film._est_alpha_m(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, '1/3'),
+        2.028355491502325e-05
+    )
+
+    # Test raises ValueError
+    with pytest.raises(ValueError) as err:
+        film._est_k_m(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, 'beta')
+    err_msg = "'beta' is not a valid rule; try '1/2' or '1/3'."
+    assert err_msg in str(err.value)

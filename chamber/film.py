@@ -100,3 +100,12 @@ def _est_k_m(p, t, t_dp, t_s, rule):
 
     k_m_film = use_rule(k_m_e, k_m_s, rule)
     return k_m_film
+
+
+def _est_alpha_m(p, t, t_dp, t_s, rule):
+    """The thermal diffusivity of the vapor film mixture."""
+    alpha_m_e = props.get_alpha_m(p, t, t_dp)
+    alpha_m_s = props.get_alpha_m_sat(p, t_s)
+
+    alpha_m_film = use_rule(alpha_m_e, alpha_m_s, rule)
+    return alpha_m_film
