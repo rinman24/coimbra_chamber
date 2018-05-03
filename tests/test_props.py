@@ -9,12 +9,20 @@ from chamber import props
 P_VALUE = 101325
 T_VALUE = 290
 TDP_VALUE = 280
+TS_VALUE = 285
 
 
 def test_get_c_pm():
     assert math.isclose(
         props.get_c_pm(P_VALUE, T_VALUE, TDP_VALUE),
         1017.641910841458
+        )
+
+
+def test_get_c_pm_sat():
+    assert math.isclose(
+        props.get_c_pm_sat(P_VALUE, TS_VALUE),
+        1022.2835902558337
         )
 
 

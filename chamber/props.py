@@ -16,6 +16,7 @@ Attributes
 Functions
 ---------
     get_c_pm
+    get_c_pm_sat
     get_rho_m
     get_k_m
     get_alpha_m
@@ -60,6 +61,32 @@ def get_c_pm(p, t, t_dp):
     """
     c_pm = hap.HAPropsSI('cp_ha', 'P', p, 'T', t, 'Tdp', t_dp)
     return c_pm
+
+
+def get_c_pm_sat(p, t_s):
+    """The specific heat of the saturated vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t_s : int or float
+        Dry bulb temperature of saturated vapor mixture in K.
+
+    Returns
+    -------
+    c_pm_sat : float
+        The specific heat of the saturated vapor mixture in J/kg K.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t_s = 285
+    >>> props.get_c_pm_sat(p, t_s)
+    1022.2835902558337
+    """
+    c_pm_sat = hap.HAPropsSI('cp_ha', 'P', p, 'T', t_s, 'RH', 1.0)
+    return c_pm_sat
 
 
 def get_rho_m(p, t, t_dp):
