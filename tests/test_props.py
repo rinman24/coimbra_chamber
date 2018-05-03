@@ -47,6 +47,13 @@ def test_get_k_m():
         )
 
 
+def test_get_k_m_sat():
+    assert math.isclose(
+        props.get_k_m_sat(P_VALUE, TS_VALUE),
+        0.025260388108991345
+        )
+
+
 def test_get_alpha_m():
     assert math.isclose(
         props.get_alpha_m(P_VALUE, T_VALUE, TDP_VALUE),

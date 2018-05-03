@@ -175,6 +175,32 @@ def get_k_m(p, t, t_dp):
     return k_m
 
 
+def get_k_m_sat(p, t_s):
+    """The thermal conductivity of the saturated vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t_s : int or float
+        Dry bulb temperature of saturated vapor mixture in K.
+
+    Returns
+    -------
+    k_m_sat : float
+        The thermal conductivity of the saturated vapor mixture in W/m K.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t_s = 285
+    >>> props.get_k_m_sat(p, t_s)
+    0.025260388108991345
+    """
+    k_m_sat = hap.HAPropsSI('k', 'P', p, 'T', t_s, 'RH', 1.0)
+    return k_m_sat
+
+
 def get_alpha_m(p, t, t_dp):
     """The thermal diffusivity of the vapor mixture.
 
