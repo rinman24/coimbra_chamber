@@ -7,14 +7,14 @@ film properties based on an e-state, s-state, and averaging rule.
 
 Functions
 ---------
-    get_film_prop
+    use_rule
 
 .. _CoolProp package:
    http://www.coolprop.org/
 """
 
 
-def get_film_prop(e_value, s_value, rule):
+def use_rule(e_value, s_value, rule):
     """The film property given a rule.
 
     This function returns the value of a film property given the `e_state`,
@@ -39,11 +39,11 @@ def get_film_prop(e_value, s_value, rule):
     >>> e_temp = 300
     >>> s_temp = 290
     >>> rule = '1/2'
-    >>> film.get_film_prop(e_temp, s_temp, rule)
+    >>> film.use_rule(e_temp, s_temp, rule)
     295.0
 
     >>> rule = '1/3'
-    >>> film.get_film_prop(e_temp, s_temp, rule)
+    >>> film.use_rule(e_temp, s_temp, rule)
     293.3333333333333
 
     Raises
@@ -71,3 +71,5 @@ def get_film_prop(e_value, s_value, rule):
             "'{0}' is not a valid rule; try '1/2' or '1/3'.".format(rule)
             )
         raise ValueError(err_msg)
+
+
