@@ -119,6 +119,33 @@ def get_rho_m(p, t, t_dp):
     return rho_m
 
 
+def get_rho_m_sat(p, t_s):
+    """The specific mass of the saturated vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t_s : int or float
+        Dry bulb temperature of saturated vapor mixture in K.
+
+    Returns
+    -------
+    rho_m_sat : float
+        The specific mass of the saturated vapor mixture in kg/m:math:`^3`.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t_s = 285
+    >>> props.get_rho_m_sat(p, t_s)
+    1.2327562216963954
+    """
+    v_ha_sat = hap.HAPropsSI('Vha', 'P', p, 'T', t_s, 'RH', 1.0)
+    rho_m_sat = 1/v_ha_sat
+    return rho_m_sat
+
+
 def get_k_m(p, t, t_dp):
     """The thermal conductivity of the vapor mixture.
 

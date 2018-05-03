@@ -33,6 +33,13 @@ def test_get_rho_m():
         )
 
 
+def test_get_rho_m_sat():
+    assert math.isclose(
+        props.get_rho_m_sat(P_VALUE, TS_VALUE),
+        1.2327562216963954
+        )
+
+
 def test_get_k_m():
     assert math.isclose(
         props.get_k_m(P_VALUE, T_VALUE, TDP_VALUE),
