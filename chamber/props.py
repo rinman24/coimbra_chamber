@@ -23,7 +23,7 @@ Functions
     get_k_m_sat
     get_alpha_m
     get_alpha_m_sat
-    get_d12
+    get_d_12
     tdp2rh
     x12m1
 
@@ -272,7 +272,7 @@ def get_alpha_m_sat(p, t_s):
     return alpha_m_sat
 
 
-def get_d12(p, t, ref):
+def get_d_12(p, t, ref):
     """The binary species diffusivity of the vapor mixture.
 
     Parameters
@@ -294,11 +294,11 @@ def get_d12(p, t, ref):
     >>> p = 101325
     >>> t = 290
     >>> ref = 'Mills'
-    >>> props.get_d12(p, t, ref)
+    >>> props.get_d_12(p, t, ref)
     2.4306504684558495e-05
 
     >>> ref = 'Marrero'
-    >>> props.get_d12(p, t, ref)
+    >>> props.get_d_12(p, t, ref)
     2.365539793302829e-05
 
     Raises

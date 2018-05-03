@@ -68,22 +68,22 @@ def test_get_alpha_m_sat():
         )
 
 
-def test_get_d12():
+def test_get_d_12():
     # Test Mills
     assert math.isclose(
-        props.get_d12(P_VALUE, T_VALUE, 'Mills'),
+        props.get_d_12(P_VALUE, T_VALUE, 'Mills'),
         2.4306504684558495e-05
         )
 
     # Test Marrero
     assert math.isclose(
-        props.get_d12(P_VALUE, T_VALUE, 'Marrero'),
+        props.get_d_12(P_VALUE, T_VALUE, 'Marrero'),
         2.365539793302829e-05
         )
 
     # Test raises ValueError
     with pytest.raises(ValueError) as err:
-        props.get_d12(P_VALUE, T_VALUE, 'Inman')
+        props.get_d_12(P_VALUE, T_VALUE, 'Inman')
     err_msg = "'Inman' is not a valid ref; try 'Mills' or 'Marrero'."
     assert err_msg in str(err.value)
 
