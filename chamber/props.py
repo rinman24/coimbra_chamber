@@ -15,7 +15,7 @@ Attributes
 
 Functions
 ---------
-    get_cp_m
+    get_c_pm
     get_rho_m
     get_k_m
     get_alpha_m
@@ -33,7 +33,7 @@ M1 = 18.015
 M2 = 28.964
 
 
-def get_cp_m(p, t, t_dp):
+def get_c_pm(p, t, t_dp):
     """The specific heat of the vapor mixture.
 
     Parameters
@@ -47,7 +47,7 @@ def get_cp_m(p, t, t_dp):
 
     Returns
     -------
-    cp_m : float
+    c_pm : float
         The specific heat of the vapor mixture in J/kg K.
 
     Examples
@@ -55,11 +55,11 @@ def get_cp_m(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_cp_m(p, t, t_dp)
+    >>> props.get_c_pm(p, t, t_dp)
     1017.641910841458
     """
-    cp_m = hap.HAPropsSI('cp_ha', 'P', p, 'T', t, 'Tdp', t_dp)
-    return cp_m
+    c_pm = hap.HAPropsSI('cp_ha', 'P', p, 'T', t, 'Tdp', t_dp)
+    return c_pm
 
 
 def get_rho_m(p, t, t_dp):
@@ -147,7 +147,7 @@ def get_alpha_m(p, t, t_dp):
     2.076201562300882e-05
     """
     # Get properties needed to calculate alpha_m
-    c_pm = get_cp_m(p, t, t_dp)
+    c_pm = get_c_pm(p, t, t_dp)
     k_m = get_k_m(p, t, t_dp)
     rho_m = get_rho_m(p, t, t_dp)
 

@@ -11,9 +11,9 @@ T_VALUE = 290
 TDP_VALUE = 280
 
 
-def test_get_cpm():
+def test_get_c_pm():
     assert math.isclose(
-        props.get_cp_m(P_VALUE, T_VALUE, TDP_VALUE),
+        props.get_c_pm(P_VALUE, T_VALUE, TDP_VALUE),
         1017.641910841458
         )
 
