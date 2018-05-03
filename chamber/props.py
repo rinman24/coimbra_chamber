@@ -18,8 +18,11 @@ Functions
     get_c_pm
     get_c_pm_sat
     get_rho_m
+    get_rho_m_sat
     get_k_m
+    get_k_m_sat
     get_alpha_m
+    get_alpha_m_sat
     get_d12
     tdp2rh
     x12m1
@@ -234,6 +237,39 @@ def get_alpha_m(p, t, t_dp):
     # Calculate alpha_m
     alpha_m = k_m/(c_pm*rho_m)
     return alpha_m
+
+
+def get_alpha_m_sat(p, t_s):
+    """The thermal diffusivity of the saturated vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t_s : int or float
+        Dry bulb temperature of saturated vapor mixture in K.
+
+    Returns
+    -------
+    alpha_m_sat : float
+        The thermal diffusivity of the saturated vapor mixture in
+        m:math:`^2`/s.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t_s = 285
+    >>> props.get_alpha_m_sat(p, t_s)
+    2.0044324561030463e-05
+    """
+    # Get properties needed to calculate alpha_m
+    c_pm_sat = get_c_pm_sat(p, t_s)
+    k_m_sat = get_k_m_sat(p, t_s)
+    rho_m_sat = get_rho_m_sat(p, t_s)
+
+    # Calculate alpha_m
+    alpha_m_sat = k_m_sat/(c_pm_sat*rho_m_sat)
+    return alpha_m_sat
 
 
 def get_d12(p, t, ref):

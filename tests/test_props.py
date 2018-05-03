@@ -61,6 +61,13 @@ def test_get_alpha_m():
         )
 
 
+def test_get_alpha_m_sat():
+    assert math.isclose(
+        props.get_alpha_m_sat(P_VALUE, TS_VALUE),
+        2.0044324561030463e-05
+        )
+
+
 def test_get_d12():
     # Test Mills
     assert math.isclose(
