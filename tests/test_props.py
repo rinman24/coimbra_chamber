@@ -1,3 +1,4 @@
+"""Unit testing of `props` module."""
 
 import math
 
