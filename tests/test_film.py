@@ -128,3 +128,41 @@ def test__est_alpha_m():
         film._est_k_m(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, 'beta')
     err_msg = "'beta' is not a valid rule; try '1/2' or '1/3'."
     assert err_msg in str(err.value)
+
+
+def test__est_d12():
+    # Test ref = 'Mills' and rule = '1/2'
+    assert math.isclose(
+        film._est_d_12(P_VALUE, T_VALUE, TS_VALUE, 'Mills', '1/2'),
+        2.3955520502741308e-05
+    )
+
+    # Test ref = 'Mills' and rule = '1/3'
+    assert math.isclose(
+        film._est_d_12(P_VALUE, T_VALUE, TS_VALUE, 'Mills', '1/3'),
+        2.3838525775468913e-05
+    )
+
+    # Test ref = 'Marrero' and rule = '1/2'
+    assert math.isclose(
+        film._est_d_12(P_VALUE, T_VALUE, TS_VALUE, 'Marrero', '1/2'),
+        2.323676676164935e-05
+    )
+
+    # Test ref = 'Marrerp' and rule = '1/3'
+    assert math.isclose(
+        film._est_d_12(P_VALUE, T_VALUE, TS_VALUE, 'Marrero', '1/3'),
+        2.3097223037856368e-05
+    )
+
+    # Test raises ValueError for ref
+    with pytest.raises(ValueError) as err:
+        film._est_d_12(P_VALUE, T_VALUE, TS_VALUE, 'Inman et al.', '1/2')
+    err_msg = "'Inman et al.' is not a valid ref; try 'Mills' or 'Marrero'."
+    assert err_msg in str(err.value)
+
+    # Test raises ValueError for rule
+    with pytest.raises(ValueError) as err:
+        film._est_d_12(P_VALUE, T_VALUE, TS_VALUE, 'Mills', 'pi')
+    err_msg = "'pi' is not a valid rule; try '1/2' or '1/3'."
+    assert err_msg in str(err.value)

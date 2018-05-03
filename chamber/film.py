@@ -77,35 +77,44 @@ def use_rule(e_value, s_value, rule):
 
 def _est_c_pm(p, t, t_dp, t_s, rule):
     """The specific heat of the vapor film mixture."""
-    c_pm_e = props.get_c_pm(p, t, t_dp)
-    c_pm_s = props.get_c_pm_sat(p, t_s)
+    c_pme = props.get_c_pm(p, t, t_dp)
+    c_pms = props.get_c_pm_sat(p, t_s)
 
-    c_pm_film = use_rule(c_pm_e, c_pm_s, rule)
+    c_pm_film = use_rule(c_pme, c_pms, rule)
     return c_pm_film
 
 
 def _est_rho_m(p, t, t_dp, t_s, rule):
     """The specific mass of the vapor film mixture."""
-    rho_m_e = props.get_rho_m(p, t, t_dp)
-    rho_m_s = props.get_rho_m_sat(p, t_s)
+    rho_me = props.get_rho_m(p, t, t_dp)
+    rho_ms = props.get_rho_m_sat(p, t_s)
 
-    rho_m_film = use_rule(rho_m_e, rho_m_s, rule)
+    rho_m_film = use_rule(rho_me, rho_ms, rule)
     return rho_m_film
 
 
 def _est_k_m(p, t, t_dp, t_s, rule):
     """The thermal conductivity of the vapor film mixture."""
-    k_m_e = props.get_k_m(p, t, t_dp)
-    k_m_s = props.get_k_m_sat(p, t_s)
+    k_me = props.get_k_m(p, t, t_dp)
+    k_ms = props.get_k_m_sat(p, t_s)
 
-    k_m_film = use_rule(k_m_e, k_m_s, rule)
+    k_m_film = use_rule(k_me, k_ms, rule)
     return k_m_film
 
 
 def _est_alpha_m(p, t, t_dp, t_s, rule):
     """The thermal diffusivity of the vapor film mixture."""
-    alpha_m_e = props.get_alpha_m(p, t, t_dp)
-    alpha_m_s = props.get_alpha_m_sat(p, t_s)
+    alpha_me = props.get_alpha_m(p, t, t_dp)
+    alpha_ms = props.get_alpha_m_sat(p, t_s)
 
-    alpha_m_film = use_rule(alpha_m_e, alpha_m_s, rule)
+    alpha_m_film = use_rule(alpha_me, alpha_ms, rule)
     return alpha_m_film
+
+
+def _est_d_12(p, t, t_s, ref, rule):
+    """The binary species diffusivity of the vapor film mixture."""
+    d_12e = props.get_d_12(p, t, ref)
+    d_12s = props.get_d_12(p, t_s, ref)
+
+    d_12_film = use_rule(d_12e, d_12s, rule)
+    return d_12_film
