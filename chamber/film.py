@@ -91,3 +91,12 @@ def _est_rho_m(p, t, t_dp, t_s, rule):
 
     rho_m_film = use_rule(rho_m_e, rho_m_s, rule)
     return rho_m_film
+
+
+def _est_k_m(p, t, t_dp, t_s, rule):
+    """The thermal conductivity of the vapor film mixture."""
+    k_m_e = props.get_k_m(p, t, t_dp)
+    k_m_s = props.get_k_m_sat(p, t_s)
+
+    k_m_film = use_rule(k_m_e, k_m_s, rule)
+    return k_m_film
