@@ -68,3 +68,23 @@ def test__est_c_pm():
         film._est_c_pm(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, '1/5')
     err_msg = "'1/5' is not a valid rule; try '1/2' or '1/3'."
     assert err_msg in str(err.value)
+
+
+def test__est_rho_m():
+    # Test rule = '1/2'
+    assert math.isclose(
+        film._est_rho_m(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, '1/2'),
+        1.2229936606324967
+    )
+
+    # Test rule = '1/3'
+    assert math.isclose(
+        film._est_rho_m(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, '1/3'),
+        1.2262478476537964
+    )
+
+    # Test raises ValueError
+    with pytest.raises(ValueError) as err:
+        film._est_rho_m(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, '24 Sep 1984')
+    err_msg = "'24 Sep 1984' is not a valid rule; try '1/2' or '1/3'."
+    assert err_msg in str(err.value)

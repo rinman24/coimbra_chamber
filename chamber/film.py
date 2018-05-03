@@ -76,9 +76,18 @@ def use_rule(e_value, s_value, rule):
 
 
 def _est_c_pm(p, t, t_dp, t_s, rule):
-    """Use `rule` and `props` module to estimate film c_pm."""
+    """The specific heat of the vapor film mixture."""
     c_pm_e = props.get_c_pm(p, t, t_dp)
     c_pm_s = props.get_c_pm_sat(p, t_s)
 
     c_pm_film = use_rule(c_pm_e, c_pm_s, rule)
     return c_pm_film
+
+
+def _est_rho_m(p, t, t_dp, t_s, rule):
+    """The specific mass of the vapor film mixture."""
+    rho_m_e = props.get_rho_m(p, t, t_dp)
+    rho_m_s = props.get_rho_m_sat(p, t_s)
+
+    rho_m_film = use_rule(rho_m_e, rho_m_s, rule)
+    return rho_m_film
