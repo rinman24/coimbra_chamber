@@ -2,7 +2,9 @@
 Thermophysical properties of water and humid air.
 
 This module provides a convenient wrapper around specific funtionality of the
-`CoolProp package`_.
+`CoolProp package`_. Specifically, the ability to calulate properties at a
+given state. A state in this case is defined as the combination of pressure `p`
+in Pa, dry bulb temperature `t` in K, and dew point `t_dp` in K.
 
 Attributes
 ----------
