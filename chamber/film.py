@@ -76,7 +76,7 @@ def use_rule(e_value, s_value, rule):
         raise ValueError(err_msg)
 
 
-def est_props(p, t, t_dp, t_s, ref, rule):
+def est_props(p, t_e, t_dp, t_s, ref, rule):
     """Estimates of film properties.
 
     This function calculates estimations of constant film properties based on
@@ -94,8 +94,8 @@ def est_props(p, t, t_dp, t_s, ref, rule):
     ----------
     p : int or float
         Pressure in Pa.
-    t : int or float
-        Dry bulb temperature in K.
+    t_e : int or float
+        Dry bulb temperature of the environment in K.
     t_s : int or float
         Dry bulb temperature of saturated vapor mixture in K.
     t_dp : int or float
@@ -172,56 +172,56 @@ def est_props(p, t, t_dp, t_s, ref, rule):
     .. [1] Mills, A. F. and Coimbra, C. F. M., 2016
        *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
     """
-    c_pm = _est_c_pm(p, t, t_dp, t_s, rule)
-    rho_m = _est_rho_m(p, t, t_dp, t_s, rule)
-    k_m = _est_k_m(p, t, t_dp, t_s, rule)
-    alpha_m = _est_alpha_m(p, t, t_dp, t_s, rule)
-    d_12 = _est_d_12(p, t, t_s, ref, rule)
+    c_pm = _est_c_pm(p, t_e, t_dp, t_s, rule)
+    rho_m = _est_rho_m(p, t_e, t_dp, t_s, rule)
+    k_m = _est_k_m(p, t_e, t_dp, t_s, rule)
+    alpha_m = _est_alpha_m(p, t_e, t_dp, t_s, rule)
+    d_12 = _est_d_12(p, t_e, t_s, ref, rule)
     film_props = dict(
         c_pm=c_pm, rho_m=rho_m, k_m=k_m, alpha_m=alpha_m, d_12=d_12
     )
     return film_props
 
 
-def _est_c_pm(p, t, t_dp, t_s, rule):
+def _est_c_pm(p, t_e, t_dp, t_s, rule):
     """The specific heat of the vapor mixture film."""
-    c_pme = props.get_c_pm(p, t, t_dp)
+    c_pme = props.get_c_pm(p, t_e, t_dp)
     c_pms = props.get_c_pm_sat(p, t_s)
 
     c_pm_film = use_rule(c_pme, c_pms, rule)
     return c_pm_film
 
 
-def _est_rho_m(p, t, t_dp, t_s, rule):
+def _est_rho_m(p, t_e, t_dp, t_s, rule):
     """The specific mass of the vapor mixture film."""
-    rho_me = props.get_rho_m(p, t, t_dp)
+    rho_me = props.get_rho_m(p, t_e, t_dp)
     rho_ms = props.get_rho_m_sat(p, t_s)
 
     rho_m_film = use_rule(rho_me, rho_ms, rule)
     return rho_m_film
 
 
-def _est_k_m(p, t, t_dp, t_s, rule):
+def _est_k_m(p, t_e, t_dp, t_s, rule):
     """The thermal conductivity of the vapor mixture film."""
-    k_me = props.get_k_m(p, t, t_dp)
+    k_me = props.get_k_m(p, t_e, t_dp)
     k_ms = props.get_k_m_sat(p, t_s)
 
     k_m_film = use_rule(k_me, k_ms, rule)
     return k_m_film
 
 
-def _est_alpha_m(p, t, t_dp, t_s, rule):
+def _est_alpha_m(p, t_e, t_dp, t_s, rule):
     """The thermal diffusivity of the vapor mixture film."""
-    alpha_me = props.get_alpha_m(p, t, t_dp)
+    alpha_me = props.get_alpha_m(p, t_e, t_dp)
     alpha_ms = props.get_alpha_m_sat(p, t_s)
 
     alpha_m_film = use_rule(alpha_me, alpha_ms, rule)
     return alpha_m_film
 
 
-def _est_d_12(p, t, t_s, ref, rule):
+def _est_d_12(p, t_e, t_s, ref, rule):
     """The binary species diffusivity of the vapor mixture film."""
-    d_12e = props.get_d_12(p, t, ref)
+    d_12e = props.get_d_12(p, t_e, ref)
     d_12s = props.get_d_12(p, t_s, ref)
 
     d_12_film = use_rule(d_12e, d_12s, rule)
