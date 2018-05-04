@@ -26,8 +26,9 @@ Functions
     get_d_12
     t_dp2rh
     t_dp2x_1
-    t_dp2m_1
     x_12m_1
+    t_dp2m_1
+    m_1s
 
 .. _CoolProp package:
    http://www.coolprop.org/
@@ -437,7 +438,7 @@ def t_dp2m_1(p, t, t_dp):
     >>> t = 290
     >>> t_dp = 280
     >>> props.t_dp2m_1(p, t, t_dp)
-    xxx
+    0.0061357476021502095
     """
     x_1 = t_dp2x_1(p, t, t_dp)
     m_1 = x_12m_1(x_1)
