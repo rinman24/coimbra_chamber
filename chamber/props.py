@@ -25,6 +25,7 @@ Functions
     get_alpha_m_sat
     get_d_12
     tdp2rh
+    t_dp2x_1
     x12m1
 
 .. _CoolProp package:
@@ -344,7 +345,7 @@ def tdp2rh(p, t, t_dp):
     Returns
     -------
     rh : float
-        Relative humidity in [0, 1]
+        Relative humidity in [0, 1].
 
     Examples
     --------
@@ -358,18 +359,47 @@ def tdp2rh(p, t, t_dp):
     return rh
 
 
+def t_dp2x_1(p, t, t_dp):
+    """RH based on p, t and t_dp.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    x_1 : float
+        Mole fraction of water vapor in mixture in [0, 1].
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> props.t_dp2x_1(p, t, t_dp)
+    0.00982822815586041
+    """
+    x_1 = hap.HAPropsSI('Y', 'P', p, 'T', t, 'Tdp', t_dp)
+    return x_1
+
+
 def x12m1(x1):
     """m1 based on x1.
 
     Parameters
     ----------
     x1 : float
-        Mole fraction of water vapor in [0, 1]
+        Mole fraction of water vapor in [0, 1].
 
     Returns
     -------
     m1 : float
-        Relative humidity in [0, 1]
+        Relative humidity in [0, 1].
 
     Examples
     --------

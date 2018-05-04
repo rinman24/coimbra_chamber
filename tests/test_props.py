@@ -95,6 +95,13 @@ def test_tdp2rh():
         )
 
 
+def test_tdp2x1():
+    assert math.isclose(
+        props.t_dp2x_1(P_VALUE, T_VALUE, TDP_VALUE),
+        0.00982822815586041
+        )
+
+
 def test_x12m1():
     assert math.isclose(
         props.x12m1(0.01),
