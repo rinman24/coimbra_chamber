@@ -24,6 +24,8 @@ Functions
     get_alpha_m
     get_alpha_m_sat
     get_d_12
+    get_x_m
+    get_x_m_sat
     t_dp2rh
     t_dp2x_1
     x_12m_1
@@ -355,10 +357,37 @@ def get_x_m(p, t, t_dp):
     >>> t = 290
     >>> t_dp = 280
     >>> props.get_x_m(p, t, t_dp)
-    xxx
+    0.00982822815586041
     """
     x_m = hap.HAPropsSI('Y', 'P', p, 'T', t, 'Tdp', t_dp)
     return x_m
+
+
+def get_x_m_sat(p, t_s):
+    """The mole fraction of water vapor in the saturated vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t_s : int or float
+        Dry bulb temperature of saturated vapor mixture in K.
+
+    Returns
+    -------
+    x_m_sat : float
+        The mole fraction of water vapor in the saturated vapor mixture in
+        [0, 1].
+
+    Examples
+    --------
+     >>> p = 101325
+    >>> t_s = 285
+    >>> props.get_x_m_sat(p, t_s)
+    0.01376427605764327
+    """
+    x_m_sat = hap.HAPropsSI('Y', 'P', p, 'T', t_s, 'RH', 1.0)
+    return x_m_sat
 
 
 def t_dp2rh(p, t, t_dp):

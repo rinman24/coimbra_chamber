@@ -95,6 +95,13 @@ def test_get_x_m():
     )
 
 
+def test_get_x_m_sat():
+    assert math.isclose(
+        props.get_x_m_sat(P_VALUE, TS_VALUE),
+        0.01376427605764327
+    )
+
+
 def test_t_dp2rh():
     assert math.isclose(
         props.t_dp2rh(P_VALUE, T_VALUE, TDP_VALUE),
