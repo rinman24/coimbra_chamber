@@ -88,9 +88,9 @@ def test_get_d_12():
     assert err_msg in str(err.value)
 
 
-def test_tdp2rh():
+def test_t_dp2rh():
     assert math.isclose(
-        props.tdp2rh(P_VALUE, T_VALUE, TDP_VALUE),
+        props.t_dp2rh(P_VALUE, T_VALUE, TDP_VALUE),
         0.5165573311068835
         )
 
@@ -102,8 +102,8 @@ def test_tdp2x1():
         )
 
 
-def test_x12m1():
+def test_x_12m_1():
     assert math.isclose(
-        props.x12m1(0.01),
+        props.x_12m_1(0.01),
         0.006243391414375084
     )

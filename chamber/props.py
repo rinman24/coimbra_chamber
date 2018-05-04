@@ -24,9 +24,9 @@ Functions
     get_alpha_m
     get_alpha_m_sat
     get_d_12
-    tdp2rh
+    t_dp2rh
     t_dp2x_1
-    x12m1
+    x_12m_1
 
 .. _CoolProp package:
    http://www.coolprop.org/
@@ -330,7 +330,7 @@ def get_d_12(p, t, ref):
         raise ValueError(err_msg)
 
 
-def tdp2rh(p, t, t_dp):
+def t_dp2rh(p, t, t_dp):
     """RH based on p, t and t_dp.
 
     Parameters
@@ -352,7 +352,7 @@ def tdp2rh(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.tdp2rh(p, t, t_dp)
+    >>> props.t_dp2rh(p, t, t_dp)
     0.5165573311068835
     """
     rh = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', t_dp)
@@ -388,7 +388,7 @@ def t_dp2x_1(p, t, t_dp):
     return x_1
 
 
-def x12m1(x1):
+def x_12m_1(x1):
     """m1 based on x1.
 
     Parameters
@@ -404,7 +404,7 @@ def x12m1(x1):
     Examples
     --------
     >>> x1 = 0.01
-    >>> props.tdp2rh(x1)
+    >>> props.x_12m_1(x1)
     0.006243391414375084
     """
     numerator = x1*M1
