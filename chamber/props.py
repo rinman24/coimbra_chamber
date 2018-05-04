@@ -332,6 +332,35 @@ def get_d_12(p, t, ref):
         raise ValueError(err_msg)
 
 
+def get_x_m(p, t, t_dp):
+    """The mole fraction of water vapor in the vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    x_m : float
+        The mole fraction of water vapor in the vapor mixture in [0, 1].
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> props.get_x_m(p, t, t_dp)
+    xxx
+    """
+    x_m = hap.HAPropsSI('Y', 'P', p, 'T', t, 'Tdp', t_dp)
+    return x_m
+
+
 def t_dp2rh(p, t, t_dp):
     """RH based on p, t and t_dp.
 
@@ -359,35 +388,6 @@ def t_dp2rh(p, t, t_dp):
     """
     rh = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', t_dp)
     return rh
-
-
-def t_dp2x_1(p, t, t_dp):
-    """Mole fraction of water vapor based on p, t and t_dp.
-
-    Parameters
-    ----------
-    p : int or float
-        Pressure in Pa.
-    t : int or float
-        Dry bulb temperature in K.
-    t_dp : int or float
-        Dew point temperature in K.
-
-    Returns
-    -------
-    x_1 : float
-        Mole fraction of water vapor in mixture in [0, 1].
-
-    Examples
-    --------
-    >>> p = 101325
-    >>> t = 290
-    >>> t_dp = 280
-    >>> props.t_dp2x_1(p, t, t_dp)
-    0.00982822815586041
-    """
-    x_1 = hap.HAPropsSI('Y', 'P', p, 'T', t, 'Tdp', t_dp)
-    return x_1
 
 
 def x_12m_1(x1):
@@ -440,6 +440,6 @@ def t_dp2m_1(p, t, t_dp):
     >>> props.t_dp2m_1(p, t, t_dp)
     0.0061357476021502095
     """
-    x_1 = t_dp2x_1(p, t, t_dp)
+    x_1 = get_x_m(p, t, t_dp)
     m_1 = x_12m_1(x_1)
     return m_1
