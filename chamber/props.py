@@ -26,6 +26,7 @@ Functions
     get_d_12
     t_dp2rh
     t_dp2x_1
+    t_dp2m_1
     x_12m_1
 
 .. _CoolProp package:
@@ -360,7 +361,7 @@ def t_dp2rh(p, t, t_dp):
 
 
 def t_dp2x_1(p, t, t_dp):
-    """RH based on p, t and t_dp.
+    """Mole fraction of water vapor based on p, t and t_dp.
 
     Parameters
     ----------
@@ -411,3 +412,33 @@ def x_12m_1(x1):
     denominator = x1*M1 + (1-x1)*M2
     m1 = numerator/denominator
     return m1
+
+
+def t_dp2m_1(p, t, t_dp):
+    """Mass fraction of water vapor based on p, t and t_dp.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    m_1 : float
+        Mass fraction of water vapor in mixture in [0, 1].
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> props.t_dp2m_1(p, t, t_dp)
+    xxx
+    """
+    x_1 = t_dp2x_1(p, t, t_dp)
+    m_1 = x_12m_1(x_1)
+    return m_1

@@ -107,3 +107,10 @@ def test_x_12m_1():
         props.x_12m_1(0.01),
         0.006243391414375084
     )
+
+
+def test_t_dp2m_1():
+    assert math.isclose(
+        props.t_dp2m_1(P_VALUE, T_VALUE, TDP_VALUE),
+        0.0061357476021502095
+    )
