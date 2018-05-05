@@ -116,6 +116,13 @@ def test_get_m_1_sat():
     )
 
 
+def test_get_h_fg_sat():
+    assert math.isclose(
+        props.get_h_fg_sat(TS_VALUE),
+        2472806.6902607535
+        )
+
+
 def test_get_rh():
     assert math.isclose(
         props.get_rh(P_VALUE, T_VALUE, TDP_VALUE),

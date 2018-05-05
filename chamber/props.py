@@ -28,6 +28,7 @@ Functions
     get_x_1_sat
     get_m_1
     get_m_1_sat
+    get_h_fg
     get_rh
     x1_2_m1
 
@@ -36,6 +37,7 @@ Functions
 """
 
 from CoolProp import HumidAirProp as hap
+from CoolProp import CoolProp as cp
 
 M1 = 18.015
 M2 = 28.964
@@ -444,6 +446,31 @@ def get_m_1_sat(p, t_s):
     x_1_sat = get_x_1_sat(p, t_s)
     m_1_sat = x1_2_m1(x_1_sat)
     return m_1_sat
+
+
+def get_h_fg_sat(t_s):
+    """Specific enthalpy of vaporization for pure water.
+
+    Parameters
+    ----------
+    t_s : int or float
+        Dry bulb temperature of saturated vapor mixture in K.
+
+    Returns
+    -------
+    h_fg_sat : float
+        Specific enthalpy of vaporization for pure water in J/kg.
+
+    Examples
+    --------
+    >>> t_s = 285
+    >>> props.get_h_fg_sat(t_s)
+    2472806.6902607535
+    """
+    h_g = cp.PropsSI('H', 'T', t_s, 'Q', 1, 'water')
+    h_f = cp.PropsSI('H', 'T', t_s, 'Q', 0, 'water')
+    h_fg = h_g - h_f
+    return h_fg
 
 
 def get_rh(p, t, t_dp):
