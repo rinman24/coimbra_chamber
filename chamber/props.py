@@ -27,6 +27,7 @@ Functions
     get_x_1
     get_x_1_sat
     get_m_1
+    get_m_1_sat
     get_rh
     x1_2_m1
 
@@ -379,7 +380,7 @@ def get_x_1_sat(p, t_s):
 
     Examples
     --------
-     >>> p = 101325
+    >>> p = 101325
     >>> t_s = 285
     >>> props.get_x_1_sat(p, t_s)
     0.01376427605764327
@@ -389,7 +390,7 @@ def get_x_1_sat(p, t_s):
 
 
 def get_m_1(p, t, t_dp):
-    """Mass fraction of water vapor based on p, t and t_dp.
+    """Mass fraction of water vapor in the vapor mixture.
 
     Parameters
     ----------
@@ -403,7 +404,7 @@ def get_m_1(p, t, t_dp):
     Returns
     -------
     m_1 : float
-        Mass fraction of water vapor in mixture in [0, 1].
+        Mass fraction of water vapor in the vapor mixture in [0, 1].
 
     Examples
     --------
@@ -416,6 +417,33 @@ def get_m_1(p, t, t_dp):
     x_1 = get_x_1(p, t, t_dp)
     m_1 = x1_2_m1(x_1)
     return m_1
+
+
+def get_m_1_sat(p, t_s):
+    """Mass fraction of water vapor in the saturated vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t_s : int or float
+        Dry bulb temperature of saturated vapor mixture in K.
+
+    Returns
+    -------
+    m_1_sat : float
+        Mass fraction of water vapor in the saturated vapor mixture in [0, 1].
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t_s = 285
+    >>> props.get_m_1_sat(p, t_s)
+    0.008605868703401028
+    """
+    x_1_sat = get_x_1_sat(p, t_s)
+    m_1_sat = x1_2_m1(x_1_sat)
+    return m_1_sat
 
 
 def get_rh(p, t, t_dp):
