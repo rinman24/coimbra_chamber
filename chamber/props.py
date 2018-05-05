@@ -24,13 +24,11 @@ Functions
     get_alpha_m
     get_alpha_m_sat
     get_d_12
-    get_x_m
-    get_x_m_sat
-    t_dp2rh
-    t_dp2x_1
-    x_12m_1
-    t_dp2m_1
-    m_1s
+    get_x_1
+    get_x_1_sat
+    get_m_1
+    get_rh
+    x1_2_m1
 
 .. _CoolProp package:
    http://www.coolprop.org/
@@ -334,7 +332,7 @@ def get_d_12(p, t, ref):
         raise ValueError(err_msg)
 
 
-def get_x_m(p, t, t_dp):
+def get_x_1(p, t, t_dp):
     """The mole fraction of water vapor in the vapor mixture.
 
     Parameters
@@ -348,7 +346,7 @@ def get_x_m(p, t, t_dp):
 
     Returns
     -------
-    x_m : float
+    x_1 : float
         The mole fraction of water vapor in the vapor mixture in [0, 1].
 
     Examples
@@ -356,14 +354,14 @@ def get_x_m(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_x_m(p, t, t_dp)
+    >>> props.get_x_1(p, t, t_dp)
     0.00982822815586041
     """
-    x_m = hap.HAPropsSI('Y', 'P', p, 'T', t, 'Tdp', t_dp)
-    return x_m
+    x_1 = hap.HAPropsSI('Y', 'P', p, 'T', t, 'Tdp', t_dp)
+    return x_1
 
 
-def get_x_m_sat(p, t_s):
+def get_x_1_sat(p, t_s):
     """The mole fraction of water vapor in the saturated vapor mixture.
 
     Parameters
@@ -375,7 +373,7 @@ def get_x_m_sat(p, t_s):
 
     Returns
     -------
-    x_m_sat : float
+    x_1_sat : float
         The mole fraction of water vapor in the saturated vapor mixture in
         [0, 1].
 
@@ -383,68 +381,14 @@ def get_x_m_sat(p, t_s):
     --------
      >>> p = 101325
     >>> t_s = 285
-    >>> props.get_x_m_sat(p, t_s)
+    >>> props.get_x_1_sat(p, t_s)
     0.01376427605764327
     """
-    x_m_sat = hap.HAPropsSI('Y', 'P', p, 'T', t_s, 'RH', 1.0)
-    return x_m_sat
+    x_1_sat = hap.HAPropsSI('Y', 'P', p, 'T', t_s, 'RH', 1.0)
+    return x_1_sat
 
 
-def t_dp2rh(p, t, t_dp):
-    """RH based on p, t and t_dp.
-
-    Parameters
-    ----------
-    p : int or float
-        Pressure in Pa.
-    t : int or float
-        Dry bulb temperature in K.
-    t_dp : int or float
-        Dew point temperature in K.
-
-    Returns
-    -------
-    rh : float
-        Relative humidity in [0, 1].
-
-    Examples
-    --------
-    >>> p = 101325
-    >>> t = 290
-    >>> t_dp = 280
-    >>> props.t_dp2rh(p, t, t_dp)
-    0.5165573311068835
-    """
-    rh = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', t_dp)
-    return rh
-
-
-def x_12m_1(x1):
-    """m1 based on x1.
-
-    Parameters
-    ----------
-    x1 : float
-        Mole fraction of water vapor in [0, 1].
-
-    Returns
-    -------
-    m1 : float
-        Relative humidity in [0, 1].
-
-    Examples
-    --------
-    >>> x1 = 0.01
-    >>> props.x_12m_1(x1)
-    0.006243391414375084
-    """
-    numerator = x1*M1
-    denominator = x1*M1 + (1-x1)*M2
-    m1 = numerator/denominator
-    return m1
-
-
-def t_dp2m_1(p, t, t_dp):
+def get_m_1(p, t, t_dp):
     """Mass fraction of water vapor based on p, t and t_dp.
 
     Parameters
@@ -466,9 +410,63 @@ def t_dp2m_1(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.t_dp2m_1(p, t, t_dp)
+    >>> props.get_m_1(p, t, t_dp)
     0.0061357476021502095
     """
-    x_1 = get_x_m(p, t, t_dp)
-    m_1 = x_12m_1(x_1)
+    x_1 = get_x_1(p, t, t_dp)
+    m_1 = x1_2_m1(x_1)
+    return m_1
+
+
+def get_rh(p, t, t_dp):
+    """RH based on p, t and t_dp.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    rh : float
+        Relative humidity in [0, 1].
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> props.get_rh(p, t, t_dp)
+    0.5165573311068835
+    """
+    rh = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', t_dp)
+    return rh
+
+
+def x1_2_m1(x_1):
+    """Convert the mole fraction to mass fraction.
+
+    Parameters
+    ----------
+    x_1 : float
+        Mole fraction of water vapor in [0, 1].
+
+    Returns
+    -------
+    m_1 : float
+        Relative humidity in [0, 1].
+
+    Examples
+    --------
+    >>> x_1 = 0.01
+    >>> props.x1_2_m1(x_1)
+    0.006243391414375084
+    """
+    numerator = x_1*M1
+    denominator = x_1*M1 + (1-x_1)*M2
+    m_1 = numerator/denominator
     return m_1

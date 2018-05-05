@@ -88,36 +88,36 @@ def test_get_d_12():
     assert err_msg in str(err.value)
 
 
-def test_get_x_m():
+def test_get_x_1():
     assert math.isclose(
-        props.get_x_m(P_VALUE, T_VALUE, TDP_VALUE),
+        props.get_x_1(P_VALUE, T_VALUE, TDP_VALUE),
         0.00982822815586041
     )
 
 
-def test_get_x_m_sat():
+def test_get_x_1_sat():
     assert math.isclose(
-        props.get_x_m_sat(P_VALUE, TS_VALUE),
+        props.get_x_1_sat(P_VALUE, TS_VALUE),
         0.01376427605764327
     )
 
 
-def test_t_dp2rh():
+def test_get_m_1():
     assert math.isclose(
-        props.t_dp2rh(P_VALUE, T_VALUE, TDP_VALUE),
+        props.get_m_1(P_VALUE, T_VALUE, TDP_VALUE),
+        0.0061357476021502095
+    )
+
+
+def test_get_rh():
+    assert math.isclose(
+        props.get_rh(P_VALUE, T_VALUE, TDP_VALUE),
         0.5165573311068835
         )
 
 
-def test_x_12m_1():
+def test_x1_2_m1():
     assert math.isclose(
-        props.x_12m_1(0.01),
+        props.x1_2_m1(0.01),
         0.006243391414375084
-    )
-
-
-def test_t_dp2m_1():
-    assert math.isclose(
-        props.t_dp2m_1(P_VALUE, T_VALUE, TDP_VALUE),
-        0.0061357476021502095
     )
