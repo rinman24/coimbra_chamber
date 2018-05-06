@@ -4,17 +4,13 @@ import math
 
 import pytest
 
-from chamber.models import film
+from chamber import film
 
 
 P_VALUE = 101325
 TE_VALUE = 290
 TDP_VALUE = 280
 TS_VALUE = 285
-
-STATE_PARAMS = dict(
-    p=P_VALUE, t_e=TE_VALUE, t_dp=TDP_VALUE, t_s=TS_VALUE, ref='Mills', rule='1/2'
-    )
 
 
 def test_use_rule():
@@ -56,8 +52,8 @@ def test_use_rule():
 
 def test_est_props():
     # Test with ref = 'Mills' and rule = '1/2'
-    state_params = STATE_PARAMS.copy()
-    film_props = film.est_props(state_params)
+    film_props = film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+                                'Mills', '1/2')
 
     assert math.isclose(film_props['c_pm'], 1019.9627505486458)
     assert math.isclose(film_props['rho_m'], 1.2229936606324967)
@@ -66,8 +62,8 @@ def test_est_props():
     assert math.isclose(film_props['d_12'], 2.3955520502741308e-05)
 
     # Test with ref = 'Mills' and rule = '1/3'
-    state_params['rule'] = '1/3'
-    film_props = film.est_props(state_params)
+    film_props = film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+                                'Mills', '1/3')
 
     assert math.isclose(film_props['c_pm'], 1020.7363637843752)
     assert math.isclose(film_props['rho_m'], 1.2262478476537964)
@@ -76,9 +72,8 @@ def test_est_props():
     assert math.isclose(film_props['d_12'], 2.3838525775468913e-05)
 
     # Test with ref = 'Marrero' and rule = '1/2'
-    state_params['ref'] = 'Marrero'
-    state_params['rule'] = '1/2'
-    film_props = film.est_props(state_params)
+    film_props = film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+                                'Marrero', '1/2')
 
     assert math.isclose(film_props['c_pm'], 1019.9627505486458)
     assert math.isclose(film_props['rho_m'], 1.2229936606324967)
@@ -87,8 +82,8 @@ def test_est_props():
     assert math.isclose(film_props['d_12'], 2.323676676164935e-05)
 
     # Test with ref = 'Marrero' and rule = '1/3'
-    state_params['rule'] = '1/3'
-    film_props = film.est_props(state_params)
+    film_props = film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+                                'Marrero', '1/3')
 
     assert math.isclose(film_props['c_pm'], 1020.7363637843752)
     assert math.isclose(film_props['rho_m'], 1.2262478476537964)
@@ -97,19 +92,18 @@ def test_est_props():
     assert math.isclose(film_props['d_12'], 2.3097223037856368e-05)
 
     # Test raises ValueError for ref
-    state_params['ref'] = 'C. F. M. Coimbra'
     with pytest.raises(ValueError) as err:
-        film.est_props(state_params)
+        film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+                       'C. F. M. Coimbra', '1/2')
     err_msg = (
         "'C. F. M. Coimbra' is not a valid ref; try 'Mills' or 'Marrero'."
         )
     assert err_msg in str(err.value)
 
     # Test raises ValueError for rule
-    state_params['ref'] = 'Marrero'
-    state_params['rule'] = 'Nu'
     with pytest.raises(ValueError) as err:
-        film.est_props(state_params)
+        film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+                       'Mills', 'Nu')
     err_msg = "'Nu' is not a valid rule; try '1/2' or '1/3'."
     assert err_msg in str(err.value)
 
