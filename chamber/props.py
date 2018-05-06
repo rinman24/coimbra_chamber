@@ -292,7 +292,7 @@ def get_d_12(p, t, ref):
 
     Returns
     -------
-    alpha_m : float
+    d_12 : float
         The thermal diffusivity of the vapor mixture in m:math:`^2`/s.
 
     Examples
