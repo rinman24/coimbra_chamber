@@ -1,4 +1,4 @@
-from chamber import props
+from chamber.models import props
 
 """
 Thermophysical film properties of humid air.
