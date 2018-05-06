@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from chamber import props
+from chamber.models import props
 
 P_VALUE = 101325
 T_VALUE = 290

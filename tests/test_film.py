@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from chamber import film
+from chamber.models import film
 
 
 P_VALUE = 101325
