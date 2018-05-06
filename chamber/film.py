@@ -76,7 +76,7 @@ def use_rule(e_value, s_value, rule):
         raise ValueError(err_msg)
 
 
-def est_props(p, t_e, t_dp, t_s, ref, rule):
+def est_props(state_params):
     """Estimates of film properties.
 
     This function calculates estimations of constant film properties based on
@@ -92,23 +92,35 @@ def est_props(p, t_e, t_dp, t_s, ref, rule):
 
     Parameters
     ----------
-    p : int or float
-        Pressure in Pa.
-    t_e : int or float
-        Dry bulb temperature of the environment in K.
-    t_s : int or float
-        Dry bulb temperature of saturated vapor mixture in K.
-    t_dp : int or float
-        Dew point temperature in K.
-    ref : {'Mills', 'Marrero'}
-        Reference for binary species diffusiity, see ``Notes``.
-    rule : {'1/2', '1/3'}
-        Rule for calculating the `film_prop`, see ``Notes``.
+    state_params : dict(float)
+        `state_params` must contain the following keys:
+        'p' : int or float
+            Pressure in Pa.
+        't_e' : int or float
+            Dry bulb temperature of the environment in K.
+        't_s' : int or float
+            Dry bulb temperature of saturated vapor mixture in K.
+        't_dp' : int or float
+            Dew point temperature in K.
+        'ref' : {'Mills', 'Marrero'}
+            Reference for binary species diffusiity, see ``Notes``.
+        'rule' : {'1/2', '1/3'}
+            Rule for calculating the `film_prop`, see ``Notes``.
 
     Returns
     -------
     film_props : dict(float)
-        The film properties in the same units as inputs.
+        `film_props` contains the following keys:
+        'c_pm' : float
+            The specific heat of the saturated vapor mixture in J/kg K.
+        'rho_m' : float
+            The specific mass of the vapor mixture in kg/m:math:`^3`.
+        'k_m' : float
+            The thermal conductivity of the vapor mixture in W/m K.
+        'alpha_m' : float
+            The thermal diffusivity of the vapor mixture in m:math:`^2`/s.
+        'd_12' : float
+            The thermal diffusivity of the vapor mixture in m:math:`^2`/s.
 
     Examples
     --------
@@ -116,13 +128,10 @@ def est_props(p, t_e, t_dp, t_s, ref, rule):
     Let's get the film props as `p` = 101325, `t` = 290, `t_dp` = 280,
     `t_s` = 285, `ref` = 'Mills' and `rule` = '1/2'
 
-    >>> p = 101325
-    >>> t = 290
-    >>> t_dp = 280
-    >>> t_s = 285
-    >>> ref = 'Mills'
-    >>> rule = '1/2'
-    >>> film_props = film.est_props(p, t, t_dp, t_s, ref, rule)
+    >>> state_params = dict(
+    ...     p=101325, t_e=290, t_dp=280, t_s=285, ref='Mills', rule='1/2'
+    ...     )
+    >>> film_props = film.est_props(state_params)
     >>> film_props['c_pm']
     1019.9627505486458
     >>> film_props['rho_m']
@@ -136,8 +145,8 @@ def est_props(p, t_e, t_dp, t_s, ref, rule):
 
     Change `rule` to '1/3'
 
-    >>> rule = '1/3'
-    >>> film_props = film.est_props(p, t, t_dp, t_s, ref, rule)
+    >>> state_params['rule'] = '1/3'
+    >>> film_props = film.est_props(state_params)
     >>> film_props['c_pm']
     1020.7363637843752
     >>> film_props['rho_m']
@@ -151,17 +160,10 @@ def est_props(p, t_e, t_dp, t_s, ref, rule):
 
     Change `ref` to 'Marrero'. Only `film_props['d_12']` will update
 
-    >>> ref = 'Marrero'
-    >>> film_props = film.est_props(p, t, t_dp, t_s, ref, rule)
+    >>> state_params['ref'] = 'Marrero'
+    >>> film_props = film.est_props(state_params)
     >>> film_props['d_12']
     2.3097223037856368e-05
-
-    Raises
-    ------
-    ValueError
-        If `rule` is not in `{'1/2', '1/3'}`.
-    ValueError
-        If `ref` is not in `{'Mills', 'Marrero'}`
 
     Notes
     -----
@@ -172,6 +174,15 @@ def est_props(p, t_e, t_dp, t_s, ref, rule):
     .. [1] Mills, A. F. and Coimbra, C. F. M., 2016
        *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
     """
+    # Unpack the dictionary
+    p = state_params['p']
+    t_e = state_params['t_e']
+    t_dp = state_params['t_dp']
+    t_s = state_params['t_s']
+    rule = state_params['rule']
+    ref = state_params['ref']
+
+    # Calculate the parameters
     c_pm = _est_c_pm(p, t_e, t_dp, t_s, rule)
     rho_m = _est_rho_m(p, t_e, t_dp, t_s, rule)
     k_m = _est_k_m(p, t_e, t_dp, t_s, rule)
@@ -179,7 +190,7 @@ def est_props(p, t_e, t_dp, t_s, ref, rule):
     d_12 = _est_d_12(p, t_e, t_s, ref, rule)
     film_props = dict(
         c_pm=c_pm, rho_m=rho_m, k_m=k_m, alpha_m=alpha_m, d_12=d_12
-    )
+        )
     return film_props
 
 
