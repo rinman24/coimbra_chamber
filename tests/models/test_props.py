@@ -135,3 +135,10 @@ def test_x1_2_m1():
         props.x1_2_m1(0.01),
         0.006243391414375084
     )
+
+
+def test_get_c_pl():
+    assert math.isclose(
+        props.get_c_pl(TS_VALUE),
+        4192.729295040042
+        )

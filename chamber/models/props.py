@@ -31,6 +31,7 @@ Functions
     get_h_fg
     get_rh
     x1_2_m1
+    get_c_pl
 
 .. _CoolProp package:
    http://www.coolprop.org/
@@ -42,6 +43,10 @@ from CoolProp import CoolProp as cp
 M1 = 18.015
 M2 = 28.964
 
+
+# --------------------------------------------------------------------------- #
+# Vapor Mixture Properties
+# --------------------------------------------------------------------------- #
 
 def get_c_pm(p, t, t_dp):
     """The specific heat of the vapor mixture.
@@ -525,3 +530,30 @@ def x1_2_m1(x_1):
     denominator = x_1*M1 + (1-x_1)*M2
     m_1 = numerator/denominator
     return m_1
+
+
+# --------------------------------------------------------------------------- #
+# Liquid Properties
+# --------------------------------------------------------------------------- #
+
+def get_c_pl(t):
+    """Specific heat of pure liquid water.
+
+    Parameters
+    ----------
+    t : int or float
+        Temperature of the liquid water (condensed phase) in K.
+
+    Returns
+    -------
+    c_pl : float
+        Specific heat of pure liquid water in J/kg K.
+
+    Examples
+    --------
+    >>> t = 285
+    >>> props.get_c_pl(t)
+    4192.729295040042
+    """
+    c_pl = cp.PropsSI('Cpmass', 'T', t, 'Q', 0, 'water')
+    return c_pl
