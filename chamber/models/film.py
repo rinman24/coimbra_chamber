@@ -10,7 +10,8 @@ film properties based on an e-state, s-state, and averaging rule.
 Functions
 ---------
     use_rule
-    est_props
+    est_mix_props
+    est_liq_props
 
 .. _CoolProp package:
    http://www.coolprop.org/
@@ -76,7 +77,7 @@ def use_rule(e_value, s_value, rule):
         raise ValueError(err_msg)
 
 
-def est_props(p, t_e, t_dp, t_s, ref, rule):
+def est_mix_props(p, t_e, t_dp, t_s, ref, rule):
     """Estimates of film properties.
 
     This function calculates estimations of constant film properties based on
@@ -122,7 +123,7 @@ def est_props(p, t_e, t_dp, t_s, ref, rule):
     >>> t_s = 285
     >>> ref = 'Mills'
     >>> rule = '1/2'
-    >>> film_props = film.est_props(p, t, t_dp, t_s, ref, rule)
+    >>> film_props = film.est_mix_props(p, t, t_dp, t_s, ref, rule)
     >>> film_props['c_pm']
     1019.9627505486458
     >>> film_props['rho_m']
@@ -137,7 +138,7 @@ def est_props(p, t_e, t_dp, t_s, ref, rule):
     Change `rule` to '1/3'
 
     >>> rule = '1/3'
-    >>> film_props = film.est_props(p, t, t_dp, t_s, ref, rule)
+    >>> film_props = film.est_mix_props(p, t, t_dp, t_s, ref, rule)
     >>> film_props['c_pm']
     1020.7363637843752
     >>> film_props['rho_m']
@@ -152,7 +153,7 @@ def est_props(p, t_e, t_dp, t_s, ref, rule):
     Change `ref` to 'Marrero'. Only `film_props['d_12']` will update
 
     >>> ref = 'Marrero'
-    >>> film_props = film.est_props(p, t, t_dp, t_s, ref, rule)
+    >>> film_props = film.est_mix_props(p, t, t_dp, t_s, ref, rule)
     >>> film_props['d_12']
     2.3097223037856368e-05
 
@@ -181,6 +182,57 @@ def est_props(p, t_e, t_dp, t_s, ref, rule):
         c_pm=c_pm, rho_m=rho_m, k_m=k_m, alpha_m=alpha_m, d_12=d_12
     )
     return film_props
+
+
+def est_liq_props(t_s, t_t, rule):
+    """Estimates of liquid properties.
+
+    This function calculates estimations of constant liquid properties.
+    Properties are returned in a `dict` with the follwoing
+    keys:
+        * 'c_pl': Specific heat of vapor mixture film in J/kg K
+
+    Parameters
+    ----------
+    t_s : int or float
+        Dry bulb temperature of saturated vapor mixture in K.
+    t_t : int or float
+        Temperature of the liquid water (condensed phase) in K.
+    rule : {'1/2', '1/3'}
+        Rule for calculating the `film_prop`, see ``Notes``.
+
+    Returns
+    -------
+    liq_props : dict(float)
+        The film properties in the same units as inputs.
+
+    Examples
+    --------
+
+    Let's get the liquid props for `t_s` = 285, `t_t` = 290, `rule` = '1/2'
+
+    >>> t_s = 285
+    >>> t_t = 290
+    >>> rule = '1/2'
+    >>> liq_props = film.est_liq_props(t_s, t_t, rule)
+    >>> liq_props['c_pl']
+    4189.82872258844
+
+    Change `rule` to '1/3'
+
+    >>> rule = '1/3'
+    >>> liq_props = film.est_liq_props(t_s, t_t, rule)
+    >>> film_props['c_pl']
+    4190.7955800723075
+
+    Raises
+    ------
+    ValueError
+        If `rule` is not in `{'1/2', '1/3'}`.
+    """
+    c_pl = _est_c_pl(t_s, t_t, rule)
+    liq_props = dict(c_pl=c_pl)
+    return liq_props
 
 
 def _est_c_pm(p, t_e, t_dp, t_s, rule):
@@ -226,3 +278,12 @@ def _est_d_12(p, t_e, t_s, ref, rule):
 
     d_12_film = use_rule(d_12e, d_12s, rule)
     return d_12_film
+
+
+def _est_c_pl(t_s, t_t, rule):
+    """Specific heat of pure liquid water at the film temperature."""
+    c_pls = props.get_c_pl(t_s)
+    c_plt = props.get_c_pl(t_t)
+
+    c_pl_film = use_rule(c_plt, c_pls, rule)
+    return c_pl_film

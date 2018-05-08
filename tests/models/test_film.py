@@ -11,6 +11,7 @@ P_VALUE = 101325
 TE_VALUE = 290
 TDP_VALUE = 280
 TS_VALUE = 285
+TT_VALUE = 290
 
 
 def test_use_rule():
@@ -50,9 +51,9 @@ def test_use_rule():
     )
 
 
-def test_est_props():
+def test_est_mix_props():
     # Test with ref = 'Mills' and rule = '1/2'
-    film_props = film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+    film_props = film.est_mix_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
                                 'Mills', '1/2')
 
     assert math.isclose(film_props['c_pm'], 1019.9627505486458)
@@ -62,7 +63,7 @@ def test_est_props():
     assert math.isclose(film_props['d_12'], 2.3955520502741308e-05)
 
     # Test with ref = 'Mills' and rule = '1/3'
-    film_props = film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+    film_props = film.est_mix_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
                                 'Mills', '1/3')
 
     assert math.isclose(film_props['c_pm'], 1020.7363637843752)
@@ -72,7 +73,7 @@ def test_est_props():
     assert math.isclose(film_props['d_12'], 2.3838525775468913e-05)
 
     # Test with ref = 'Marrero' and rule = '1/2'
-    film_props = film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+    film_props = film.est_mix_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
                                 'Marrero', '1/2')
 
     assert math.isclose(film_props['c_pm'], 1019.9627505486458)
@@ -82,7 +83,7 @@ def test_est_props():
     assert math.isclose(film_props['d_12'], 2.323676676164935e-05)
 
     # Test with ref = 'Marrero' and rule = '1/3'
-    film_props = film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+    film_props = film.est_mix_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
                                 'Marrero', '1/3')
 
     assert math.isclose(film_props['c_pm'], 1020.7363637843752)
@@ -93,7 +94,7 @@ def test_est_props():
 
     # Test raises ValueError for ref
     with pytest.raises(ValueError) as err:
-        film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+        film.est_mix_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
                        'C. F. M. Coimbra', '1/2')
     err_msg = (
         "'C. F. M. Coimbra' is not a valid ref; try 'Mills' or 'Marrero'."
@@ -102,9 +103,26 @@ def test_est_props():
 
     # Test raises ValueError for rule
     with pytest.raises(ValueError) as err:
-        film.est_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
+        film.est_mix_props(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE,
                        'Mills', 'Nu')
     err_msg = "'Nu' is not a valid rule; try '1/2' or '1/3'."
+    assert err_msg in str(err.value)
+
+
+def test_est_liq_props():
+    # Test with rule = '1/2'
+    liq_props = film.est_liq_props(TS_VALUE, TT_VALUE, '1/2')
+    assert math.isclose(liq_props['c_pl'], 4189.82872258844)
+
+    # Test with rule = '1/3'
+    film_props = film.est_liq_props(TS_VALUE, TT_VALUE, '1/3')
+
+    assert math.isclose(film_props['c_pl'], 4190.7955800723075)
+
+    # Test raises ValueError for rule
+    with pytest.raises(ValueError) as err:
+        film.est_liq_props(TS_VALUE, TT_VALUE, 'No-Rules')
+    err_msg = "'No-Rules' is not a valid rule; try '1/2' or '1/3'."
     assert err_msg in str(err.value)
 
 
@@ -183,7 +201,7 @@ def test__est_alpha_m():
 
     # Test raises ValueError
     with pytest.raises(ValueError) as err:
-        film._est_k_m(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE, 'beta')
+        film._est_alpha_m(P_VALUE, TE_VALUE, TDP_VALUE, TS_VALUE, 'beta')
     err_msg = "'beta' is not a valid rule; try '1/2' or '1/3'."
     assert err_msg in str(err.value)
 
@@ -223,4 +241,24 @@ def test__est_d12():
     with pytest.raises(ValueError) as err:
         film._est_d_12(P_VALUE, TE_VALUE, TS_VALUE, 'Mills', 'pi')
     err_msg = "'pi' is not a valid rule; try '1/2' or '1/3'."
+    assert err_msg in str(err.value)
+
+
+def test__est_c_pl():
+    # Test rule = '1/2'
+    assert math.isclose(
+        film._est_c_pl(TS_VALUE, TT_VALUE, '1/2'),
+        4189.82872258844
+    )
+
+    # Test rule = '1/3'
+    assert math.isclose(
+        film._est_c_pl(TS_VALUE, TT_VALUE, '1/3'),
+        4190.7955800723075
+    )
+
+    # Test raises ValueError
+    with pytest.raises(ValueError) as err:
+        film._est_c_pl(TS_VALUE, TT_VALUE, 'gamma')
+    err_msg = "'gamma' is not a valid rule; try '1/2' or '1/3'."
     assert err_msg in str(err.value)
