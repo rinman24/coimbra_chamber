@@ -87,7 +87,7 @@ def est_mix_props(p, t_e, t_dp, t_s, ref, rule):
         * 'rho_m': Specific mass of vapor mixture film in kg/m:math:`^3`
         * 'k_m': Thermal conductivity of the vapor mixture film in W/m K.
         * 'alpha_m': Thermal diffusivity of the vapor mixture film in
-          m:math:`^2`/s
+          m:math:`^2`/s.
         * 'd_12': Binary species diffusivity of the vapor mixture film in
           m:math:`^2`/s
 
