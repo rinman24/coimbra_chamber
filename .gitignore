@@ -1,21 +1,20 @@
-# Compiled Source #
-###################
+##########
+# Python #
+##########
 *.pyc
+*__pycache__/
 
+#####################
 # Jupyter Notebooks #
 #####################
 *.ipynb
 
+###############
 # Directories #
 ###############
-.cache/
-__pycache__/
-chamber/example.py
-chamber/.ipynb_checkpoints/
-example.py
-abs_water.csv
-.vscode/settings.json
+*.ipynb_checkpoints/
 
+##################
 # OSX Attributes #
 ##################
 *.DS_Store
@@ -24,9 +23,14 @@ abs_water.csv
 # VS Code #
 ###########
 *.vscode
+*.cache/
 
-########
-# Sphinx
-########
-docs/_build/*
-!docs/_build/.gitkeep
+#######################
+# Local Documentation #
+#######################
+*docs/_build/
+
+##########
+# pytest #
+##########
+*.pytest_cache/
