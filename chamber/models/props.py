@@ -160,6 +160,35 @@ def get_rho_m_sat(p, t_s):
     return rho_m_sat
 
 
+def get_mu(p, t, rh):
+    """The viscocity of the vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    rh : int or float
+        Relative humidity percentage.
+
+    Returns
+    -------
+    mu : float
+        The viscocity of the vapor mixture in Pa*s.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> rh = 50
+    >>> props.get_mu(p, t, rh)
+    1.1938261652198243
+    """
+    mu = hap.HAPropsSI('mu', 'P', p, 'T', t, 'RH', rh)
+    return mu
+
+
 def get_k_m(p, t, t_dp):
     """The thermal conductivity of the vapor mixture.
 
