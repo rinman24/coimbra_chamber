@@ -12,7 +12,8 @@ results = {'Pressure (Pa)': [], 'Temperature (K)': [],
 					'Schmidt Marrero': []}
 
 
-# Gets relevant values and calculates Schmidt number
+# Gets relevant values, calculates Schmidt number for the testing range
+# and saves the results to a .csv file
 def get_schmidt(p, t, rh):
 	mills = props.get_d_12(p, t, 'Mills')
 	marrero = props.get_d_12(p, t, 'Marrero')
