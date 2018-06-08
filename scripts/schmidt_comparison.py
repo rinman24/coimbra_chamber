@@ -1,28 +1,11 @@
 import pandas as pd
 
+from chamber.models import params
 from chamber.models import props
 
 results = {'Pressure (Pa)': [], 'Temperature (K)': [],
 					'Ralative Humidity': [], 'Schmidt Mills': [],
 					'Schmidt Marrero': []}
-
-# Gets relevant values, calculates Schmidt number for the testing range
-# and saves the results to a .csv file
-def get_schmidt(p, t, rh):
-	mills = props.get_d_12(p, t, 'Mills')
-	marrero = props.get_d_12(p, t, 'Marrero')
-
-	# Sometimes errors arise with coolprop from high relative humidities
-	try:
-		rho = 1/hap.HAPropsSI('Vha', 'P', p, 'T', t, 'RH', rh)
-	except ValueError:
-		return False, False
-
-	mu = props.get_mu(p, t, rh)
-	schmidt_mills = mu/(rho*mills)
-	schmidt_marrero = mu/(rho*marrero)
-
-	return schmidt_mills, schmidt_marrero
 
 if __name__=="__main__":
 	for p in range(30000,100001,10000):
