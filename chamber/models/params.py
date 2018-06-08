@@ -32,8 +32,8 @@ def get_schmidt(p, t, t_dp, ref):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_c_pm(p, t, t_dp)
-    1017.641910841458
+    >>> props.get_schmidt(p, t, t_dp, 'Mills')
+    0.6104149007992397
 
     Notes
     -----
