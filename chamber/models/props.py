@@ -32,6 +32,8 @@ Functions
     get_rh
     x1_2_m1
     get_c_pl
+    get_mu
+    get_tdp
 
 .. _CoolProp package:
    http://www.coolprop.org/
@@ -158,35 +160,6 @@ def get_rho_m_sat(p, t_s):
     v_ha_sat = hap.HAPropsSI('Vha', 'P', p, 'T', t_s, 'RH', 1.0)
     rho_m_sat = 1/v_ha_sat
     return rho_m_sat
-
-
-def get_mu(p, t, rh):
-    """The viscocity of the vapor mixture.
-
-    Parameters
-    ----------
-    p : int or float
-        Pressure in Pa.
-    t : int or float
-        Dry bulb temperature in K.
-    rh : int or float
-        Relative humidity percentage.
-
-    Returns
-    -------
-    mu : float
-        The viscocity of the vapor mixture in Pa*s.
-
-    Examples
-    --------
-    >>> p = 101325
-    >>> t = 290
-    >>> rh = 50
-    >>> props.get_mu(p, t, rh)
-    1.1938261652198243
-    """
-    mu = hap.HAPropsSI('mu', 'P', p, 'T', t, 'RH', rh)
-    return mu
 
 
 def get_k_m(p, t, t_dp):
@@ -586,3 +559,61 @@ def get_c_pl(t):
     """
     c_pl = cp.PropsSI('Cpmass', 'T', t, 'Q', 0, 'water')
     return c_pl
+
+
+def get_mu(p, t, t_dp):
+    """The viscocity of the vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    mu : float
+        The viscocity of the vapor mixture in Pa*s.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> props.get_mu(p, t, t_dp)
+    1.800077369582236e-5
+    """
+    mu = hap.HAPropsSI('mu', 'P', p, 'T', t, 'Tdp', t_dp)
+    return mu
+
+
+def get_tdp(p, t, rh):
+    """The dew point temperature of the vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    rh : float.
+        Relative humidity fraction between 0 and 1.
+
+    Returns
+    -------
+    t_dp : float
+        The dew point temperature of the vapor mixture in K.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> rh = 0.5
+    >>> props.get_mu(p, t, rh)
+    279.5268317988297
+    """
+    t_dp = hap.HAPropsSI('Tdp', 'P', p, 'T', t, 'R', rh)
+    return t_dp
