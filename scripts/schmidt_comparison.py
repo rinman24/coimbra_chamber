@@ -13,8 +13,8 @@ if __name__=="__main__":
 		for t in range(275, int(310*pow(p/101325, 0.09)), 5):
 			for t_dp in (props.get_tdp(p, t, i/100) for i in range(5, 90, 5)):
 				# relative humidity should be a fraction between 0 and 1
-				schmidt_mills = get_schmidt(p, t, t_dp, 'Mills')
-				schmidt_marrero = get_schmidt(p, t, t_dp, 'Marrero')
+				schmidt_mills = params.get_schmidt(p, t, t_dp, 'Mills')
+				schmidt_marrero = params.get_schmidt(p, t, t_dp, 'Marrero')
 				results['Pressure (Pa)'].append(p)
 				results['Temperature (K)'].append(t)
 				results['Ralative Humidity'].append(rh)
