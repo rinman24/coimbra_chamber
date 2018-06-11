@@ -29,12 +29,15 @@ Functions
     get_m_1
     get_m_1_sat
     get_h_fg
-    get_rh
     x1_2_m1
+    get_mu
     get_c_pl
+    get_rh
+    get_tdp
 
 .. _CoolProp package:
    http://www.coolprop.org/
+
 """
 
 from CoolProp import HumidAirProp as hap
@@ -49,7 +52,7 @@ M2 = 28.964
 # --------------------------------------------------------------------------- #
 
 def get_c_pm(p, t, t_dp):
-    """The specific heat of the vapor mixture.
+    """Get specific heat of vapor mixture.
 
     Parameters
     ----------
@@ -72,13 +75,14 @@ def get_c_pm(p, t, t_dp):
     >>> t_dp = 280
     >>> props.get_c_pm(p, t, t_dp)
     1017.641910841458
+
     """
     c_pm = hap.HAPropsSI('cp_ha', 'P', p, 'T', t, 'Tdp', t_dp)
     return c_pm
 
 
 def get_c_pm_sat(p, t_s):
-    """The specific heat of the saturated vapor mixture.
+    """Get specific heat of saturated vapor mixture.
 
     Parameters
     ----------
@@ -98,13 +102,14 @@ def get_c_pm_sat(p, t_s):
     >>> t_s = 285
     >>> props.get_c_pm_sat(p, t_s)
     1022.2835902558337
+
     """
     c_pm_sat = hap.HAPropsSI('cp_ha', 'P', p, 'T', t_s, 'RH', 1.0)
     return c_pm_sat
 
 
 def get_rho_m(p, t, t_dp):
-    """The specific mass of the vapor mixture.
+    """Get specific mass of vapor mixture.
 
     Parameters
     ----------
@@ -127,6 +132,7 @@ def get_rho_m(p, t, t_dp):
     >>> t_dp = 280
     >>> props.get_rho_m(p, t, t_dp)
     1.213231099568598
+
     """
     v_ha = hap.HAPropsSI('Vha', 'P', p, 'T', t, 'Tdp', t_dp)
     rho_m = 1/v_ha
@@ -134,7 +140,7 @@ def get_rho_m(p, t, t_dp):
 
 
 def get_rho_m_sat(p, t_s):
-    """The specific mass of the saturated vapor mixture.
+    """Get specific mass of saturated vapor mixture.
 
     Parameters
     ----------
@@ -154,6 +160,7 @@ def get_rho_m_sat(p, t_s):
     >>> t_s = 285
     >>> props.get_rho_m_sat(p, t_s)
     1.2327562216963954
+
     """
     v_ha_sat = hap.HAPropsSI('Vha', 'P', p, 'T', t_s, 'RH', 1.0)
     rho_m_sat = 1/v_ha_sat
@@ -161,7 +168,7 @@ def get_rho_m_sat(p, t_s):
 
 
 def get_k_m(p, t, t_dp):
-    """The thermal conductivity of the vapor mixture.
+    """Get thermal conductivity of vapor mixture.
 
     Parameters
     ----------
@@ -184,13 +191,14 @@ def get_k_m(p, t, t_dp):
     >>> t_dp = 280
     >>> props.get_k_m(p, t, t_dp)
     0.02563350730647246
+
     """
     k_m = hap.HAPropsSI('k', 'P', p, 'T', t, 'Tdp', t_dp)
     return k_m
 
 
 def get_k_m_sat(p, t_s):
-    """The thermal conductivity of the saturated vapor mixture.
+    """Get thermal conductivity of saturated vapor mixture.
 
     Parameters
     ----------
@@ -210,13 +218,14 @@ def get_k_m_sat(p, t_s):
     >>> t_s = 285
     >>> props.get_k_m_sat(p, t_s)
     0.025260388108991345
+
     """
     k_m_sat = hap.HAPropsSI('k', 'P', p, 'T', t_s, 'RH', 1.0)
     return k_m_sat
 
 
 def get_alpha_m(p, t, t_dp):
-    """The thermal diffusivity of the vapor mixture.
+    """Get thermal diffusivity of vapor mixture.
 
     Parameters
     ----------
@@ -239,6 +248,7 @@ def get_alpha_m(p, t, t_dp):
     >>> t_dp = 280
     >>> props.get_alpha_m(p, t, t_dp)
     2.076201562300882e-05
+
     """
     # Get properties needed to calculate alpha_m
     c_pm = get_c_pm(p, t, t_dp)
@@ -251,7 +261,7 @@ def get_alpha_m(p, t, t_dp):
 
 
 def get_alpha_m_sat(p, t_s):
-    """The thermal diffusivity of the saturated vapor mixture.
+    """Get thermal diffusivity of saturated vapor mixture.
 
     Parameters
     ----------
@@ -272,6 +282,7 @@ def get_alpha_m_sat(p, t_s):
     >>> t_s = 285
     >>> props.get_alpha_m_sat(p, t_s)
     2.0044324561030463e-05
+
     """
     # Get properties needed to calculate alpha_m
     c_pm_sat = get_c_pm_sat(p, t_s)
@@ -284,7 +295,7 @@ def get_alpha_m_sat(p, t_s):
 
 
 def get_d_12(p, t, ref):
-    """The binary species diffusivity of the vapor mixture.
+    """Get binary species diffusivity of vapor mixture.
 
     Parameters
     ----------
@@ -325,6 +336,7 @@ def get_d_12(p, t, ref):
     ----------
     .. [1] Mills, A. F. and Coimbra, C. F. M., 2016
        *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
+
     """
     p_norm = p/101325
     if ref == 'Mills':
@@ -341,7 +353,7 @@ def get_d_12(p, t, ref):
 
 
 def get_x_1(p, t, t_dp):
-    """The mole fraction of water vapor in the vapor mixture.
+    """Get mole fraction of water vapor in mixture.
 
     Parameters
     ----------
@@ -364,13 +376,14 @@ def get_x_1(p, t, t_dp):
     >>> t_dp = 280
     >>> props.get_x_1(p, t, t_dp)
     0.00982822815586041
+
     """
     x_1 = hap.HAPropsSI('Y', 'P', p, 'T', t, 'Tdp', t_dp)
     return x_1
 
 
 def get_x_1_sat(p, t_s):
-    """The mole fraction of water vapor in the saturated vapor mixture.
+    """Get mole fraction of water vapor in saturated mixture.
 
     Parameters
     ----------
@@ -391,6 +404,7 @@ def get_x_1_sat(p, t_s):
     >>> t_s = 285
     >>> props.get_x_1_sat(p, t_s)
     0.01376427605764327
+
     """
     x_1_sat = hap.HAPropsSI('Y', 'P', p, 'T', t_s, 'RH', 1.0)
     return x_1_sat
@@ -420,6 +434,7 @@ def get_m_1(p, t, t_dp):
     >>> t_dp = 280
     >>> props.get_m_1(p, t, t_dp)
     0.0061357476021502095
+
     """
     x_1 = get_x_1(p, t, t_dp)
     m_1 = x1_2_m1(x_1)
@@ -447,6 +462,7 @@ def get_m_1_sat(p, t_s):
     >>> t_s = 285
     >>> props.get_m_1_sat(p, t_s)
     0.008605868703401028
+
     """
     x_1_sat = get_x_1_sat(p, t_s)
     m_1_sat = x1_2_m1(x_1_sat)
@@ -471,12 +487,101 @@ def get_h_fg_sat(t_s):
     >>> t_s = 285
     >>> props.get_h_fg_sat(t_s)
     2472806.6902607535
+
     """
     h_g = cp.PropsSI('H', 'T', t_s, 'Q', 1, 'water')
     h_f = cp.PropsSI('H', 'T', t_s, 'Q', 0, 'water')
     h_fg = h_g - h_f
     return h_fg
 
+
+def x1_2_m1(x_1):
+    """Convert the mole fraction to mass fraction.
+
+    Parameters
+    ----------
+    x_1 : float
+        Mole fraction of water vapor in [0, 1].
+
+    Returns
+    -------
+    m_1 : float
+        Relative humidity in [0, 1].
+
+    Examples
+    --------
+    >>> x_1 = 0.01
+    >>> props.x1_2_m1(x_1)
+    0.006243391414375084
+
+    """
+    numerator = x_1*M1
+    denominator = x_1*M1 + (1-x_1)*M2
+    m_1 = numerator/denominator
+    return m_1
+
+
+def get_mu(p, t, t_dp):
+    """Get dynamic viscocity of vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    mu : float
+        The viscocity of the vapor mixture in Pa*s.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> props.get_mu(p, t, t_dp)
+    1.800077369582236e-5
+
+    """
+    mu = hap.HAPropsSI('mu', 'P', p, 'T', t, 'Tdp', t_dp)
+    return mu
+
+
+# --------------------------------------------------------------------------- #
+# Liquid Properties
+# --------------------------------------------------------------------------- #
+
+def get_c_pl(t):
+    """Specific heat of pure liquid water.
+
+    Parameters
+    ----------
+    t : int or float
+        Temperature of the liquid water (condensed phase) in K.
+
+    Returns
+    -------
+    c_pl : float
+        Specific heat of pure liquid water in J/kg K.
+
+    Examples
+    --------
+    >>> t = 285
+    >>> props.get_c_pl(t)
+    4192.729295040042
+
+    """
+    c_pl = cp.PropsSI('Cpmass', 'T', t, 'Q', 0, 'water')
+    return c_pl
+
+
+# --------------------------------------------------------------------------- #
+# Water Vapor Content
+# --------------------------------------------------------------------------- #
 
 def get_rh(p, t, t_dp):
     """RH based on p, t and t_dp.
@@ -502,58 +607,37 @@ def get_rh(p, t, t_dp):
     >>> t_dp = 280
     >>> props.get_rh(p, t, t_dp)
     0.5165573311068835
+
     """
     rh = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', t_dp)
     return rh
 
 
-def x1_2_m1(x_1):
-    """Convert the mole fraction to mass fraction.
+def get_tdp(p, t, rh):
+    """Get dew point temperature of vapor mixture.
 
     Parameters
     ----------
-    x_1 : float
-        Mole fraction of water vapor in [0, 1].
-
-    Returns
-    -------
-    m_1 : float
-        Relative humidity in [0, 1].
-
-    Examples
-    --------
-    >>> x_1 = 0.01
-    >>> props.x1_2_m1(x_1)
-    0.006243391414375084
-    """
-    numerator = x_1*M1
-    denominator = x_1*M1 + (1-x_1)*M2
-    m_1 = numerator/denominator
-    return m_1
-
-
-# --------------------------------------------------------------------------- #
-# Liquid Properties
-# --------------------------------------------------------------------------- #
-
-def get_c_pl(t):
-    """Specific heat of pure liquid water.
-
-    Parameters
-    ----------
+    p : int or float
+        Pressure in Pa.
     t : int or float
-        Temperature of the liquid water (condensed phase) in K.
+        Dry bulb temperature in K.
+    rh : float.
+        Relative humidity fraction between 0 and 1.
 
     Returns
     -------
-    c_pl : float
-        Specific heat of pure liquid water in J/kg K.
+    t_dp : float
+        The dew point temperature of the vapor mixture in K.
 
     Examples
     --------
-    >>> t = 285
-    >>> props.get_c_pl(t)
-    4192.729295040042
+    >>> p = 101325
+    >>> t = 290
+    >>> rh = 0.5
+    >>> props.get_mu(p, t, rh)
+    279.5268317988297
+
     """
-    c_pl = cp.PropsSI('Cpmass', 'T', t, 'Q', 0, 'water')
-    return c_pl
+    t_dp = hap.HAPropsSI('Tdp', 'P', p, 'T', t, 'R', rh)
+    return t_dp

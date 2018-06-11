@@ -10,6 +10,7 @@ P_VALUE = 101325
 T_VALUE = 290
 TDP_VALUE = 280
 TS_VALUE = 285
+RH_VALUE = 0.5
 
 
 def test_get_c_pm():
@@ -141,4 +142,18 @@ def test_get_c_pl():
     assert math.isclose(
         props.get_c_pl(TS_VALUE),
         4192.729295040042
+        )
+
+
+def test_get_mu():
+    assert math.isclose(
+        props.get_mu(P_VALUE, T_VALUE, TDP_VALUE),
+        1.800077369582236e-5
+        )
+
+
+def test_get_tdp():
+    assert math.isclose(
+        props.get_tdp(P_VALUE, T_VALUE, RH_VALUE),
+        279.5268317988297
         )
