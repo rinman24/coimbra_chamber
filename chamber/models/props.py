@@ -677,7 +677,7 @@ def get_M(p, t, t_dp):
 
     
 def get_gamma(p, t, t_dp):
-    """Get the  coefficient of ***something*** of the vapor mixture.
+    """Get the coefficient of volumetric expansion of the vapor mixture.
 
     Parameters
     ----------
@@ -691,7 +691,7 @@ def get_gamma(p, t, t_dp):
     Returns
     -------
     gamma : float
-        The total molar mass of the vapor mixture in m:math:`^3`/kg.
+        The coefficient of volumetric expansion of the vapor mixture in m:math:`^-3`.
 
     Examples
     --------
