@@ -645,7 +645,7 @@ def get_tdp(p, t, rh):
 
     
 def get_M(p, t, t_dp):
-    """Get total mass of the vapor mixture.
+    """Get the molar mass of the vapor mixture.
 
     Parameters
     ----------
