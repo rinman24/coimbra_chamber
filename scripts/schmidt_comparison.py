@@ -1,5 +1,8 @@
 import pandas as pd
 
+import sys
+sys.path.insert(0, 'C:/Users/sabre/Documents/GitHub/chamber')
+
 from chamber.models import params
 from chamber.models import props
 
@@ -7,7 +10,7 @@ results = {'Pressure (Pa)': [], 'Temperature (K)': [], 'Ralative Humidity': [],
            'Dew Point (K)': [], 'Schmidt Mills': [], 'Schmidt Marrero': []}
 
 if __name__=="__main__":
-	for p in range(3e4, 1.01325e5, 1e4):
+	for p in range(int(3e4), int(1.01325e5), int(1e4)):
 		# Uses the model limit as the upper bound of the loop range
 		for t in range(275, int(310*pow(p/101325, 0.09)), 5):
 			for rh in (rh_int/100 for rh_int in range(5, 90, 5)):
