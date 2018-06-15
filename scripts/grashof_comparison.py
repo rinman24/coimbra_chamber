@@ -24,4 +24,4 @@ if __name__=="__main__":
 
 	df = pd.DataFrame.from_dict(results)
 	df[['Pressure (Pa)', 'Temperature (K)', 'Ralative Humidity',
-		'Grashof']].to_csv('schmidt_comparison.csv', sep=',')
+		'Grashof']].to_csv('grashof_comparison.csv', sep=',')
