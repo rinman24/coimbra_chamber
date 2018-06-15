@@ -79,7 +79,7 @@ def get_grashof(p, t, t_dp):
     >>> t = 290
     >>> t_dp = 280
     >>> params.get_grashof(p, t, t_dp)
-    157.31009268101118
+    231.5493976780182
 
     """
     g = const.ACC_GRAV
