@@ -12,7 +12,7 @@ from chamber import const
 
 
 def get_schmidt(p, t, t_dp, ref):
-	"""The Schmidt number for the vapor mixture.
+    """Get Schmidt number for vapor mixture.
 
     Parameters
     ----------
@@ -46,14 +46,15 @@ def get_schmidt(p, t, t_dp, ref):
     ----------
     .. [1] Mills, A. F. and Coimbra, C. F. M., 2016
        *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
-    """
-	d_12 = props.get_d_12(p, t, ref)
-	rho = props.get_rho_m(p, t, t_dp)
-	mu = props.get_mu(p, t, t_dp)
 
-	# Calculate Schmidt number
-	schmidt = mu/(rho*d_12)
-	return schmidt
+    """
+    d_12 = props.get_d_12(p, t, ref)
+    rho = props.get_rho_m(p, t, t_dp)
+    mu = props.get_mu(p, t, t_dp)
+    
+    # Calculate Schmidt number
+    schmidt = mu/(rho*d_12)
+    return schmidt
 
 
 def get_grashof(p, t, t_dp):
