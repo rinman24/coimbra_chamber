@@ -6,8 +6,7 @@ sys.path.insert(0, 'C:/Users/sabre/Documents/GitHub/chamber')
 from chamber.models import params
 from chamber.models import props
 
-results = {'Pressure (Pa)': [], 'Temperature (K)': [], 'Ralative Humidity': [],
-           'Dew Point (K)': [], 'Grashof': []}
+df = pd.DataFrame()
 
 if __name__=="__main__":
 	for p in range(int(3e4), int(1.01325e5), int(1e4)):
@@ -16,12 +15,11 @@ if __name__=="__main__":
 			for rh in (rh_int/100 for rh_int in range(5, 90, 5)):
 				t_dp = props.get_tdp(p, t, rh)
 				grashof = params.get_grashof(p, t, t_dp)
-				results['Pressure (Pa)'].append(p)
-				results['Temperature (K)'].append(t)
-				results['Ralative Humidity'].append(rh)
-				results['Dew Point (K)'].append(rh)
-				results['Grashof'].append(grashof)
+				df = df.append({
+					'Pressure (Pa)': p, 'Temperature (K)': t,
+					'Dew Point (K)': t_dp, 'Ralative Humidity': rh,
+				    'Grashof': grashof
+				    }, ignore_index=True)
 
-	df = pd.DataFrame.from_dict(results)
-	df[['Pressure (Pa)', 'Temperature (K)', 'Ralative Humidity',
-		'Grashof']].to_csv('grashof_comparison.csv', sep=',')
+	df[['Pressure (Pa)', 'Temperature (K)', 'Dew Point (K)',
+	    'Ralative Humidity', 'Grashof']].to_csv('grashof_comparison.csv')
