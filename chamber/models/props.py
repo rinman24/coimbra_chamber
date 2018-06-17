@@ -641,3 +641,68 @@ def get_tdp(p, t, rh):
     """
     t_dp = hap.HAPropsSI('Tdp', 'P', p, 'T', t, 'R', rh)
     return t_dp
+
+
+def get_mol_wgt(p, t, t_dp):
+    """Get the molar mass of the vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    M : float
+        The total molar mass of the vapor mixture in kg/mol.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> props.get_mol_wgt(p, t, t_dp)
+    28.856390729921483
+
+    """
+    x_1 = get_x_1(p, t, t_dp)
+    M = x_1*M1 + (1 - x_1)*M2
+    return M
+
+
+def get_gamma(p, t, t_dp):
+    """Get the coefficient of volumetric expansion of the vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    gamma : float
+        The coefficient of volumetric expansion of the vapor mixture
+        in m:math:`^-3`.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> props.get_gamma(p, t, t_dp)
+    0.49602914637400736
+
+    """
+    # Suffix `-r` is used to denote the reference state
+    rho_r = get_rho_m(p, t, t_dp)
+    mol_wgt_r = get_mol_wgt(p, t, t_dp)
+    gamma = (1/rho_r)*(mol_wgt_r/M1 - 1)
+    return gamma

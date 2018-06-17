@@ -20,3 +20,10 @@ def test_get_schmidt():
             params.get_schmidt(P_VALUE, T_VALUE, TDP_VALUE, 'Marrero'),
             0.6272163625320014
             )
+
+
+def test_get_grashof():
+    assert math.isclose(
+            params.get_grashof(P_VALUE, T_VALUE, TDP_VALUE),
+            231.5493976780182
+            )

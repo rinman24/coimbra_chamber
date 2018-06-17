@@ -157,3 +157,17 @@ def test_get_tdp():
         props.get_tdp(P_VALUE, T_VALUE, RH_VALUE),
         279.5268317988297
         )
+
+
+def test_get_mol_wgt():
+    assert math.isclose(
+        props.get_mol_wgt(P_VALUE, T_VALUE, TDP_VALUE),
+        28.856390729921483
+        )
+
+
+def test_get_gamma():
+    assert math.isclose(
+        props.get_gamma(P_VALUE, T_VALUE, TDP_VALUE),
+        0.49602914637400736
+        )
