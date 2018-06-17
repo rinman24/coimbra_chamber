@@ -14,6 +14,7 @@ Table of Contents
   * `Dependencies`_
   * `Setting up Initial State of MySQL Database`_
   * `Preferred Way to Run Tests`_
+  * `Preferred Way to Run Scripts`_
   * `Images`_
 
 Description
@@ -88,7 +89,7 @@ Preferred Way to Run Tests
 
 Back to `Table of Contents`_
 
-1. From the repo directory; i.e., ucsd_ch
+1. From the repo directory; i.e., chamber
 ::
 
     $ python -m pytest tests/<your-test-name>.py -v --capture=no
@@ -96,6 +97,20 @@ Back to `Table of Contents`_
 It should also be noted that the test_const.py file in the test directory
 does not acctually contain tests, but rather the constants that are
 needed for testing.
+
+
+Preferred Way to Run Scripts
+---------------------------
+
+Back to `Table of Contents`_
+
+1. From the repo directory; i.e., chamber
+::
+
+    $ python -m chamber.scripts.<yout-script-name>
+
+It should also be noted that the `.py` is not required at the end of this line.
+
 
 Images
 ------
