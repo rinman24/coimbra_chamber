@@ -643,8 +643,7 @@ def get_tdp(p, t, rh):
     return t_dp
 
 
-    
-def get_M(p, t, t_dp):
+def get_mol_wgt(p, t, t_dp):
     """Get the molar mass of the vapor mixture.
 
     Parameters
@@ -671,11 +670,10 @@ def get_M(p, t, t_dp):
 
     """
     x_1 = get_x_1(p, t, t_dp)
-    M = x_1*M1 + (1-x_1)*M2
+    M = x_1*M1 + (1 - x_1)*M2
     return M
 
 
-    
 def get_gamma(p, t, t_dp):
     """Get the coefficient of volumetric expansion of the vapor mixture.
 
@@ -691,7 +689,8 @@ def get_gamma(p, t, t_dp):
     Returns
     -------
     gamma : float
-        The coefficient of volumetric expansion of the vapor mixture in m:math:`^-3`.
+        The coefficient of volumetric expansion of the vapor mixture
+        in m:math:`^-3`.
 
     Examples
     --------
@@ -703,6 +702,6 @@ def get_gamma(p, t, t_dp):
 
     """
     rho = get_rho_m(p, t, t_dp)
-    M = get_M(p, t, t_dp)
-    gamma = (1/rho)*(M/M1-1)
+    mol_wgt = get_mol_wgt(p, t, t_dp)
+    gamma = (1/rho)*(mol_wgt/M1 - 1)
     return gamma

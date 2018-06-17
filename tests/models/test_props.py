@@ -159,9 +159,9 @@ def test_get_tdp():
         )
 
 
-def test_get_M():
+def test_get_mol_wgt():
     assert math.isclose(
-        props.get_M(P_VALUE, T_VALUE, TDP_VALUE),
+        props.get_mol_wgt(P_VALUE, T_VALUE, TDP_VALUE),
         28.856390729921483
         )
 

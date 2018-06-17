@@ -98,5 +98,5 @@ def get_grashof(p, t, t_dp):
     nu = mu/rho
 
     # Calculate Schmidt number (Sh)
-    grashof = g*gamma_1*rho(m_1s-m_1e)*pow(radius, 3)/pow(nu, 2)
+    grashof = g*gamma_1*rho*(m_1s-m_1e)*pow(radius, 3)/pow(nu, 2)
     return grashof
