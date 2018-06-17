@@ -48,12 +48,12 @@ def get_schmidt(p, t, t_dp, ref):
        *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
 
     """
-    d_12 = props.get_d_12(p, t, ref)
+    D_12 = props.get_d_12(p, t, ref)
     rho = props.get_rho_m(p, t, t_dp)
     mu = props.get_mu(p, t, t_dp)
-    
+
     # Calculate Schmidt number
-    schmidt = mu/(rho*d_12)
+    schmidt = mu/(rho*D_12)
     return schmidt
 
 
@@ -83,14 +83,20 @@ def get_grashof(p, t, t_dp):
     231.5493976780182
 
     """
+    # Constants
     g = const.ACC_GRAV
-    R = const.R_IN_TUBE
-    gamma = props.get_gamma(p, t, t_dp)
-    mu = props.get_mu(p, t, t_dp)
-    m_s = props.get_m_1_sat(p, t)
-    m_1 = props.get_m_1(p, t, t_dp)
-    rho = props.get_rho_m(p, t, t_dp)
+    radius = const.R_IN_TUBE
 
-    # Calculate Schmidt number
-    grashof = rho*g*gamma*(m_s-m_1)*(R**3)/(mu/rho)**2
+    # Calculate water vapor parameters
+    gamma_1 = props.get_gamma(p, t, t_dp)
+    m_1s = props.get_m_1_sat(p, t)
+    m_1e = props.get_m_1(p, t, t_dp)
+
+    # Get vapor properties
+    rho = props.get_rho_m(p, t, t_dp)
+    mu = props.get_mu(p, t, t_dp)
+    nu = mu/rho
+
+    # Calculate Schmidt number (Sh)
+    grashof = g*gamma_1*rho(m_1s-m_1e)*pow(radius, 3)/pow(nu, 2)
     return grashof
