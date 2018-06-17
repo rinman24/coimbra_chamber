@@ -665,7 +665,7 @@ def get_mol_wgt(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_M(p, t, t_dp)
+    >>> props.get_mol_wgt(p, t, t_dp)
     28.856390729921483
 
     """
@@ -701,7 +701,8 @@ def get_gamma(p, t, t_dp):
     0.49602914637400736
 
     """
-    rho = get_rho_m(p, t, t_dp)
-    mol_wgt = get_mol_wgt(p, t, t_dp)
-    gamma = (1/rho)*(mol_wgt/M1 - 1)
+    # Suffix `-r` is used to denote the reference state
+    rho_r = get_rho_m(p, t, t_dp)
+    mol_wgt_r = get_mol_wgt(p, t, t_dp)
+    gamma = (1/rho_r)*(mol_wgt_r/M1 - 1)
     return gamma
