@@ -1,6 +1,11 @@
 """
 Nondimensional parameters.
 
+Attributes
+----------
+    RADIUS : float
+        Inside radius of Stefan tube used in experiments
+
 Functions
 ---------
     get_schmidt
@@ -10,6 +15,7 @@ Functions
 from chamber.models import props
 from chamber import const
 
+RADIUS = 0.015
 
 def get_schmidt(p, t, t_dp, ref):
     """Get Schmidt number for vapor mixture.
@@ -85,7 +91,7 @@ def get_grashof(p, t, t_dp):
     """
     # Constants
     g = const.ACC_GRAV
-    radius = const.R_IN_TUBE
+    radius = RADIUS
 
     # Calculate water vapor parameters
     gamma_1 = props.get_gamma(p, t, t_dp)
