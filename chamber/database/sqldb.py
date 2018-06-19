@@ -33,9 +33,9 @@ def connect_sqldb(database):
     cnx : MySQLConnection
         Returns the MySQL connection object
     """
-    config = {'user': os.environ['MySqlUserName'],
-              'password': os.environ['MySqlCredentials'],
-              'host': os.environ['MySqlHost'],
+    config = {'user': os.environ['MYSQLUSERNAME'],
+              'password': os.environ['MYSQLCREDENTIALS'],
+              'host': os.environ['MYSQLHOST'],
               'database': database}
     try:
         cnx = conn.connect(**config)

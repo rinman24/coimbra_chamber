@@ -13,7 +13,7 @@ from nptdms import TdmsFile
 import pytest
 
 import chamber.const as const
-import chamber.sqldb as sqldb
+from chamber.database import sqldb
 import tests.test_const as test_const
 
 
