@@ -29,9 +29,7 @@ def df_01():
 
 @pytest.fixture(scope='module')
 def df_bad():
-    """
-    Fixture to instantiate only one pd.DataFrame object for testing.
-    """
+    """Fixture to instantiate only one pd.DataFrame object for testing."""
     data = [[1, 2, 3], [4, 5, 6]]
     columns = ['A', 'B', 'C']
     dataframe = pd.DataFrame(data, columns=columns)
@@ -86,7 +84,7 @@ def test__format_dew_point(df_01, df_bad):
         "'DataFrame' object has no attribute 'DewPoint'"
         )
 
-    
+
 def test__format_pressure(df_01, df_bad):
     assert math.isclose(df_01.Pressure[0], 100156.841)
     assert math.isclose(df_01.Pressure[100], 100161.21800000001)
