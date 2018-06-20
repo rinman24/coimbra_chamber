@@ -1,7 +1,7 @@
 """Docstring."""
 from math import cos, pi, sin
 
-import chamber.tools as tools
+from chamber.tools import tools
 
 
 class TestTools(object):

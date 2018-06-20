@@ -2,7 +2,7 @@
 
 from math import exp, isclose, log, pi, sqrt
 
-import chamber.laser as laser
+from chamber.tools import laser
 
 
 class TestLaser(object):
