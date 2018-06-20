@@ -25,5 +25,5 @@ def test_get_schmidt():
 def test_get_grashof():
     assert math.isclose(
             params.get_grashof(P_VALUE, T_VALUE, TDP_VALUE),
-            231.5493976780182
+            523.3337477478809
             )

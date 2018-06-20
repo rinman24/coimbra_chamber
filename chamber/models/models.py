@@ -1,4 +1,5 @@
 """Docstring."""
+
 import pandas as pd
 
 from chamber.models import film
@@ -7,7 +8,9 @@ from chamber.models import props
 
 class Spalding:
     """Init."""
+
     def __init__(self, p, t_e, t_dp, ref, rule):
+        """Init."""
         self._t_s_guess = None
         self._s_state = None
         self._u_state = None
@@ -30,8 +33,8 @@ class Spalding:
     # ----------------------------------------------------------------------- #
     @property
     def film_guide(self):
-        """Dictionary of how to calculate film props.
-        
+        """Persist information for the calculation of film props.
+
         Keys
         ----
         'ref' : Reference for binary species diffusiity.
@@ -45,7 +48,7 @@ class Spalding:
 
         This should not be confused with the e-state which contains
         'm_1e' and 'h_e' and requires a guess at the surface temperature.
-        
+
         Keys
         ----
         'p' : Pressure in Pa of the experimental state.
@@ -62,6 +65,8 @@ class Spalding:
     @property
     def s_state(self):
         """
+        Persist saturated state.
+
         Dictonary containing variables for the s-state, based on guess at
         surface temperature.
 
@@ -72,7 +77,8 @@ class Spalding:
         ----
         'm_1s_g' : Mass fraction of water vapor in the s-state (saturated vapor
             mixture) in [0, 1].
-        'h_s_g' : Mixture enthalpy at the s-state (saturated vapor mixture) in J/kg.
+        'h_s_g' : Mixture enthalpy at the s-state (saturated vapor mixture) in
+            J/kg.
         'h_fgs_g' : Specific enthalpy of vaporization for pure water at t_s in
             J/kg.
         """
@@ -81,6 +87,8 @@ class Spalding:
     @property
     def u_state(self):
         """
+        Persist u state.
+
         Dictionary containing variables for the u-state, based on guess at
         surface temperature.
 
@@ -96,8 +104,10 @@ class Spalding:
     @property
     def liq_props(self):
         """
-        Dictionary containing variables for the liquid properties, based on guess at
-        surface temperature.
+        Persist liquid properties.
+
+        Dictionary containing variables for the liquid properties, based on
+        guess at surface temperature.
 
         Keys include an '_g' suffix to indicate that each value is based on
         t_s_guess.
@@ -111,6 +121,8 @@ class Spalding:
     @property
     def t_state(self):
         """
+        Persist t state.
+
         Dictionary containing variables for the t-state, based on guess at
         surface temperature.
 
@@ -126,6 +138,8 @@ class Spalding:
     @property
     def film_props(self):
         """
+        Persist film properties.
+
         Dictionary containing variables for the vapor mixture film properties,
         based on guess at surface temperature.
 
@@ -143,15 +157,18 @@ class Spalding:
             m:math:`^2`/s
         """
         return self._film_props
-    
+
     @property
     def e_state(self):
         """
+        Persist e state.
+
         Dictonary containing variables for the e-state, based on guess at
         surface temperature and experimental state.
 
-        Some keys include an '_g' suffix to indicate that each value is based on
-        t_s_guess.
+        Some keys include an '_g' suffix to indicate that each value is based
+        on t_s_guess.
+
         Keys
         ----
         m_1e
@@ -165,8 +182,7 @@ class Spalding:
 
     def _set_s_state(self):
         if self.t_s_guess:
-            m_1s_g = props.get_m_1_sat(self._exp_state['p'],
-                                     self.t_s_guess)
+            m_1s_g = props.get_m_1_sat(self._exp_state['p'], self.t_s_guess)
             h_fgs_g = props.get_h_fg_sat(self.t_s_guess)
             h_s_g = 0
             self._s_state = dict(m_1s_g=m_1s_g, h_fgs_g=h_fgs_g, h_s_g=h_s_g)
@@ -234,7 +250,8 @@ class Spalding:
 
     def _set_e_state(self):
         if self.film_props:
-            m_1e = props.get_m_1(self.exp_state['p'], self.exp_state['t_e'], self.exp_state['t_dp'])
+            m_1e = props.get_m_1(self.exp_state['p'], self.exp_state['t_e'],
+                                 self.exp_state['t_dp'])
             c_pm_g = self.film_props['c_pm_g']
             t_e = self.exp_state['t_e']
             t_s_g = self.t_s_guess
@@ -247,82 +264,3 @@ class Spalding:
                 "Cannot set `e-state` when `self.film_props` is None."
                 )
             raise ValueError(err_msg)
-
-
-    # !!!! ERROR HERE IN HOW YOU ARE CALCULATING c_pm!!!
-    # We need the film state first, and then we can evaluate c_pm!!
-    # So, lets write the film_props first.
-
-    # I am in the process of rewriting docsrings for the properties
-    # when I realized this error. Fix the docstrings and then come back
-    # to this problem. This way commits are atomistic.
-
-    # However, I just realized again that the e-state depends on the film prop
-    # c_pm and the mixture depends on the e_state, so, we may need to be creative here.
-
-    # def _set_e_state(self):
-    #     if self.s_state:
-    #         m_1e = props.get_m_1(self.exp_state['p'],
-    #                              self.exp_state['t_e'],
-    #                              self.exp_state['t_dp'])
-    #         c_pm = props.get_c_pm(self.exp_state['p'],
-    #                               self.exp_state['t_e'],
-    #                               self.exp_state['t_dp'])
-    #         h_e = c_pm*(self.exp_state['t_e']-self.t_s_guess)
-    #         self._e_state = dict(m_1e=m_1e, h_e=h_e)
-    #     else:
-    #         err_msg = (
-    #             "Cannot set `e-state` when `self.s_state` is None."
-    #             )
-    #         raise ValueError(err_msg)
-
-    # def _set_potentials(self):
-    #     if self.film_state:
-    #         m_1e = self.e_state['m_1e']
-    #         m_1s = self.s_state['m_1s']
-    #         b_m = (m_1s - m_1e)/(1 - m_1s)
-
-    #         h_s = self.s_state['h_s']
-    #         h_e = self.e_state['h_e']
-    #         h_u = self.u_state['h_u']
-    #         b_h_numer = h_s - h_e
-    #         b_h_denom = h_u + ()
-    #         # HERE IS YOUR ISSUE, YOU CANNOT JUST SET THE BH NUMBER BECAUSE IN
-    #         # GENERAL IT DEPENDS ON MDDP, THIS SHOLD BE DONE IN THE SOLVER.
-    #         #
-    #         # WE NEED TO FIND A WAY TO SPECIFY QCU, QRS, DMDY, AND DHDY FOR
-    #         # THIS MODEL FOR IT TO REMAIN GENERAL ENOUGH
-    #         #
-    #         # PERHAPS THESE DEFAULT TO SOME VALUE (NONE) AND WE CAN CONFIGURE
-    #         # THEM ON THE FLY WHEN WE HAVE AN INSTANCE,
-    #         # THIS IS THE STRATEGY METHOD
-    #         # THIS IS THE STRATEGY METHOD
-    #         # THIS IS THE STRATEGY METHOD
-    #         # THIS IS THE STRATEGY METHOD
-    #         # THIS IS THE STRATEGY METHOD
-    #         # AWESOME, I JUST NEED TO CREATE A METHOD TYPE ON THE FLY.
-    #         # PERFECT! RESEARCH PAYS OFF!
-
-    #         # Do this
-    #         # First make q_cu and q_rs methods that return None (or just None)
-    #         #
-    #         # import types
-    #         #
-    #         # then write methods to change the private method (or attribute) q_cu/q_rs
-    #         # from a None to a function that is a
-    #         # types.MethodType(function, self)
-    #         # Now, when we configure the instance we can change these
-    #         # attributes.
-    #         # 
-    #         # Then write all the stratiges as module level functions, for
-    #         # example
-    #         # 
-    #         # def no_rad: return 0
-    #         # def no_qcu: return 0
-    #         # def black: return sig(ts**4-te**4)
-    #         # def Tstate: return mddp(h_t-h_u)
-    #         # This should be a lot of fun!!! 
-    #         #
-    #         # The interesting part is that the module level funstion will
-    #         # still take `self` as the first argument, just like it was
-    #         # a method!! So cool once you get it.

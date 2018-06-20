@@ -1,6 +1,4 @@
-"""
-chi2 module
-"""
+"""Module for performing chi-squared linear regression."""
 
 import math
 import random
@@ -18,72 +16,52 @@ random.seed(10)
 
 
 def _s(sigma, n):
-    """
-    Calculate S from Numerical Recipes 15.2.4 where sigma is constant.
-    """
+    """Calculate S from Numerical Recipes 15.2.4 with constant sigma."""
     return 1/pow(sigma, 2) * n
 
 
 def _s1(x, sigma):
-    """
-    Calculate S_x from Numerical Recipes 15.2.4 where sigma is constant.
-    """
+    """Calculate S_x from Numerical Recipes 15.2.4 with constant sigma."""
     return sum(list(map(lambda x: x/pow(sigma, 2), x)))
 
 
 def _sxx(x, sigma):
-    """
-    Calculate S_xx from Numerical Recipes 15.2.4 where sigma is constant.
-    """
+    """Calculate S_xx from Numerical Recipes 15.2.4 with constant sigma."""
     return sum(list(map(lambda x: pow(x, 2)/pow(sigma, 2), x)))
 
 
 def _sxy(x, y, sigma):
-    """
-    Calculate S_xx from Numerical Recipes 15.2.4 where sigma is constant.
-    """
+    """Calculate S_xx from Numerical Recipes 15.2.4 with constant sigma."""
     return sum(list(map(lambda x, y: (x * y)/pow(sigma, 2), x, y)))
 
 
 def _delta(s, sx, sxx):
-    """
-    Calculate Delta from Numerical Recipes 15.2.6 where sigma is constant.
-    """
+    """Calculate Delta from Numerical Recipes 15.2.6 with constant sigma."""
     return s*sxx - pow(sx, 2)
 
 
 def _a(sx, sy, sxx, sxy, delta):
-    """
-    Calculate a from Numerical Recipes 15.2.6 where sigma is constant.
-    """
+    """Calculate a from Numerical Recipes 15.2.6 with constant sigma."""
     return (sxx*sy - sx*sxy)/delta
 
 
 def _b(s, sx, sy, sxy, delta):
-    """
-    Calculate b from Numerical Recipes 15.2.6 where sigma is constant.
-    """
+    """Calculate b from Numerical Recipes 15.2.6 with constant sigma."""
     return (s*sxy - sx*sy)/delta
 
 
 def _sig_a(sxx, delta):
-    """
-    Calculate sigma_a from Numerical Recipes 15.2.9 where sigma is constant.
-    """
+    """Calculate sigma_a from Numerical Recipes 15.2.9 with constant sigma."""
     return math.sqrt(sxx/delta)
 
 
 def _sig_b(s, delta):
-    """
-    Calculate sigma_a from Numerical Recipes 15.2.9 where sigma is constant.
-    """
+    """Calculate sigma_a from Numerical Recipes 15.2.9 with constant sigma."""
     return math.sqrt(s/delta)
 
 
 def _chi2(x, y, a, b, sigma):
-    """
-    Calculate chi^2 from Numerical Recipes 15.2.2 where sigma is constant.
-    """
+    """Calculate chi^2 from Numerical Recipes 15.2.2 with constant sigma."""
     return sum(list(map(lambda xi, yi: pow((yi-a-b*xi)/sigma, 2), x, y)))
 
 
@@ -93,9 +71,7 @@ def _chi2(x, y, a, b, sigma):
 
 
 def chi2(x, y, sigma, plot=False):
-    """
-    Use all of the helper function above to determine chi2 stats.
-    """
+    """Use all of the helper function above to determine chi2 stats."""
     s_res = _s(sigma, len(x))
     sx_res = _s1(x, sigma)
     sy_res = _s1(y, sigma)
@@ -141,9 +117,7 @@ def chi2(x, y, sigma, plot=False):
 
 
 def _calc_bins(y, res):
-    """
-    Use the resolution to determine bins for the function's range.
-    """
+    """Use the resolution to determine bins for the function's range."""
     y_max = max(y)
     y_min = min(y)
     bins = [y_min]
@@ -156,16 +130,12 @@ def _calc_bins(y, res):
 
 
 def add_steps(y, resolution):
-    """
-    Use bins to digitize y in to specified resolution.
-    """
+    """Use bins to digitize y in to specified resolution."""
     bins = _calc_bins(y, resolution)
     idx = np.digitize(y, bins)
     return [bins[i-1] + 0.5*resolution for i in idx]
 
 
 def add_noise(y, amp):
-    """
-    Use amp to add noise to _y attribute.
-    """
+    """Use amp to add noise to _y attribute."""
     return list(map(lambda x: x + random.uniform(-1, 1)*amp, y))
