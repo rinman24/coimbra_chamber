@@ -8,6 +8,7 @@ from chamber.models import params
 
 P_VALUE = 101325
 T_VALUE = 290
+TS_VALUE = 289
 TDP_VALUE = 280
 
 
@@ -24,6 +25,6 @@ def test_get_schmidt():
 
 def test_get_grashof():
     assert math.isclose(
-            params.get_grashof(P_VALUE, T_VALUE, TDP_VALUE),
-            231.5493976780182
+            params.get_grashof(P_VALUE, T_VALUE, TS_VALUE, TDP_VALUE),
+            456.280130439354
             )

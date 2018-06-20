@@ -63,15 +63,17 @@ def get_schmidt(p, t, t_dp, ref):
     return schmidt
 
 
-def get_grashof(p, t, t_dp):
+def get_grashof(p, t_e, t_s, t_dp):
     """Get Grashof number for vapor mixture.
 
     Parameters
     ----------
     p : int or float
         Pressure in Pa.
-    t : int or float
+    t_e : int or float
         Dry bulb temperature in K.
+    t_s : int or float
+        Water surface temperature in K.
     t_dp : int or float
         Dew point temperature in K.
 
@@ -83,10 +85,11 @@ def get_grashof(p, t, t_dp):
     Examples
     --------
     >>> p = 101325
-    >>> t = 290
+    >>> t_e = 290
+    >>> t_s = 289
     >>> t_dp = 280
-    >>> params.get_grashof(p, t, t_dp)
-    231.5493976780182
+    >>> params.get_grashof(p, t_e, t_s, t_dp)
+    456.280130439354
 
     """
     # Constants
@@ -94,15 +97,15 @@ def get_grashof(p, t, t_dp):
     radius = RADIUS
 
     # Calculate water vapor parameters
-    gamma_1 = props.get_gamma(p, t, t_dp)
-    m_1s = props.get_m_1_sat(p, t)
-    m_1e = props.get_m_1(p, t, t_dp)
+    gamma_1 = props.get_gamma(p, t_e, t_dp)
+    m_1s = props.get_m_1_sat(p, t_s)
+    m_1e = props.get_m_1(p, t_e, t_dp)
 
     # Get vapor properties
-    rho = props.get_rho_m(p, t, t_dp)
-    mu = props.get_mu(p, t, t_dp)
+    rho = props.get_rho_m(p, t_e, t_dp)
+    mu = props.get_mu(p, t_e, t_dp)
     nu = mu/rho
 
-    # Calculate Schmidt number (Sh)
-    grashof = g*gamma_1*rho*(m_1s-m_1e)*pow(radius, 3)/pow(nu, 2)
+    # Calculate Grashof number (Gr)
+    grashof = g*gamma_1*rho*(m_1s-m_1e)*pow(radius, 3)/pow(nu, 2) + (t_s-t_e)/t_e
     return grashof
