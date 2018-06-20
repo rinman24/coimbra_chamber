@@ -29,9 +29,7 @@ def df_01():
 
 @pytest.fixture(scope='module')
 def df_bad():
-    """
-    Fixture to instantiate only one pd.DataFrame object for testing.
-    """
+    """Fixture to instantiate only one pd.DataFrame object for testing."""
     data = [[1, 2, 3], [4, 5, 6]]
     columns = ['A', 'B', 'C']
     dataframe = pd.DataFrame(data, columns=columns)
@@ -39,6 +37,7 @@ def df_bad():
 
 
 def test__zero_time(df_01, df_bad):
+    """Test _zero_time."""
     assert df_01.Idx[0] == 8000
 
     df_01 = anlys._zero_time(df_01)
@@ -48,7 +47,7 @@ def test__zero_time(df_01, df_bad):
         anlys._zero_time(df_bad)
     assert err.value.args[0] == "'DataFrame' object has no attribute 'Idx'"
 
-    
+
 def test__format_temp(df_01, df_bad):
     assert math.isclose(df_01.TC4[0], 290.799)
     assert math.isclose(df_01.TC7[100], 290.358)
@@ -68,7 +67,7 @@ def test__format_temp(df_01, df_bad):
         )
     assert err.value.args[0] == err_msg
 
-    
+
 def test__format_dew_point(df_01, df_bad):
     assert math.isclose(df_01.DewPoint[0], 259.04)
     assert math.isclose(df_01.DewPoint[100], 259.145)
@@ -86,7 +85,7 @@ def test__format_dew_point(df_01, df_bad):
         "'DataFrame' object has no attribute 'DewPoint'"
         )
 
-    
+
 def test__format_pressure(df_01, df_bad):
     assert math.isclose(df_01.Pressure[0], 100156.841)
     assert math.isclose(df_01.Pressure[100], 100161.21800000001)
@@ -104,7 +103,7 @@ def test__format_pressure(df_01, df_bad):
         "'DataFrame' object has no attribute 'Pressure'"
         )
 
-    
+
 def test__add_avg_te(df_01, df_bad):
     assert 'Te' not in set(df_01)
 

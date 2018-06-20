@@ -1,3 +1,4 @@
+"""Implementaion of Hardy equations for water vapor content in air."""
 import math
 
 G_COEFF = (-2.8365744e3, -6.028076559e3, 1.954263612e1, -2.737830188e-2,
@@ -16,13 +17,16 @@ B_COEFF_ICE = (-8.2308868e1, 5.6519110e-1, -1.5304505e-3, 1.5395086e-6)
 
 
 def get_p_sat(p_in, t_in):
+    """Get saturation vapor pressure."""
     enh_fact, p_sat_ideal = _get_enh_fact(p_in, t_in, retrun_p=True)
     p_sat = enh_fact*p_sat_ideal
-    return p_sat 
+    return p_sat
 
 
 def _get_p_sat_water_ideal(t_in):
     """
+    Get ideal saturaton vapor pressure over water.
+
     Valid from 0 C to 100 C, extrapolated to -100 to 200 in literature.
     """
     sum_ = sum(G_COEFF[i] * pow(t_in, i-2) for i in range(7))
@@ -32,7 +36,11 @@ def _get_p_sat_water_ideal(t_in):
 
 
 def _get_p_sat_ice_ideal(t_in):
-    """Valid from -100 C to 0 C."""
+    """
+    Get ideal saturation vapor pressure over ice.
+
+    Valid from -100 C to 0 C.
+    """
     sum_ = sum(K_COEFF[i] * pow(t_in, i-1) for i in range(5))
     last_term = K_COEFF[5] * math.log(t_in)
     p_sat_ice = math.exp(sum_ + last_term)

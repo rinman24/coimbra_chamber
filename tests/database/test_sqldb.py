@@ -13,7 +13,7 @@ from nptdms import TdmsFile
 import pytest
 
 import chamber.const as const
-import chamber.sqldb as sqldb
+from chamber.database import sqldb
 import tests.test_const as test_const
 
 
@@ -36,7 +36,7 @@ def cursor():
 
 @pytest.fixture(scope='module')
 def test_tdms_obj():
-    """Fixture to instantiate only one TdmsFile object for testing"""
+    """Fixture to instantiate only one TdmsFile object for testing."""
     return (TdmsFile(test_const.CORRECT_FILE_LIST[0]),  # IsMass 1 Duty 5%
             TdmsFile(test_const.CORRECT_FILE_LIST[1]),  # IsMass 1 Duty 0%
             TdmsFile(test_const.CORRECT_FILE_LIST[2]),  # IsMass 0 Duty 5%
@@ -47,17 +47,17 @@ class TestSqlDb(object):
     """Unit testing of sqldb.py."""
 
     def test_connect_sqldb(self, cursor):
-        """Can a connection to tbe database be created?"""
+        """Test connection to database."""
         assert cursor
 
     def test_create_tables(self, cursor):
-        """"Can tables be created in the datbase?"""
+        """Test create_tables."""
         sqldb.create_tables(cursor, const.TABLES)
         cursor.execute("SELECT 1 FROM Setting LIMIT 1;")
         assert not cursor.fetchall()
 
     def test_setting_exists(self, cursor):
-        """Can existing settings be found in the database?"""
+        """Test setting_exists."""
         cursor.execute(const.ADD_SETTING, test_const.SETTINGS_TEST_1)
         assert sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_1)
         assert not sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_2)
@@ -86,7 +86,7 @@ class TestSqlDb(object):
     #         assert False
 
     def test_get_setting_info(self, test_tdms_obj):
-        """Test output when reading .tdms files for settings"""
+        """Test output when reading .tdms files for settings."""
         assert test_const.TDMS_01_SETTING == sqldb.get_setting_info(
             test_tdms_obj[0])
         assert test_const.TDMS_02_SETTING == sqldb.get_setting_info(
@@ -97,14 +97,14 @@ class TestSqlDb(object):
             test_tdms_obj[3])  # This is the same setting at 2
 
     def test_get_test_info(self, test_tdms_obj):
-        """Test dictionary output when reading .tdms files for tests"""
+        """Test dictionary output when reading .tdms files for tests."""
         assert test_const.TDMS_01_TEST == sqldb.get_test_info(test_tdms_obj[0])
         assert test_const.TDMS_02_TEST == sqldb.get_test_info(test_tdms_obj[1])
         assert test_const.TDMS_03_TEST == sqldb.get_test_info(test_tdms_obj[2])
         assert test_const.TDMS_04_TEST == sqldb.get_test_info(test_tdms_obj[3])
 
     def test_get_obs_info(self, test_tdms_obj):
-        """Test output when converting Observation data to a dict of strs"""
+        """Test output when converting Observation data to a dict of strs."""
         assert test_const.TDMS_01_OBS_07 == sqldb.get_obs_info(
             test_tdms_obj[0], test_const.TEST_INDEX)
         assert test_const.TDMS_02_OBS_07 == sqldb.get_obs_info(
@@ -115,6 +115,7 @@ class TestSqlDb(object):
             test_tdms_obj[3], test_const.TEST_INDEX)
 
     def test_get_temp_info(self, test_tdms_obj):
+        """Docstring."""
         assert test_const.TDMS_01_THM_07 == sqldb.get_temp_info(
             test_tdms_obj[0], test_const.TEST_INDEX, test_const.TC_INDEX)
         assert test_const.TDMS_02_THM_07 == sqldb.get_temp_info(
@@ -125,7 +126,7 @@ class TestSqlDb(object):
             test_tdms_obj[3], test_const.TEST_INDEX, test_const.TC_INDEX)
 
     def test_add_tube_info(self, cursor):
-        """Tets data insertion into Tube and handling of dulicate tubes"""
+        """Tets data insertion into Tube and handling of dulicate tubes."""
         sqldb.add_tube_info(cursor)
         cursor.execute("SELECT TubeID FROM Tube;")
         assert cursor.fetchone()[0] == 1
@@ -295,7 +296,7 @@ class TestSqlDb(object):
 
 
 def drop_tables(cursor, bol):
-    """Drops databese tables if bol is true, does not drop if false"""
+    """Drop databese tables if bol is true."""
     if bol:
         print("Dropping tables...")
         cursor.execute("DROP TABLE IF EXISTS " +
@@ -305,6 +306,7 @@ def drop_tables(cursor, bol):
 
 
 def truncate(cursor, table):
-        cursor.execute('SET FOREIGN_KEY_CHECKS=0')
-        cursor.execute('TRUNCATE {}'.format(table))
-        cursor.execute('SET FOREIGN_KEY_CHECKS=1')
+    """Truncate tables."""
+    cursor.execute('SET FOREIGN_KEY_CHECKS=0')
+    cursor.execute('TRUNCATE {}'.format(table))
+    cursor.execute('SET FOREIGN_KEY_CHECKS=1')
