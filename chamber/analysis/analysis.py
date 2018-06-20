@@ -15,7 +15,7 @@ import pandas as pd
 import numpy as np
 import scipy.signal as signal
 
-import chamber.chi2
+from chamber.analysis import chi2
 
 TC_LIST = ['TC{0}'.format(i) for i in range(4, 14)]
 TC_SET = set(TC_LIST)
@@ -108,7 +108,7 @@ def analysis(dataframe, sigma=4e-8, steps=100, plot=False):
         for len_ in _half_len_gen(dataframe, idx, steps=steps):
             print('{0}: \thalf_length={1}'.format(rh, len_))
             time, mass = _get_stat_group(dataframe, idx, len_)
-            stats = chamber.chi2.chi2(time, mass, sigma, plot=plot)
+            stats = chi2.chi2(time, mass, sigma, plot=plot)
             stats.append(rh)
             res.append(stats)
     return pd.DataFrame(
