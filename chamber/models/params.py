@@ -10,12 +10,14 @@ Functions
 ---------
     get_schmidt
     get_grashof
+
 """
 
 from chamber.models import props
 from chamber import const
 
 RADIUS = 0.015
+
 
 def get_schmidt(p, t, t_dp, ref):
     """Get Schmidt number for vapor mixture.
