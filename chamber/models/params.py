@@ -91,9 +91,9 @@ def get_grashof(p, t_e, t_dp, t_s):
     >>> p = 101325
     >>> t_e = 290
     >>> t_dp = 280
-    >>> t_s = 289
+    >>> t_s = 289.5
     >>> params.get_grashof(p, t_e, t_dp, t_s)
-    456.280130439354
+    230.11072973650792
 
     """
     # Constants
