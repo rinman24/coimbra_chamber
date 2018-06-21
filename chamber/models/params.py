@@ -109,10 +109,11 @@ def get_grashof(p, t_e, t_dp, t_s):
     rho = props.get_rho_m(p, t_e, t_dp)
     mu = props.get_mu(p, t_e, t_dp)
     nu = mu/rho
+    beta = 1/t_e
 
     # Calculate Grashof number (Gr)
     grashof = (g
-               * (gamma_1*rho*(m_1s - m_1e) + (t_s - t_e)/t_e)
+               * (gamma_1*rho*(m_1s - m_1e) + beta*(t_s - t_e))
                * pow(radius, 3)
                / pow(nu, 2))
 
