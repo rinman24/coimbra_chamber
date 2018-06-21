@@ -21,7 +21,7 @@ import tests.test_const as test_const
 def cursor():
     """Cursor Fixture at module level so that only one connection is made."""
     print("\nConnecting to MySQL...")
-    cnx = sqldb.connect_sqldb("test")
+    cnx = sqldb.connect("test")
     cur = cnx.cursor()
     print("Connected.")
     yield cur
@@ -46,7 +46,7 @@ def test_tdms_obj():
 class TestSqlDb(object):
     """Unit testing of sqldb.py."""
 
-    def test_connect_sqldb(self, cursor):
+    def test_connect(self, cursor):
         """Test connection to database."""
         assert cursor
 

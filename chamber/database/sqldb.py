@@ -1,3 +1,4 @@
+
 """Docstring."""
 from decimal import Decimal
 import numpy as np
@@ -15,7 +16,7 @@ from nptdms import TdmsFile
 import chamber.const as const
 
 
-def connect_sqldb(database):
+def connect(database):
     """
     Use connect constructor to connect to a MySQL server.
 
@@ -58,8 +59,8 @@ def create_tables(cur, tables):
 
     Uses a list of tuples where the 0 index is the name of the table and the 1
     index is a string of MySQL DDL used to create the table. A list is required
-    so that the DDL can be executed in order so that foreign key constraint
-    errors do not occur.
+    so that the DDL can be executed in order to avoid foreign key constraint
+    errors.
 
     Parameters
     ----------
@@ -125,40 +126,6 @@ def setting_exists(cur, setting_info):
         return setting_id
 
 
-# def list_tdms(file_path, file_list=None):
-#     """Use the file_path to find tdms files.
-
-#     This function recursively searches through the argument directory and
-#     returns a list of all filepaths for files with the tdms extension.
-
-#     Parameters
-#     ----------
-#     file_path : string
-#         This is the directory to search for tdms files.
-#     file_list : empty list
-#         This is an empty list when the function is called with only a
-# directory
-#         argument. File_list is then populated recursively.
-
-#     Returns
-#     -------
-#     file_list : list of strings
-#         List of absolute filepaths of files with a .tdms extension. Elements
-# of
-#         list are type string.
-#     """
-#     if file_list is None:
-#         file_list = []
-#     try:
-#         for file_name in os.listdir(file_path):
-#             list_tdms(os.path.join(file_path, file_name), file_list)
-#     except NotADirectoryError:
-#         regex = compile(r".tdms$")
-#         if regex.search(file_path):
-#             return file_list.append(file_path)
-#     return file_list
-
-
 def test_exists(cur, test_info):
     """
     Check if a test already exists.
@@ -193,27 +160,6 @@ def test_exists(cur, test_info):
         return False
     else:
         return result[0][0]
-
-
-# def move_files(directory):
-#     """Move all tdms files into new directory maintaining file structure.
-
-#     This function moves all tdms files in directory into the directory
-#     '/home/user/read_files/'.
-
-#     Parameters
-#     ----------
-#     directory : string
-#         This is the directory to move tdms files from.
-#     """
-#     for file_path in list_tdms(directory):
-#         if not os.stat(file_path).st_size == 0:
-#             new_file_path = os.path.join(os.path.join(
-#                             str(Path.home()), "read_files"),
-#                             os.path.relpath(file_path)[3:])
-#             if not os.path.exists(os.path.split(new_file_path)[0]):
-#                 os.makedirs(os.path.split(new_file_path)[0])
-#             shutil.move(file_path, new_file_path)
 
 
 def get_setting_info(tdms_obj):
@@ -270,7 +216,7 @@ def get_test_info(tdms_obj):
         Set of values to insert into the Test table. Keys should be column
         names and values should be the value to insert.
 
-     """
+    """
     test_info = {'Author': '',
                  'DateTime': tdms_obj.object().properties['DateTime'].replace(
                                  microsecond=0).replace(tzinfo=None),
@@ -600,3 +546,63 @@ def add_data(cur, file_name, test=False):
 #         #        add_temp(cur, tdms_obj, obs_id, obs_idx)
 #     # if not test:
 #     #    move_files(directory)
+
+
+
+# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
+# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
+# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
+# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
+
+# def list_tdms(file_path, file_list=None):
+#     """Use the file_path to find tdms files.
+
+#     This function recursively searches through the argument directory and
+#     returns a list of all filepaths for files with the tdms extension.
+
+#     Parameters
+#     ----------
+#     file_path : string
+#         This is the directory to search for tdms files.
+#     file_list : empty list
+#         This is an empty list when the function is called with only a
+# directory
+#         argument. File_list is then populated recursively.
+
+#     Returns
+#     -------
+#     file_list : list of strings
+#         List of absolute filepaths of files with a .tdms extension. Elements
+# of
+#         list are type string.
+#     """
+#     if file_list is None:
+#         file_list = []
+#     try:
+#         for file_name in os.listdir(file_path):
+#             list_tdms(os.path.join(file_path, file_name), file_list)
+#     except NotADirectoryError:
+#         regex = compile(r".tdms$")
+#         if regex.search(file_path):
+#             return file_list.append(file_path)
+#     return file_list
+
+# def move_files(directory):
+#     """Move all tdms files into new directory maintaining file structure.
+
+#     This function moves all tdms files in directory into the directory
+#     '/home/user/read_files/'.
+
+#     Parameters
+#     ----------
+#     directory : string
+#         This is the directory to move tdms files from.
+#     """
+#     for file_path in list_tdms(directory):
+#         if not os.stat(file_path).st_size == 0:
+#             new_file_path = os.path.join(os.path.join(
+#                             str(Path.home()), "read_files"),
+#                             os.path.relpath(file_path)[3:])
+#             if not os.path.exists(os.path.split(new_file_path)[0]):
+#                 os.makedirs(os.path.split(new_file_path)[0])
+#             shutil.move(file_path, new_file_path)

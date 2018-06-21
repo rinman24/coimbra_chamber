@@ -68,7 +68,7 @@ def get_db_data(test_id):
     rel_hum: list of floats
         List of calculated relative humidity data pertaining to the TestID.
     """
-    cnx = sqldb.connect_sqldb('test_chamber')
+    cnx = sqldb.connect('test_chamber')
     cur = cnx.cursor()
 
     mass = sqldb.get_mass(cur, test_id)
