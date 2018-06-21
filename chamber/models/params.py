@@ -10,6 +10,7 @@ Functions
 ---------
     get_schmidt
     get_grashof
+    get_prandtl
 
 """
 
@@ -56,6 +57,7 @@ def get_schmidt(p, t, t_dp, ref):
        *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
 
     """
+    # Get vapor properties
     D_12 = props.get_d_12(p, t, ref)
     rho = props.get_rho_m(p, t, t_dp)
     mu = props.get_mu(p, t, t_dp)
@@ -111,3 +113,40 @@ def get_grashof(p, t_e, t_s, t_dp):
     # Calculate Grashof number (Gr)
     grashof = g*gamma_1*rho*(m_1s-m_1e)*pow(radius, 3)/pow(nu, 2) + (t_s-t_e)/t_e
     return grashof
+
+
+def get_prandtl(p, t, t_dp):
+    """Get Prandtl number for vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+
+    Returns
+    -------
+    prandtl : float
+        The Prandtl number for the vapor mixture.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> params.get_prandtl(p, t, t_dp)
+    0.7146248666414813
+
+    """
+    # Get vapor properties
+    alpha = props.get_alpha_m(p, t, t_dp)
+    rho = props.get_rho_m(p, t, t_dp)
+    mu = props.get_mu(p, t, t_dp)
+    nu = mu/rho
+
+    # Calculate Prandtl number (Pr)
+    prandtl = nu/alpha
+    return prandtl

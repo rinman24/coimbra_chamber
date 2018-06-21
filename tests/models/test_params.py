@@ -28,3 +28,10 @@ def test_get_grashof():
             params.get_grashof(P_VALUE, T_VALUE, TS_VALUE, TDP_VALUE),
             456.280130439354
             )
+
+
+def test_get_prandtl():
+    assert math.isclose(
+            params.get_prandtl(P_VALUE, T_VALUE, TDP_VALUE),
+            0.7146248666414813
+            )
