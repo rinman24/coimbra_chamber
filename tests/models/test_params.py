@@ -25,8 +25,28 @@ def test_get_schmidt():
 
 def test_get_grashof():
     assert math.isclose(
-            params.get_grashof(P_VALUE, T_VALUE, TS_VALUE, TDP_VALUE),
-            456.280130439354
+            params.get_grashof(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE),
+            0
+            )
+    assert math.isclose(
+            params.get_grashof(P_VALUE, T_VALUE, TDP_VALUE, T_VALUE-1),
+            0
+            )
+    assert math.isclose(
+            params.get_grashof(P_VALUE, T_VALUE, TDP_VALUE, T_VALUE-0.5),
+            230.11072973650792
+            )
+    assert math.isclose(
+            params.get_grashof(P_VALUE, T_VALUE, TDP_VALUE, T_VALUE),
+            523.3337477478808
+            )
+    assert math.isclose(
+            params.get_grashof(P_VALUE, T_VALUE, TDP_VALUE, T_VALUE+0.5),
+            817.5332327958012
+            )
+    assert math.isclose(
+            params.get_grashof(P_VALUE, T_VALUE, TDP_VALUE, T_VALUE+1),
+            1112.7334920658418
             )
 
 

@@ -67,7 +67,7 @@ def get_schmidt(p, t, t_dp, ref):
     return schmidt
 
 
-def get_grashof(p, t_e, t_s, t_dp):
+def get_grashof(p, t_e, t_dp, t_s):
     """Get Grashof number for vapor mixture.
 
     Parameters
@@ -76,10 +76,10 @@ def get_grashof(p, t_e, t_s, t_dp):
         Pressure in Pa.
     t_e : int or float
         Dry bulb temperature in K.
-    t_s : int or float
-        Water surface temperature in K.
     t_dp : int or float
         Dew point temperature in K.
+    t_s : int or float
+        Saturated liquid surface temperature in K.
 
     Returns
     -------
@@ -90,9 +90,9 @@ def get_grashof(p, t_e, t_s, t_dp):
     --------
     >>> p = 101325
     >>> t_e = 290
-    >>> t_s = 289
     >>> t_dp = 280
-    >>> params.get_grashof(p, t_e, t_s, t_dp)
+    >>> t_s = 289
+    >>> params.get_grashof(p, t_e, t_dp, t_s)
     456.280130439354
 
     """
@@ -111,8 +111,15 @@ def get_grashof(p, t_e, t_s, t_dp):
     nu = mu/rho
 
     # Calculate Grashof number (Gr)
-    grashof = g*gamma_1*rho*(m_1s-m_1e)*pow(radius, 3)/pow(nu, 2) + (t_s-t_e)/t_e
-    return grashof
+    grashof = (g
+               * (gamma_1*rho*(m_1s - m_1e) + (t_s - t_e)/t_e)
+               * pow(radius, 3)
+               / pow(nu, 2))
+
+    if grashof < 0:
+        return 0
+    else:
+        return grashof
 
 
 def get_prandtl(p, t, t_dp):
