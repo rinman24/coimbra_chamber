@@ -61,9 +61,10 @@ def get_schmidt(p, t, t_dp, ref):
     D_12 = props.get_d_12(p, t, ref)
     rho = props.get_rho_m(p, t, t_dp)
     mu = props.get_mu(p, t, t_dp)
+    nu = mu/rho
 
     # Calculate Schmidt number
-    schmidt = mu/(rho*D_12)
+    schmidt = nu/D_12
     return schmidt
 
 
