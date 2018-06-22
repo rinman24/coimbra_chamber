@@ -1,51 +1,81 @@
-"""Docstring."""
+
+"""MySQL Database Integration.
+
+Functions
+---------
+    connect
+
+"""
+import configparser
 from decimal import Decimal
-import numpy as np
 import os
 from pathlib import Path
 from re import compile
-from scipy import stats
 import shutil
 
 from CoolProp.HumidAirProp import HAPropsSI
-import mysql.connector as conn
-from mysql.connector import errorcode
+import mysql.connector
+# from mysql.connector import errorcode
 from nptdms import TdmsFile
+import numpy as np
+from scipy import stats
 
 import chamber.const as const
 
 
-def connect_sqldb(database):
+def connect(database):
     """
-    Use connect constructor to connect to a MySQL server.
-
-    Uses environment variables MySqlUserName, MySqlCredentials, MySqlHost to
-    connect to a MySQL server. If the environment variables are not already
-    available use, execute the follwing command, for example, in the terminal:
-
-    $ export MySqlUserName=user
+    Connect to MySQL server and return a cursor.
 
     Parameters
     ----------
     database : str
-        The name of the desired database to connect to.
+        Name of the database with which to establish a
+        connection.
+
     Returns
     -------
-    cnx : MySQLConnection
-        Returns the MySQL connection object
+    mysql.connector.connection.MySQLConnection
+
+        Connection object if successful, raises error otherwise.
+
+        Note: This database connection is typically referred to as `cnx` in the
+        `chamber` package.
+
+    Raises
+    ------
+    mysql.connector.errocode.ER_ACCESS_DENIED_ERROR
+        If there is an issue with your username or password.
+    mysql.connector.errorcode.ER_BAD_DB_ERROR
+        If the database does not exist.
+
+    Examples
+    --------
+    Connect to a database named 'test' using built in config.ini
+
+    >>> from chamber.database import sqldb
+    >>> cnx = sqldb.connect('test')
+    >>> cnx
+    <mysql.connector.connection.MySQLConnection object at 0x000002785C297780>
 
     """
-    config = {'user': os.environ['MYSQLUSERNAME'],
-              'password': os.environ['MYSQLCREDENTIALS'],
-              'host': os.environ['MYSQLHOST'],
-              'database': database}
+    # Parse the 'MySQL-Server' section of the config file.
+    config_parser = configparser.ConfigParser()
+    config_parser.read('config.ini')
+    config = dict(config_parser['MySQL-Server'])
+    config['database'] = database
+
+    # Try to connect
     try:
-        cnx = conn.connect(**config)
-    except conn.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Something is wrong with your user name or password")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exist")
+        cnx = mysql.connector.connect(**config)
+    except mysql.connector.Error as err:
+        if err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
+            print(
+                "Something is wrong with your username or "
+                "password: {}".format(err)
+                )
+        elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist {}".format(err))
         else:
             print(err)
     else:
@@ -58,8 +88,8 @@ def create_tables(cur, tables):
 
     Uses a list of tuples where the 0 index is the name of the table and the 1
     index is a string of MySQL DDL used to create the table. A list is required
-    so that the DDL can be executed in order so that foreign key constraint
-    errors do not occur.
+    so that the DDL can be executed in order to avoid foreign key constraint
+    errors.
 
     Parameters
     ----------
@@ -81,8 +111,8 @@ def create_tables(cur, tables):
         name, ddl = table
         try:
             cur.execute(ddl)
-        except conn.Error as err:
-            if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+        except mysql.connector.Error as err:
+            if err.errno == mysql.connector.errorcode.ER_TABLE_EXISTS_ERROR:
                 print(name, 'already exists.')
             else:
                 print(err.msg)
@@ -125,40 +155,6 @@ def setting_exists(cur, setting_info):
         return setting_id
 
 
-# def list_tdms(file_path, file_list=None):
-#     """Use the file_path to find tdms files.
-
-#     This function recursively searches through the argument directory and
-#     returns a list of all filepaths for files with the tdms extension.
-
-#     Parameters
-#     ----------
-#     file_path : string
-#         This is the directory to search for tdms files.
-#     file_list : empty list
-#         This is an empty list when the function is called with only a
-# directory
-#         argument. File_list is then populated recursively.
-
-#     Returns
-#     -------
-#     file_list : list of strings
-#         List of absolute filepaths of files with a .tdms extension. Elements
-# of
-#         list are type string.
-#     """
-#     if file_list is None:
-#         file_list = []
-#     try:
-#         for file_name in os.listdir(file_path):
-#             list_tdms(os.path.join(file_path, file_name), file_list)
-#     except NotADirectoryError:
-#         regex = compile(r".tdms$")
-#         if regex.search(file_path):
-#             return file_list.append(file_path)
-#     return file_list
-
-
 def test_exists(cur, test_info):
     """
     Check if a test already exists.
@@ -193,27 +189,6 @@ def test_exists(cur, test_info):
         return False
     else:
         return result[0][0]
-
-
-# def move_files(directory):
-#     """Move all tdms files into new directory maintaining file structure.
-
-#     This function moves all tdms files in directory into the directory
-#     '/home/user/read_files/'.
-
-#     Parameters
-#     ----------
-#     directory : string
-#         This is the directory to move tdms files from.
-#     """
-#     for file_path in list_tdms(directory):
-#         if not os.stat(file_path).st_size == 0:
-#             new_file_path = os.path.join(os.path.join(
-#                             str(Path.home()), "read_files"),
-#                             os.path.relpath(file_path)[3:])
-#             if not os.path.exists(os.path.split(new_file_path)[0]):
-#                 os.makedirs(os.path.split(new_file_path)[0])
-#             shutil.move(file_path, new_file_path)
 
 
 def get_setting_info(tdms_obj):
@@ -270,7 +245,7 @@ def get_test_info(tdms_obj):
         Set of values to insert into the Test table. Keys should be column
         names and values should be the value to insert.
 
-     """
+    """
     test_info = {'Author': '',
                  'DateTime': tdms_obj.object().properties['DateTime'].replace(
                                  microsecond=0).replace(tzinfo=None),
@@ -600,3 +575,62 @@ def add_data(cur, file_name, test=False):
 #         #        add_temp(cur, tdms_obj, obs_id, obs_idx)
 #     # if not test:
 #     #    move_files(directory)
+
+
+# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
+# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
+# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
+# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
+
+# def list_tdms(file_path, file_list=None):
+#     """Use the file_path to find tdms files.
+
+#     This function recursively searches through the argument directory and
+#     returns a list of all filepaths for files with the tdms extension.
+
+#     Parameters
+#     ----------
+#     file_path : string
+#         This is the directory to search for tdms files.
+#     file_list : empty list
+#         This is an empty list when the function is called with only a
+# directory
+#         argument. File_list is then populated recursively.
+
+#     Returns
+#     -------
+#     file_list : list of strings
+#         List of absolute filepaths of files with a .tdms extension. Elements
+# of
+#         list are type string.
+#     """
+#     if file_list is None:
+#         file_list = []
+#     try:
+#         for file_name in os.listdir(file_path):
+#             list_tdms(os.path.join(file_path, file_name), file_list)
+#     except NotADirectoryError:
+#         regex = compile(r".tdms$")
+#         if regex.search(file_path):
+#             return file_list.append(file_path)
+#     return file_list
+
+# def move_files(directory):
+#     """Move all tdms files into new directory maintaining file structure.
+
+#     This function moves all tdms files in directory into the directory
+#     '/home/user/read_files/'.
+
+#     Parameters
+#     ----------
+#     directory : string
+#         This is the directory to move tdms files from.
+#     """
+#     for file_path in list_tdms(directory):
+#         if not os.stat(file_path).st_size == 0:
+#             new_file_path = os.path.join(os.path.join(
+#                             str(Path.home()), "read_files"),
+#                             os.path.relpath(file_path)[3:])
+#             if not os.path.exists(os.path.split(new_file_path)[0]):
+#                 os.makedirs(os.path.split(new_file_path)[0])
+#             shutil.move(file_path, new_file_path)
