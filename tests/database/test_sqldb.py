@@ -1,4 +1,5 @@
 """Docstring."""
+import configparser
 from datetime import datetime
 from decimal import Decimal
 from os import path
@@ -15,6 +16,12 @@ import pytest
 import chamber.const as const
 from chamber.database import sqldb
 import tests.test_const as test_const
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+print(config['MySQL-Server']['host'])
+print(config['MySQL-Server']['user'])
+print(config['MySQL-Server']['password'])
 
 
 @pytest.fixture(scope='module')
@@ -43,12 +50,13 @@ def test_tdms_obj():
             TdmsFile(test_const.CORRECT_FILE_LIST[3]))  # IsMass 0 Duty 0%
 
 
-class TestSqlDb(object):
-    """Unit testing of sqldb.py."""
-
-    def test_connect(self, cursor):
+def test_connect(cursor):
         """Test connection to database."""
         assert cursor
+
+
+class TestSqlDb(object):
+    """Unit testing of sqldb.py."""
 
     def test_create_tables(self, cursor):
         """Test create_tables."""

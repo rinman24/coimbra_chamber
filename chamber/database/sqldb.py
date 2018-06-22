@@ -1,52 +1,81 @@
 
-"""Docstring."""
+"""MySQL Database Integration.
+
+Functions
+---------
+    connect
+
+"""
+import configparser
 from decimal import Decimal
-import numpy as np
 import os
 from pathlib import Path
 from re import compile
-from scipy import stats
 import shutil
 
 from CoolProp.HumidAirProp import HAPropsSI
-import mysql.connector as conn
-from mysql.connector import errorcode
+import mysql.connector
+# from mysql.connector import errorcode
 from nptdms import TdmsFile
+import numpy as np
+from scipy import stats
 
 import chamber.const as const
 
 
 def connect(database):
     """
-    Use connect constructor to connect to a MySQL server.
-
-    Uses environment variables MySqlUserName, MySqlCredentials, MySqlHost to
-    connect to a MySQL server. If the environment variables are not already
-    available use, execute the follwing command, for example, in the terminal:
-
-    $ export MySqlUserName=user
+    Connect to MySQL server and return a cursor.
 
     Parameters
     ----------
     database : str
-        The name of the desired database to connect to.
+        Name of the database with which to establish a
+        connection.
+
     Returns
     -------
-    cnx : MySQLConnection
-        Returns the MySQL connection object
+    mysql.connector.connection.MySQLConnection
+
+        Connection object if successful, raises error otherwise.
+
+        Note: This database connection is typically referred to as `cnx` in the
+        `chamber` package.
+
+    Raises
+    ------
+    mysql.connector.errocode.ER_ACCESS_DENIED_ERROR
+        If there is an issue with your username or password.
+    mysql.connector.errorcode.ER_BAD_DB_ERROR
+        If the database does not exist.
+
+    Examples
+    --------
+    Connect to a database named 'test' using built in config.ini
+
+    >>> from chamber.database import sqldb
+    >>> cnx = sqldb.connect('test')
+    >>> cnx
+    <mysql.connector.connection.MySQLConnection object at 0x000002785C297780>
 
     """
-    config = {'user': os.environ['MYSQLUSERNAME'],
-              'password': os.environ['MYSQLCREDENTIALS'],
-              'host': os.environ['MYSQLHOST'],
-              'database': database}
+    # Parse the 'MySQL-Server' section of the config file.
+    config_parser = configparser.ConfigParser()
+    config_parser.read('config.ini')
+    config = dict(config_parser['MySQL-Server'])
+    config['database'] = database
+
+    # Try to connect
     try:
-        cnx = conn.connect(**config)
-    except conn.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Something is wrong with your user name or password")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exist")
+        cnx = mysql.connector.connect(**config)
+    except mysql.connector.Error as err:
+        if err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
+            print(
+                "Something is wrong with your username or "
+                "password: {}".format(err)
+                )
+        elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist {}".format(err))
         else:
             print(err)
     else:
@@ -82,8 +111,8 @@ def create_tables(cur, tables):
         name, ddl = table
         try:
             cur.execute(ddl)
-        except conn.Error as err:
-            if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+        except mysql.connector.Error as err:
+            if err.errno == mysql.connector.errorcode.ER_TABLE_EXISTS_ERROR:
                 print(name, 'already exists.')
             else:
                 print(err.msg)
@@ -546,7 +575,6 @@ def add_data(cur, file_name, test=False):
 #         #        add_temp(cur, tdms_obj, obs_id, obs_idx)
 #     # if not test:
 #     #    move_files(directory)
-
 
 
 # DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED

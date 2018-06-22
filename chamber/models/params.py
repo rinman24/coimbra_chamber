@@ -10,6 +10,7 @@ Functions
 ---------
     get_schmidt
     get_grashof
+    get_prandtl
 
 """
 
@@ -56,17 +57,75 @@ def get_schmidt(p, t, t_dp, ref):
        *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
 
     """
+    # Get vapor properties
     D_12 = props.get_d_12(p, t, ref)
     rho = props.get_rho_m(p, t, t_dp)
     mu = props.get_mu(p, t, t_dp)
+    nu = mu/rho
 
     # Calculate Schmidt number
-    schmidt = mu/(rho*D_12)
+    schmidt = nu/D_12
     return schmidt
 
 
-def get_grashof(p, t, t_dp):
+def get_grashof(p, t, t_dp, t_s):
     """Get Grashof number for vapor mixture.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+    t_s : int or float
+        Saturated liquid surface temperature in K.
+
+    Returns
+    -------
+    grashof : float
+        The Grashof number for the vapor mixture.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> t_s = 289.5
+    >>> params.get_grashof(p, t, t_dp, t_s)
+    230.11072973650792
+
+    """
+    # Constants
+    g = const.ACC_GRAV
+    radius = RADIUS
+
+    # Calculate water vapor parameters
+    gamma_1 = props.get_gamma(p, t, t_dp)
+    m_1s = props.get_m_1_sat(p, t_s)
+    m_1e = props.get_m_1(p, t, t_dp)
+
+    # Get vapor properties
+    rho = props.get_rho_m(p, t, t_dp)
+    mu = props.get_mu(p, t, t_dp)
+    nu = mu/rho
+    beta = 1/t
+
+    # Calculate Grashof number (Gr)
+    grashof = (g
+               * (gamma_1*rho*(m_1s - m_1e) + beta*(t_s - t))
+               * pow(radius, 3)
+               / pow(nu, 2))
+
+    if grashof < 0:
+        return 0
+    else:
+        return grashof
+
+
+def get_prandtl(p, t, t_dp):
+    """Get Prandtl number for vapor mixture.
 
     Parameters
     ----------
@@ -79,32 +138,24 @@ def get_grashof(p, t, t_dp):
 
     Returns
     -------
-    grashof : float
-        The Grashof number for the vapor mixture.
+    prandtl : float
+        The Prandtl number for the vapor mixture.
 
     Examples
     --------
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> params.get_grashof(p, t, t_dp)
-    231.5493976780182
+    >>> params.get_prandtl(p, t, t_dp)
+    0.7146248666414813
 
     """
-    # Constants
-    g = const.ACC_GRAV
-    radius = RADIUS
-
-    # Calculate water vapor parameters
-    gamma_1 = props.get_gamma(p, t, t_dp)
-    m_1s = props.get_m_1_sat(p, t)
-    m_1e = props.get_m_1(p, t, t_dp)
-
     # Get vapor properties
+    alpha = props.get_alpha_m(p, t, t_dp)
     rho = props.get_rho_m(p, t, t_dp)
     mu = props.get_mu(p, t, t_dp)
     nu = mu/rho
 
-    # Calculate Schmidt number (Sh)
-    grashof = g*gamma_1*rho*(m_1s-m_1e)*pow(radius, 3)/pow(nu, 2)
-    return grashof
+    # Calculate Prandtl number (Pr)
+    prandtl = nu/alpha
+    return prandtl
