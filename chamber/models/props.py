@@ -330,7 +330,7 @@ def get_d_12(p, t, t_dp, ref):
 
     >>> ref = 'constant'
     >>> props.get_d_12(p, t, t_dp, ref)
-    2.365539793302829e-05
+    2.416458085635347e-05
 
     Raises
     ------
