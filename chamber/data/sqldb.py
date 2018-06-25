@@ -1,22 +1,19 @@
-
 """MySQL Database Integration.
 
 Functions
 ---------
     connect
+    create_tables
+    get_setting_info
+    setting_exists
 
 """
 import configparser
-from decimal import Decimal
-import os
-from pathlib import Path
-from re import compile
-import shutil
+import re
 
 from CoolProp.HumidAirProp import HAPropsSI
-import mysql.connector
-# from mysql.connector import errorcode
-from nptdms import TdmsFile
+import mysql
+import nptdms
 import numpy as np
 from scipy import stats
 
@@ -184,6 +181,89 @@ def setting_exists(cur, setting_info):
         return setting_id
 
 
+def get_temp_info(tdms_obj, tdms_idx, couple_idx):
+    """
+    Get thermocouple observations.
+
+    Returns temperature data for the provided index (time) and thermocouple
+    index.
+
+    Parameters
+    ----------
+    tdms_obj : :class:`~nptdms.TdmsFile`
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+    tdms_idx : int
+        This is the index in the tdms file, which represents a single time.
+    couple_idx : int
+        This is the thermocouple index for a specific observation in the tdms
+        file, which represents a single thermocouple measurement at a single
+        time.
+
+    Returns
+    -------
+    temp_info : string
+        A single value to insert into the TempObservation table. Key should be
+        thermocouple number and the value should be the temperature
+        measurement.
+
+    Examples
+    --------
+    Get the temperature measurement from index 1 and thermocouple 4:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> get_temp_info(tdms_file, 1, 4)
+    '280.24'
+
+    """
+    regex = re.compile(r'^(\d){3}.(\d){2}$')
+    temp_info = '{:.2f}'.format(
+        tdms_obj.object("Data", "TC{}".format(couple_idx)).data[tdms_idx])
+    if not regex.search(temp_info):
+        return
+    return temp_info
+
+# Not-Reviewed
+
+
+def get_setting_info(tdms_obj):
+    """
+    Use TDMS file to return initial state of test.
+
+    This function searches through the :class:`~nptdms.TdmsFile` object for
+    the initial settings including: Duty, Mass, Pressure, Temp, and TimeStep.
+    The function returns a dictionary of settings formatted for use with the
+    `add_setting` DML query.
+
+    Parameters
+    ----------
+    tdms_obj : :class:`~nptdms.TdmsFile`
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+
+    Returns
+    -------
+    setting_info : dict of {str: int or float}
+        Set of values to insert into the Setting table. Keys should be column
+        names and values should be the value to insert.
+
+    Examples
+    --------
+    tbd
+
+    """
+    temp_list = [float(get_temp_info(tdms_obj, 0, x)) for x in range(4, 14)]
+    duty = tdms_obj.object('Settings', 'DutyCycle').data[0]
+    pressure = tdms_obj.object('Data', 'Pressure').data[0]
+    setting_info = {'Duty': '{:.1f}'.format(round(duty, 1)),
+                    'Pressure': 5000*round(float(pressure)/5000),
+                    'Temperature': 5*round(float(np.mean(temp_list))/5)}
+    return setting_info
+
+
 def test_exists(cur, test_info):
     """
     Check if a test already exists.
@@ -220,53 +300,21 @@ def test_exists(cur, test_info):
         return result[0][0]
 
 
-def get_setting_info(tdms_obj):
-    """
-    Return a dictionary containg the initial state of the test.
-
-    This function searches through the TdmsFile object for the initial settings
-    including: Duty, Mass, Pressure, Temp, and TimeStep. The function returns a
-    dictionary of settings formatted for use with the ADD_SETTING querry in
-    const.py.
-
-    Parameters
-    ----------
-    tdms_obj : nptdms.TdmsFile
-        TdmsFile object containg the data from the tdms test file. Original
-        tdms files were created from UCSD Chamber experiments in the Coimbra
-        Lab in SERF 159.
-
-    Returns
-    -------
-    setting_info : dict
-        Set of values to insert into the Setting table. Keys should be column
-        names and values should be the value to insert.
-
-    """
-    temp_list = [float(get_temp_info(tdms_obj, 0, x)) for x in range(4, 14)]
-    duty = tdms_obj.object('Settings', 'DutyCycle').data[0]
-    pressure = tdms_obj.object('Data', 'Pressure').data[0]
-    setting_info = {'Duty': '{:.1f}'.format(round(duty, 1)),
-                    'Pressure': 5000*round(float(pressure)/5000),
-                    'Temperature': 5*round(float(np.mean(temp_list))/5)}
-    return setting_info
-
-
 def get_test_info(tdms_obj):
     """
-    Use a TdmsFile object to find test details.
+    Use a nptdms.TdmsFile object to find test details.
 
-    Builds a dictionary containing the initial state of Test in the TdmsFile,
-    and formats the data for use with the ADD_TEST querry in const.py. Uses a
-    loop to parse through a double linked list to search for 'Author' and
-    'Description' fields.
+    Builds a dictionary containing the initial state of Test in the
+    nptdms.TdmsFile, and formats the data for use with the ADD_TEST querry in
+    const.py. Uses a loop to parse through a double linked list to search for
+    'Author' and 'Description' fields.
 
     Parameters
     ----------
     tdms_obj : nptdms.TdmsFile
-        TdmsFile object containg the data from the tdms test file. Original
-        tdms files were created from UCSD Chamber experiments in the Coimbra
-        Lab in SERF 159.
+        nptdms.TdmsFile object containg the data from the tdms test file.
+        Original tdms files were created from UCSD Chamber experiments in the
+        Coimbra Lab in SERF 159.
 
     Returns
     -------
@@ -297,15 +345,15 @@ def get_obs_info(tdms_obj, tdms_idx):
     Return a dictionary of observation data.
 
     Builds a dictionary containing the observation for a given index (time) in
-    the TdmsFile objrct, and formats the data for use with the ADD_OBS querry
-    in const.py.
+    the nptdms.TdmsFile objrct, and formats the data for use with the ADD_OBS
+    querry in const.py.
 
     Parameters
     ----------
     tdms_obj : nptdms.TdmsFile
-        TdmsFile object containg the data from the tdms test file. Original
-        tdms files were created from UCSD Chamber experiments in the Coimbra
-        Lab in SERF 159.
+        nptdms.TdmsFile object containg the data from the tdms test file.
+        Original tdms files were created from UCSD Chamber experiments in the
+        Coimbra Lab in SERF 159.
     tdms_idx : int
         This is the index in the tdms file, which represents a single time.
 
@@ -337,44 +385,6 @@ def get_obs_info(tdms_obj, tdms_idx):
     return obs_info
 
 
-def get_temp_info(tdms_obj, tdms_idx, couple_idx):
-    """
-    Get a thermocouple observation.
-
-    Returns temperature data for the provided index (time) and thermocouple
-    index provided in the argument and returns a dictionary formatted for use
-    with the ADD_TEMP querry in const.py. Does nothing if temperature exceeds
-    database limits is (1000.00 kelvin or above) or IsMass is set to 0.
-
-    Parameters
-    ----------
-    tdms_obj : nptdms.TdmsFile
-        TdmsFile object containg the data from the tdms test file. Original
-        tdms files were created from UCSD Chamber experiments in the Coimbra
-        Lab in SERF 159.
-    tdms_idx : int
-        This is the index in the tdms file, which represents a single time.
-    couple_idx : int
-        This is the thermocouple index for a specific observation in the tdms
-        file, which represents a single thermocouple measurement at a single
-        time.
-
-    Returns
-    -------
-    temp_info : string
-        A single value to insert into the TempObservation table. Key should be
-        thermocouple number and the value should be the temperature
-        measurement.
-
-    """
-    regex = compile(r'^(\d){3}.(\d){2}$')
-    temp_info = '{:.2f}'.format(
-        tdms_obj.object("Data", "TC{}".format(couple_idx)).data[tdms_idx])
-    if not regex.search(temp_info):
-        return
-    return temp_info
-
-
 def add_tube_info(cur):
     """
     Use MySQL cursor to add the test-independant Tube information.
@@ -396,7 +406,7 @@ def add_tube_info(cur):
 
 def add_setting_info(cur, tdms_obj):
     """
-    Use MySQL cursor and TdmsFile objecs to add the settings for a given test.
+    Use short title.
 
     Uses cursor's .execute function on a MySQL insert query and dictionary of
     Setting data built by the get_setting method. Adds the new Setting if the
@@ -409,9 +419,9 @@ def add_setting_info(cur, tdms_obj):
     cur : MySQLCursor
         Cursor used to interact with the MySQL database.
     tdms_obj : nptdms.TdmsFile
-        TdmsFile object containg the data from the tdms test file. Original
-        tdms files were created from UCSD Chamber experiments in the Coimbra
-        Lab in SERF 159.
+        nptdms.TdmsFile object containg the data from the tdms test file.
+        Original tdms files were created from UCSD Chamber experiments in the
+        Coimbra Lab in SERF 159.
 
     Returns
     -------
@@ -434,17 +444,17 @@ def add_test_info(cur, tdms_obj, setting_id):
     Add a Test to the database.
 
     Uses cursor's .execute function on a MySQL insert query and dictionary of
-    Test data built by get_test using the argument TdmsFile. Adds the foreign
-    key SettingID to the dictionary before executing the MySQL query.
+    Test data built by get_test using the argument nptdms.TdmsFile. Adds the
+    foreign key SettingID to the dictionary before executing the MySQL query.
 
     Parameters
     ----------
     cur : MySQLCursor
         Cursor used to interact with the MySQL database.
     tdms_obj : nptdms.TdmsFile
-        TdmsFile object containg the data from the tdms test file. Original
-        tdms files were created from UCSD Chamber experiments in the Coimbra
-        Lab in SERF 159.
+        nptdms.TdmsFile object containg the data from the tdms test file.
+        Original tdms files were created from UCSD Chamber experiments in the
+        Coimbra Lab in SERF 159.
     setting_id : tuple
         SettingID[0] is the SettingID for the MySQL database. SettingID is the
         primary key for the Setting table. Setting_ID[1] is the value of
@@ -473,18 +483,18 @@ def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
     Add an Observation to the database.
 
     Uses cursor's .execute function on a MySQL insert query and dictionary of
-    observation data built by get_obs using the argument TdmsFile and index.
-    Adds the foreign key TestID to the dictionary before executing the MySQL
-    query.
+    observation data built by get_obs using the argument nptdms.TdmsFile and
+    index. Adds the foreign key TestID to the dictionary before executing the
+    MySQL query.
 
     Parameters
     ----------
     cur : MySQLCursor
         Cursor used to interact with the MySQL database.
     tdms_obj : nptdms.TdmsFile
-        TdmsFile object containg the data from the tdms test file. Original
-        tdms files were created from UCSD Chamber experiments in the Coimbra
-        Lab in SERF 159.
+        nptdms.TdmsFile object containg the data from the tdms test file.
+        Original tdms files were created from UCSD Chamber experiments in the
+        Coimbra Lab in SERF 159.
     test_id : tuple
         TestID[0] is the primary key for the Test table. TestID[1] is the value
         of IsMass.
@@ -512,17 +522,17 @@ def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
 
     Uses cursor's .execute function on a MySQL insert query and dictionary of
     TempObservation data built by looping through get_temp_info for each
-    thermocouple using the argument TdmsFile and index. Adds the foreign key
-    ObservationID to the dictionary before executing the MySQL query.
+    thermocouple using the argument nptdms.TdmsFile and index. Adds the foreign
+    key ObservationID to the dictionary before executing the MySQL query.
 
     Parameters
     ----------
     cur : MySQLCursor
         Cursor used to interact with the MySQL database.
     tdms_obj : nptdms.TdmsFile
-        TdmsFile object containg the data from the tdms test file. Original
-        tdms files were created from UCSD Chamber experiments in the Coimbra
-        Lab in SERF 159.
+        nptdms.TdmsFile object containg the data from the tdms test file.
+        Original tdms files were created from UCSD Chamber experiments in the
+        Coimbra Lab in SERF 159.
     obs_id : tuple
         obs_id[0] is the ObservationID which is the primary key for the
         Observation table.
@@ -563,7 +573,7 @@ def add_data(cur, file_name, test=False):
         This is the directory to search for tdms files.
 
     """
-    tdms_obj = TdmsFile(file_name)
+    tdms_obj = nptdms.TdmsFile(file_name)
     if not test_exists(cur, get_test_info(tdms_obj)):
         # print("WE GOT IN THE LOOP")
         test_id = add_test_info(cur, tdms_obj, add_setting_info(cur, tdms_obj))
@@ -592,7 +602,7 @@ def add_data(cur, file_name, test=False):
 #     """
 #     for file_name in list_tdms(directory):
 #         # print(file_name)
-#         tdms_obj = TdmsFile(file_name)
+#         tdms_obj = nptdms.TdmsFile(file_name)
 #         # print(test_exists(cur, get_test_info(tdms_obj))) # DELEDTE
 #         if not test_exists(cur, get_test_info(tdms_obj)):
 #             # print("WE GOT IN THE LOOP")
@@ -639,7 +649,7 @@ def add_data(cur, file_name, test=False):
 #         for file_name in os.listdir(file_path):
 #             list_tdms(os.path.join(file_path, file_name), file_list)
 #     except NotADirectoryError:
-#         regex = compile(r".tdms$")
+#         regex = re.compile(r".tdms$")
 #         if regex.search(file_path):
 #             return file_list.append(file_path)
 #     return file_list
