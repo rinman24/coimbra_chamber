@@ -225,8 +225,6 @@ def get_temp_info(tdms_obj, tdms_idx, couple_idx):
         return
     return temp_info
 
-# Not-Reviewed
-
 
 def get_setting_info(tdms_obj):
     """
@@ -252,16 +250,33 @@ def get_setting_info(tdms_obj):
 
     Examples
     --------
-    tbd
+    Get the settings from tdms file:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> get_setting_info(tdms_file)
+    {'PowOut': '-0.0003', 'OptidewOk': 1, 'Pressure': 100393, 'Mass':
+    '0.0985090', 'DewPoint': '270.69', 'CapManOk': 1, 'Idx': 8, 'PowRef':
+    '-0.0003'}
 
     """
-    temp_list = [float(get_temp_info(tdms_obj, 0, x)) for x in range(4, 14)]
+    avg_temp = (
+        sum(float(get_temp_info(tdms_obj, 0, i)) for i in range(4, 14))/10
+        )
+    rounded_temp = 5*round(avg_temp/5)
+
     duty = tdms_obj.object('Settings', 'DutyCycle').data[0]
+    rounded_duty = '{:.1f}'.format(round(duty, 1))
+
     pressure = tdms_obj.object('Data', 'Pressure').data[0]
-    setting_info = {'Duty': '{:.1f}'.format(round(duty, 1)),
-                    'Pressure': 5000*round(float(pressure)/5000),
-                    'Temperature': 5*round(float(np.mean(temp_list))/5)}
+    rounded_pressure = 5000*round(float(pressure)/5000)
+
+    setting_info = dict(Duty=rounded_duty, Pressure=rounded_pressure,
+                        Temperature=rounded_temp)
+
     return setting_info
+
+# Not-Reviewed
 
 
 def test_exists(cur, test_info):
