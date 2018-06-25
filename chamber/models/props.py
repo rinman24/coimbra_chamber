@@ -34,6 +34,8 @@ Functions
     get_c_pl
     get_rh
     get_tdp
+    get_mol_wgt
+    get_gamma
 
 .. _CoolProp package:
    http://www.coolprop.org/
@@ -294,7 +296,7 @@ def get_alpha_m_sat(p, t_s):
     return alpha_m_sat
 
 
-def get_d_12(p, t, ref):
+def get_d_12(p, t, t_dp, ref):
     """Get binary species diffusivity of vapor mixture.
 
     Parameters
@@ -303,7 +305,9 @@ def get_d_12(p, t, ref):
         Pressure in Pa.
     t : int or float
         Dry bulb temperature in K.
-    ref : {'Mills', 'Marrero'}
+    t_dp : int or float
+        Dew point temperature in K.
+    ref : {'Mills', 'Marrero', 'constant'}
         Reference for binary species diffusiity, see ``Notes``.
 
     Returns
@@ -315,18 +319,23 @@ def get_d_12(p, t, ref):
     --------
     >>> p = 101325
     >>> t = 290
+    >>> t_dp = 280
     >>> ref = 'Mills'
-    >>> props.get_d_12(p, t, ref)
+    >>> props.get_d_12(p, t, t_dp, ref)
     2.4306504684558495e-05
 
     >>> ref = 'Marrero'
-    >>> props.get_d_12(p, t, ref)
+    >>> props.get_d_12(p, t, t_dp, ref)
     2.365539793302829e-05
+
+    >>> ref = 'constant'
+    >>> props.get_d_12(p, t, t_dp, ref)
+    2.416458085635347e-05
 
     Raises
     ------
     ValueError
-        If `ref` is not in `{'Mills', 'Marrero'}`.
+        If `ref` is not in `{'Mills', 'Marrero', 'constant'}`.
 
     Notes
     -----
@@ -345,9 +354,16 @@ def get_d_12(p, t, ref):
     elif ref == 'Marrero':
         d_12 = 1.87e-10*pow(t, 2.072)/p_norm
         return d_12
+    elif ref == 'constant':
+        rho = get_rho_m(p, t, t_dp)
+        mu = get_mu(p, t, t_dp)
+        nu = mu/rho
+        schmidt = 0.614
+        d_12 = nu/schmidt
+        return d_12
     else:
         err_msg = (
-            "'{0}' is not a valid ref; try 'Mills' or 'Marrero'.".format(ref)
+            "'{0}' is not a valid ref; try 'Mills', 'Marrero', or 'constant'.".format(ref)
             )
         raise ValueError(err_msg)
 
