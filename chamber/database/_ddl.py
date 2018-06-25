@@ -10,7 +10,7 @@ tables.append(("Setting",
                "  `SettingId` SMALLINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,"
                "  `Duty` DECIMAL(4,1) UNSIGNED NOT NULL,"
                "  `Pressure` MEDIUMINT(6) UNSIGNED NOT NULL,"
-               "  `Temperature` DECIMAL(5,2) UNSIGNED NOT NULL,"
+               "  `Temperature` DECIMAL(4,1) UNSIGNED NOT NULL,"
                "  PRIMARY KEY (`SettingId`))"
                "  ENGINE = InnoDB"
                "  DEFAULT CHARACTER SET = latin1;"))

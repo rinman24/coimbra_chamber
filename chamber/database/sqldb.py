@@ -20,8 +20,8 @@ from nptdms import TdmsFile
 import numpy as np
 from scipy import stats
 
-import chamber.const as const
-from chamber.database import _dml
+from .. import const
+from . import _dml
 
 
 def connect(database):
@@ -40,9 +40,9 @@ def connect(database):
     Returns
     -------
     cnx : :class:`mysql...`
-        Connection to MySQL database
+        Connection to MySQL database.
     cur : :class:`mysql.connector.crsor.MySqlCursor`
-        Cursor for MySQL database
+        Cursor for MySQL database.
 
     Examples
     --------
@@ -90,10 +90,10 @@ def create_tables(cur, tables):
 
     Parameters
     ----------
-    cur : MySQLCursor
-        Cursor used to interact with the MySQL database.
-    tables : list
-        List of table names and DDL query language. For example:
+    cur : :class:`mysql.connector.crsor.MySqlCursor`
+        Cursor for MySQL database.
+    tables : list of tuple of (str, str)
+        List of tuples of table names and DDL query language. For example:
         [('UnitTest',
         "CREATE TABLE UnitTest ("
         "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
@@ -101,6 +101,28 @@ def create_tables(cur, tables):
         "    String VARCHAR(30) NULL,"
         "  PRIMARY KEY (`UnitTestID`)"
         ");"))]
+
+    Returns
+    -------
+    bool
+        `True` if successful.
+
+    Examples
+    --------
+    Create tables in the MySQL database:
+
+    >>> from chamebr.database import _ddl
+    >>> _, cur = connect('test')
+    >>> status = create_tables(cur, _ddl.tables)
+    Setting up tables...
+    Setting  OK
+    Tube  OK
+    Test  OK
+    Observation  OK
+    TempObservation  OK
+    Unit  OK
+    >>> status
+    True
 
     """
     print('Setting up tables...')
@@ -115,32 +137,42 @@ def create_tables(cur, tables):
                 print(err.msg)
         else:
             print(table[0], ' OK')
+    return True
 
 
 def setting_exists(cur, setting_info):
     """
-    Check if a setting already exists.
-
-    Uses the setting dictionary where the keys are the columns in the Setting
-    table and the values are the string values. The cursor executes a DML
-    SELECT statement and returns the SettingID if the setting exists or False
-    if no setting matching the query exists.
+    Use `setting_info` to return existing setting id or `None`.
 
     Parameters
     ----------
-    cur : MySQLCursor
-        Cursor used to interact with the MySQL database.
-    setting_info : dict of strings
-        Set of setting values to check for. Keys should be column names from
-        the Setting table and values should be the value to insert.
+    cur : :class:`mysql.connector.crsor.MySqlCursor`
+        Cursor for MySQL database.
+    setting_info : dict of {str : int or float}
+        Experimental settings of to check for in database. Keys are column
+        names from the Setting table and values are numerical values to
+        insert.
 
     Returns
     -------
-    setting_id : tuple or False
-        SettingID[0] is the SettingID for the MySQL database. SettingID is the
-        primary key for the Setting table. Setting_ID[1] is the value of
-        IsMass. If the setting does not exist in the database the function
-        returns False.
+    setting_id : int or False
+        SettingID for the MySQL database if it exists, `False` otherwise.
+
+    Examples
+    --------
+    Obtain a setting ID that already exists:
+
+    >>> _, cur = connect('test')
+    >>> setting_info = dict(Duty=10, Pressure=100000, Temperature=300)
+    >>> setting_id = setting_exists(cur, setting_info)
+    >>> setting_id
+    1
+
+    Attempt to obtain a setting ID that doesn't exist:
+    >>> setting_info['Duty'] = 20
+    >>> setting_id = setting_exists(cur, setting_info)
+    >>> setting_id
+    False
 
     """
     cur.execute(_dml.select_setting, setting_info)

@@ -22,6 +22,9 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 
+SETTINGS_TEST_1 = dict(Duty=10, Pressure=100000, Temperature=300)
+SETTINGS_TEST_2 = dict(Duty=20, Pressure=110000, Temperature=270)
+
 @pytest.fixture(scope='module')
 def cursor():
     """Cursor Fixture at module level so that only one connection is made."""
@@ -56,7 +59,7 @@ def test_connect(cursor):
 def test_create_tables(cursor):
     """Test creation of tables."""
     # Create the tables
-    sqldb.create_tables(cursor, _ddl.tables)
+    assert sqldb.create_tables(cursor, _ddl.tables)
 
     # Now check that all tables exist
     table_names_set = set(_ddl.table_name_list)
@@ -67,35 +70,14 @@ def test_create_tables(cursor):
 
 def test_setting_exists(cursor):
     """Test setting_exists."""
-    cursor.execute(_dml.add_setting, test_const.SETTINGS_TEST_1)
-    assert sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_1)
-    assert not sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_2)
+    cursor.execute(_dml.add_setting, SETTINGS_TEST_1)
+    assert sqldb.setting_exists(cursor, SETTINGS_TEST_1)
+    assert not sqldb.setting_exists(cursor, SETTINGS_TEST_2)
     truncate(cursor, 'Setting')
+
 
 class TestSqlDb(object):
     """Unit testing of sqldb.py."""
-
-    # def test_list_tdms(self):
-    #     """Can tdms files be located?"""
-    #     files = sqldb.list_tdms(test_const.TEST_DIRECTORY)
-    #     assert len(files) == len(test_const.CORRECT_FILE_LIST)
-    #     for f in files:
-    #         assert f not in test_const.INCORRECT_FILE_LIST
-    #         assert f in test_const.CORRECT_FILE_LIST
-
-    # def test_move_files(self):
-    #     """Test that files are removed from the directory and into user."""
-    #     try:
-    #         assert path.exists(test_const.CORRECT_FILE_LIST[2])
-    #         sqldb.move_files(path.split(test_const.CORRECT_FILE_LIST[2])[0])
-    #         assert not path.exists(test_const.CORRECT_FILE_LIST[2])
-    #         new_path = path.join(
-    #             path.join(str(Path.home()), "read_files"),
-    #             path.relpath(test_const.CORRECT_FILE_LIST[2])[3:])
-    #         assert path.exists(new_path)
-    #         move(new_path, path.split(test_const.CORRECT_FILE_LIST[2])[0])
-    #     except FileNotFoundError:
-    #         assert False
 
     def test_get_setting_info(self, test_tdms_obj):
         """Test output when reading .tdms files for settings."""
@@ -322,3 +304,26 @@ def truncate(cursor, table):
     cursor.execute('SET FOREIGN_KEY_CHECKS=0')
     cursor.execute('TRUNCATE {}'.format(table))
     cursor.execute('SET FOREIGN_KEY_CHECKS=1')
+
+
+ # def test_list_tdms(self):
+    #     """Can tdms files be located?"""
+    #     files = sqldb.list_tdms(test_const.TEST_DIRECTORY)
+    #     assert len(files) == len(test_const.CORRECT_FILE_LIST)
+    #     for f in files:
+    #         assert f not in test_const.INCORRECT_FILE_LIST
+    #         assert f in test_const.CORRECT_FILE_LIST
+
+    # def test_move_files(self):
+    #     """Test that files are removed from the directory and into user."""
+    #     try:
+    #         assert path.exists(test_const.CORRECT_FILE_LIST[2])
+    #         sqldb.move_files(path.split(test_const.CORRECT_FILE_LIST[2])[0])
+    #         assert not path.exists(test_const.CORRECT_FILE_LIST[2])
+    #         new_path = path.join(
+    #             path.join(str(Path.home()), "read_files"),
+    #             path.relpath(test_const.CORRECT_FILE_LIST[2])[3:])
+    #         assert path.exists(new_path)
+    #         move(new_path, path.split(test_const.CORRECT_FILE_LIST[2])[0])
+    #     except FileNotFoundError:
+    #         assert False
