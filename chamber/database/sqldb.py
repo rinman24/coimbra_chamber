@@ -21,6 +21,7 @@ import numpy as np
 from scipy import stats
 
 import chamber.const as const
+from chamber.database import _dml
 
 
 def connect(database):
@@ -142,7 +143,7 @@ def setting_exists(cur, setting_info):
         returns False.
 
     """
-    cur.execute(const.FIND_SETTING, setting_info)
+    cur.execute(_dml.select_setting, setting_info)
     result = cur.fetchall()
     if not result:
         return False
@@ -178,7 +179,7 @@ def test_exists(cur, test_info):
     if not test_info:
         print("File Unable to Transfer")
         return False
-    cur.execute(const.FIND_TEST.format(
+    cur.execute(_dml.select_test.format(
         test_info['DateTime'].replace(microsecond=0).replace(tzinfo=None)))
     result = cur.fetchall()
     if not result:
@@ -356,9 +357,9 @@ def add_tube_info(cur):
         Cursor used to interact with the MySQL database.
 
     """
-    cur.execute(const.FIND_TUBE, const.TUBE_DATA)
+    cur.execute(_dml.select_tube, const.TUBE_DATA)
     if not cur.fetchall():
-        cur.execute(const.ADD_TUBE, const.TUBE_DATA)
+        cur.execute(_dml.add_tube, const.TUBE_DATA)
 
 
 def add_setting_info(cur, tdms_obj):
@@ -391,7 +392,7 @@ def add_setting_info(cur, tdms_obj):
     setting_info = get_setting_info(tdms_obj)
     setting_id = setting_exists(cur, setting_info)
     if not setting_id:
-        cur.execute(const.ADD_SETTING, setting_info)
+        cur.execute(_dml.add_setting, setting_info)
         setting_id = cur.lastrowid
     return setting_id
 
@@ -430,7 +431,7 @@ def add_test_info(cur, tdms_obj, setting_id):
         test_info["SettingID"] = setting_id
         test_info["TubeID"] = str(
             tdms_obj.object("Settings", "TubeID").data[0])
-        cur.execute(const.ADD_TEST, test_info)
+        cur.execute(_dml.add_test, test_info)
         test_id = cur.lastrowid
     return test_id
 
@@ -468,9 +469,9 @@ def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
     obs_info = get_obs_info(tdms_obj, tdms_idx)
     obs_info['TestId'] = test_id
     if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        cur.execute(const.ADD_OBS_M_T, obs_info)
+        cur.execute(_dml.add_obs_m_t, obs_info)
     else:
-        cur.execute(const.ADD_OBS_M_F, obs_info)
+        cur.execute(_dml.add_obs_m_f, obs_info)
 
 
 def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
@@ -510,7 +511,7 @@ def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
                       idx,
                       test_id) for couple_idx in range(14)]
 
-    cur.executemany(const.ADD_TEMP, temp_data)
+    cur.executemany(_dml.add_temp, temp_data)
 
 
 def add_data(cur, file_name, test=False):

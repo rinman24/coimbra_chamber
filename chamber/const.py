@@ -71,68 +71,7 @@ ACC_GRAV = 9.80665  # m/s^2
 
 # CONSTANTS FOR sqldb.py
 # MySQL querry Constants
-ADD_SETTING = ("INSERT INTO Setting "
-               "(Duty, Pressure, Temperature)"
-               " VALUES "
-               "(%(Duty)s, %(Pressure)s, %(Temperature)s)")
 
-ADD_TEST = ("INSERT INTO Test "
-            "(Author, DateTime, Description, IsMass, TimeStep,"
-            " SettingID, TubeID)"
-            " VALUES "
-            "(%(Author)s, %(DateTime)s, %(Description)s, %(IsMass)s,"
-            " %(TimeStep)s, %(SettingID)s, %(TubeID)s)")
-
-ADD_OBS_M_T = ("INSERT INTO Observation "
-               "(CapManOk, DewPoint, Idx, Mass, OptidewOk, PowOut, PowRef,"
-               " Pressure, TestID)"
-               " VALUES "
-               "(%(CapManOk)s, %(DewPoint)s, %(Idx)s, %(Mass)s, %(OptidewOk)s,"
-               " %(PowOut)s, %(PowRef)s, %(Pressure)s, %(TestId)s)")
-
-ADD_OBS_M_F = ("INSERT INTO Observation "
-               "(CapManOk, DewPoint, Idx, OptidewOk, PowOut, PowRef,"
-               " Pressure, TestID)"
-               " VALUES "
-               "(%(CapManOk)s, %(DewPoint)s, %(Idx)s, %(OptidewOk)s,"
-               " %(PowOut)s, %(PowRef)s, %(Pressure)s, %(TestId)s)")
-
-ADD_TEMP = ("INSERT INTO TempObservation "
-            "(ThermocoupleNum, Temperature, Idx, TestId)"
-            " VALUES "
-            "(%s, %s, %s, %s)")
-
-ADD_TUBE = ("INSERT INTO Tube "
-            "(DiameterIn, DiameterOut, Length, Material, Mass)"
-            " VALUES "
-            "(%(DiameterIn)s, %(DiameterOut)s, %(Length)s,"
-            " %(Material)s, %(Mass)s)")
-
-ADD_UNIT = ("INSERT INTO Unit "
-            "(Duty, Length, Mass, Power, Pressure, Temperature, Time)"
-            " VALUES "
-            "(%(Duty)s, %(Length)s, %(Mass)s, %(Power)s, %(Pressure)s,"
-            " %(Temperature)s, %(Time)s)")
-
-FIND_SETTING = ("SELECT SettingID FROM Setting WHERE "
-                "    Duty = %(Duty)s AND"
-                "    Pressure = %(Pressure)s AND"
-                "    Temperature = %(Temperature)s;")
-
-FIND_TEST = ("SELECT TestID FROM Test WHERE "
-             "    DateTime='{}'")
-
-FIND_TUBE = ("SELECT TubeID FROM Tube WHERE "
-             "    DiameterIn = %(DiameterIn)s AND"
-             "    DiameterOut = %(DiameterOut)s AND"
-             "    Length = %(Length)s AND"
-             "    Material = %(Material)s AND"
-             "    Mass = %(Mass)s")
-
-
-# MySql Tube and Unit Constants
-TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
-             'Material': 'Delrin', 'Mass': 0.0657957}
 
 UNIT_DATA = {'Duty': 'Percent', 'Length': 'Meter', 'Mass': 'Kilogram',
              'Power': 'Watt', 'Pressure': 'Pascal', 'Temperature': 'Kelvin',

@@ -15,7 +15,7 @@ from nptdms import TdmsFile
 import pytest
 
 import chamber.const as const
-from chamber.database import sqldb, _ddl
+from chamber.database import sqldb, _ddl, _dml
 import tests.test_const as test_const
 
 config = configparser.ConfigParser()
@@ -65,15 +65,15 @@ def test_create_tables(cursor):
         assert row[0] in table_names_set
 
 
+def test_setting_exists(cursor):
+    """Test setting_exists."""
+    cursor.execute(_dml.add_setting, test_const.SETTINGS_TEST_1)
+    assert sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_1)
+    assert not sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_2)
+    truncate(cursor, 'Setting')
+
 class TestSqlDb(object):
     """Unit testing of sqldb.py."""
-
-    def test_setting_exists(self, cursor):
-        """Test setting_exists."""
-        cursor.execute(const.ADD_SETTING, test_const.SETTINGS_TEST_1)
-        assert sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_1)
-        assert not sqldb.setting_exists(cursor, test_const.SETTINGS_TEST_2)
-        truncate(cursor, 'Setting')
 
     # def test_list_tdms(self):
     #     """Can tdms files be located?"""

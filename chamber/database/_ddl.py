@@ -1,4 +1,4 @@
-"""MySQL constants."""
+"""MySQL DDL constants."""
 
 tables = []
 
