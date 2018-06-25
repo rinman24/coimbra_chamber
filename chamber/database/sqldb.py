@@ -25,38 +25,34 @@ import chamber.const as const
 
 def connect(database):
     """
-    Connect to MySQL server and return a cursor.
+    Use config file to return connection and cursor to a MySQL database.
+
+    The host, username, and password are all stored in config.ini in the root
+    of the repository. Make sure to edit this file so that it contains your
+    information.
 
     Parameters
     ----------
     database : str
-        Name of the database with which to establish a
-        connection.
+        Name of the database for which to return a cursor.
 
     Returns
     -------
-    mysql.connector.connection.MySQLConnection
-
-        Connection object if successful, raises error otherwise.
-
-        Note: This database connection is typically referred to as `cnx` in the
-        `chamber` package.
-
-    Raises
-    ------
-    mysql.connector.errocode.ER_ACCESS_DENIED_ERROR
-        If there is an issue with your username or password.
-    mysql.connector.errorcode.ER_BAD_DB_ERROR
-        If the database does not exist.
+    cnx : :class:`mysql...`
+        Connection to MySQL database
+    cur : :class:`mysql.connector.crsor.MySqlCursor`
+        Cursor for MySQL database
 
     Examples
     --------
-    Connect to a database named 'test' using built in config.ini
+    Obtain a connection and cursor to a schema named 'test' using built in
+    config.ini:
 
-    >>> from chamber.database import sqldb
-    >>> cnx = sqldb.connect('test')
-    >>> cnx
-    <mysql.connector.connection.MySQLConnection object at 0x000002785C297780>
+    >>> cnx, cur = sqldb.connect('test')
+    >>> type(cnx)
+    <class 'mysql.connector.connection.MySQLConnection'>
+    >>> type(cur)
+    <class 'mysql.connector.cursor.MySQLCursor'>
 
     """
     # Parse the 'MySQL-Server' section of the config file.
@@ -79,7 +75,7 @@ def connect(database):
         else:
             print(err)
     else:
-        return cnx
+        return cnx, cnx.cursor()
 
 
 def create_tables(cur, tables):

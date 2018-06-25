@@ -9,6 +9,7 @@ from shutil import move
 from math import isclose
 
 import mysql.connector as conn
+from mysql.connector.cursor import MySQLCursor
 from mysql.connector import errorcode
 from nptdms import TdmsFile
 import pytest
@@ -28,8 +29,7 @@ print(config['MySQL-Server']['password'])
 def cursor():
     """Cursor Fixture at module level so that only one connection is made."""
     print("\nConnecting to MySQL...")
-    cnx = sqldb.connect("test")
-    cur = cnx.cursor()
+    cnx, cur = sqldb.connect("test")
     print("Connected.")
     yield cur
     print("\nCleaning up test database...")
@@ -53,6 +53,7 @@ def test_tdms_obj():
 def test_connect(cursor):
         """Test connection to database."""
         assert cursor
+        assert isinstance(cursor, MySQLCursor)
 
 
 class TestSqlDb(object):
