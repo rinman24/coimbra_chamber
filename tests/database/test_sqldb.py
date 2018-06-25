@@ -15,14 +15,11 @@ from nptdms import TdmsFile
 import pytest
 
 import chamber.const as const
-from chamber.database import sqldb
+from chamber.database import sqldb, _ddl
 import tests.test_const as test_const
 
 config = configparser.ConfigParser()
 config.read('config.ini')
-print(config['MySQL-Server']['host'])
-print(config['MySQL-Server']['user'])
-print(config['MySQL-Server']['password'])
 
 
 @pytest.fixture(scope='module')
@@ -56,14 +53,14 @@ def test_connect(cursor):
         assert isinstance(cursor, MySQLCursor)
 
 
-class TestSqlDb(object):
-    """Unit testing of sqldb.py."""
-
-    def test_create_tables(self, cursor):
-        """Test create_tables."""
-        sqldb.create_tables(cursor, const.TABLES)
+def test_create_tables(cursor):
+        """Test creation of tables."""
+        sqldb.create_tables(cursor, _ddl.tables)
         cursor.execute("SELECT 1 FROM Setting LIMIT 1;")
         assert not cursor.fetchall()
+
+class TestSqlDb(object):
+    """Unit testing of sqldb.py."""
 
     def test_setting_exists(self, cursor):
         """Test setting_exists."""
