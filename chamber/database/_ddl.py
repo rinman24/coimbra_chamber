@@ -1,4 +1,4 @@
-# MySQL Tables Constants
+"""MySQL constants."""
 
 tables = []
 
@@ -120,3 +120,6 @@ tables.append(("Unit",
                "  `Time` VARCHAR(50) NOT NULL)"
                "  ENGINE = InnoDB"
                "  DEFAULT CHARACTER SET = latin1;"))
+
+# Constant for Table Drop
+table_name_list = [table[0] for table in reversed(tables)]

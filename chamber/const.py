@@ -129,9 +129,6 @@ FIND_TUBE = ("SELECT TubeID FROM Tube WHERE "
              "    Material = %(Material)s AND"
              "    Mass = %(Mass)s")
 
-# Constant for Table Drop
-TABLE_NAME_LIST = [table[0] for table in reversed(TABLES)]
-
 
 # MySql Tube and Unit Constants
 TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,

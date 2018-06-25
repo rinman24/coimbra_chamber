@@ -54,10 +54,16 @@ def test_connect(cursor):
 
 
 def test_create_tables(cursor):
-        """Test creation of tables."""
-        sqldb.create_tables(cursor, _ddl.tables)
-        cursor.execute("SELECT 1 FROM Setting LIMIT 1;")
-        assert not cursor.fetchall()
+    """Test creation of tables."""
+    # Create the tables
+    sqldb.create_tables(cursor, _ddl.tables)
+
+    # Now check that all tables exist
+    table_names_set = set(_ddl.table_name_list)
+    cursor.execute("SHOW TABLES;")
+    for row in cursor:
+        assert row[0] in table_names_set
+
 
 class TestSqlDb(object):
     """Unit testing of sqldb.py."""
@@ -306,7 +312,7 @@ def drop_tables(cursor, bol):
     if bol:
         print("Dropping tables...")
         cursor.execute("DROP TABLE IF EXISTS " +
-                       ", ".join(const.TABLE_NAME_LIST) + ";")
+                       ", ".join(_ddl.table_name_list) + ";")
     else:
         print("Tables not dropped.")
 
