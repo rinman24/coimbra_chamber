@@ -3,8 +3,6 @@ from sys import argv
 import matplotlib.pyplot as plt
 from nptdms import TdmsFile
 from numpy import array
-import pandas as pd
-import pickle
 
 from chamber.models import props
 
