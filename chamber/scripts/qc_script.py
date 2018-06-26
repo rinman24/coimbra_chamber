@@ -1,8 +1,7 @@
-from sys import argv
-
 import matplotlib.pyplot as plt
 from nptdms import TdmsFile
 from numpy import array
+from sys import argv
 
 from chamber.models import props
 
