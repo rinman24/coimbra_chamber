@@ -1,11 +1,11 @@
 # This script takes a command line argument of a directory in which
 # you want all the tdms files to be edited.
-from numpy import array
 import os
 from re import compile
 from sys import argv
 
 from nptdms import TdmsWriter, ChannelObject, types
+from numpy import array
 
 
 def list_tdms(file_path, file_list=None):
