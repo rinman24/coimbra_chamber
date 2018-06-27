@@ -24,14 +24,6 @@ Back to `Table of Contents`_
 
 Description will go here.
 
-Make sure that you export your MySQLCredentials environment variable for
-access
-::
-
-    $ export MySqlUserName=<user_name>
-    $ export MySqlCredentials=<password>
-    $ export MySqlHost=<host>
-
 Python Version
 --------------
 
@@ -68,14 +60,23 @@ Setting up Initial State of MySQL Database
 Back to `Table of Contents`_
 
 Setting up the initial state of the MySQL Server is handled by the
-setup_sqldb.py file.
-Simply run the following command from the root directory; e.g., ucsd_ch:
-::
+setup_sqldb.py file. However, before running this script, you must make some
+changes to the `config_example.ini` file:
 
-  $ python setup/setup_sqldb.py <database_name>
+#. Change this filename to from `config_example.ini` to `config.ini`.
+#. Populate `config.ini` with information relevant to your application; i.e.,
+   insert your own username, password, and host for the MySQL Server.
 
 
-Where <database_name> is replaced with the name of the MySQL database schema.
+
+Once you have made this changes, simply run the following command from the root
+directory; e.g., ucsd_ch:
+.. code-block:: console
+ 
+    python setup/setup_sqldb.py <database_name>
+
+
+Where `<database_name>` is replaced with the name of the MySQL database schema.
 This will create all tables and populate the Unit table and add Tube 1
 (default tube used in experiments).
 
@@ -89,10 +90,11 @@ Preferred Way to Run Tests
 
 Back to `Table of Contents`_
 
-1. From the repo directory; i.e., chamber
-::
+1. From the repo directory; i.e., chamber:
+.. code-block:: console
+ 
+    python -m pytest tests/<your-test-name>.py -v --capture=no
 
-    $ python -m pytest tests/<your-test-name>.py -v --capture=no
 
 It should also be noted that the test_const.py file in the test directory
 does not acctually contain tests, but rather the constants that are
@@ -104,10 +106,11 @@ Preferred Way to Run Scripts
 
 Back to `Table of Contents`_
 
-1. From the repo directory; i.e., chamber
-::
+1. From the repo directory; i.e., chamber:
+.. code-block:: console
 
-    $ python -m chamber.scripts.<yout-script-name>
+    python -m chamber.scripts.<yout-script-name>
+
 
 It should also be noted that the `.py` is not required at the end of this line.
 
@@ -117,13 +120,13 @@ Images
 
 Back to `Table of Contents`_
 
+.. image:: images/chamber_optics.jpg
+
 .. image:: images/chamber_iso_view.jpg
 
 .. image:: images/chamber_scale.jpg
 
 .. image:: images/chamber_profile.jpg
-
-.. image:: images/chamber_optics.jpg
 
 
 .. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
