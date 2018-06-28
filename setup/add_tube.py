@@ -16,7 +16,7 @@ for key, value in ATTRIBUTES.items():
 ANS = input("Is this correct? [y/n]: ")
 
 if "y" in ANS.lower():
-    CNX = sqldb.connect()
+    CNX = sqldb.connect_sqldb()
     print("Sucessfully created a connection to the database")
     CUR = CNX.cursor()
     print("Sucessfully created a cursor for the database")

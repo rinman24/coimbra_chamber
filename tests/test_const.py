@@ -4,6 +4,14 @@ import os
 
 
 # Constants for test_sqldb.py
+SETTINGS_TEST_1 = {'Duty': 10,
+                   'Pressure': 100000,
+                   'Temperature': 300}
+
+SETTINGS_TEST_2 = {'Duty': 20,
+                   'Pressure': 110000,
+                   'Temperature': 270}
+
 TEST_DIRECTORY = os.path.join(os.getcwd(), 'tests', 'data_transfer_test_files')
 
 CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
@@ -77,6 +85,50 @@ TDMS_04_TEST = {'Author': 'author_04',
                 'IsMass': 0,
                 'TimeStep': 1}
 
+TDMS_01_OBS_07 = {'CapManOk': 1,
+                  'DewPoint': '270.69',
+                  'Idx': 8,
+                  'OptidewOk': 1,
+                  'PowOut': '-0.0003',
+                  'PowRef': '-0.0003',
+                  'Pressure': 100393,
+                  'Mass': '0.0985090'}
+
+TDMS_02_OBS_07 = {'CapManOk': 1,
+                  'DewPoint': '270.93',
+                  'Idx': 7,
+                  'OptidewOk': 1,
+                  'PowOut': '-0.0004',
+                  'PowRef': '-0.0001',
+                  'Pressure': 100428,
+                  'Mass': '0.0985083'}
+
+TDMS_03_OBS_07 = {'CapManOk': 1,
+                  'DewPoint': '270.12',
+                  'Idx': 8,
+                  'OptidewOk': 1,
+                  'PowOut': '-0.0002',
+                  'PowRef': '-0.0000',
+                  'Pressure': 100463}
+
+TDMS_04_OBS_07 = {'CapManOk': 1,
+                  'DewPoint': '270.22',
+                  'Idx': 8,
+                  'OptidewOk': 1,
+                  'PowOut': '-0.0003',
+                  'PowRef': '0.0001',
+                  'Pressure': 100520}
+
+TEST_INDEX = 7
+TC_INDEX = 7
+
+TDMS_01_THM_07 = '284.66'
+
+TDMS_02_THM_07 = '283.55'
+
+TDMS_03_THM_07 = '282.43'
+
+TDMS_04_THM_07 = '282.29'
 
 TDMS_01_ADD_TEST = [(1, 'author_01', datetime(2018, 1, 29, 17, 54, 12),
                      'description_01', 1, 1.00, 1, 1)]
