@@ -198,7 +198,7 @@ def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
     >>> t_s = 289
     >>> ref = 'constant'
     >>> params.get_sherwood(l, m_dot_pp, p, t, t_dp, ref)
-    0.7146248666414813
+    0.3540373651492251
 
     Notes
     -----
