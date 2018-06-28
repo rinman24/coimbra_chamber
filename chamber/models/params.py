@@ -14,6 +14,8 @@ Functions
 
 """
 
+from math import log
+
 from chamber.models import props
 from chamber import const
 
@@ -31,7 +33,7 @@ def get_schmidt(p, t, t_dp, ref):
         Dry bulb temperature in K.
     t_dp : int or float
         Dew point temperature in K.
-    ref : {'Mills', 'Marrero'}
+    ref : {'Mills', 'Marrero', 'constant'}
         Reference for binary species diffusiity, see ``Notes``.
 
     Returns
@@ -58,13 +60,13 @@ def get_schmidt(p, t, t_dp, ref):
 
     """
     # Get vapor properties
-    D_12 = props.get_d_12(p, t, ref)
+    d_12 = props.get_d_12(p, t, t_dp, ref)
     rho = props.get_rho_m(p, t, t_dp)
     mu = props.get_mu(p, t, t_dp)
     nu = mu/rho
 
     # Calculate Schmidt number
-    schmidt = nu/D_12
+    schmidt = nu/d_12
     return schmidt
 
 
@@ -159,3 +161,60 @@ def get_prandtl(p, t, t_dp):
     # Calculate Prandtl number (Pr)
     prandtl = nu/alpha
     return prandtl
+
+
+def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
+    """Get Sherwood number for vapor mixture.
+
+    Parameters
+    ----------
+    l : int or float
+        The length of the stefan tube from the water surface in m.
+    m_dot_pp : int or float
+        The evaporation flux in kg/s/m:math:`^3`.
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+    t_s : int or float
+        Saturated liquid surface temperature in K.
+    ref : {'Mills', 'Marrero', 'constant'}
+        Reference for binary species diffusiity, see ``Notes``.
+
+    Returns
+    -------
+    sherwood : float
+        The Sherwood number for the vapor mixture.
+
+    Examples
+    --------
+    >>> l = 0.044
+    >>> m_dot_pp = 1.2e-6
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> t_s = 289
+    >>> ref = 'constant'
+    >>> params.get_sherwood(l, m_dot_pp, p, t, t_dp, ref)
+    0.7146248666414813
+
+    Notes
+    -----
+    For more information regarding the choices for `ref` see Appendix of [1]_.
+
+    References
+    ----------
+    .. [1] Mills, A. F. and Coimbra, C. F. M., 2016
+       *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
+
+    """
+    # Get vapor properties
+    beta_m1 = props.get_beta_m1(p, t, t_dp, t_s)
+    d_12 = props.get_d_12(p, t, t_dp, ref)
+    rho = props.get_rho_m(p, t, t_dp)
+
+    # Calculate Sherwood number (Sh)
+    sherwood = m_dot_pp*l/(rho*d_12*log(1+beta_m1))
+    return sherwood
