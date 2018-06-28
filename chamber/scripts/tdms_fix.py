@@ -9,7 +9,7 @@ from numpy import array
 
 
 def list_tdms(file_path, file_list=None):
-	# Finds all teh .tdms files in the argument directory
+	# Finds all the .tdms files in the argument directory
 	# and returns them as a list of strings
 	if file_list is None:
 		file_list = []
@@ -33,13 +33,13 @@ def get_rh(file_path):
 	elif re_low.search(file_path):
 		return 0
 	else:
-		print('Error with {}. Could not find RH setting in file path.'.format(file_path))
+		print('Error with {}. Could not find Reservoir setting in file path.'.format(file_path))
 		return False
 
 
 def get_channel_obj(rh):
 	# Returns the channel object for the RH
-	channel_obj = ChannelObject('Settings', 'RH', array([rh]),
+	channel_obj = ChannelObject('Settings', 'Reservoir', array([rh]),
 		properties={'datatype': types.DoubleFloat(rh)})
 	return channel_obj
 
@@ -57,7 +57,7 @@ def fix_tdms(directory):
 		print('Fixing {}'.format(file_path))
 		rh = get_rh(file_path)
 		if isinstance(rh, int):
-			print('Added in {0} rh = {1}.'.format(file_path, rh))
+			print('Added in {0} Reservoir = {1}.'.format(file_path, rh))
 			channel_obj = get_channel_obj(rh)
 			append_file(file_path, channel_obj)
 
