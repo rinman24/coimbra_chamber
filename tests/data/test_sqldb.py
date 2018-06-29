@@ -156,27 +156,30 @@ def test_get_test_info(test_tdms_obj):
         assert TDMS_03_TEST == sqldb.get_test_info(test_tdms_obj[2])
         assert TDMS_04_TEST == sqldb.get_test_info(test_tdms_obj[3])
 
-class TestSqlDb(object):
-    """Unit testing of sqldb.py."""
 
-    def test_get_obs_info(self, test_tdms_obj):
-        """Test output when converting Observation data to a dict of strs."""
+def test_get_obs_info(test_tdms_obj):
+        """Test get_obs_info."""
         assert (
-            TDMS_01_OBS_07 == 
+            TDMS_01_OBS_07 ==
             sqldb.get_obs_info(test_tdms_obj[0], TEST_INDEX)
             )
+        print(sqldb.get_obs_info(test_tdms_obj[0], TEST_INDEX))
         assert (
-            TDMS_02_OBS_07 == 
+            TDMS_02_OBS_07 ==
             sqldb.get_obs_info(test_tdms_obj[1], TEST_INDEX)
             )
         assert (
-            TDMS_03_OBS_07 == 
+            TDMS_03_OBS_07 ==
             sqldb.get_obs_info(test_tdms_obj[2], TEST_INDEX)
             )
         assert (
-            TDMS_04_OBS_07 == 
+            TDMS_04_OBS_07 ==
             sqldb.get_obs_info(test_tdms_obj[3], TEST_INDEX)
             )
+
+
+class TestSqlDb(object):
+    """Unit testing of sqldb.py."""
 
     def test_add_tube_info(self, cursor):
         """Tets data insertion into Tube and handling of dulicate tubes."""

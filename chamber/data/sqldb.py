@@ -324,6 +324,60 @@ def get_test_info(tdms_obj):
             test_info['Description'] = value[:500]
     return test_info
 
+
+def get_obs_info(tdms_obj, tdms_idx):
+    """
+    Use TDMS file and index to return observation info.
+
+    Builds a dictionary containing the observation for a given index (time) in
+    the nptdms.TdmsFile object.
+
+    Parameters
+    ----------
+     tdms_obj : :class:`~nptdms.TdmsFile`
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+    tdms_idx : int
+        Index in the tdms file representing a single time.
+
+    Returns
+    -------
+    obs_info : dict of {str: str or int}
+        Set of values to insert into the Observation table. Keys should be
+        column names and values should be the value to insert.
+
+    Examples
+    --------
+    Get the observation information from index 10:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> get_obs_info(tdms_file, 10)
+    {'DewPoint': '270.69', 'Idx': 8, 'Mass': '0.0985090', 'CapManOk': 1,
+    'Pressure': 100393, 'OptidewOk': 1, 'PowRef': '-0.0003', 'PowOut':
+    '-0.0003'}
+
+    """
+    obs_info = {'CapManOk': int(
+                    tdms_obj.object("Data", "CapManOk").data[tdms_idx]),
+                'DewPoint': '{:.2f}'.format(
+                    tdms_obj.object("Data", "DewPoint").data[tdms_idx]),
+                'Idx': int(
+                    tdms_obj.object("Data", "Idx").data[tdms_idx]),
+                'OptidewOk': int(
+                    tdms_obj.object("Data", "OptidewOk").data[tdms_idx]),
+                'PowOut': '{:.4f}'.format(
+                    tdms_obj.object("Data", "PowOut").data[tdms_idx]),
+                'PowRef': '{:.4f}'.format(
+                    tdms_obj.object("Data", "PowRef").data[tdms_idx]),
+                'Pressure': int(
+                    tdms_obj.object("Data", "Pressure").data[tdms_idx])}
+    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
+        obs_info['Mass'] = '{:.7f}'.format(
+            tdms_obj.object("Data", "Mass").data[tdms_idx])
+    return obs_info
+
 # Not-Reviewed
 
 
@@ -361,51 +415,6 @@ def test_exists(cur, test_info):
         return False
     else:
         return result[0][0]
-
-
-def get_obs_info(tdms_obj, tdms_idx):
-    """
-    Return a dictionary of observation data.
-
-    Builds a dictionary containing the observation for a given index (time) in
-    the nptdms.TdmsFile objrct, and formats the data for use with the ADD_OBS
-    querry in const.py.
-
-    Parameters
-    ----------
-    tdms_obj : nptdms.TdmsFile
-        nptdms.TdmsFile object containg the data from the tdms test file.
-        Original tdms files were created from UCSD Chamber experiments in the
-        Coimbra Lab in SERF 159.
-    tdms_idx : int
-        This is the index in the tdms file, which represents a single time.
-
-    Returns
-    -------
-    obs_info : dict
-        Set of values to insert into the Observation table. Keys should be
-        column names and values
-        should be the value to insert.
-
-    """
-    obs_info = {'CapManOk': int(
-                    tdms_obj.object("Data", "CapManOk").data[tdms_idx]),
-                'DewPoint': '{:.2f}'.format(
-                    tdms_obj.object("Data", "DewPoint").data[tdms_idx]),
-                'Idx': int(
-                    tdms_obj.object("Data", "Idx").data[tdms_idx]),
-                'OptidewOk': int(
-                    tdms_obj.object("Data", "OptidewOk").data[tdms_idx]),
-                'PowOut': '{:.4f}'.format(
-                    tdms_obj.object("Data", "PowOut").data[tdms_idx]),
-                'PowRef': '{:.4f}'.format(
-                    tdms_obj.object("Data", "PowRef").data[tdms_idx]),
-                'Pressure': int(
-                    tdms_obj.object("Data", "Pressure").data[tdms_idx])}
-    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        obs_info['Mass'] = '{:.7f}'.format(
-            tdms_obj.object("Data", "Mass").data[tdms_idx])
-    return obs_info
 
 
 def add_tube_info(cur):
