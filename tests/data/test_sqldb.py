@@ -76,10 +76,14 @@ def cursor():
 @pytest.fixture(scope='module')
 def test_tdms_obj():
     """Fixture to instantiate only one nptdms.TdmsFile object for testing."""
-    return (nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[0]),  # IsMass 1 Duty 5%
-            nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[1]),  # IsMass 1 Duty 0%
-            nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[2]),  # IsMass 0 Duty 5%
-            nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[3]))  # IsMass 0 Duty 0%
+    return (  # IsMass 1 Duty 5%
+            nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[0]),
+            # IsMass 1 Duty 0%
+            nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[1]),
+            # IsMass 0 Duty 5%
+            nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[2]),
+            # IsMass 0 Duty 0%
+            nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[3]))
 
 
 def test_connect(cursor):
@@ -151,7 +155,6 @@ def test_get_setting_info(test_tdms_obj):
 def test_get_test_info(test_tdms_obj):
         """Test get_test_info."""
         assert TDMS_01_TEST == sqldb.get_test_info(test_tdms_obj[0])
-        print(sqldb.get_test_info(test_tdms_obj[0]))
         assert TDMS_02_TEST == sqldb.get_test_info(test_tdms_obj[1])
         assert TDMS_03_TEST == sqldb.get_test_info(test_tdms_obj[2])
         assert TDMS_04_TEST == sqldb.get_test_info(test_tdms_obj[3])
@@ -163,7 +166,6 @@ def test_get_obs_info(test_tdms_obj):
             TDMS_01_OBS_07 ==
             sqldb.get_obs_info(test_tdms_obj[0], TEST_INDEX)
             )
-        print(sqldb.get_obs_info(test_tdms_obj[0], TEST_INDEX))
         assert (
             TDMS_02_OBS_07 ==
             sqldb.get_obs_info(test_tdms_obj[1], TEST_INDEX)
@@ -178,16 +180,34 @@ def test_get_obs_info(test_tdms_obj):
             )
 
 
+def test_add_tube_info(cursor):
+    """Test add_tube_info."""
+    assert sqldb.add_tube_info(cursor)
+    cursor.execute("SELECT TubeID FROM Tube;")
+    assert cursor.fetchone()[0] == 1
+    cursor.execute("SELECT TubeID FROM Tube;")
+    assert len(cursor.fetchall()) == 1
+
+    cursor.execute("SELECT DiameterIn FROM Tube WHERE TubeID=1;")
+    assert cursor.fetchone()[0] == Decimal('0.0300000')
+
+    cursor.execute("SELECT DiameterOut FROM Tube WHERE TubeID=1;")
+    assert cursor.fetchone()[0] == Decimal('0.0400000')
+
+    cursor.execute("SELECT Length FROM Tube WHERE TubeID=1;")
+    assert cursor.fetchone()[0] == Decimal('0.0600000')
+
+    cursor.execute("SELECT Material FROM Tube WHERE TubeID=1;")
+    assert cursor.fetchone()[0] == 'Delrin'
+
+    cursor.execute("SELECT Mass FROM Tube WHERE TubeID=1;")
+    assert cursor.fetchone()[0] == Decimal('0.0873832')
+
+    assert not sqldb.add_tube_info(cursor)
+
+
 class TestSqlDb(object):
     """Unit testing of sqldb.py."""
-
-    def test_add_tube_info(self, cursor):
-        """Tets data insertion into Tube and handling of dulicate tubes."""
-        sqldb.add_tube_info(cursor)
-        cursor.execute("SELECT TubeID FROM Tube;")
-        assert cursor.fetchone()[0] == 1
-        cursor.execute("SELECT TubeID FROM Tube;")
-        assert len(cursor.fetchall()) == 1
 
     def test_add_setting_info(self, cursor, test_tdms_obj):
         """Test data insertion and condition handling in add_setting."""
@@ -274,7 +294,8 @@ class TestSqlDb(object):
 
     def test_add_temp(self, cursor, test_tdms_obj):
         """Test temperature insert and condition handling in add_temp."""
-        sqldb.add_temp_info(cursor, test_tdms_obj[0], 1, TEST_INDEX, TEST_INDEX+1)
+        sqldb.add_temp_info(cursor, test_tdms_obj[0], 1, TEST_INDEX,
+                            TEST_INDEX+1)
         cursor.execute(
             test_const.GET_TEMP_OBS.format(1, TEST_INDEX+1)
             )
@@ -367,7 +388,7 @@ def truncate(cursor, table):
     cursor.execute('SET FOREIGN_KEY_CHECKS=1')
 
 
- # def test_list_tdms(self):
+# def test_list_tdms(self):
     #     """Can tdms files be located?"""
     #     files = sqldb.list_tdms(test_const.TEST_DIRECTORY)
     #     assert len(files) == len(test_const.CORRECT_FILE_LIST)

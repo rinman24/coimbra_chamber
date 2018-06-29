@@ -123,3 +123,8 @@ tables.append(("Unit",
 
 # Constant for Table Drop
 table_name_list = [table[0] for table in reversed(tables)]
+
+
+# Default tube
+tube_data = dict(DiameterIn=0.03, DiameterOut=0.04, Length=0.06,
+                 Material='Delrin', Mass=0.0873832)

@@ -18,6 +18,7 @@ import numpy as np
 from scipy import stats
 
 from .. import const
+from . import _ddl
 from . import _dml
 
 
@@ -378,6 +379,53 @@ def get_obs_info(tdms_obj, tdms_idx):
             tdms_obj.object("Data", "Mass").data[tdms_idx])
     return obs_info
 
+
+def add_tube_info(cur):
+    """
+    Use a MySQL cursor to add test-independant Tube information.
+
+    Uses cursor .execute function on the ADD_TUBE and TUBE_DATA constants in
+    _ddl.py. Adds the new Tube if the Tube doesn't exist. If the Tube already
+    exists, then the function does nothing.
+
+    Parameters
+    ----------
+    cur : :class:`mysql.connector.crsor.MySqlCursor`
+        Cursor for MySQL database.
+
+    Returns
+    -------
+    bool
+        `True` if tube added, `False` if tube already exists in database.
+
+    Examples
+    --------
+    Add the tube for the first time:
+
+    >>> _, cur = connect('test')
+    >>> status = add_tube_info(cur)
+    Tube added.
+    >>> status
+    True
+
+    Now add it again:
+
+    >>> status = add_tube_info(cur)
+    Tube already exists.`
+    >>> status
+    False
+
+    """
+    cur.execute(_dml.select_tube, _ddl.tube_data)
+    if not cur.fetchall():
+        cur.execute(_dml.add_tube, _ddl.tube_data)
+        print('Tube added.')
+        return True
+    else:
+        print('Tube already exists.')
+        return False
+
+
 # Not-Reviewed
 
 
@@ -415,25 +463,6 @@ def test_exists(cur, test_info):
         return False
     else:
         return result[0][0]
-
-
-def add_tube_info(cur):
-    """
-    Use MySQL cursor to add the test-independant Tube information.
-
-    Uses cursor .execute function on the ADD_TUBE and TUBE_DATA constants in
-    const.py. Adds the new Tube if the Tube doesn't exist. If the Tube already
-    exists, then the function does nothing.
-
-    Parameters
-    ----------
-    cur : MySQLCursor
-        Cursor used to interact with the MySQL database.
-
-    """
-    cur.execute(_dml.select_tube, const.TUBE_DATA)
-    if not cur.fetchall():
-        cur.execute(_dml.add_tube, const.TUBE_DATA)
 
 
 def add_setting_info(cur, tdms_obj):
