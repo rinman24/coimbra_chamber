@@ -382,7 +382,7 @@ def get_obs_info(tdms_obj, tdms_idx):
 
 def add_tube_info(cur):
     """
-    Use a MySQL cursor to add test-independant Tube information.
+    Use a MySQL cursor to add test-independant Tube info.
 
     Uses cursor .execute function on the ADD_TUBE and TUBE_DATA constants in
     _ddl.py. Adds the new Tube if the Tube doesn't exist. If the Tube already
@@ -428,7 +428,7 @@ def add_tube_info(cur):
 
 def add_setting_info(cur, tdms_obj):
     """
-    Use a MySQL cursor and a TDMS file to add setting to the database.
+    Use a MySQL cursor and a TDMS file to add setting info.
 
     Uses cursor's .execute function on a MySQL insert query and dictionary of
     Setting data built by the get_setting method. Adds the new Setting if the
@@ -453,7 +453,7 @@ def add_setting_info(cur, tdms_obj):
 
     Examples
     --------
-    Get the setting_id for a given file:
+    Add the setting info for a given file and get its id:
 
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
@@ -469,6 +469,56 @@ def add_setting_info(cur, tdms_obj):
         cur.execute(_dml.add_setting, setting_info)
         setting_id = cur.lastrowid
     return setting_id
+
+
+def add_test_info(cur, tdms_obj, setting_id):
+    """
+    Use a MySQL cursor, TDMS file and setting_id to add test info.
+
+    Uses cursor's .execute function on a MySQL insert query and dictionary of
+    Test data built by get_test using the argument nptdms.TdmsFile. Adds the
+    foreign key SettingID to the dictionary before executing the MySQL query.
+
+     Parameters
+    ----------
+    cur : :class:`mysql.connector.crsor.MySqlCursor`
+        Cursor for MySQL database.
+    tdms_obj : :class:`~nptdms.TdmsFile`
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+    setting_id : int
+        SettingID for the MySQL database, which is primary key for the Setting
+        table.
+
+    Returns
+    -------
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Examples
+    --------
+    Add the test info for a given file and get its id:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> _, cur = connect('test')
+    >>> test_id = add_test_info(cur, tdms_file)
+    >>> test_id
+    1
+
+    """
+    test_info = get_test_info(tdms_obj)
+    test_id = test_exists(cur, test_info)
+    if not test_id:
+        test_info["SettingID"] = setting_id
+        test_info["TubeID"] = str(
+            tdms_obj.object("Settings", "TubeID").data[0])
+        cur.execute(_dml.add_test, test_info)
+        test_id = cur.lastrowid
+    return test_id
+
 
 # Not-Reviewed
 
@@ -507,45 +557,6 @@ def test_exists(cur, test_info):
         return False
     else:
         return result[0][0]
-
-
-def add_test_info(cur, tdms_obj, setting_id):
-    """
-    Add a Test to the database.
-
-    Uses cursor's .execute function on a MySQL insert query and dictionary of
-    Test data built by get_test using the argument nptdms.TdmsFile. Adds the
-    foreign key SettingID to the dictionary before executing the MySQL query.
-
-    Parameters
-    ----------
-    cur : MySQLCursor
-        Cursor used to interact with the MySQL database.
-    tdms_obj : nptdms.TdmsFile
-        nptdms.TdmsFile object containg the data from the tdms test file.
-        Original tdms files were created from UCSD Chamber experiments in the
-        Coimbra Lab in SERF 159.
-    setting_id : tuple
-        SettingID[0] is the SettingID for the MySQL database. SettingID is the
-        primary key for the Setting table. Setting_ID[1] is the value of
-        IsMass.
-
-    Returns
-    -------
-    test_id : tuple
-        TestID[0] is the primary key for the Test table. TestID[1] is the value
-        of IsMass.
-
-    """
-    test_info = get_test_info(tdms_obj)
-    test_id = test_exists(cur, test_info)
-    if not test_id:
-        test_info["SettingID"] = setting_id
-        test_info["TubeID"] = str(
-            tdms_obj.object("Settings", "TubeID").data[0])
-        cur.execute(_dml.add_test, test_info)
-        test_id = cur.lastrowid
-    return test_id
 
 
 def add_obs_info(cur, tdms_obj, test_id, tdms_idx):

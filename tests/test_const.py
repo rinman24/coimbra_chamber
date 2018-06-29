@@ -50,19 +50,6 @@ TDMS_03_SETTING = {'Duty': '5.0',
                    'Pressure': 100000,
                    'Temperature': 280}
 
-
-TDMS_01_ADD_TEST = [(1, 'author_01', datetime(2018, 1, 29, 17, 54, 12),
-                     'description_01', 1, 1.00, 1, 1)]
-
-TDMS_02_ADD_TEST = [(2, 'author_02', datetime(2018, 1, 29, 17, 55, 10),
-                     'description_02', 1, 1.00, 2, 1)]
-
-TDMS_03_ADD_TEST = [(3, 'author_03', datetime(2018, 1, 29, 17, 50, 58),
-                     'description_03', 0, 1.00, 3, 1)]
-
-TDMS_04_ADD_TEST = [(4, 'author_04', datetime(2018, 1, 29, 17, 52, 24),
-                     'description_04', 0, 1.00, 2, 1)]
-
 GET_LAST_DEW_POINT = (
     'SELECT'
     '    DewPoint '

@@ -56,6 +56,20 @@ TDMS_04_TEST = dict(Author='author_04',
                     DateTime=datetime(2018, 1, 29, 17, 52, 24),
                     Description='description_04', IsMass=0, TimeStep=1)
 
+TDMS_01_ADD_SETTING = [(1, Decimal('5.0'), 100000, Decimal('285.0'))]
+TDMS_02_ADD_SETTING = [(2, Decimal('0.0'), 100000, Decimal('280.0'))]
+TDMS_03_ADD_SETTING = [(3, Decimal('5.0'), 100000, Decimal('280.0'))]
+# TDMS_04_ADD_SETTING = [(3, Decimal('5.0'), 100000, Decimal('280.0'))]
+
+TDMS_01_ADD_TEST = [(1, 'author_01', datetime(2018, 1, 29, 17, 54, 12),
+                     'description_01', 1, 1.00, 1, 1)]
+TDMS_02_ADD_TEST = [(2, 'author_02', datetime(2018, 1, 29, 17, 55, 10),
+                     'description_02', 1, 1.00, 2, 1)]
+TDMS_03_ADD_TEST = [(3, 'author_03', datetime(2018, 1, 29, 17, 50, 58),
+                     'description_03', 0, 1.00, 3, 1)]
+TDMS_04_ADD_TEST = [(4, 'author_04', datetime(2018, 1, 29, 17, 52, 24),
+                     'description_04', 0, 1.00, 2, 1)]
+
 
 @pytest.fixture(scope='module')
 def cursor():
@@ -208,51 +222,59 @@ def test_add_tube_info(cursor):
 
 def test_add_setting_info(cursor, test_tdms_obj):
     """Test add_setting_info."""
-    sqldb.add_setting_info(cursor, test_tdms_obj[0])
-    setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
-                                                test_tdms_obj[0]))
+    setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[0])
     assert setting_id == 1
+    cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
+                   cursor.lastrowid))
+    assert cursor.fetchall() == TDMS_01_ADD_SETTING
 
-    sqldb.add_setting_info(cursor, test_tdms_obj[1])
-    setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
-                                                test_tdms_obj[1]))
+    setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[1])
     assert setting_id == 2
+    cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
+                   cursor.lastrowid))
+    assert cursor.fetchall() == TDMS_02_ADD_SETTING
 
-    sqldb.add_setting_info(cursor, test_tdms_obj[2])
-    setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
-                                                test_tdms_obj[2]))
+    setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[2])
     assert setting_id == 3
+    cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
+                   cursor.lastrowid))
+    assert cursor.fetchall() == TDMS_03_ADD_SETTING
 
-    sqldb.add_setting_info(cursor, test_tdms_obj[3])
-    setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
-                                                test_tdms_obj[3]))
+    setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[3])
     assert setting_id == 2  # This test has the same setting at 2
+    cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(2))
+    assert cursor.fetchall() == TDMS_02_ADD_SETTING
+
+
+def test_add_test_info(cursor, test_tdms_obj):
+    """Test add_test_info."""
+    test_id = sqldb.add_test_info(cursor, test_tdms_obj[0], 1)
+    assert test_id == 1
+    cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
+                   test_id))
+    assert cursor.fetchall() == TDMS_01_ADD_TEST
+
+    test_id = sqldb.add_test_info(cursor, test_tdms_obj[1], 2)
+    assert test_id == 2
+    cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
+                   test_id))
+    assert cursor.fetchall() == TDMS_02_ADD_TEST
+
+    test_id = sqldb.add_test_info(cursor, test_tdms_obj[2], 3)
+    assert test_id == 3
+    cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
+                   test_id))
+    assert cursor.fetchall() == TDMS_03_ADD_TEST
+
+    test_id = sqldb.add_test_info(cursor, test_tdms_obj[3], 2)
+    assert test_id == 4
+    cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
+                   test_id))
+    assert cursor.fetchall() == TDMS_04_ADD_TEST
 
 
 class TestSqlDb(object):
     """Unit testing of sqldb.py."""
-
-    def test_add_test_info(self, cursor, test_tdms_obj):
-        """Test correct data insertion and condition handling in add_test."""
-        sqldb.add_test_info(cursor, test_tdms_obj[0], 1)
-        cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                       cursor.lastrowid))
-        assert cursor.fetchall() == test_const.TDMS_01_ADD_TEST
-
-        sqldb.add_test_info(cursor, test_tdms_obj[1], 2)
-        cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                       cursor.lastrowid))
-        assert cursor.fetchall() == test_const.TDMS_02_ADD_TEST
-
-        sqldb.add_test_info(cursor, test_tdms_obj[2], 3)
-        cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                       cursor.lastrowid))
-        assert cursor.fetchall() == test_const.TDMS_03_ADD_TEST
-
-        sqldb.add_test_info(cursor, test_tdms_obj[3], 2)
-        cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                       cursor.lastrowid))
-        assert cursor.fetchall() == test_const.TDMS_04_ADD_TEST
 
     def test_test_exists(self, cursor, test_tdms_obj):
         """Test that you can find tests that already exist."""
