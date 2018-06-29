@@ -363,7 +363,8 @@ def get_d_12(p, t, t_dp, ref):
         return d_12
     else:
         err_msg = (
-            "'{0}' is not a valid ref; try 'Mills', 'Marrero', or 'constant'.".format(ref)
+            "'{0}' is not a valid ref; try 'Mills',"
+            " 'Marrero', or 'constant'.".format(ref)
             )
         raise ValueError(err_msg)
 
