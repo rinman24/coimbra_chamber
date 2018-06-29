@@ -58,7 +58,7 @@ def get_schmidt(p, t, t_dp, ref):
 
     """
     # Get vapor properties
-    D_12 = props.get_d_12(p, t, ref)
+    D_12 = props.get_d_12(p, t, t_dp, ref)
     rho = props.get_rho_m(p, t, t_dp)
     mu = props.get_mu(p, t, t_dp)
     nu = mu/rho
