@@ -725,7 +725,7 @@ def get_gamma(p, t, t_dp):
 
 
 def get_beta_m1(p, t, t_dp, t_s):
-    """Get the mass transfer rate coefficient of the stean tube system.
+    """Get the mass transfer rate coefficient of the stefan tube system.
 
     Parameters
     ----------

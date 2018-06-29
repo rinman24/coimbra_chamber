@@ -7,7 +7,7 @@ import pytest
 from chamber.models import params
 
 LENGTH = 0.044
-M_DOT_PP = 1.2e-6
+M_DOT_PP = 2.5e-6
 P_VALUE = 101325
 T_VALUE = 290
 TDP_VALUE = 280
@@ -66,15 +66,15 @@ def test_get_prandtl():
 def test_get_sherwood():
     assert math.isclose(
             params.get_sherwood(LENGTH, M_DOT_PP, P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, 'Mills'),
-            0.35197016795893893
+            0.7332711832477895
             )
 
     assert math.isclose(
             params.get_sherwood(LENGTH, M_DOT_PP, P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, 'Marrero'),
-            0.36165802666011554
+            0.7534542222085742
             )
 
     assert math.isclose(
             params.get_sherwood(LENGTH, M_DOT_PP, P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE, 'constant'),
-            0.3540373651492251
+            0.7375778440608858
             )
