@@ -43,6 +43,19 @@ TDMS_03_OBS_07 = dict(CapManOk=1, DewPoint='270.12', Idx=8, OptidewOk=1,
 TDMS_04_OBS_07 = dict(CapManOk=1, DewPoint='270.22', Idx=8, OptidewOk=1,
                       PowOut='-0.0003', PowRef='0.0001', Pressure=100520)
 
+TDMS_01_TEST = dict(Author='author_01',
+                    DateTime=datetime(2018, 1, 29, 17, 54, 12),
+                    Description='description_01', IsMass=1, TimeStep=1)
+TDMS_02_TEST = dict(Author='author_02',
+                    DateTime=datetime(2018, 1, 29, 17, 55, 10),
+                    Description='description_02', IsMass=1, TimeStep=1)
+TDMS_03_TEST = dict(Author='author_03',
+                    DateTime=datetime(2018, 1, 29, 17, 50, 58),
+                    Description='description_03', IsMass=0, TimeStep=1)
+TDMS_04_TEST = dict(Author='author_04',
+                    DateTime=datetime(2018, 1, 29, 17, 52, 24),
+                    Description='description_04', IsMass=0, TimeStep=1)
+
 
 @pytest.fixture(scope='module')
 def cursor():
@@ -135,15 +148,16 @@ def test_get_setting_info(test_tdms_obj):
             )  # This is the same setting at 2
 
 
+def test_get_test_info(test_tdms_obj):
+        """Test get_test_info."""
+        assert TDMS_01_TEST == sqldb.get_test_info(test_tdms_obj[0])
+        print(sqldb.get_test_info(test_tdms_obj[0]))
+        assert TDMS_02_TEST == sqldb.get_test_info(test_tdms_obj[1])
+        assert TDMS_03_TEST == sqldb.get_test_info(test_tdms_obj[2])
+        assert TDMS_04_TEST == sqldb.get_test_info(test_tdms_obj[3])
+
 class TestSqlDb(object):
     """Unit testing of sqldb.py."""
-
-    def test_get_test_info(self, test_tdms_obj):
-        """Test dictionary output when reading .tdms files for tests."""
-        assert test_const.TDMS_01_TEST == sqldb.get_test_info(test_tdms_obj[0])
-        assert test_const.TDMS_02_TEST == sqldb.get_test_info(test_tdms_obj[1])
-        assert test_const.TDMS_03_TEST == sqldb.get_test_info(test_tdms_obj[2])
-        assert test_const.TDMS_04_TEST == sqldb.get_test_info(test_tdms_obj[3])
 
     def test_get_obs_info(self, test_tdms_obj):
         """Test output when converting Observation data to a dict of strs."""
@@ -218,11 +232,11 @@ class TestSqlDb(object):
 
     def test_test_exists(self, cursor, test_tdms_obj):
         """Test that you can find tests that already exist."""
-        assert 1 == sqldb.test_exists(cursor, test_const.TDMS_01_TEST)
-        assert 2 == sqldb.test_exists(cursor, test_const.TDMS_02_TEST)
-        assert 3 == sqldb.test_exists(cursor, test_const.TDMS_03_TEST)
-        assert 4 == sqldb.test_exists(cursor, test_const.TDMS_04_TEST)
-        assert not 5 == sqldb.test_exists(cursor, test_const.TDMS_01_TEST)
+        assert 1 == sqldb.test_exists(cursor, TDMS_01_TEST)
+        assert 2 == sqldb.test_exists(cursor, TDMS_02_TEST)
+        assert 3 == sqldb.test_exists(cursor, TDMS_03_TEST)
+        assert 4 == sqldb.test_exists(cursor, TDMS_04_TEST)
+        assert not 5 == sqldb.test_exists(cursor, TDMS_01_TEST)
         assert not 6 == sqldb.test_exists(cursor, '')
 
     def test_add_obs_info(self, cursor, test_tdms_obj):

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from tabulate import tabulate
 
-from chamber.database import sqldb
+from chamber.data import sqldb
 
 
 def meshgrid(i_points, j_points):

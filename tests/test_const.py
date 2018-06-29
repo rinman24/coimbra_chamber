@@ -50,33 +50,6 @@ TDMS_03_SETTING = {'Duty': '5.0',
                    'Pressure': 100000,
                    'Temperature': 280}
 
-TDMS_01_TEST = {'Author': 'author_01',
-                'DateTime':
-                    datetime(2018, 1, 29, 17, 54, 12),
-                'Description': 'description_01',
-                'IsMass': 1,
-                'TimeStep': 1}
-
-TDMS_02_TEST = {'Author': 'author_02',
-                'DateTime':
-                    datetime(2018, 1, 29, 17, 55, 10),
-                'Description': 'description_02',
-                'IsMass': 1,
-                'TimeStep': 1}
-
-TDMS_03_TEST = {'Author': 'author_03',
-                'DateTime':
-                    datetime(2018, 1, 29, 17, 50, 58),
-                'Description': 'description_03',
-                'IsMass': 0,
-                'TimeStep': 1}
-
-TDMS_04_TEST = {'Author': 'author_04',
-                'DateTime': datetime(2018, 1, 29, 17, 52, 24),
-                'Description': 'description_04',
-                'IsMass': 0,
-                'TimeStep': 1}
-
 
 TDMS_01_ADD_TEST = [(1, 'author_01', datetime(2018, 1, 29, 17, 54, 12),
                      'description_01', 1, 1.00, 1, 1)]
