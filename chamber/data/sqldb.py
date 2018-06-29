@@ -335,7 +335,7 @@ def get_obs_info(tdms_obj, tdms_idx):
 
     Parameters
     ----------
-     tdms_obj : :class:`~nptdms.TdmsFile`
+    tdms_obj : :class:`~nptdms.TdmsFile`
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -426,6 +426,50 @@ def add_tube_info(cur):
         return False
 
 
+def add_setting_info(cur, tdms_obj):
+    """
+    Use a MySQL cursor and a TDMS file to add setting to the database.
+
+    Uses cursor's .execute function on a MySQL insert query and dictionary of
+    Setting data built by the get_setting method. Adds the new Setting if the
+    setting doesn't exist and returns the SettingID form the MySQL database.
+    If the setting already exists, then the SettingID of that setting is
+    returned.
+
+    Parameters
+    ----------
+    cur : :class:`mysql.connector.crsor.MySqlCursor`
+        Cursor for MySQL database.
+    tdms_obj : :class:`~nptdms.TdmsFile`
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+
+    Returns
+    -------
+    setting_id : int
+        SettingID for the MySQL database, which is primary key for the Setting
+        table.
+
+    Examples
+    --------
+    Get the setting_id for a given file:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> _, cur = connect('test')
+    >>> setting_id = add_setting_info(cur, tdms_file)
+    >>> setting_id
+    1
+
+    """
+    setting_info = get_setting_info(tdms_obj)
+    setting_id = setting_exists(cur, setting_info)
+    if not setting_id:
+        cur.execute(_dml.add_setting, setting_info)
+        setting_id = cur.lastrowid
+    return setting_id
+
 # Not-Reviewed
 
 
@@ -463,41 +507,6 @@ def test_exists(cur, test_info):
         return False
     else:
         return result[0][0]
-
-
-def add_setting_info(cur, tdms_obj):
-    """
-    Use short title.
-
-    Uses cursor's .execute function on a MySQL insert query and dictionary of
-    Setting data built by the get_setting method. Adds the new Setting if the
-    setting doesn't exist and returns the SettingID form the MySQL database.
-    If the setting already exists, then the SettingID of that setting is
-    returned.
-
-    Parameters
-    ----------
-    cur : MySQLCursor
-        Cursor used to interact with the MySQL database.
-    tdms_obj : nptdms.TdmsFile
-        nptdms.TdmsFile object containg the data from the tdms test file.
-        Original tdms files were created from UCSD Chamber experiments in the
-        Coimbra Lab in SERF 159.
-
-    Returns
-    -------
-    setting_id : tuple
-        SettingID[0] is the SettingID for the MySQL database. SettingID is the
-        primary key for the Setting table. Setting_ID[1] is the value of
-        IsMass.
-
-    """
-    setting_info = get_setting_info(tdms_obj)
-    setting_id = setting_exists(cur, setting_info)
-    if not setting_id:
-        cur.execute(_dml.add_setting, setting_info)
-        setting_id = cur.lastrowid
-    return setting_id
 
 
 def add_test_info(cur, tdms_obj, setting_id):

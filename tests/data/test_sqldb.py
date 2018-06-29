@@ -206,30 +206,31 @@ def test_add_tube_info(cursor):
     assert not sqldb.add_tube_info(cursor)
 
 
+def test_add_setting_info(cursor, test_tdms_obj):
+    """Test add_setting_info."""
+    sqldb.add_setting_info(cursor, test_tdms_obj[0])
+    setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
+                                                test_tdms_obj[0]))
+    assert setting_id == 1
+
+    sqldb.add_setting_info(cursor, test_tdms_obj[1])
+    setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
+                                                test_tdms_obj[1]))
+    assert setting_id == 2
+
+    sqldb.add_setting_info(cursor, test_tdms_obj[2])
+    setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
+                                                test_tdms_obj[2]))
+    assert setting_id == 3
+
+    sqldb.add_setting_info(cursor, test_tdms_obj[3])
+    setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
+                                                test_tdms_obj[3]))
+    assert setting_id == 2  # This test has the same setting at 2
+
+
 class TestSqlDb(object):
     """Unit testing of sqldb.py."""
-
-    def test_add_setting_info(self, cursor, test_tdms_obj):
-        """Test data insertion and condition handling in add_setting."""
-        sqldb.add_setting_info(cursor, test_tdms_obj[0])
-        setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
-                                                    test_tdms_obj[0]))
-        assert setting_id == 1
-
-        sqldb.add_setting_info(cursor, test_tdms_obj[1])
-        setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
-                                                    test_tdms_obj[1]))
-        assert setting_id == 2
-
-        sqldb.add_setting_info(cursor, test_tdms_obj[2])
-        setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
-                                                    test_tdms_obj[2]))
-        assert setting_id == 3
-
-        sqldb.add_setting_info(cursor, test_tdms_obj[3])
-        setting_id = sqldb.setting_exists(cursor, sqldb.get_setting_info(
-                                                    test_tdms_obj[3]))
-        assert setting_id == 2  # This test has the same setting at 2
 
     def test_add_test_info(self, cursor, test_tdms_obj):
         """Test correct data insertion and condition handling in add_test."""
