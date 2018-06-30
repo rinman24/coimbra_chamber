@@ -33,18 +33,18 @@ def get_schmidt(p, t, t_dp, ref):
     Parameters
     ----------
     p : int or float
-        Pressure in Pa.
+        Pressure in Pa
     t : int or float
-        Dry bulb temperature in K.
+        Dry bulb temperature in K
     t_dp : int or float
-        Dew point temperature in K.
+        Dew point temperature in K
     ref : {'Mills', 'Marrero', 'constant'}
-        Reference for binary species diffusiity, see ``Notes``.
+        Reference for binary species diffusiity, see ``Notes``
 
     Returns
     -------
-    schmidt : float
-        The schmidt number for the vapor mixture.
+    float
+        The schmidt number for the vapor mixture
 
     Examples
     --------
@@ -85,18 +85,18 @@ def get_grashof(p, t, t_dp, t_s):
     Parameters
     ----------
     p : int or float
-        Pressure in Pa.
+        Pressure in Pa
     t : int or float
-        Dry bulb temperature in K.
+        Dry bulb temperature in K
     t_dp : int or float
-        Dew point temperature in K.
+        Dew point temperature in K
     t_s : int or float
-        Saturated liquid surface temperature in K.
+        Saturated liquid surface temperature in K
 
     Returns
     -------
-    grashof : float
-        The Grashof number for the vapor mixture.
+    float
+        The Grashof number for the vapor mixture
 
     Examples
     --------
@@ -145,16 +145,16 @@ def get_prandtl(p, t, t_dp):
     Parameters
     ----------
     p : int or float
-        Pressure in Pa.
+        Pressure in Pa
     t : int or float
-        Dry bulb temperature in K.
+        Dry bulb temperature in K
     t_dp : int or float
-        Dew point temperature in K.
+        Dew point temperature in K
 
     Returns
     -------
-    prandtl : float
-        The Prandtl number for the vapor mixture.
+    float
+        The Prandtl number for the vapor mixture
 
     Examples
     --------
@@ -186,24 +186,24 @@ def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
     Parameters
     ----------
     l : int or float
-        The length of the stefan tube from the water surface in m.
+        The length of the stefan tube from the water surface in m
     m_dot_pp : int or float
-        The evaporation flux in kg/s/m:math:`^3`.
+        The evaporation flux in kg/s/m:math:`^3`
     p : int or float
         Pressure in Pa.
     t : int or float
-        Dry bulb temperature in K.
+        Dry bulb temperature in K
     t_dp : int or float
-        Dew point temperature in K.
+        Dew point temperature in K
     t_s : int or float
-        Saturated liquid surface temperature in K.
+        Saturated liquid surface temperature in K
     ref : {'Mills', 'Marrero', 'constant'}
-        Reference for binary species diffusiity, see ``Notes``.
+        Reference for binary species diffusiity, see ``Notes``
 
     Returns
     -------
-    sherwood : float
-        The Sherwood number for the vapor mixture.
+    float
+        The Sherwood number for the vapor mixture
 
     Examples
     --------
