@@ -36,6 +36,7 @@ Functions
     get_tdp
     get_mol_wgt
     get_gamma
+    get_beta_m1
 
 .. _CoolProp package:
    http://www.coolprop.org/
