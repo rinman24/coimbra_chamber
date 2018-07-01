@@ -24,7 +24,8 @@ RADIUS = 0.015
 
 
 def get_schmidt(p, t, t_dp, ref):
-    """Get Schmidt number for vapor mixture.
+    """
+    Get Schmidt number for vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Schmidt number, the ratio of momentum diffusivity and
@@ -76,7 +77,8 @@ def get_schmidt(p, t, t_dp, ref):
 
 
 def get_grashof(p, t, t_dp, t_s):
-    """Get Grashof number for vapor mixture.
+    """
+    Get Grashof number for vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Grashof number, the ratio of the buoyant force and
@@ -136,7 +138,8 @@ def get_grashof(p, t, t_dp, t_s):
 
 
 def get_prandtl(p, t, t_dp):
-    """Get Prandtl number for vapor mixture.
+    """
+    Get Prandtl number for vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Prandtl number, the ratio of momentum diffusivity and
@@ -177,7 +180,8 @@ def get_prandtl(p, t, t_dp):
 
 
 def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
-    """Get Sherwood number for vapor mixture.
+    """
+    Get Sherwood number for vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Sherwood number, the ratio of convective mass transfer and
