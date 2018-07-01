@@ -58,3 +58,12 @@ select_tube = ("SELECT TubeID FROM Tube WHERE "
                "  Length = %(Length)s AND"
                "  Material = %(Material)s AND"
                "  Mass = %(Mass)s")
+
+get_last_dew_point = ("SELECT"
+                      "    DewPoint "
+                      "FROM"
+                      "    Observation "
+                      "WHERE"
+                      "    TestID={} "
+                      "ORDER BY Idx DESC "
+                      "LIMIT 1;")

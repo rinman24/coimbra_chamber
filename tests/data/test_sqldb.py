@@ -282,38 +282,39 @@ def test_test_exists(cursor, test_tdms_obj):
     assert not 6 == sqldb.test_exists(cursor, '')
 
 
+def test_add_obs_info(cursor, test_tdms_obj):
+    """Test add_obs_info."""
+    for tdms_idx in range(
+            len(test_tdms_obj[0].object("Data", "Idx").data)
+            ):
+        assert sqldb.add_obs_info(cursor, test_tdms_obj[0], 1, tdms_idx)
+    cursor.execute(dml.get_last_dew_point.format(1))
+    assert cursor.fetchall()[0][0] == Decimal('270.78')
+
+    for tdms_idx in range(
+            len(test_tdms_obj[1].object("Data", "Idx").data)
+            ):
+        assert sqldb.add_obs_info(cursor, test_tdms_obj[1], 2, tdms_idx)
+    cursor.execute(dml.get_last_dew_point.format(2))
+    assert cursor.fetchall()[0][0] == Decimal('270.93')
+
+    for tdms_idx in range(
+            len(test_tdms_obj[2].object("Data", "Idx").data)
+            ):
+        assert sqldb.add_obs_info(cursor, test_tdms_obj[2], 3, tdms_idx)
+    cursor.execute(dml.get_last_dew_point.format(3))
+    assert cursor.fetchall()[0][0] == Decimal('270.20')
+
+    for tdms_idx in range(
+            len(test_tdms_obj[3].object("Data", "Idx").data)
+            ):
+        assert sqldb.add_obs_info(cursor, test_tdms_obj[3], 4, tdms_idx)
+    cursor.execute(dml.get_last_dew_point.format(4))
+    assert cursor.fetchall()[0][0] == Decimal('270.32')
+
+
 class TestSqlDb(object):
     """Unit testing of sqldb.py."""
-
-    def test_add_obs_info(self, cursor, test_tdms_obj):
-        """Test correct data insertion and condition handling in add_obs."""
-        for tdms_idx in range(
-                len(test_tdms_obj[0].object("Data", "Idx").data)
-                ):
-            sqldb.add_obs_info(cursor, test_tdms_obj[0], 1, tdms_idx)
-        cursor.execute(test_const.GET_LAST_DEW_POINT.format(1))
-        assert cursor.fetchall()[0][0] == Decimal('270.78')
-
-        for tdms_idx in range(
-                len(test_tdms_obj[1].object("Data", "Idx").data)
-                ):
-            sqldb.add_obs_info(cursor, test_tdms_obj[1], 2, tdms_idx)
-        cursor.execute(test_const.GET_LAST_DEW_POINT.format(2))
-        assert cursor.fetchall()[0][0] == Decimal('270.93')
-
-        for tdms_idx in range(
-                len(test_tdms_obj[2].object("Data", "Idx").data)
-                ):
-            sqldb.add_obs_info(cursor, test_tdms_obj[2], 3, tdms_idx)
-        cursor.execute(test_const.GET_LAST_DEW_POINT.format(3))
-        assert cursor.fetchall()[0][0] == Decimal('270.20')
-
-        for tdms_idx in range(
-                len(test_tdms_obj[3].object("Data", "Idx").data)
-                ):
-            sqldb.add_obs_info(cursor, test_tdms_obj[3], 4, tdms_idx)
-        cursor.execute(test_const.GET_LAST_DEW_POINT.format(4))
-        assert cursor.fetchall()[0][0] == Decimal('270.32')
 
     def test_add_temp(self, cursor, test_tdms_obj):
         """Test temperature insert and condition handling in add_temp."""

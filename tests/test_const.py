@@ -50,16 +50,6 @@ TDMS_03_SETTING = {'Duty': '5.0',
                    'Pressure': 100000,
                    'Temperature': 280}
 
-GET_LAST_DEW_POINT = (
-    'SELECT'
-    '    DewPoint '
-    'FROM'
-    '    Observation '
-    'WHERE'
-    '    TestID={} '
-    'ORDER BY Idx DESC '
-    'LIMIT 1;')
-
 GET_TEMP_OBS = ("SELECT"
                 "    Temperature, ThermocoupleNum "
                 "FROM"
