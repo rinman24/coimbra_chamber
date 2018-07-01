@@ -15,7 +15,7 @@ import nptdms
 import pytest
 
 import chamber.const as const
-from chamber.data import sqldb, _ddl, _dml
+from chamber.data import sqldb, ddl, dml
 import tests.test_const as test_const
 
 config = configparser.ConfigParser()
@@ -59,7 +59,6 @@ TDMS_04_TEST = dict(Author='author_04',
 TDMS_01_ADD_SETTING = [(1, Decimal('5.0'), 100000, Decimal('285.0'))]
 TDMS_02_ADD_SETTING = [(2, Decimal('0.0'), 100000, Decimal('280.0'))]
 TDMS_03_ADD_SETTING = [(3, Decimal('5.0'), 100000, Decimal('280.0'))]
-# TDMS_04_ADD_SETTING = [(3, Decimal('5.0'), 100000, Decimal('280.0'))]
 
 TDMS_01_ADD_TEST = [(1, 'author_01', datetime(2018, 1, 29, 17, 54, 12),
                      'description_01', 1, 1.00, 1, 1)]
@@ -109,10 +108,10 @@ def test_connect(cursor):
 def test_create_tables(cursor):
     """Test creation of tables."""
     # Create the tables
-    assert sqldb.create_tables(cursor, _ddl.tables)
+    assert sqldb.create_tables(cursor, ddl.tables)
 
     # Now check that all tables exist
-    table_names_set = set(_ddl.table_name_list)
+    table_names_set = set(ddl.table_name_list)
     cursor.execute("SHOW TABLES;")
     for row in cursor:
         assert row[0] in table_names_set
@@ -120,8 +119,8 @@ def test_create_tables(cursor):
 
 def test_setting_exists(cursor):
     """Test setting_exists."""
-    cursor.execute(_dml.add_setting, SETTINGS_TEST_1)
-    assert sqldb.setting_exists(cursor, SETTINGS_TEST_1)
+    cursor.execute(dml.add_setting, SETTINGS_TEST_1)
+    assert 1 == sqldb.setting_exists(cursor, SETTINGS_TEST_1)
     assert not sqldb.setting_exists(cursor, SETTINGS_TEST_2)
     truncate(cursor, 'Setting')
 
@@ -273,17 +272,18 @@ def test_add_test_info(cursor, test_tdms_obj):
     assert cursor.fetchall() == TDMS_04_ADD_TEST
 
 
+def test_test_exists(cursor, test_tdms_obj):
+    """Test test_exists."""
+    assert 1 == sqldb.test_exists(cursor, TDMS_01_TEST)
+    assert 2 == sqldb.test_exists(cursor, TDMS_02_TEST)
+    assert 3 == sqldb.test_exists(cursor, TDMS_03_TEST)
+    assert 4 == sqldb.test_exists(cursor, TDMS_04_TEST)
+    assert not 5 == sqldb.test_exists(cursor, TDMS_01_TEST)
+    assert not 6 == sqldb.test_exists(cursor, '')
+
+
 class TestSqlDb(object):
     """Unit testing of sqldb.py."""
-
-    def test_test_exists(self, cursor, test_tdms_obj):
-        """Test that you can find tests that already exist."""
-        assert 1 == sqldb.test_exists(cursor, TDMS_01_TEST)
-        assert 2 == sqldb.test_exists(cursor, TDMS_02_TEST)
-        assert 3 == sqldb.test_exists(cursor, TDMS_03_TEST)
-        assert 4 == sqldb.test_exists(cursor, TDMS_04_TEST)
-        assert not 5 == sqldb.test_exists(cursor, TDMS_01_TEST)
-        assert not 6 == sqldb.test_exists(cursor, '')
 
     def test_add_obs_info(self, cursor, test_tdms_obj):
         """Test correct data insertion and condition handling in add_obs."""
@@ -399,7 +399,7 @@ def drop_tables(cursor, bol):
     if bol:
         print("Dropping tables...")
         cursor.execute("DROP TABLE IF EXISTS " +
-                       ", ".join(_ddl.table_name_list) + ";")
+                       ", ".join(ddl.table_name_list) + ";")
     else:
         print("Tables not dropped.")
 

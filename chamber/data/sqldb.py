@@ -17,9 +17,8 @@ import nptdms
 import numpy as np
 from scipy import stats
 
-from .. import const
-from . import _ddl
-from . import _dml
+from chamber import const
+from chamber.data import ddl, dml
 
 
 def connect(database):
@@ -109,9 +108,9 @@ def create_tables(cur, tables):
     --------
     Create tables in the MySQL database:
 
-    >>> from chamebr.database import _ddl
+    >>> from chamebr.database import ddl
     >>> _, cur = connect('test')
-    >>> status = create_tables(cur, _ddl.tables)
+    >>> status = create_tables(cur, ddl.tables)
     Setting up tables...
     Setting  OK
     Tube  OK
@@ -173,7 +172,7 @@ def setting_exists(cur, setting_info):
     False
 
     """
-    cur.execute(_dml.select_setting, setting_info)
+    cur.execute(dml.select_setting, setting_info)
     result = cur.fetchall()
     if not result:
         return False
@@ -385,7 +384,7 @@ def add_tube_info(cur):
     Use a MySQL cursor to add test-independant Tube info.
 
     Uses cursor .execute function on the ADD_TUBE and TUBE_DATA constants in
-    _ddl.py. Adds the new Tube if the Tube doesn't exist. If the Tube already
+    ddl.py. Adds the new Tube if the Tube doesn't exist. If the Tube already
     exists, then the function does nothing.
 
     Parameters
@@ -416,9 +415,9 @@ def add_tube_info(cur):
     False
 
     """
-    cur.execute(_dml.select_tube, _ddl.tube_data)
+    cur.execute(dml.select_tube, ddl.tube_data)
     if not cur.fetchall():
-        cur.execute(_dml.add_tube, _ddl.tube_data)
+        cur.execute(dml.add_tube, ddl.tube_data)
         print('Tube added.')
         return True
     else:
@@ -466,7 +465,7 @@ def add_setting_info(cur, tdms_obj):
     setting_info = get_setting_info(tdms_obj)
     setting_id = setting_exists(cur, setting_info)
     if not setting_id:
-        cur.execute(_dml.add_setting, setting_info)
+        cur.execute(dml.add_setting, setting_info)
         setting_id = cur.lastrowid
     return setting_id
 
@@ -515,12 +514,9 @@ def add_test_info(cur, tdms_obj, setting_id):
         test_info["SettingID"] = setting_id
         test_info["TubeID"] = str(
             tdms_obj.object("Settings", "TubeID").data[0])
-        cur.execute(_dml.add_test, test_info)
+        cur.execute(dml.add_test, test_info)
         test_id = cur.lastrowid
     return test_id
-
-
-# Not-Reviewed
 
 
 def test_exists(cur, test_info):
@@ -534,10 +530,10 @@ def test_exists(cur, test_info):
 
     Parameters
     ----------
-    cur : MySQLCursor
-        Cursor used to interact with the MySQL database.
-    test_info : dict of strings
-        Set of setting values to check for. Keys should be column names from
+    cur : :class:`mysql.connector.crsor.MySqlCursor`
+        Cursor for MySQL database.
+    test_info : dict of {str: str or int or datetime.datetime}
+        Test settings to check for in database. Keys are column names from
         the Test table and values should be the value to insert.
 
     Returns
@@ -546,17 +542,29 @@ def test_exists(cur, test_info):
         This is the primary key for the Test table if the test already exists.
         If the test does not exist in the database the function returns False.
 
+    Examples
+    --------
+    Check for test info that already exists in the database:
+
+    >>> YOU NEED TO FIND OUT WHAT THESE EXAMPLES ARE DOING!!!
+
+    Check for test info that does not exist in the database:
+
+    >>> YOU NEED TO FIND OUT WHAT THESE EXAMPLES ARE DOING!!!
+
     """
     if not test_info:
         print("File Unable to Transfer")
         return False
-    cur.execute(_dml.select_test.format(
+    cur.execute(dml.select_test.format(
         test_info['DateTime'].replace(microsecond=0).replace(tzinfo=None)))
     result = cur.fetchall()
     if not result:
         return False
     else:
         return result[0][0]
+
+# Not-Reviewed
 
 
 def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
@@ -592,9 +600,9 @@ def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
     obs_info = get_obs_info(tdms_obj, tdms_idx)
     obs_info['TestId'] = test_id
     if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        cur.execute(_dml.add_obs_m_t, obs_info)
+        cur.execute(dml.add_obs_m_t, obs_info)
     else:
-        cur.execute(_dml.add_obs_m_f, obs_info)
+        cur.execute(dml.add_obs_m_f, obs_info)
 
 
 def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
@@ -634,7 +642,7 @@ def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
                       idx,
                       test_id) for couple_idx in range(14)]
 
-    cur.executemany(_dml.add_temp, temp_data)
+    cur.executemany(dml.add_temp, temp_data)
 
 
 def add_data(cur, file_name, test=False):
