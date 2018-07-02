@@ -12,7 +12,7 @@ import sqldb
 
 def build_tables():
     """Checks for and builds tables from const.TABLES in database."""
-    cnx = sqldb.connect('test_chamber')
+    cnx = sqldb.connect_sqldb('test_chamber')
     cur = cnx.cursor()
     sqldb.create_tables(cur, const.TABLES)
     sqldb.add_tube_info(cur)
@@ -24,7 +24,7 @@ def build_tables():
 def job():
     """Writes .tdms files from argument directory to database."""
     print("\nConnecting to MySQL...")
-    cnx = sqldb.connect('test_chamber')
+    cnx = sqldb.connect_sqldb('test_chamber')
     cur = cnx.cursor()
     print("Connected.")
     sqldb.add_input(cur, sys.argv[1])
