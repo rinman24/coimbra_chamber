@@ -428,13 +428,82 @@ def add_test_info(cur, tdms_obj, setting_id, tube_id):
     # ------------------------------------------------------------------------
     # If the test id didn't exist, add it, and return the new setting id.
     # NOTE: It is important to point out that if the test id doen't already
-    #       exist then the foreign key `SettingID` must also be added.
+    #       exist then the foreign key `SettingID` must also be added because
+    #       it is not contained in the `test_info`.
     if not test_id:
         test_info["SettingID"] = setting_id
         cur.execute(dml.add_test, test_info)
         test_id = cur.lastrowid
     return test_id
 
+
+# ----------------------------------------------------------------------------
+# `Observation` Table
+
+
+def _get_obs_info(tdms_obj, tdms_idx):
+    """
+    Use TDMS file and index to return observation info.
+
+    Builds a dictionary containing the observation for a given index (time) in
+    the nptdms.TdmsFile object.
+
+    It is important to note here that tdms_idx is NOT the same as the Idx
+    comumn in the MySQL schema. Because the tdms files are read in using
+    `nptdms` data is converted into arrays of type `np.ndarray`. As a result,
+    I can use the tdms_idx as a proxy for the idx column in the tdms file.
+
+    Parameters
+    ----------
+    tdms_obj : nptdms.TdmsFile
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+    tdms_idx : int
+        Index in the tdms file representing a single time.
+
+    Returns
+    -------
+    obs_info : dict of {str: str or int}
+        Set of values to insert into the Observation table. Keys should be
+        column names and values should be the value to insert.
+
+    Examples
+    --------
+    Get the observation information from index 10:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> get_obs_info(tdms_file, 10)
+    {'DewPoint': '270.69', 'Idx': 8, 'Mass': '0.0985090', 'CapManOk': 1,
+    'Pressure': 100393, 'OptidewOk': 1, 'PowRef': '-0.0003', 'PowOut':
+    '-0.0003'}
+
+    """
+    # ------------------------------------------------------------------------
+    # Construct the obs_info dictionary
+    obs_info = {'CapManOk': int(
+                    tdms_obj.object("Data", "CapManOk").data[tdms_idx]),
+                'DewPoint': '{:.2f}'.format(
+                    tdms_obj.object("Data", "DewPoint").data[tdms_idx]),
+                'Idx': int(
+                    tdms_obj.object("Data", "Idx").data[tdms_idx]),
+                'OptidewOk': int(
+                    tdms_obj.object("Data", "OptidewOk").data[tdms_idx]),
+                'PowOut': '{:.4f}'.format(
+                    tdms_obj.object("Data", "PowOut").data[tdms_idx]),
+                'PowRef': '{:.4f}'.format(
+                    tdms_obj.object("Data", "PowRef").data[tdms_idx]),
+                'Pressure': int(
+                    tdms_obj.object("Data", "Pressure").data[tdms_idx])}
+    
+    # ------------------------------------------------------------------------
+    # If the setting IsMass is True, then also add mass
+    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
+        obs_info['Mass'] = '{:.7f}'.format(
+            tdms_obj.object("Data", "Mass").data[tdms_idx])
+
+    return obs_info
 
 # ----------------------------------------------------------------------------
 # Still to be organized
@@ -546,65 +615,6 @@ def get_temp_info(tdms_obj, tdms_idx, couple_idx):
     return temp_info
 
 
-def get_obs_info(tdms_obj, tdms_idx):
-    """
-    Use TDMS file and index to return observation info.
-
-    Builds a dictionary containing the observation for a given index (time) in
-    the nptdms.TdmsFile object.
-
-    It is important to note here that tdms_idx is NOT the same as the Idx
-    comumn in the MySQL schema. Because the tdms files are read in using
-    `nptdms` data is converted into arrays of type `np.ndarray`. As a result,
-    I can use the tdms_idx as a proxy for the idx column in the tdms file.
-
-    Parameters
-    ----------
-    tdms_obj : nptdms.TdmsFile
-        Object containg the data from the tdms test file. Original tdms files
-        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
-        159.
-    tdms_idx : int
-        Index in the tdms file representing a single time.
-
-    Returns
-    -------
-    obs_info : dict of {str: str or int}
-        Set of values to insert into the Observation table. Keys should be
-        column names and values should be the value to insert.
-
-    Examples
-    --------
-    Get the observation information from index 10:
-
-    >>> import nptdms
-    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> get_obs_info(tdms_file, 10)
-    {'DewPoint': '270.69', 'Idx': 8, 'Mass': '0.0985090', 'CapManOk': 1,
-    'Pressure': 100393, 'OptidewOk': 1, 'PowRef': '-0.0003', 'PowOut':
-    '-0.0003'}
-
-    """
-    obs_info = {'CapManOk': int(
-                    tdms_obj.object("Data", "CapManOk").data[tdms_idx]),
-                'DewPoint': '{:.2f}'.format(
-                    tdms_obj.object("Data", "DewPoint").data[tdms_idx]),
-                'Idx': int(
-                    tdms_obj.object("Data", "Idx").data[tdms_idx]),
-                'OptidewOk': int(
-                    tdms_obj.object("Data", "OptidewOk").data[tdms_idx]),
-                'PowOut': '{:.4f}'.format(
-                    tdms_obj.object("Data", "PowOut").data[tdms_idx]),
-                'PowRef': '{:.4f}'.format(
-                    tdms_obj.object("Data", "PowRef").data[tdms_idx]),
-                'Pressure': int(
-                    tdms_obj.object("Data", "Pressure").data[tdms_idx])}
-    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        obs_info['Mass'] = '{:.7f}'.format(
-            tdms_obj.object("Data", "Mass").data[tdms_idx])
-    return obs_info
-
-
 def add_tube_info(cur):
     """
     Use a MySQL cursor to add test-independant Tube info.
@@ -694,7 +704,7 @@ def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
     ...     assert add_obs_info(cur, tdms_file, 2, i)
 
     """
-    obs_info = get_obs_info(tdms_obj, tdms_idx)
+    obs_info = _get_obs_info(tdms_obj, tdms_idx)
     obs_info['TestId'] = test_id
     if tdms_obj.object("Settings", "IsMass").data[0] == 1:
         cur.execute(dml.add_obs_m_t, obs_info)
