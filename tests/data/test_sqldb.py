@@ -241,7 +241,6 @@ def test__get_obs_info(test_tdms_obj):
             )
 
 
-
 def test_add_tube_info(cursor):
     """Test add_tube_info."""
     assert sqldb.add_tube_info(cursor)
@@ -377,13 +376,19 @@ def test__test_exists(cursor, test_tdms_obj):
 
 def test_add_obs_info(cursor, test_tdms_obj):
     """Test add_obs_info."""
+    # ------------------------------------------------------------------------
+    # File 1
+    # For every index in the data enter all of the data
     for tdms_idx in range(
             len(test_tdms_obj[0].object("Data", "Idx").data)
             ):
         assert sqldb.add_obs_info(cursor, test_tdms_obj[0], 1, tdms_idx)
+    # Then check that you can get the last dew point correct
     cursor.execute(dml.get_last_dew_point.format(1))
     assert cursor.fetchall()[0][0] == Decimal('270.78')
 
+    # ------------------------------------------------------------------------
+    # File 2
     for tdms_idx in range(
             len(test_tdms_obj[1].object("Data", "Idx").data)
             ):
@@ -391,6 +396,8 @@ def test_add_obs_info(cursor, test_tdms_obj):
     cursor.execute(dml.get_last_dew_point.format(2))
     assert cursor.fetchall()[0][0] == Decimal('270.93')
 
+    # ------------------------------------------------------------------------
+    # File 3
     for tdms_idx in range(
             len(test_tdms_obj[2].object("Data", "Idx").data)
             ):
@@ -398,6 +405,8 @@ def test_add_obs_info(cursor, test_tdms_obj):
     cursor.execute(dml.get_last_dew_point.format(3))
     assert cursor.fetchall()[0][0] == Decimal('270.20')
 
+    # ------------------------------------------------------------------------
+    # File 4
     for tdms_idx in range(
             len(test_tdms_obj[3].object("Data", "Idx").data)
             ):

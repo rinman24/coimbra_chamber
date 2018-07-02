@@ -3,6 +3,7 @@ MySQL and TDMS Integration.
 
 Functions
 ---------
+    add_obs_info
     add_setting_info
     add_test_info
     connect
@@ -505,6 +506,65 @@ def _get_obs_info(tdms_obj, tdms_idx):
 
     return obs_info
 
+
+def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
+    """
+    Add an observation to the database.
+
+    Uses cursor's .execute function on a MySQL insert query and dictionary of
+    observation data built by get_obs using the argument nptdms.TdmsFile and
+    index. Adds the foreign key TestID to the dictionary before executing the
+    MySQL query.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    tdms_obj : nptdms.TdmsFile
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+    tdms_idx : int
+        Index in the tdms file representing a single time.
+
+    Returns
+    -------
+    `True` or `None`
+        `True` if successful. Else `None`.
+
+    Examples
+    --------
+    Add a single observation at test_idx 1 from a file with test_id 1:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> _, cur = connect('my-schema')
+    >>> assert add_obs_info(cur, tdms_file, 1, 0)
+
+    Add all observations in a file with test_id 2:
+
+    >>> for i in range(len(tdms_file.object("Data", "Idx").data)):
+    ...     assert add_obs_info(cur, tdms_file, 2, i)
+
+    """
+    # ------------------------------------------------------------------------
+    # Get the observation info from the tdms file
+    obs_info = _get_obs_info(tdms_obj, tdms_idx)
+    # Add the test id to the dictionary of observation info
+    obs_info['TestId'] = test_id
+
+    # If the test is a mass test, then include mass info
+    # Else, don't consider mass.
+    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
+        cur.execute(dml.add_obs_m_t, obs_info)
+        return True
+    else:
+        cur.execute(dml.add_obs_m_f, obs_info)
+        return True
+
 # ----------------------------------------------------------------------------
 # Still to be organized
 
@@ -659,59 +719,6 @@ def add_tube_info(cur):
     else:
         print('Tube already exists.')
         return False
-
-
-def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
-    """
-    Add an observation to the database.
-
-    Uses cursor's .execute function on a MySQL insert query and dictionary of
-    observation data built by get_obs using the argument nptdms.TdmsFile and
-    index. Adds the foreign key TestID to the dictionary before executing the
-    MySQL query.
-
-    Parameters
-    ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
-    tdms_obj : nptdms.TdmsFile
-        Object containg the data from the tdms test file. Original tdms files
-        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
-        159.
-    test_id : int
-        TestID for the MySQL database, which is the primary key for the Test
-        table.
-    tdms_idx : int
-        Index in the tdms file representing a single time.
-
-    Returns
-    -------
-    `True` or `None`
-        `True` if successful. Else `None`.
-
-    Examples
-    --------
-    Add a single observation at test_idx 1 from a file with test_id 1:
-
-    >>> import nptdms
-    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> _, cur = connect('my-schema')
-    >>> assert add_obs_info(cur, tdms_file, 1, 0)
-
-    Add all observations in a file with test_id 2:
-
-    >>> for i in range(len(tdms_file.object("Data", "Idx").data)):
-    ...     assert add_obs_info(cur, tdms_file, 2, i)
-
-    """
-    obs_info = _get_obs_info(tdms_obj, tdms_idx)
-    obs_info['TestId'] = test_id
-    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        cur.execute(dml.add_obs_m_t, obs_info)
-        return True
-    else:
-        cur.execute(dml.add_obs_m_f, obs_info)
-        return True
 
 
 def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
