@@ -84,6 +84,7 @@ TEMP_OBS_4 = [283.54, 283.41, 283.28, 283.44, 282.59, 280.51, 280.81,
 
 TEST_DIRECTORY = os.path.join(os.getcwd(), 'tests', 'data_transfer_test_files')
 
+
 @pytest.fixture(scope='module')
 def cursor():
     """Cursor Fixture at module level so that only one connection is made."""
@@ -314,14 +315,38 @@ def test_add_test_info(cursor, test_tdms_obj):
     assert cursor.fetchall() == TDMS_04_ADD_TEST
 
 
-def test_test_exists(cursor, test_tdms_obj):
-    """Test test_exists."""
-    assert 1 == sqldb.test_exists(cursor, TDMS_01_TEST)
-    assert 2 == sqldb.test_exists(cursor, TDMS_02_TEST)
-    assert 3 == sqldb.test_exists(cursor, TDMS_03_TEST)
-    assert 4 == sqldb.test_exists(cursor, TDMS_04_TEST)
-    assert not 5 == sqldb.test_exists(cursor, TDMS_01_TEST)
-    assert not 6 == sqldb.test_exists(cursor, '')
+def test__test_exists(cursor, test_tdms_obj):
+    """
+    Test _test_exists.
+
+    The tests were previously added. All that is left to do is to assert that
+    the tests exist.
+
+    Files 1-4 should exist. However, 5 and 6 shouldn't exist.
+    """
+    # ------------------------------------------------------------------------
+    # File 1
+    assert 1 == sqldb._test_exists(cursor, TDMS_01_TEST)
+
+    # ------------------------------------------------------------------------
+    # File 2
+    assert 2 == sqldb._test_exists(cursor, TDMS_02_TEST)
+
+    # ------------------------------------------------------------------------
+    # File 3
+    assert 3 == sqldb._test_exists(cursor, TDMS_03_TEST)
+
+    # ------------------------------------------------------------------------
+    # File 4
+    assert 4 == sqldb._test_exists(cursor, TDMS_04_TEST)
+
+    # ------------------------------------------------------------------------
+    # File 5: Should not exist
+    assert not 5 == sqldb._test_exists(cursor, TDMS_01_TEST)
+
+    # ------------------------------------------------------------------------
+    # File 6: Should not exist
+    assert not 6 == sqldb._test_exists(cursor, '')
 
 
 def test_add_obs_info(cursor, test_tdms_obj):
@@ -428,8 +453,7 @@ def test_add_data(cursor):
     for i in range(len(res)):
         assert isclose(res[i], test_const.OBS_DATA_1[i])
 
-    fp = os.path.join(TEST_DIRECTORY, 'tdms_test_folder',
-                    'test_02.tdms')
+    fp = os.path.join(TEST_DIRECTORY, 'tdms_test_folder', 'test_02.tdms')
     sqldb.add_data(cursor, fp, True)
     cursor.execute(
         test_const.GET_OBS_DATA_M.format(2, TEST_INDEX)
@@ -447,8 +471,10 @@ def test_add_data(cursor):
     for i in range(len(res)):
         assert isclose(res[i], test_const.OBS_DATA_3[i])
 
-    fp = os.path.join(TEST_DIRECTORY, 'tdms_test_folder',
-                    'tdms_test_folder_full', 'test_04.tdms')
+    fp = os.path.join(
+        TEST_DIRECTORY, 'tdms_test_folder', 'tdms_test_folder_full',
+        'test_04.tdms'
+        )
     sqldb.add_data(cursor, fp, True)
     cursor.execute(
         test_const.GET_OBS_DATA_T.format(4, TEST_INDEX)

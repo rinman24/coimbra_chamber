@@ -182,7 +182,7 @@ def _setting_exists(cur, setting_info):
     # Query the settings table and fetch the result
     cur.execute(dml.select_setting, setting_info)
     result = cur.fetchall()
-    
+
     # ------------------------------------------------------------------------
     # Return the setting id or False
     if not result:
@@ -236,13 +236,13 @@ def add_setting_info(cur, tdms_obj):
     # ------------------------------------------------------------------------
     # Check if the setting id already exists
     setting_id = _setting_exists(cur, setting_info)
-    
+
     # ------------------------------------------------------------------------
     # If the setting didn't exist, add it, and return the new setting id.
     if not setting_id:
         cur.execute(dml.add_setting, setting_info)
         setting_id = cur.lastrowid
-    
+
     return setting_id
 
 
@@ -285,8 +285,11 @@ def _get_test_info(tdms_obj):
     # Construct the test_info dictionary with the exception of the `Author`
     # and `Description` fields, which will be filled below
     test_info = dict(
-        Author='', 
-        DateTime=tdms_obj.object().properties['DateTime'].replace(microsecond=0).replace(tzinfo=None),
+        Author='',
+        DateTime=(
+            tdms_obj.object().properties['DateTime']
+            .replace(microsecond=0).replace(tzinfo=None)
+            ),
         Description='',
         IsMass=int(tdms_obj.object("Settings", "IsMass").data[0]),
         TimeStep=int(tdms_obj.object("Settings", "TimeStep").data[0])
@@ -301,6 +304,73 @@ def _get_test_info(tdms_obj):
             test_info['Description'] = value[:1000]
 
     return test_info
+
+
+def _test_exists(cur, test_info):
+    """
+    Check if a test already exists.
+
+    Uses the test_info dictionary where the keys are the columns in the Test
+    table and the values are the string values. The cursor executes a DML
+    SELECT statement and returns the TestID if the test exists or False if no
+    test matching the query exists.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    test_info : dict of {str: str or int or datetime.datetime}
+        Test settings to check for in database. Keys are column names from
+        the Test table and values should be the value to insert.
+
+    Returns
+    -------
+    test_id : int or False
+        This is the primary key for the Test table if the test already exists.
+        If the test does not exist in the database the function returns False.
+
+    Examples
+    --------
+    Check for test info that already exists in the database:
+
+    >>> import datetime
+    >>> _, cur = connect('my_schema')
+    >>> test_info = dict(Author='author_01',
+    ... DateTime=datetime.datetime(2018, 1, 29, 17, 54, 12),
+    ... Description='description_01', IsMass=1, TimeStep=1)
+    >>> test_exists(cur, test_info)
+    1
+
+    Check for test info that does not exist in the database:
+
+    >>> test_info['Author'] = 'foo'
+    >>> test_exists(cur, test_info)
+    False
+
+    Todo
+    ----
+    Raise exception rather than print message.
+
+    """
+    # ------------------------------------------------------------------------
+    # If there is no test info print a message to the user, this should really
+    # raise an exception; See Todo in docstring
+    if not test_info:
+        print("No test info: File Unable to Transfer")
+        return False
+
+    # ------------------------------------------------------------------------
+    # Querry the data base to see if the test exists in the database and fetch
+    # the results
+    cur.execute(dml.select_test.format(
+        test_info['DateTime'].replace(microsecond=0).replace(tzinfo=None))
+        )
+    result = cur.fetchall()
+
+    if not result:
+        return False
+    else:
+        return result[0][0]
 
 
 # ----------------------------------------------------------------------------
@@ -557,7 +627,7 @@ def add_test_info(cur, tdms_obj, setting_id):
 
     """
     test_info = _get_test_info(tdms_obj)
-    test_id = test_exists(cur, test_info)
+    test_id = _test_exists(cur, test_info)
     if not test_id:
         test_info["SettingID"] = setting_id
         test_info["TubeID"] = str(
@@ -565,61 +635,6 @@ def add_test_info(cur, tdms_obj, setting_id):
         cur.execute(dml.add_test, test_info)
         test_id = cur.lastrowid
     return test_id
-
-
-def test_exists(cur, test_info):
-    """
-    Check if a test already exists.
-
-    Uses the test_info dictionary where the keys are the columns in the Test
-    table and the values are the string values. The cursor executes a DML
-    SELECT statement and returns the TestID if the test exists or False if no
-    test matching the query exists.
-
-    Parameters
-    ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
-    test_info : dict of {str: str or int or datetime.datetime}
-        Test settings to check for in database. Keys are column names from
-        the Test table and values should be the value to insert.
-
-    Returns
-    -------
-    test_id : int or False
-        This is the primary key for the Test table if the test already exists.
-        If the test does not exist in the database the function returns False.
-
-    Examples
-    --------
-    Check for test info that already exists in the database:
-
-    >>> import datetime
-    >>> _, cur = connect('my_schema')
-    >>> test_info = dict(Author='author_01',
-    ... DateTime=datetime.datetime(2018, 1, 29, 17, 54, 12),
-    ... Description='description_01', IsMass=1, TimeStep=1)
-    >>> test_exists(cur, test_info)
-    1
-
-    Check for test info that does not exist in the database:
-
-    >>> test_info['Author'] = 'foo'
-    >>> test_exists(cur, test_info)
-    False
-
-    """
-    if not test_info:
-        print("File Unable to Transfer")
-        return False
-    cur.execute(dml.select_test.format(
-        test_info['DateTime'].replace(microsecond=0).replace(tzinfo=None))
-        )
-    result = cur.fetchall()
-    if not result:
-        return False
-    else:
-        return result[0][0]
 
 
 def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
@@ -756,7 +771,7 @@ def add_data(cur, file_name, test=False):
 
     """
     tdms_obj = nptdms.TdmsFile(file_name)
-    if not test_exists(cur, _get_test_info(tdms_obj)):
+    if not _test_exists(cur, _get_test_info(tdms_obj)):
         # print("WE GOT IN THE LOOP")
         test_id = add_test_info(cur, tdms_obj, add_setting_info(cur, tdms_obj))
         # print("TestID = ", test_id)
@@ -766,19 +781,6 @@ def add_data(cur, file_name, test=False):
     # if not test:
     #    move_files(directory)
 
-# NOTE: YOU NEED TO REALIZE THAT WE ARE AT THE END OF THE LINE NOW. THE LAST
-# THING THAT WE NEED TO DO IS TO GET ALL OF THESE FUNCTIONS TO CASCADE TOGETHER.
-# IN OREDER TO DO THAT YOU MUST FULLY UNDERSTAND THE CALL SIGNATURE AND
-# SEQUENCE OF ALL OF THE CALLS IN THE STACK.
-# CONSEQUENTLY, I WOULD SUGGEST GOING BACK AND
-# 1) REDOING ALL OF THE DOCSTRINGS, EXPECIALLY DESCRIPTIONS
-# 2) ADD COMMENTS EVERYWHERE
-# THEN YOU WILL BE IN A MUCH BETTER PLACE TO ACTUALLY WRAP THIS UP.
-# AFTER THAT, WE WILL NEED TO FIND A WAY TO PULL THE DATA OUT OF THE DATA BASE.
-# THIS IS PERFECT STUFF TO HAVE ALEX HELP ME WITH ONCE I HAVE A SOLID STARTING
-# PLACE FOR HIM WITH THIS CODE
-
-# LET'S GET THIS WRAPPED UP AND MERGE HIS PULL REQUESTS.
 
 # Not-Reviewed
 
