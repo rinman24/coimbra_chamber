@@ -36,9 +36,9 @@ def connect(database):
 
     Returns
     -------
-    cnx : `mysql.connector.connection.MySQLConnection`
+    cnx : mysql.connector.connection.MySQLConnection
         Connection to MySQL database.
-    cur : `mysql.connector.cursor.MySqlCursor`
+    cur : mysql.connector.cursor.MySqlCursor
         Cursor for MySQL database.
 
     Examples
@@ -87,15 +87,15 @@ def create_tables(cur, tables):
 
     Parameters
     ----------
-    cur : `mysql.connector.crsor.MySqlCursor`
+    cur : mysql.connector.crsor.MySqlCursor
         Cursor for MySQL database.
     tables : list of tuple of (str, str)
         List of tuples of table names and DDL query language. For example:
         [('UnitTest',
-        "CREATE TABLE UnitTest ("
-        "    UnitTestID TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
-        "    Number DECIMAL(5,2) NULL,"
-        "    String VARCHAR(30) NULL,"
+        "CREATE TABLE `UnitTest` ("
+        "    `UnitTestID` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+        "    `Number` DECIMAL(5,2) NULL,"
+        "    `String` VARCHAR(30) NULL,"
         "  PRIMARY KEY (`UnitTestID`)"
         ");"))]
 
@@ -139,11 +139,11 @@ def create_tables(cur, tables):
 
 def setting_exists(cur, setting_info):
     """
-    Use `setting_info` to return existing setting id or `None`.
+    Check if the settings exist in the database.
 
     Parameters
     ----------
-    cur : `mysql.connector.crsor.MySqlCursor`
+    cur : mysql.connector.crsor.MySqlCursor
         Cursor for MySQL database.
     setting_info : dict of {str : int or float}
         Experimental settings of to check for in database. Keys are column
@@ -153,7 +153,7 @@ def setting_exists(cur, setting_info):
     Returns
     -------
     setting_id : int or False
-        SettingID for the MySQL database if it exists, `False` otherwise.
+        SettingID for the MySQL database if it exists, False otherwise.
 
     Examples
     --------
@@ -190,7 +190,7 @@ def get_temp_info(tdms_obj, tdms_idx, couple_idx):
 
     Parameters
     ----------
-    tdms_obj : `nptdms.TdmsFile`
+    tdms_obj : nptdms.TdmsFile
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -230,14 +230,14 @@ def get_setting_info(tdms_obj):
     """
     Use TDMS file to return initial state of test.
 
-    This function searches through the `nptdms.TdmsFile` object for
+    This function searches through the nptdms.TdmsFile object for
     the initial settings including: Duty, Mass, Pressure, Temp, and TimeStep.
     The function returns a dictionary of settings formatted for use with the
-    `add_setting` DML query.
+    add_setting DML query.
 
     Parameters
     ----------
-    tdms_obj : `nptdms.TdmsFile`
+    tdms_obj : nptdms.TdmsFile
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -293,7 +293,7 @@ def get_test_info(tdms_obj):
 
     Parameters
     ----------
-    tdms_obj : `nptdms.TdmsFile`
+    tdms_obj : nptdms.TdmsFile
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -346,7 +346,7 @@ def get_obs_info(tdms_obj, tdms_idx):
 
     Parameters
     ----------
-    tdms_obj : `nptdms.TdmsFile`
+    tdms_obj : nptdms.TdmsFile
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -401,7 +401,7 @@ def add_tube_info(cur):
 
     Parameters
     ----------
-    cur : `mysql.connector.crsor.MySqlCursor`
+    cur : mysql.connector.crsor.MySqlCursor
         Cursor for MySQL database.
 
     Returns
@@ -422,7 +422,7 @@ def add_tube_info(cur):
     Now add it again:
 
     >>> status = add_tube_info(cur)
-    Tube already exists.`
+    Tube already exists.
     >>> status
     False
 
@@ -449,9 +449,9 @@ def add_setting_info(cur, tdms_obj):
 
     Parameters
     ----------
-    cur : `mysql.connector.crsor.MySqlCursor`
+    cur : mysql.connector.crsor.MySqlCursor
         Cursor for MySQL database.
-    tdms_obj : `nptdms.TdmsFile`
+    tdms_obj : nptdms.TdmsFile
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -492,9 +492,9 @@ def add_test_info(cur, tdms_obj, setting_id):
 
      Parameters
     ----------
-    cur : `mysql.connector.crsor.MySqlCursor`
+    cur : mysql.connector.crsor.MySqlCursor
         Cursor for MySQL database.
-    tdms_obj : `nptdms.TdmsFile`
+    tdms_obj : nptdms.TdmsFile
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -542,7 +542,7 @@ def test_exists(cur, test_info):
 
     Parameters
     ----------
-    cur : `mysql.connector.crsor.MySqlCursor`
+    cur : mysql.connector.crsor.MySqlCursor
         Cursor for MySQL database.
     test_info : dict of {str: str or int or datetime.datetime}
         Test settings to check for in database. Keys are column names from
@@ -597,9 +597,9 @@ def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
 
     Parameters
     ----------
-    cur : `mysql.connector.crsor.MySqlCursor`
+    cur : mysql.connector.crsor.MySqlCursor
         Cursor for MySQL database.
-    tdms_obj : `nptdms.TdmsFile`
+    tdms_obj : nptdms.TdmsFile
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -650,9 +650,9 @@ def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
 
     Parameters
     ----------
-    cur : `mysql.connector.crsor.MySqlCursor`
+    cur : mysql.connector.crsor.MySqlCursor
         Cursor for MySQL database.
-    tdms_obj : `nptdms.TdmsFile`
+    tdms_obj : nptdms.TdmsFile
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -672,7 +672,7 @@ def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
 
     Examples
     --------
-    Add temperature from observations a tdms file where the `test_id` is `,
+    Add temperature from observations a tdms file where the `test_id` is 1,
     `tdms_index` is 0, and the `idx` is 99:
 
     >>> import nptdms
