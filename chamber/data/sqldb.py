@@ -81,7 +81,7 @@ def connect(database):
 
 
 # ----------------------------------------------------------------------------
-# Settings
+# `Setting` Table
 
 
 def _get_setting_info(tdms_obj):
@@ -245,6 +245,64 @@ def add_setting_info(cur, tdms_obj):
     
     return setting_id
 
+
+# ----------------------------------------------------------------------------
+# `Test` Table
+
+
+def _get_test_info(tdms_obj):
+    """
+    Use TDMS file to return test details.
+
+    Builds a dictionary containing the initial state of test in the
+    nptdms.TdmsFile.
+
+    Parameters
+    ----------
+    tdms_obj : nptdms.TdmsFile
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+
+    Returns
+    -------
+    test_info : dict of {str: str}
+        Set of values to insert into the Test table. Keys should be column
+        names and values should be the value to insert.
+
+    Examples
+    --------
+    Get the initial state of the test from the tdms file:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> get_test_info(tdms_file)
+    {'Description': 'description', 'TimeStep': 1, 'IsMass': 1, 'Author':
+    'RHI', 'DateTime': datetime.datetime(2018, 1, 29, 17, 54, 12)}
+
+    """
+    # ------------------------------------------------------------------------
+    # Construct the test_info dictionary with the exception of the `Author`
+    # and `Description` fields, which will be filled below
+    test_info = dict(
+        Author='', 
+        DateTime=tdms_obj.object().properties['DateTime'].replace(microsecond=0).replace(tzinfo=None),
+        Description='',
+        IsMass=int(tdms_obj.object("Settings", "IsMass").data[0]),
+        TimeStep=int(tdms_obj.object("Settings", "TimeStep").data[0])
+        )
+
+    # ------------------------------------------------------------------------
+    # Now iterate through properties and look for `Author` and `Description`
+    for name, value in tdms_obj.object().properties.items():
+        if name == "author":
+            test_info['Author'] = value
+        elif name == "description":
+            test_info['Description'] = value[:1000]
+
+    return test_info
+
+
 # ----------------------------------------------------------------------------
 # Still to be organized
 
@@ -353,54 +411,6 @@ def get_temp_info(tdms_obj, tdms_idx, couple_idx):
     if not regex.search(temp_info):
         return
     return temp_info
-
-
-def get_test_info(tdms_obj):
-    """
-    Use TDMS file to return test details.
-
-    Builds a dictionary containing the initial state of test in the
-    nptdms.TdmsFile.
-
-    Parameters
-    ----------
-    tdms_obj : nptdms.TdmsFile
-        Object containg the data from the tdms test file. Original tdms files
-        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
-        159.
-
-    Returns
-    -------
-    test_info : dict of {str: str}
-        Set of values to insert into the Test table. Keys should be column
-        names and values should be the value to insert.
-
-    Examples
-    --------
-    Get the initial state of the test from the tdms file:
-
-    >>> import nptdms
-    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> get_test_info(tdms_file)
-    {'Description': 'description', 'TimeStep': 1, 'IsMass': 1, 'Author':
-    'RHI', 'DateTime': datetime.datetime(2018, 1, 29, 17, 54, 12)}
-
-    """
-    test_info = {'Author': '',
-                 'DateTime': tdms_obj.object().properties['DateTime'].replace(
-                                 microsecond=0).replace(tzinfo=None),
-                 'Description': '',
-                 'IsMass': int(
-                    tdms_obj.object("Settings", "IsMass").data[0]),
-                 'TimeStep': int(
-                    tdms_obj.object("Settings", "TimeStep").data[0])}
-
-    for name, value in tdms_obj.object().properties.items():
-        if name == "author":
-            test_info['Author'] = value
-        if name == "description":
-            test_info['Description'] = value[:500]
-    return test_info
 
 
 def get_obs_info(tdms_obj, tdms_idx):
@@ -546,7 +556,7 @@ def add_test_info(cur, tdms_obj, setting_id):
     1
 
     """
-    test_info = get_test_info(tdms_obj)
+    test_info = _get_test_info(tdms_obj)
     test_id = test_exists(cur, test_info)
     if not test_id:
         test_info["SettingID"] = setting_id
@@ -746,7 +756,7 @@ def add_data(cur, file_name, test=False):
 
     """
     tdms_obj = nptdms.TdmsFile(file_name)
-    if not test_exists(cur, get_test_info(tdms_obj)):
+    if not test_exists(cur, _get_test_info(tdms_obj)):
         # print("WE GOT IN THE LOOP")
         test_id = add_test_info(cur, tdms_obj, add_setting_info(cur, tdms_obj))
         # print("TestID = ", test_id)

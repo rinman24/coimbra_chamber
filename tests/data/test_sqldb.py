@@ -131,8 +131,8 @@ def test_create_tables(cursor):
         assert row[0] in table_names_set
 
 
-def test_setting_exists(cursor):
-    """Test setting_exists."""
+def test__setting_exists(cursor):
+    """Test _setting_exists."""
     # ------------------------------------------------------------------------
     # Manually add a setting and assert the setting id is 1
     cursor.execute(dml.add_setting, SETTINGS_TEST_1)
@@ -167,8 +167,8 @@ def test_get_temp_info(test_tdms_obj):
         )
 
 
-def test_get_setting_info(test_tdms_obj):
-        """Test get_setting_info."""
+def test__get_setting_info(test_tdms_obj):
+        """Test _get_setting_info."""
         # --------------------------------------------------------------------
         # File 1
         assert TDMS_01_SETTING == sqldb._get_setting_info(test_tdms_obj[0])
@@ -186,12 +186,23 @@ def test_get_setting_info(test_tdms_obj):
         assert TDMS_02_SETTING == sqldb._get_setting_info(test_tdms_obj[3])
 
 
-def test_get_test_info(test_tdms_obj):
-        """Test get_test_info."""
-        assert TDMS_01_TEST == sqldb.get_test_info(test_tdms_obj[0])
-        assert TDMS_02_TEST == sqldb.get_test_info(test_tdms_obj[1])
-        assert TDMS_03_TEST == sqldb.get_test_info(test_tdms_obj[2])
-        assert TDMS_04_TEST == sqldb.get_test_info(test_tdms_obj[3])
+def test__get_test_info(test_tdms_obj):
+        """Test _get_test_info."""
+        # --------------------------------------------------------------------
+        # File 1
+        assert TDMS_01_TEST == sqldb._get_test_info(test_tdms_obj[0])
+
+        # --------------------------------------------------------------------
+        # File 2
+        assert TDMS_02_TEST == sqldb._get_test_info(test_tdms_obj[1])
+
+        # --------------------------------------------------------------------
+        # File 3
+        assert TDMS_03_TEST == sqldb._get_test_info(test_tdms_obj[2])
+
+        # --------------------------------------------------------------------
+        # File 4
+        assert TDMS_04_TEST == sqldb._get_test_info(test_tdms_obj[3])
 
 
 def test_get_obs_info(test_tdms_obj):
