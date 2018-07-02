@@ -428,12 +428,9 @@ def add_test_info(cur, tdms_obj, setting_id, tube_id):
     # ------------------------------------------------------------------------
     # If the test id didn't exist, add it, and return the new setting id.
     # NOTE: It is important to point out that if the test id doen't already
-    #       exist then the foreign keys `SettingID` and `TubeID` must also be
-    #       added.
+    #       exist then the foreign key `SettingID` must also be added.
     if not test_id:
         test_info["SettingID"] = setting_id
-        #test_info["TubeID"] = str(
-        #    tdms_obj.object("Settings", "TubeID").data[0])
         cur.execute(dml.add_test, test_info)
         test_id = cur.lastrowid
     return test_id
