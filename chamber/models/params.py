@@ -76,7 +76,6 @@ def get_schmidt(p, t, t_dp, ref):
     return schmidt
 
 
-
 def get_grashof(p, t, t_dp, t_s):
     """
     Get Grashof number for vapor mixture.
