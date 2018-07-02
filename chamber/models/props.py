@@ -441,7 +441,7 @@ def get_x_1_sat(p, t_s):
 
 def get_m_1(p, t, t_dp):
     """
-    Mass fraction of water vapor in the vapor mixture.
+    Get mass fraction of water vapor in the vapor mixture.
 
     Parameters
     ----------
@@ -473,7 +473,7 @@ def get_m_1(p, t, t_dp):
 
 def get_m_1_sat(p, t_s):
     """
-    Mass fraction of water vapor in the saturated vapor mixture.
+    Get mass fraction of water vapor in the saturated vapor mixture.
 
     Parameters
     ----------
@@ -502,7 +502,7 @@ def get_m_1_sat(p, t_s):
 
 def get_h_fg_sat(t_s):
     """
-    Specific enthalpy of vaporization for pure water.
+    Get specific enthalpy of vaporization for pure water.
 
     Parameters
     ----------
@@ -591,7 +591,7 @@ def get_mu(p, t, t_dp):
 
 def get_c_pl(t):
     """
-    Specific heat of pure liquid water.
+    Get specific heat of pure liquid water.
 
     Parameters
     ----------
@@ -620,7 +620,7 @@ def get_c_pl(t):
 
 def get_rh(p, t, t_dp):
     """
-    RH based on p, t and t_dp.
+    Get relative humidity of the vapor liquid mixture.
 
     Parameters
     ----------
