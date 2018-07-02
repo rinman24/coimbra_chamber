@@ -6,6 +6,7 @@ Functions
     add_obs_info
     add_setting_info
     add_test_info
+    add_tube_info
     connect
     create_tables
 
@@ -24,7 +25,7 @@ from chamber.data import ddl, dml
 
 
 # ----------------------------------------------------------------------------
-# Connect to database
+# Connect and setup
 
 
 def connect(database):
@@ -80,6 +81,121 @@ def connect(database):
             print(err)
     else:
         return cnx, cnx.cursor()
+
+
+def create_tables(cur, tables):
+    """
+    Create tables in the database.
+
+    Uses a list of tuples where the 0 index is the name of the table and the 1
+    index is a string of MySQL DDL used to create the table. A list is required
+    so that the DDL can be executed in order to avoid foreign key constraint
+    errors.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    tables : list of tuple of (str, str)
+        List of tuples of table names and DDL query language. For example:
+        [('UnitTest',
+        "CREATE TABLE `UnitTest` ("
+        "    `UnitTestID` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+        "    `Number` DECIMAL(5,2) NULL,"
+        "    `String` VARCHAR(30) NULL,"
+        "  PRIMARY KEY (`UnitTestID`)"
+        ");"))]
+
+    Returns
+    -------
+    bool
+        `True` if successful.
+
+    Examples
+    --------
+    Create tables in the MySQL database:
+
+    >>> from chamebr.database import ddl
+    >>> _, cur = connect('my-schema')
+    >>> status = create_tables(cur, ddl.tables)
+    Setting up tables...
+    Setting  OK
+    Tube  OK
+    Test  OK
+    Observation  OK
+    TempObservation  OK
+    Unit  OK
+    >>> status
+    True
+
+    """
+    print('Setting up tables...')
+    for table in tables:
+        name, ddl = table
+        try:
+            cur.execute(ddl)
+        except mysql.connector.Error as err:
+            if err.errno == mysql.connector.errorcode.ER_TABLE_EXISTS_ERROR:
+                print(name, 'already exists.')
+            else:
+                print(err.msg)
+        else:
+            print(table[0], ' OK')
+    return True
+
+
+# ----------------------------------------------------------------------------
+# `Tube` Table
+
+
+def add_tube_info(cur):
+    """
+    Use a MySQL cursor to add test-independant Tube info.
+
+    Uses cursor .execute function on the ADD_TUBE and TUBE_DATA constants in
+    ddl.py. Adds the new Tube if the Tube doesn't exist. If the Tube already
+    exists, then the function does nothing.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+
+    Returns
+    -------
+    bool
+        `True` if tube added, `False` if tube already exists in database.
+
+    Examples
+    --------
+    Add the tube for the first time:
+
+    >>> _, cur = connect('my-schema')
+    >>> status = add_tube_info(cur)
+    Tube added.
+    >>> status
+    True
+
+    Now add it again:
+
+    >>> status = add_tube_info(cur)
+    Tube already exists.
+    >>> status
+    False
+
+    """
+    # First query if the tube exists
+    cur.execute(dml.select_tube, ddl.tube_data)
+    
+    # If the tube does not exist, add it
+    # Else, it already exists.
+    if not cur.fetchall():
+        cur.execute(dml.add_tube, ddl.tube_data)
+        print('Tube added.')
+        return True
+    else:
+        print('Tube already exists.')
+        return False
 
 
 # ----------------------------------------------------------------------------
@@ -685,113 +801,6 @@ def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
 
 # ----------------------------------------------------------------------------
 # Still to be organized
-
-
-def create_tables(cur, tables):
-    """
-    Create tables in the database.
-
-    Uses a list of tuples where the 0 index is the name of the table and the 1
-    index is a string of MySQL DDL used to create the table. A list is required
-    so that the DDL can be executed in order to avoid foreign key constraint
-    errors.
-
-    Parameters
-    ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
-    tables : list of tuple of (str, str)
-        List of tuples of table names and DDL query language. For example:
-        [('UnitTest',
-        "CREATE TABLE `UnitTest` ("
-        "    `UnitTestID` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
-        "    `Number` DECIMAL(5,2) NULL,"
-        "    `String` VARCHAR(30) NULL,"
-        "  PRIMARY KEY (`UnitTestID`)"
-        ");"))]
-
-    Returns
-    -------
-    bool
-        `True` if successful.
-
-    Examples
-    --------
-    Create tables in the MySQL database:
-
-    >>> from chamebr.database import ddl
-    >>> _, cur = connect('my-schema')
-    >>> status = create_tables(cur, ddl.tables)
-    Setting up tables...
-    Setting  OK
-    Tube  OK
-    Test  OK
-    Observation  OK
-    TempObservation  OK
-    Unit  OK
-    >>> status
-    True
-
-    """
-    print('Setting up tables...')
-    for table in tables:
-        name, ddl = table
-        try:
-            cur.execute(ddl)
-        except mysql.connector.Error as err:
-            if err.errno == mysql.connector.errorcode.ER_TABLE_EXISTS_ERROR:
-                print(name, 'already exists.')
-            else:
-                print(err.msg)
-        else:
-            print(table[0], ' OK')
-    return True
-
-
-def add_tube_info(cur):
-    """
-    Use a MySQL cursor to add test-independant Tube info.
-
-    Uses cursor .execute function on the ADD_TUBE and TUBE_DATA constants in
-    ddl.py. Adds the new Tube if the Tube doesn't exist. If the Tube already
-    exists, then the function does nothing.
-
-    Parameters
-    ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
-
-    Returns
-    -------
-    bool
-        `True` if tube added, `False` if tube already exists in database.
-
-    Examples
-    --------
-    Add the tube for the first time:
-
-    >>> _, cur = connect('my-schema')
-    >>> status = add_tube_info(cur)
-    Tube added.
-    >>> status
-    True
-
-    Now add it again:
-
-    >>> status = add_tube_info(cur)
-    Tube already exists.
-    >>> status
-    False
-
-    """
-    cur.execute(dml.select_tube, ddl.tube_data)
-    if not cur.fetchall():
-        cur.execute(dml.add_tube, ddl.tube_data)
-        print('Tube added.')
-        return True
-    else:
-        print('Tube already exists.')
-        return False
 
 
 def add_data(cur, file_name, test=False):

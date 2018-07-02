@@ -254,7 +254,11 @@ def test__get_obs_info(test_tdms_obj):
 
 def test_add_tube_info(cursor):
     """Test add_tube_info."""
+    
+    # Add the tube the first time and we should get true
     assert sqldb.add_tube_info(cursor)
+    
+    # Check that there is one and only one tube with this id
     cursor.execute("SELECT TubeID FROM Tube;")
     assert cursor.fetchone()[0] == 1
     cursor.execute("SELECT TubeID FROM Tube;")
@@ -275,6 +279,8 @@ def test_add_tube_info(cursor):
     cursor.execute("SELECT Mass FROM Tube WHERE TubeID=1;")
     assert cursor.fetchone()[0] == Decimal('0.0873832')
 
+    # Now that it is added, we should get a False indicating that it could not
+    # be added
     assert not sqldb.add_tube_info(cursor)
 
 
