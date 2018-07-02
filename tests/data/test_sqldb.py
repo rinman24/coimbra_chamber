@@ -133,9 +133,17 @@ def test_create_tables(cursor):
 
 def test_setting_exists(cursor):
     """Test setting_exists."""
+    # ------------------------------------------------------------------------
+    # Manually add a setting and assert the setting id is 1
     cursor.execute(dml.add_setting, SETTINGS_TEST_1)
-    assert 1 == sqldb.setting_exists(cursor, SETTINGS_TEST_1)
-    assert not sqldb.setting_exists(cursor, SETTINGS_TEST_2)
+    assert 1 == sqldb._setting_exists(cursor, SETTINGS_TEST_1)
+
+    # ------------------------------------------------------------------------
+    # Assert that other settings do not exist
+    assert not sqldb._setting_exists(cursor, SETTINGS_TEST_2)
+
+    # ------------------------------------------------------------------------
+    # Truncate table so it can be used in subsequent tests
     truncate(cursor, 'Setting')
 
 
@@ -163,19 +171,19 @@ def test_get_setting_info(test_tdms_obj):
         """Test get_setting_info."""
         # --------------------------------------------------------------------
         # File 1
-        assert TDMS_01_SETTING == sqldb.get_setting_info(test_tdms_obj[0])
+        assert TDMS_01_SETTING == sqldb._get_setting_info(test_tdms_obj[0])
 
         # --------------------------------------------------------------------
         # File 2
-        assert TDMS_02_SETTING == sqldb.get_setting_info(test_tdms_obj[1])
+        assert TDMS_02_SETTING == sqldb._get_setting_info(test_tdms_obj[1])
 
         # --------------------------------------------------------------------
         # File 3
-        assert TDMS_03_SETTING == sqldb.get_setting_info(test_tdms_obj[2])
+        assert TDMS_03_SETTING == sqldb._get_setting_info(test_tdms_obj[2])
 
         # --------------------------------------------------------------------
         # File 4: This is the same setting at File 2
-        assert TDMS_02_SETTING == sqldb.get_setting_info(test_tdms_obj[3])
+        assert TDMS_02_SETTING == sqldb._get_setting_info(test_tdms_obj[3])
 
 
 def test_get_test_info(test_tdms_obj):
@@ -234,24 +242,34 @@ def test_add_tube_info(cursor):
 
 def test_add_setting_info(cursor, test_tdms_obj):
     """Test add_setting_info."""
+    # ------------------------------------------------------------------------
+    # File 1
+    # Add a new setting and assert that its id is 1
     setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[0])
     assert setting_id == 1
+    # Query the new setting and check the results
     cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
                    cursor.lastrowid))
     assert cursor.fetchall() == TDMS_01_ADD_SETTING
 
+    # ------------------------------------------------------------------------
+    # File 2
     setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[1])
     assert setting_id == 2
     cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
                    cursor.lastrowid))
     assert cursor.fetchall() == TDMS_02_ADD_SETTING
 
+    # ------------------------------------------------------------------------
+    # File 3
     setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[2])
     assert setting_id == 3
     cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
                    cursor.lastrowid))
     assert cursor.fetchall() == TDMS_03_ADD_SETTING
 
+    # ------------------------------------------------------------------------
+    # File 4
     setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[3])
     assert setting_id == 2  # This test has the same setting at 2
     cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(2))

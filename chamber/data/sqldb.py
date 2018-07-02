@@ -1,11 +1,11 @@
-"""MySQL Database Integration.
+"""
+MySQL and TDMS Integration.
 
 Functions
 ---------
     connect
     create_tables
-    get_setting_info
-    setting_exists
+    add_setting_info
 
 """
 import configparser
@@ -19,6 +19,10 @@ from scipy import stats
 
 from chamber import const
 from chamber.data import ddl, dml
+
+
+# ----------------------------------------------------------------------------
+# Connect to database
 
 
 def connect(database):
@@ -74,6 +78,175 @@ def connect(database):
             print(err)
     else:
         return cnx, cnx.cursor()
+
+
+# ----------------------------------------------------------------------------
+# Settings
+
+
+def _get_setting_info(tdms_obj):
+    """
+    Use TDMS file to return initial state of test.
+
+    This function searches through the nptdms.TdmsFile object for the initial
+    settings including: Duty, Pressure, and Temperature. These settings are
+    returned in the form of a dictionary with the keys: 'Duty', 'Pressure',
+    and 'Temperature' respectively. This dictionaty can then be used as an
+    input to the `add_setting` function.
+
+    Parameters
+    ----------
+    tdms_obj : nptdms.TdmsFile
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+
+    Returns
+    -------
+    setting_info : dict of {str: scalar}
+        Set of values to insert into the Setting table. Keys should be column
+        names and values should be the value to insert.
+
+    Examples
+    --------
+    Get the settings from tdms file:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> get_setting_info(tdms_file)
+    {'Duty': '5.0', 'Pressure': 100000, 'Temperature': 285}
+
+    """
+    # ------------------------------------------------------------------------
+    # Read thermocouples 4-14, average, and round to nearest 5 K
+    avg_temp = (
+        sum(float(get_temp_info(tdms_obj, 0, i)) for i in range(4, 14))/10
+        )
+    rounded_temp = 5*round(avg_temp/5)
+
+    # ------------------------------------------------------------------------
+    # Read duty and round to nearest 0.1 %
+    duty = tdms_obj.object('Settings', 'DutyCycle').data[0]
+    rounded_duty = '{:.1f}'.format(round(duty, 1))
+
+    # ------------------------------------------------------------------------
+    # Read pressure and round to nearest 5 kPa
+    pressure = tdms_obj.object('Data', 'Pressure').data[0]
+    rounded_pressure = 5000*round(float(pressure)/5000)
+
+    # ------------------------------------------------------------------------
+    # Construct dictionary to return
+    setting_info = dict(
+        Duty=rounded_duty, Pressure=rounded_pressure, Temperature=rounded_temp
+        )
+
+    return setting_info
+
+
+def _setting_exists(cur, setting_info):
+    """
+    Check if the settings exist in the database.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    setting_info : dict of {str : scalar}
+        Experimental settings of to check for in database. Keys are column
+        names from the Setting table and values are numerical values to
+        insert.
+
+    Returns
+    -------
+    setting_id : int or False
+        SettingID for the MySQL database if it exists, False otherwise.
+
+    Examples
+    --------
+    Obtain a setting ID that already exists:
+
+    >>> _, cur = connect('my-schema')
+    >>> setting_info = dict(Duty=10, Pressure=100000, Temperature=300)
+    >>> setting_id = setting_exists(cur, setting_info)
+    >>> setting_id
+    1
+
+    Attempt to obtain a setting ID that doesn't exist:
+    >>> setting_info['Duty'] = 20
+    >>> setting_id = setting_exists(cur, setting_info)
+    >>> setting_id
+    False
+
+    """
+    # ------------------------------------------------------------------------
+    # Query the settings table and fetch the result
+    cur.execute(dml.select_setting, setting_info)
+    result = cur.fetchall()
+    
+    # ------------------------------------------------------------------------
+    # Return the setting id or False
+    if not result:
+        return False
+    else:
+        setting_id = result[0][0]
+        return setting_id
+
+
+def add_setting_info(cur, tdms_obj):
+    """
+    Use a MySQL cursor and a TDMS file to add setting info into database.
+
+    Uses cursor's .execute function on a MySQL insert query and dictionary of
+    Setting data built by the get_setting method. Adds the new Setting if the
+    setting doesn't exist and returns the SettingID form the MySQL database.
+    If the setting already exists, then the SettingID of that setting is
+    returned.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    tdms_obj : nptdms.TdmsFile
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+
+    Returns
+    -------
+    setting_id : int
+        SettingID for the MySQL database, which is primary key for the Setting
+        table.
+
+    Examples
+    --------
+    Add the setting info for a given file and get its id:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> _, cur = connect('my-schema')
+    >>> setting_id = add_setting_info(cur, tdms_file)
+    >>> setting_id
+    1
+
+    """
+    # ------------------------------------------------------------------------
+    # Get the setting into from the tdsm file
+    setting_info = _get_setting_info(tdms_obj)
+
+    # ------------------------------------------------------------------------
+    # Check if the setting id already exists
+    setting_id = _setting_exists(cur, setting_info)
+    
+    # ------------------------------------------------------------------------
+    # If the setting didn't exist, add it, and return the new setting id.
+    if not setting_id:
+        cur.execute(dml.add_setting, setting_info)
+        setting_id = cur.lastrowid
+    
+    return setting_id
+
+# ----------------------------------------------------------------------------
+# Still to be organized
 
 
 def create_tables(cur, tables):
@@ -137,50 +310,6 @@ def create_tables(cur, tables):
     return True
 
 
-def setting_exists(cur, setting_info):
-    """
-    Check if the settings exist in the database.
-
-    Parameters
-    ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
-    setting_info : dict of {str : int or float}
-        Experimental settings of to check for in database. Keys are column
-        names from the Setting table and values are numerical values to
-        insert.
-
-    Returns
-    -------
-    setting_id : int or False
-        SettingID for the MySQL database if it exists, False otherwise.
-
-    Examples
-    --------
-    Obtain a setting ID that already exists:
-
-    >>> _, cur = connect('my-schema')
-    >>> setting_info = dict(Duty=10, Pressure=100000, Temperature=300)
-    >>> setting_id = setting_exists(cur, setting_info)
-    >>> setting_id
-    1
-
-    Attempt to obtain a setting ID that doesn't exist:
-    >>> setting_info['Duty'] = 20
-    >>> setting_id = setting_exists(cur, setting_info)
-    >>> setting_id
-    False
-
-    """
-    cur.execute(dml.select_setting, setting_info)
-    result = cur.fetchall()
-    if not result:
-        return False
-    else:
-        setting_id = result[0][0]
-        return setting_id
-
-
 def get_temp_info(tdms_obj, tdms_idx, couple_idx):
     """
     Get thermocouple observations.
@@ -224,64 +353,6 @@ def get_temp_info(tdms_obj, tdms_idx, couple_idx):
     if not regex.search(temp_info):
         return
     return temp_info
-
-
-def get_setting_info(tdms_obj):
-    """
-    Use TDMS file to return initial state of test.
-
-    This function searches through the nptdms.TdmsFile object for
-    the initial settings including: Duty, Mass, Pressure, Temp, and TimeStep.
-    The function returns a dictionary of settings formatted for use with the
-    add_setting DML query.
-
-    Parameters
-    ----------
-    tdms_obj : nptdms.TdmsFile
-        Object containg the data from the tdms test file. Original tdms files
-        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
-        159.
-
-    Returns
-    -------
-    setting_info : dict of {str: int or float}
-        Set of values to insert into the Setting table. Keys should be column
-        names and values should be the value to insert.
-
-    Examples
-    --------
-    Get the settings from tdms file:
-
-    >>> import nptdms
-    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> get_setting_info(tdms_file)
-    {'Duty': '5.0', 'Pressure': 100000, 'Temperature': 285}
-
-    """
-    # ------------------------------------------------------------------------
-    # Read thermocouples 4-14, average, and round to nearest 5 K
-    avg_temp = (
-        sum(float(get_temp_info(tdms_obj, 0, i)) for i in range(4, 14))/10
-        )
-    rounded_temp = 5*round(avg_temp/5)
-
-    # ------------------------------------------------------------------------
-    # Read duty and round to nearest 0.1 %
-    duty = tdms_obj.object('Settings', 'DutyCycle').data[0]
-    rounded_duty = '{:.1f}'.format(round(duty, 1))
-
-    # ------------------------------------------------------------------------
-    # Read pressure and round to nearest 5 kPa
-    pressure = tdms_obj.object('Data', 'Pressure').data[0]
-    rounded_pressure = 5000*round(float(pressure)/5000)
-
-    # ------------------------------------------------------------------------
-    # Construct dictionary to return
-    setting_info = dict(
-        Duty=rounded_duty, Pressure=rounded_pressure, Temperature=rounded_temp
-        )
-
-    return setting_info
 
 
 def get_test_info(tdms_obj):
@@ -435,51 +506,6 @@ def add_tube_info(cur):
     else:
         print('Tube already exists.')
         return False
-
-
-def add_setting_info(cur, tdms_obj):
-    """
-    Use a MySQL cursor and a TDMS file to add setting info.
-
-    Uses cursor's .execute function on a MySQL insert query and dictionary of
-    Setting data built by the get_setting method. Adds the new Setting if the
-    setting doesn't exist and returns the SettingID form the MySQL database.
-    If the setting already exists, then the SettingID of that setting is
-    returned.
-
-    Parameters
-    ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
-    tdms_obj : nptdms.TdmsFile
-        Object containg the data from the tdms test file. Original tdms files
-        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
-        159.
-
-    Returns
-    -------
-    setting_id : int
-        SettingID for the MySQL database, which is primary key for the Setting
-        table.
-
-    Examples
-    --------
-    Add the setting info for a given file and get its id:
-
-    >>> import nptdms
-    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> _, cur = connect('my-schema')
-    >>> setting_id = add_setting_info(cur, tdms_file)
-    >>> setting_id
-    1
-
-    """
-    setting_info = get_setting_info(tdms_obj)
-    setting_id = setting_exists(cur, setting_info)
-    if not setting_id:
-        cur.execute(dml.add_setting, setting_info)
-        setting_id = cur.lastrowid
-    return setting_id
 
 
 def add_test_info(cur, tdms_obj, setting_id):
