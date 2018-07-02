@@ -49,16 +49,20 @@ TDMS_04_OBS_07 = dict(CapManOk=1, DewPoint='270.22', Idx=8, OptidewOk=1,
 
 TDMS_01_TEST = dict(Author='author_01',
                     DateTime=datetime(2018, 1, 29, 17, 54, 12),
-                    Description='description_01', IsMass=1, TimeStep=1)
+                    Description='description_01', IsMass=1, TimeStep=1,
+                    TubeID=1)
 TDMS_02_TEST = dict(Author='author_02',
                     DateTime=datetime(2018, 1, 29, 17, 55, 10),
-                    Description='description_02', IsMass=1, TimeStep=1)
+                    Description='description_02', IsMass=1, TimeStep=1,
+                    TubeID=1)
 TDMS_03_TEST = dict(Author='author_03',
                     DateTime=datetime(2018, 1, 29, 17, 50, 58),
-                    Description='description_03', IsMass=0, TimeStep=1)
+                    Description='description_03', IsMass=0, TimeStep=1,
+                    TubeID=1)
 TDMS_04_TEST = dict(Author='author_04',
                     DateTime=datetime(2018, 1, 29, 17, 52, 24),
-                    Description='description_04', IsMass=0, TimeStep=1)
+                    Description='description_04', IsMass=0, TimeStep=1,
+                    TubeID=1)
 
 TDMS_01_ADD_SETTING = [(1, Decimal('5.0'), 100000, Decimal('285.0'))]
 TDMS_02_ADD_SETTING = [(2, Decimal('0.0'), 100000, Decimal('280.0'))]
@@ -290,25 +294,35 @@ def test_add_setting_info(cursor, test_tdms_obj):
 
 def test_add_test_info(cursor, test_tdms_obj):
     """Test add_test_info."""
-    test_id = sqldb.add_test_info(cursor, test_tdms_obj[0], 1)
+    # ------------------------------------------------------------------------
+    # File 1
+    # Add a new test and assert that its id is 1
+    test_id = sqldb.add_test_info(cursor, test_tdms_obj[0], 1, 1)
     assert test_id == 1
+    # Query the new test and check the results
     cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
                    test_id))
     assert cursor.fetchall() == TDMS_01_ADD_TEST
 
-    test_id = sqldb.add_test_info(cursor, test_tdms_obj[1], 2)
+    # ------------------------------------------------------------------------
+    # File 2
+    test_id = sqldb.add_test_info(cursor, test_tdms_obj[1], 2, 1)
     assert test_id == 2
     cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
                    test_id))
     assert cursor.fetchall() == TDMS_02_ADD_TEST
 
-    test_id = sqldb.add_test_info(cursor, test_tdms_obj[2], 3)
+    # ------------------------------------------------------------------------
+    # File 3
+    test_id = sqldb.add_test_info(cursor, test_tdms_obj[2], 3, 1)
     assert test_id == 3
     cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
                    test_id))
     assert cursor.fetchall() == TDMS_03_ADD_TEST
 
-    test_id = sqldb.add_test_info(cursor, test_tdms_obj[3], 2)
+    # ------------------------------------------------------------------------
+    # File 4
+    test_id = sqldb.add_test_info(cursor, test_tdms_obj[3], 2, 1)
     assert test_id == 4
     cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
                    test_id))
