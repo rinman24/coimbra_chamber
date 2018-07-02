@@ -52,7 +52,7 @@ def get_schmidt(p, t, t_dp, ref):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> params.get_schmidt(p, t, t_dp, 'Mills')
+    >>> get_schmidt(p, t, t_dp, 'Mills')
     0.6104149007992397
 
     Notes
@@ -106,7 +106,7 @@ def get_grashof(p, t, t_dp, t_s):
     >>> t = 290
     >>> t_dp = 280
     >>> t_s = 289.5
-    >>> params.get_grashof(p, t, t_dp, t_s)
+    >>> get_grashof(p, t, t_dp, t_s)
     230.11072973650792
 
     """
@@ -164,7 +164,7 @@ def get_prandtl(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> params.get_prandtl(p, t, t_dp)
+    >>> get_prandtl(p, t, t_dp)
     0.7146248666414813
 
     """
@@ -218,7 +218,7 @@ def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
     >>> t_dp = 280
     >>> t_s = 289
     >>> ref = 'constant'
-    >>> params.get_sherwood(l, m_dot_pp, p, t, t_dp, ref)
+    >>> get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref)
     0.3540373651492251
 
     Notes

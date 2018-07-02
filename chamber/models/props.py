@@ -77,7 +77,7 @@ def get_c_pm(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_c_pm(p, t, t_dp)
+    >>> get_c_pm(p, t, t_dp)
     1017.641910841458
 
     """
@@ -105,7 +105,7 @@ def get_c_pm_sat(p, t_s):
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_c_pm_sat(p, t_s)
+    >>> get_c_pm_sat(p, t_s)
     1022.2835902558337
 
     """
@@ -136,7 +136,7 @@ def get_rho_m(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_rho_m(p, t, t_dp)
+    >>> get_rho_m(p, t, t_dp)
     1.213231099568598
 
     """
@@ -165,7 +165,7 @@ def get_rho_m_sat(p, t_s):
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_rho_m_sat(p, t_s)
+    >>> get_rho_m_sat(p, t_s)
     1.2327562216963954
 
     """
@@ -197,7 +197,7 @@ def get_k_m(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_k_m(p, t, t_dp)
+    >>> get_k_m(p, t, t_dp)
     0.02563350730647246
 
     """
@@ -225,7 +225,7 @@ def get_k_m_sat(p, t_s):
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_k_m_sat(p, t_s)
+    >>> get_k_m_sat(p, t_s)
     0.025260388108991345
 
     """
@@ -256,7 +256,7 @@ def get_alpha_m(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_alpha_m(p, t, t_dp)
+    >>> get_alpha_m(p, t, t_dp)
     2.076201562300882e-05
 
     """
@@ -291,7 +291,7 @@ def get_alpha_m_sat(p, t_s):
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_alpha_m_sat(p, t_s)
+    >>> get_alpha_m_sat(p, t_s)
     2.0044324561030463e-05
 
     """
@@ -331,15 +331,15 @@ def get_d_12(p, t, t_dp, ref):
     >>> t = 290
     >>> t_dp = 280
     >>> ref = 'Mills'
-    >>> props.get_d_12(p, t, t_dp, ref)
+    >>> get_d_12(p, t, t_dp, ref)
     2.4306504684558495e-05
 
     >>> ref = 'Marrero'
-    >>> props.get_d_12(p, t, t_dp, ref)
+    >>> get_d_12(p, t, t_dp, ref)
     2.365539793302829e-05
 
     >>> ref = 'constant'
-    >>> props.get_d_12(p, t, t_dp, ref)
+    >>> get_d_12(p, t, t_dp, ref)
     2.416458085635347e-05
 
     Raises
@@ -402,7 +402,7 @@ def get_x_1(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_x_1(p, t, t_dp)
+    >>> get_x_1(p, t, t_dp)
     0.00982822815586041
 
     """
@@ -431,7 +431,7 @@ def get_x_1_sat(p, t_s):
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_x_1_sat(p, t_s)
+    >>> get_x_1_sat(p, t_s)
     0.01376427605764327
 
     """
@@ -462,7 +462,7 @@ def get_m_1(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_m_1(p, t, t_dp)
+    >>> get_m_1(p, t, t_dp)
     0.0061357476021502095
 
     """
@@ -491,7 +491,7 @@ def get_m_1_sat(p, t_s):
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_m_1_sat(p, t_s)
+    >>> get_m_1_sat(p, t_s)
     0.008605868703401028
 
     """
@@ -517,7 +517,7 @@ def get_h_fg_sat(t_s):
     Examples
     --------
     >>> t_s = 285
-    >>> props.get_h_fg_sat(t_s)
+    >>> get_h_fg_sat(t_s)
     2472806.6902607535
 
     """
@@ -544,7 +544,7 @@ def x1_2_m1(x_1):
     Examples
     --------
     >>> x_1 = 0.01
-    >>> props.x1_2_m1(x_1)
+    >>> x1_2_m1(x_1)
     0.006243391414375084
 
     """
@@ -577,8 +577,8 @@ def get_mu(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_mu(p, t, t_dp)
-    1.800077369582236e-5
+    >>> get_mu(p, t, t_dp)
+    1.800077369582236e-05
 
     """
     mu = hap.HAPropsSI('mu', 'P', p, 'T', t, 'Tdp', t_dp)
@@ -606,7 +606,7 @@ def get_c_pl(t):
     Examples
     --------
     >>> t = 285
-    >>> props.get_c_pl(t)
+    >>> get_c_pl(t)
     4192.729295040042
 
     """
@@ -641,7 +641,7 @@ def get_rh(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_rh(p, t, t_dp)
+    >>> get_rh(p, t, t_dp)
     0.5165573311068835
 
     """
@@ -672,7 +672,7 @@ def get_tdp(p, t, rh):
     >>> p = 101325
     >>> t = 290
     >>> rh = 0.5
-    >>> props.get_mu(p, t, rh)
+    >>> get_tdp(p, t, rh)
     279.5268317988297
 
     """
@@ -703,7 +703,7 @@ def get_mol_wgt(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_mol_wgt(p, t, t_dp)
+    >>> get_mol_wgt(p, t, t_dp)
     28.856390729921483
 
     """
@@ -736,7 +736,7 @@ def get_gamma(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_gamma(p, t, t_dp)
+    >>> get_gamma(p, t, t_dp)
     0.49602914637400736
 
     """
@@ -773,7 +773,7 @@ def get_beta_m1(p, t, t_dp, t_s):
     >>> t = 290
     >>> t_dp = 280
     >>> t_s = 285
-    >>> props.get_gamma(p, t, t_dp)
+    >>> get_beta_m1(p, t, t_dp, t_s)
     0.002491563166729926
 
     """
