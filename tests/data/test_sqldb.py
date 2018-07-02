@@ -152,23 +152,34 @@ def test__setting_exists(cursor):
     truncate(cursor, 'Setting')
 
 
-def test_get_temp_info(test_tdms_obj):
+def test__get_temp_info(test_tdms_obj):
     """Test get_temp_info."""
+    # ------------------------------------------------------------------------
+    # File 1
     assert (
         TDMS_01_THM_07 ==
-        sqldb.get_temp_info(test_tdms_obj[0], TEST_INDEX, TC_INDEX)
+        sqldb._get_temp_info(test_tdms_obj[0], TEST_INDEX, TC_INDEX)
         )
+
+    # ------------------------------------------------------------------------
+    # File 2
     assert (
         TDMS_02_THM_07 ==
-        sqldb.get_temp_info(test_tdms_obj[1], TEST_INDEX, TC_INDEX)
+        sqldb._get_temp_info(test_tdms_obj[1], TEST_INDEX, TC_INDEX)
         )
+
+    # ------------------------------------------------------------------------
+    # File 3
     assert (
         TDMS_03_THM_07 ==
-        sqldb.get_temp_info(test_tdms_obj[2], TEST_INDEX, TC_INDEX)
+        sqldb._get_temp_info(test_tdms_obj[2], TEST_INDEX, TC_INDEX)
         )
+
+    # ------------------------------------------------------------------------
+    # File 4
     assert (
         TDMS_04_THM_07 ==
-        sqldb.get_temp_info(test_tdms_obj[3], TEST_INDEX, TC_INDEX)
+        sqldb._get_temp_info(test_tdms_obj[3], TEST_INDEX, TC_INDEX)
         )
 
 

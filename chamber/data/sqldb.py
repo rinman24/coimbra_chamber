@@ -122,7 +122,7 @@ def _get_setting_info(tdms_obj):
     # ------------------------------------------------------------------------
     # Read thermocouples 4-14, average, and round to nearest 5 K
     avg_temp = (
-        sum(float(get_temp_info(tdms_obj, 0, i)) for i in range(4, 14))/10
+        sum(float(_get_temp_info(tdms_obj, 0, i)) for i in range(4, 14))/10
         )
     rounded_temp = 5*round(avg_temp/5)
 
@@ -565,6 +565,57 @@ def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
         cur.execute(dml.add_obs_m_f, obs_info)
         return True
 
+
+# ----------------------------------------------------------------------------
+# `TempObservation` Table
+
+def _get_temp_info(tdms_obj, tdms_idx, couple_idx):
+    """
+    Get thermocouple observations.
+
+    Returns temperature data for the provided index (time) and thermocouple
+    index.
+
+    Parameters
+    ----------
+    tdms_obj : nptdms.TdmsFile
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+    tdms_idx : int
+        Index in the tdms file representing a single time.
+    couple_idx : int
+        This is the thermocouple index for a specific observation in the tdms
+        file, which represents a single thermocouple measurement at a single
+        time.
+
+    Returns
+    -------
+    temp_info : string
+        A single value to insert into the TempObservation table. Key should be
+        thermocouple number and the value should be the temperature
+        measurement.
+
+    Examples
+    --------
+    Get the temperature measurement from index 1 and thermocouple 4:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> get_temp_info(tdms_file, 1, 4)
+    '280.24'
+
+    """
+    # ------------------------------------------------------------------------
+    # Compile a regular expression to use when obtaining TC obervations
+    regex = re.compile(r'^(\d){3}.(\d){2}$')
+    # Get and format the temperature observation
+    temp_info = '{:.2f}'.format(
+        tdms_obj.object("Data", "TC{}".format(couple_idx)).data[tdms_idx])
+    if not regex.search(temp_info):
+        return
+    return temp_info
+
 # ----------------------------------------------------------------------------
 # Still to be organized
 
@@ -628,51 +679,6 @@ def create_tables(cur, tables):
         else:
             print(table[0], ' OK')
     return True
-
-
-def get_temp_info(tdms_obj, tdms_idx, couple_idx):
-    """
-    Get thermocouple observations.
-
-    Returns temperature data for the provided index (time) and thermocouple
-    index.
-
-    Parameters
-    ----------
-    tdms_obj : nptdms.TdmsFile
-        Object containg the data from the tdms test file. Original tdms files
-        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
-        159.
-    tdms_idx : int
-        Index in the tdms file representing a single time.
-    couple_idx : int
-        This is the thermocouple index for a specific observation in the tdms
-        file, which represents a single thermocouple measurement at a single
-        time.
-
-    Returns
-    -------
-    temp_info : string
-        A single value to insert into the TempObservation table. Key should be
-        thermocouple number and the value should be the temperature
-        measurement.
-
-    Examples
-    --------
-    Get the temperature measurement from index 1 and thermocouple 4:
-
-    >>> import nptdms
-    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> get_temp_info(tdms_file, 1, 4)
-    '280.24'
-
-    """
-    regex = re.compile(r'^(\d){3}.(\d){2}$')
-    temp_info = '{:.2f}'.format(
-        tdms_obj.object("Data", "TC{}".format(couple_idx)).data[tdms_idx])
-    if not regex.search(temp_info):
-        return
-    return temp_info
 
 
 def add_tube_info(cur):
@@ -771,7 +777,7 @@ def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
     temp_data = [
         (
             couple_idx,
-            get_temp_info(tdms_obj, tdms_idx, couple_idx),
+            _get_temp_info(tdms_obj, tdms_idx, couple_idx),
             idx,
             test_id
         )
