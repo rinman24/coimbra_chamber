@@ -36,7 +36,7 @@ def connect(database):
 
     Returns
     -------
-    cnx : `mysql...`
+    cnx : `mysql.connector.connection.MySQLConnection`
         Connection to MySQL database.
     cur : `mysql.connector.cursor.MySqlCursor`
         Cursor for MySQL database.
@@ -46,7 +46,7 @@ def connect(database):
     Obtain a connection and cursor to a schema named 'test' using built in
     config.ini:
 
-    >>> cnx, cur = sqldb.connect('test')
+    >>> cnx, cur = connect('test')
     >>> type(cnx)
     <class 'mysql.connector.connection.MySQLConnection'>
     >>> type(cur)
@@ -78,7 +78,7 @@ def connect(database):
 
 def create_tables(cur, tables):
     """
-    Use a MySQL cursor and a list of tuples to create tables in the database.
+    Create tables in the database.
 
     Uses a list of tuples where the 0 index is the name of the table and the 1
     index is a string of MySQL DDL used to create the table. A list is required
@@ -255,24 +255,31 @@ def get_setting_info(tdms_obj):
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
     >>> get_setting_info(tdms_file)
-    {'PowOut': '-0.0003', 'OptidewOk': 1, 'Pressure': 100393, 'Mass':
-    '0.0985090', 'DewPoint': '270.69', 'CapManOk': 1, 'Idx': 8, 'PowRef':
-    '-0.0003'}
+    {'Duty': '5.0', 'Pressure': 100000, 'Temperature': 285}
 
     """
+    # ------------------------------------------------------------------------
+    # Read thermocouples 4-14, average, and round to nearest 5 K
     avg_temp = (
         sum(float(get_temp_info(tdms_obj, 0, i)) for i in range(4, 14))/10
         )
     rounded_temp = 5*round(avg_temp/5)
 
+    # ------------------------------------------------------------------------
+    # Read duty and round to nearest 0.1 %
     duty = tdms_obj.object('Settings', 'DutyCycle').data[0]
     rounded_duty = '{:.1f}'.format(round(duty, 1))
 
+    # ------------------------------------------------------------------------
+    # Read pressure and round to nearest 5 kPa
     pressure = tdms_obj.object('Data', 'Pressure').data[0]
     rounded_pressure = 5000*round(float(pressure)/5000)
 
-    setting_info = dict(Duty=rounded_duty, Pressure=rounded_pressure,
-                        Temperature=rounded_temp)
+    # ------------------------------------------------------------------------
+    # Construct dictionary to return
+    setting_info = dict(
+        Duty=rounded_duty, Pressure=rounded_pressure, Temperature=rounded_temp
+        )
 
     return setting_info
 
@@ -695,9 +702,6 @@ def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
     return True
 
 
-# Not-Reviewed
-
-
 def add_data(cur, file_name, test=False):
     """
     Insert tdms files into the MySQL database from argument directory.
@@ -726,6 +730,21 @@ def add_data(cur, file_name, test=False):
     # if not test:
     #    move_files(directory)
 
+# NOTE: YOU NEED TO REALIZE THAT WE ARE AT THE END OF THE LINE NOW. THE LAST
+# THING THAT WE NEED TO DO IS TO GET ALL OF THESE FUNCTIONS TO CASCADE TOGETHER.
+# IN OREDER TO DO THAT YOU MUST FULLY UNDERSTAND THE CALL SIGNATURE AND
+# SEQUENCE OF ALL OF THE CALLS IN THE STACK.
+# CONSEQUENTLY, I WOULD SUGGEST GOING BACK AND
+# 1) REDOING ALL OF THE DOCSTRINGS, EXPECIALLY DESCRIPTIONS
+# 2) ADD COMMENTS EVERYWHERE
+# THEN YOU WILL BE IN A MUCH BETTER PLACE TO ACTUALLY WRAP THIS UP.
+# AFTER THAT, WE WILL NEED TO FIND A WAY TO PULL THE DATA OUT OF THE DATA BASE.
+# THIS IS PERFECT STUFF TO HAVE ALEX HELP ME WITH ONCE I HAVE A SOLID STARTING
+# PLACE FOR HIM WITH THIS CODE
+
+# LET'S GET THIS WRAPPED UP AND MERGE HIS PULL REQUESTS.
+
+# Not-Reviewed
 
 # def add_input(cur, directory, test=False):
 #     """Insert tdms files into the MySQL database from argument directory.

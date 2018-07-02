@@ -4,8 +4,6 @@ import os
 
 
 # Constants for test_sqldb.py
-TEST_DIRECTORY = os.path.join(os.getcwd(), 'tests', 'data_transfer_test_files')
-
 CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
                                                'data_transfer_test_files',
                                                'test_01.tdms'),
@@ -38,17 +36,6 @@ INCORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
                                                  'tdms_test_folder_full',
                                                  'test_04.tdms_index')]
 
-TDMS_01_SETTING = {'Duty': '5.0',
-                   'Pressure': 100000,
-                   'Temperature': 285}
-
-TDMS_02_SETTING = {'Duty': '0.0',
-                   'Pressure': 100000,
-                   'Temperature': 280}
-
-TDMS_03_SETTING = {'Duty': '5.0',
-                   'Pressure': 100000,
-                   'Temperature': 280}
 
 GET_OBS_DATA_M = ("SELECT"
                   "    CapManOk, DewPoint, Mass,"

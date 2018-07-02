@@ -2,7 +2,7 @@
 import configparser
 from datetime import datetime
 from decimal import Decimal
-from os import path
+import os
 from pathlib import Path
 from shutil import move
 
@@ -28,6 +28,10 @@ TDMS_01_THM_07 = '284.66'
 TDMS_02_THM_07 = '283.55'
 TDMS_03_THM_07 = '282.43'
 TDMS_04_THM_07 = '282.29'
+
+TDMS_01_SETTING = dict(Duty='5.0', Pressure=100000, Temperature=285)
+TDMS_02_SETTING = dict(Duty='0.0', Pressure=100000, Temperature=280)
+TDMS_03_SETTING = dict(Duty='5.0', Pressure=100000, Temperature=280)
 
 TEST_INDEX = 7
 TC_INDEX = 7
@@ -78,6 +82,7 @@ TEMP_OBS_3 = [283.59, 283.46, 283.34, 283.48, 282.84, 280.51, 280.82,
 TEMP_OBS_4 = [283.54, 283.41, 283.28, 283.44, 282.59, 280.51, 280.81,
               282.29, 282.41, 280.84, 280.33, 280.71, 280.37, 282.27]
 
+TEST_DIRECTORY = os.path.join(os.getcwd(), 'tests', 'data_transfer_test_files')
 
 @pytest.fixture(scope='module')
 def cursor():
@@ -156,22 +161,21 @@ def test_get_temp_info(test_tdms_obj):
 
 def test_get_setting_info(test_tdms_obj):
         """Test get_setting_info."""
-        assert (
-            test_const.TDMS_01_SETTING ==
-            sqldb.get_setting_info(test_tdms_obj[0])
-            )
-        assert (
-            test_const.TDMS_02_SETTING ==
-            sqldb.get_setting_info(test_tdms_obj[1])
-            )
-        assert (
-            test_const.TDMS_03_SETTING ==
-            sqldb.get_setting_info(test_tdms_obj[2])
-            )
-        assert (
-            test_const.TDMS_02_SETTING ==
-            sqldb.get_setting_info(test_tdms_obj[3])
-            )  # This is the same setting at 2
+        # --------------------------------------------------------------------
+        # File 1
+        assert TDMS_01_SETTING == sqldb.get_setting_info(test_tdms_obj[0])
+
+        # --------------------------------------------------------------------
+        # File 2
+        assert TDMS_02_SETTING == sqldb.get_setting_info(test_tdms_obj[1])
+
+        # --------------------------------------------------------------------
+        # File 3
+        assert TDMS_03_SETTING == sqldb.get_setting_info(test_tdms_obj[2])
+
+        # --------------------------------------------------------------------
+        # File 4: This is the same setting at File 2
+        assert TDMS_02_SETTING == sqldb.get_setting_info(test_tdms_obj[3])
 
 
 def test_get_test_info(test_tdms_obj):
@@ -372,52 +376,57 @@ def test_add_temp_info(cursor, test_tdms_obj):
     assert res == TEMP_OBS_4
 
 
-class TestSqlDb(object):
-    """Unit testing of sqldb.py."""
+def test_add_data(cursor):
+    """
+    Test add_data.
 
-    def test_add_data(self, cursor):
-        """Test overall data insertion, the final table in cascade."""
-        truncate(cursor, 'Observation')
-        truncate(cursor, 'Test')
-        truncate(cursor, 'Setting')
+    Test overall data insertion, the final table in cascade.
+    """
+    # ------------------------------------------------------------------------
+    # Clear all of the previous work we have done in the database
+    truncate(cursor, 'Observation')
+    truncate(cursor, 'Test')
+    truncate(cursor, 'Setting')
 
-        fp = path.join(test_const.TEST_DIRECTORY, 'test_01.tdms')
-        sqldb.add_data(cursor, fp, True)
-        cursor.execute(
-            test_const.GET_OBS_DATA_M.format(1, TEST_INDEX)
-            )
-        res = cursor.fetchall()[0]
-        for i in range(len(res)):
-            assert isclose(res[i], test_const.OBS_DATA_1[i])
+    # ------------------------------------------------------------------------
+    # File 1
+    fp = os.path.join(TEST_DIRECTORY, 'test_01.tdms')
+    sqldb.add_data(cursor, fp, True)
+    cursor.execute(
+        test_const.GET_OBS_DATA_M.format(1, TEST_INDEX)
+        )
+    res = cursor.fetchall()[0]
+    for i in range(len(res)):
+        assert isclose(res[i], test_const.OBS_DATA_1[i])
 
-        fp = path.join(test_const.TEST_DIRECTORY, 'tdms_test_folder',
-                       'test_02.tdms')
-        sqldb.add_data(cursor, fp, True)
-        cursor.execute(
-            test_const.GET_OBS_DATA_M.format(2, TEST_INDEX)
-            )
-        res = cursor.fetchall()[0]
-        for i in range(len(res)):
-            assert isclose(res[i], test_const.OBS_DATA_2[i])
+    fp = os.path.join(TEST_DIRECTORY, 'tdms_test_folder',
+                    'test_02.tdms')
+    sqldb.add_data(cursor, fp, True)
+    cursor.execute(
+        test_const.GET_OBS_DATA_M.format(2, TEST_INDEX)
+        )
+    res = cursor.fetchall()[0]
+    for i in range(len(res)):
+        assert isclose(res[i], test_const.OBS_DATA_2[i])
 
-        fp = path.join(test_const.TEST_DIRECTORY, 'test_03.tdms')
-        sqldb.add_data(cursor, fp, True)
-        cursor.execute(
-            test_const.GET_OBS_DATA_T.format(3, TEST_INDEX)
-            )
-        res = cursor.fetchall()[0]
-        for i in range(len(res)):
-            assert isclose(res[i], test_const.OBS_DATA_3[i])
+    fp = os.path.join(TEST_DIRECTORY, 'test_03.tdms')
+    sqldb.add_data(cursor, fp, True)
+    cursor.execute(
+        test_const.GET_OBS_DATA_T.format(3, TEST_INDEX)
+        )
+    res = cursor.fetchall()[0]
+    for i in range(len(res)):
+        assert isclose(res[i], test_const.OBS_DATA_3[i])
 
-        fp = path.join(test_const.TEST_DIRECTORY, 'tdms_test_folder',
-                       'tdms_test_folder_full', 'test_04.tdms')
-        sqldb.add_data(cursor, fp, True)
-        cursor.execute(
-            test_const.GET_OBS_DATA_T.format(4, TEST_INDEX)
-            )
-        res = cursor.fetchall()[0]
-        for i in range(len(res)):
-            assert isclose(res[i], test_const.OBS_DATA_4[i])
+    fp = os.path.join(TEST_DIRECTORY, 'tdms_test_folder',
+                    'tdms_test_folder_full', 'test_04.tdms')
+    sqldb.add_data(cursor, fp, True)
+    cursor.execute(
+        test_const.GET_OBS_DATA_T.format(4, TEST_INDEX)
+        )
+    res = cursor.fetchall()[0]
+    for i in range(len(res)):
+        assert isclose(res[i], test_const.OBS_DATA_4[i])
 
 
 def drop_tables(cursor, bol):
