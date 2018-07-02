@@ -616,6 +616,73 @@ def _get_temp_info(tdms_obj, tdms_idx, couple_idx):
         return
     return temp_info
 
+
+def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
+    """
+    Add a temperature observation to the database.
+
+    Uses cursor's .execute function on a MySQL insert query and dictionary of
+    TempObservation data built by looping through get_temp_info for each
+    thermocouple using the argument nptdms.TdmsFile and index. Adds the foreign
+    key ObservationID to the dictionary before executing the MySQL query.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    tdms_obj : nptdms.TdmsFile
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+    tdms_idx : int
+        Index in the tdms file representing a single time.
+    idx : int
+        Idx for the MySql database, which is part of the composite primary key
+        in the the Observation table.
+
+    Returns
+    -------
+    `True` or `None`
+        `True` if successful. Else `None`.
+
+    Examples
+    --------
+    Add temperature from observations a tdms file where the `test_id` is 1,
+    `tdms_index` is 0, and the `idx` is 99:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> _, cur = connect('my-schema')
+    >>> assert add_temp_info(cur, tdms_file, 1, 0, 99)
+
+    """
+    # ------------------------------------------------------------------------
+    # If this is a mass test, we want to disregard thermocouples 0-3.
+    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
+        initial_tc_index = 4
+    else:
+        initial_tc_index = 0
+
+    # Use a list comprehension to get all of the thermocouple data
+    temp_data_list = [
+        (
+            couple_idx,
+            _get_temp_info(tdms_obj, tdms_idx, couple_idx),
+            idx,
+            test_id
+        )
+        for couple_idx
+        in range(initial_tc_index, 14)
+        ]
+
+    # Execute many using the temp_data_list
+    cur.executemany(dml.add_temp, temp_data_list)
+
+    return True
+
 # ----------------------------------------------------------------------------
 # Still to be organized
 
@@ -725,69 +792,6 @@ def add_tube_info(cur):
     else:
         print('Tube already exists.')
         return False
-
-
-def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
-    """
-    Add a temperature observation to the database.
-
-    Uses cursor's .execute function on a MySQL insert query and dictionary of
-    TempObservation data built by looping through get_temp_info for each
-    thermocouple using the argument nptdms.TdmsFile and index. Adds the foreign
-    key ObservationID to the dictionary before executing the MySQL query.
-
-    Parameters
-    ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
-    tdms_obj : nptdms.TdmsFile
-        Object containg the data from the tdms test file. Original tdms files
-        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
-        159.
-    test_id : int
-        TestID for the MySQL database, which is the primary key for the Test
-        table.
-    tdms_idx : int
-        Index in the tdms file representing a single time.
-    idx : int
-        Idx for the MySql database, which is part of the composite primary key
-        in the the Observation table.
-
-    Returns
-    -------
-    `True` or `None`
-        `True` if successful. Else `None`.
-
-    Examples
-    --------
-    Add temperature from observations a tdms file where the `test_id` is 1,
-    `tdms_index` is 0, and the `idx` is 99:
-
-    >>> import nptdms
-    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> _, cur = connect('my-schema')
-    >>> assert add_temp_info(cur, tdms_file, 1, 0, 99)
-
-    """
-    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        initial_tc_index = 4
-    else:
-        initial_tc_index = 0
-
-    temp_data = [
-        (
-            couple_idx,
-            _get_temp_info(tdms_obj, tdms_idx, couple_idx),
-            idx,
-            test_id
-        )
-        for couple_idx
-        in range(initial_tc_index, 14)
-        ]
-
-    cur.executemany(dml.add_temp, temp_data)
-
-    return True
 
 
 def add_data(cur, file_name, test=False):
