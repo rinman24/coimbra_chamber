@@ -36,9 +36,9 @@ def connect(database):
 
     Returns
     -------
-    cnx : :class:`mysql...`
+    cnx : `mysql...`
         Connection to MySQL database.
-    cur : :class:`mysql.connector.cursor.MySqlCursor`
+    cur : `mysql.connector.cursor.MySqlCursor`
         Cursor for MySQL database.
 
     Examples
@@ -87,7 +87,7 @@ def create_tables(cur, tables):
 
     Parameters
     ----------
-    cur : :class:`mysql.connector.crsor.MySqlCursor`
+    cur : `mysql.connector.crsor.MySqlCursor`
         Cursor for MySQL database.
     tables : list of tuple of (str, str)
         List of tuples of table names and DDL query language. For example:
@@ -143,7 +143,7 @@ def setting_exists(cur, setting_info):
 
     Parameters
     ----------
-    cur : :class:`mysql.connector.crsor.MySqlCursor`
+    cur : `mysql.connector.crsor.MySqlCursor`
         Cursor for MySQL database.
     setting_info : dict of {str : int or float}
         Experimental settings of to check for in database. Keys are column
@@ -190,7 +190,7 @@ def get_temp_info(tdms_obj, tdms_idx, couple_idx):
 
     Parameters
     ----------
-    tdms_obj : :class:`~nptdms.TdmsFile`
+    tdms_obj : `nptdms.TdmsFile`
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -230,14 +230,14 @@ def get_setting_info(tdms_obj):
     """
     Use TDMS file to return initial state of test.
 
-    This function searches through the :class:`~nptdms.TdmsFile` object for
+    This function searches through the `nptdms.TdmsFile` object for
     the initial settings including: Duty, Mass, Pressure, Temp, and TimeStep.
     The function returns a dictionary of settings formatted for use with the
     `add_setting` DML query.
 
     Parameters
     ----------
-    tdms_obj : :class:`~nptdms.TdmsFile`
+    tdms_obj : `nptdms.TdmsFile`
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -286,7 +286,7 @@ def get_test_info(tdms_obj):
 
     Parameters
     ----------
-    tdms_obj : :class:`~nptdms.TdmsFile`
+    tdms_obj : `nptdms.TdmsFile`
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -332,9 +332,14 @@ def get_obs_info(tdms_obj, tdms_idx):
     Builds a dictionary containing the observation for a given index (time) in
     the nptdms.TdmsFile object.
 
+    It is important to note here that tdms_idx is NOT the same as the Idx
+    comumn in the MySQL schema. Because the tdms files are read in using
+    `nptdms` data is converted into arrays of type `np.ndarray`. As a result,
+    I can use the tdms_idx as a proxy for the idx column in the tdms file.
+
     Parameters
     ----------
-    tdms_obj : :class:`~nptdms.TdmsFile`
+    tdms_obj : `nptdms.TdmsFile`
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -389,7 +394,7 @@ def add_tube_info(cur):
 
     Parameters
     ----------
-    cur : :class:`mysql.connector.crsor.MySqlCursor`
+    cur : `mysql.connector.crsor.MySqlCursor`
         Cursor for MySQL database.
 
     Returns
@@ -437,9 +442,9 @@ def add_setting_info(cur, tdms_obj):
 
     Parameters
     ----------
-    cur : :class:`mysql.connector.crsor.MySqlCursor`
+    cur : `mysql.connector.crsor.MySqlCursor`
         Cursor for MySQL database.
-    tdms_obj : :class:`~nptdms.TdmsFile`
+    tdms_obj : `nptdms.TdmsFile`
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -480,9 +485,9 @@ def add_test_info(cur, tdms_obj, setting_id):
 
      Parameters
     ----------
-    cur : :class:`mysql.connector.crsor.MySqlCursor`
+    cur : `mysql.connector.crsor.MySqlCursor`
         Cursor for MySQL database.
-    tdms_obj : :class:`~nptdms.TdmsFile`
+    tdms_obj : `nptdms.TdmsFile`
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -530,7 +535,7 @@ def test_exists(cur, test_info):
 
     Parameters
     ----------
-    cur : :class:`mysql.connector.crsor.MySqlCursor`
+    cur : `mysql.connector.crsor.MySqlCursor`
         Cursor for MySQL database.
     test_info : dict of {str: str or int or datetime.datetime}
         Test settings to check for in database. Keys are column names from
@@ -585,9 +590,9 @@ def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
 
     Parameters
     ----------
-    cur : :class:`mysql.connector.crsor.MySqlCursor`
+    cur : `mysql.connector.crsor.MySqlCursor`
         Cursor for MySQL database.
-    tdms_obj : :class:`~nptdms.TdmsFile`
+    tdms_obj : `nptdms.TdmsFile`
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
@@ -627,12 +632,9 @@ def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
         return True
 
 
-# Not-Reviewed
-
-
 def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
     """
-    Add a TempObservation to the database.
+    Add a temperature observation to the database.
 
     Uses cursor's .execute function on a MySQL insert query and dictionary of
     TempObservation data built by looping through get_temp_info for each
@@ -641,33 +643,59 @@ def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
 
     Parameters
     ----------
-    cur : MySQLCursor
-        Cursor used to interact with the MySQL database.
-    tdms_obj : nptdms.TdmsFile
-        nptdms.TdmsFile object containg the data from the tdms test file.
-        Original tdms files were created from UCSD Chamber experiments in the
-        Coimbra Lab in SERF 159.
-    obs_id : tuple
-        obs_id[0] is the ObservationID which is the primary key for the
-        Observation table.
-        obs_id[1] is the boolean representation of IsMass.
-    temp_idx : int
-        This is the temperature index in the tdms file, which represents a
-        single time.
+    cur : `mysql.connector.crsor.MySqlCursor`
+        Cursor for MySQL database.
+    tdms_obj : `nptdms.TdmsFile`
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+    tdms_idx : int
+        Index in the tdms file representing a single time.
+    idx : int
+        Idx for the MySql database, which is part of the composite primary key
+        in the the Observation table.
+
+    Returns
+    -------
+    `True` or `None`
+        `True` if successful. Else `None`.
+
+    Examples
+    --------
+    Add temperature from observations a tdms file where the `test_id` is `,
+    `tdms_index` is 0, and the `idx` is 99:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> _, cur = connect('my-schema')
+    >>> assert add_temp_info(cur, tdms_file, 1, 0, 99)
 
     """
     if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        temp_data = [(couple_idx,
-                      get_temp_info(tdms_obj, tdms_idx, couple_idx),
-                      idx,
-                      test_id) for couple_idx in range(4, 14)]
+        initial_tc_index = 4
     else:
-        temp_data = [(couple_idx,
-                      get_temp_info(tdms_obj, tdms_idx, couple_idx),
-                      idx,
-                      test_id) for couple_idx in range(14)]
+        initial_tc_index = 0
+
+    temp_data = [
+        (
+            couple_idx,
+            get_temp_info(tdms_obj, tdms_idx, couple_idx),
+            idx,
+            test_id
+        )
+        for couple_idx
+        in range(initial_tc_index, 14)
+        ]
 
     cur.executemany(dml.add_temp, temp_data)
+
+    return True
+
+
+# Not-Reviewed
 
 
 def add_data(cur, file_name, test=False):

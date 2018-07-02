@@ -69,6 +69,15 @@ TDMS_03_ADD_TEST = [(3, 'author_03', datetime(2018, 1, 29, 17, 50, 58),
 TDMS_04_ADD_TEST = [(4, 'author_04', datetime(2018, 1, 29, 17, 52, 24),
                      'description_04', 0, 1.00, 2, 1)]
 
+TEMP_OBS_1 = [284.61, 280.93, 281.07, 284.66, 286.26,
+              281.23, 280.92, 281.32, 280.82, 284.86]
+TEMP_OBS_2 = [283.44, 280.71, 280.9, 283.55, 284.4,
+              280.96, 280.59, 280.9, 280.56, 283.65]
+TEMP_OBS_3 = [283.59, 283.46, 283.34, 283.48, 282.84, 280.51, 280.82,
+              282.43, 282.56, 280.85, 280.37, 280.76, 280.39, 282.42]
+TEMP_OBS_4 = [283.54, 283.41, 283.28, 283.44, 282.59, 280.51, 280.81,
+              282.29, 282.41, 280.84, 280.33, 280.71, 280.37, 282.27]
+
 
 @pytest.fixture(scope='module')
 def cursor():
@@ -313,42 +322,58 @@ def test_add_obs_info(cursor, test_tdms_obj):
     assert cursor.fetchall()[0][0] == Decimal('270.32')
 
 
+def test_add_temp_info(cursor, test_tdms_obj):
+    """Test add_temp."""
+    # ------------------------------------------------------------------------
+    # File 1
+
+    # Add temps with tdms_idx 7 and Idx 8
+    assert sqldb.add_temp_info(
+        cursor, test_tdms_obj[0], 1, TEST_INDEX, TEST_INDEX+1
+        )
+    # Now query these with the TestId and Idx
+    cursor.execute(
+        dml.get_temp_obs.format(1, TEST_INDEX+1)
+        )
+    res = [float(r[0]) for r in cursor.fetchall()]
+    assert res == TEMP_OBS_1
+
+    # ------------------------------------------------------------------------
+    # File 2
+    assert sqldb.add_temp_info(
+        cursor, test_tdms_obj[1], 2, TEST_INDEX, TEST_INDEX
+        )
+    cursor.execute(
+        dml.get_temp_obs.format(2, TEST_INDEX)
+        )
+    res = [float(r[0]) for r in cursor.fetchall()]
+    assert res == TEMP_OBS_2
+
+    # ------------------------------------------------------------------------
+    # File 3
+    assert sqldb.add_temp_info(
+        cursor, test_tdms_obj[2], 3, TEST_INDEX, TEST_INDEX+1
+        )
+    cursor.execute(
+        dml.get_temp_obs.format(3, TEST_INDEX+1)
+        )
+    res = [float(r[0]) for r in cursor.fetchall()]
+    assert res == TEMP_OBS_3
+
+    # ------------------------------------------------------------------------
+    # File 4
+    assert sqldb.add_temp_info(
+        cursor, test_tdms_obj[3], 4, TEST_INDEX, TEST_INDEX+1
+        )
+    cursor.execute(
+        dml.get_temp_obs.format(4, TEST_INDEX+1)
+        )
+    res = [float(r[0]) for r in cursor.fetchall()]
+    assert res == TEMP_OBS_4
+
+
 class TestSqlDb(object):
     """Unit testing of sqldb.py."""
-
-    def test_add_temp(self, cursor, test_tdms_obj):
-        """Test temperature insert and condition handling in add_temp."""
-        sqldb.add_temp_info(cursor, test_tdms_obj[0], 1, TEST_INDEX,
-                            TEST_INDEX+1)
-        cursor.execute(
-            test_const.GET_TEMP_OBS.format(1, TEST_INDEX+1)
-            )
-        res = [float(r[0]) for r in cursor.fetchall()]
-        assert res == test_const.TEMP_OBS_1
-
-        sqldb.add_temp_info(cursor, test_tdms_obj[1], 2,
-                            TEST_INDEX, TEST_INDEX)
-        cursor.execute(
-            test_const.GET_TEMP_OBS.format(2, TEST_INDEX)
-            )
-        res = [float(r[0]) for r in cursor.fetchall()]
-        assert res == test_const.TEMP_OBS_2
-
-        sqldb.add_temp_info(cursor, test_tdms_obj[2], 3,
-                            TEST_INDEX, TEST_INDEX+1)
-        cursor.execute(
-            test_const.GET_TEMP_OBS.format(3, TEST_INDEX+1)
-            )
-        res = [float(r[0]) for r in cursor.fetchall()]
-        assert res == test_const.TEMP_OBS_3
-
-        sqldb.add_temp_info(cursor, test_tdms_obj[3], 4,
-                            TEST_INDEX, TEST_INDEX+1)
-        cursor.execute(
-            test_const.GET_TEMP_OBS.format(4, TEST_INDEX+1)
-            )
-        res = [float(r[0]) for r in cursor.fetchall()]
-        assert res == test_const.TEMP_OBS_4
 
     def test_add_data(self, cursor):
         """Test overall data insertion, the final table in cascade."""

@@ -38,7 +38,7 @@ add_tube = ("INSERT INTO Tube "
             "(%(DiameterIn)s, %(DiameterOut)s, %(Length)s,"
             " %(Material)s, %(Mass)s)")
 
-ADD_UNIT = ("INSERT INTO Unit "
+add_unit = ("INSERT INTO Unit "
             "(Duty, Length, Mass, Power, Pressure, Temperature, Time)"
             " VALUES "
             "(%(Duty)s, %(Length)s, %(Mass)s, %(Power)s, %(Pressure)s,"
@@ -67,3 +67,13 @@ get_last_dew_point = ("SELECT"
                       "    TestID={} "
                       "ORDER BY Idx DESC "
                       "LIMIT 1;")
+
+get_temp_obs = ("SELECT"
+                "    Temperature, ThermocoupleNum "
+                "FROM"
+                "    TempObservation "
+                "WHERE"
+                "    TestId={} "
+                "AND"
+                "    Idx={} "
+                "ORDER BY ThermocoupleNum ASC;")

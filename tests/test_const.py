@@ -50,16 +50,6 @@ TDMS_03_SETTING = {'Duty': '5.0',
                    'Pressure': 100000,
                    'Temperature': 280}
 
-GET_TEMP_OBS = ("SELECT"
-                "    Temperature, ThermocoupleNum "
-                "FROM"
-                "    TempObservation "
-                "WHERE"
-                "    TestId={} "
-                "AND"
-                "    Idx={} "
-                "ORDER BY ThermocoupleNum ASC;")
-
 GET_OBS_DATA_M = ("SELECT"
                   "    CapManOk, DewPoint, Mass,"
                   "    OptidewOk, PowOut, PowRef, Pressure "
@@ -79,15 +69,6 @@ GET_OBS_DATA_T = ("SELECT"
                   "    TestId={} "
                   "AND"
                   "    Idx ={};")
-
-TEMP_OBS_1 = [284.61, 280.93, 281.07, 284.66, 286.26,
-              281.23, 280.92, 281.32, 280.82, 284.86]
-TEMP_OBS_2 = [283.44, 280.71, 280.9, 283.55, 284.4,
-              280.96, 280.59, 280.9, 280.56, 283.65]
-TEMP_OBS_3 = [283.59, 283.46, 283.34, 283.48, 282.84, 280.51, 280.82,
-              282.43, 282.56, 280.85, 280.37, 280.76, 280.39, 282.42]
-TEMP_OBS_4 = [283.54, 283.41, 283.28, 283.44, 282.59, 280.51, 280.81,
-              282.29, 282.41, 280.84, 280.33, 280.71, 280.37, 282.27]
 
 OBS_DATA_1 = (1, 270.7, 9.8509e-2, 1, -3e-4, 0, 100353)
 OBS_DATA_2 = (1, 270.93, 9.85083e-2, 1, -4e-4, -1e-4, 100428)
