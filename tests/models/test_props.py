@@ -91,7 +91,8 @@ def test_get_d_12():
     # Test raises ValueError
     with pytest.raises(ValueError) as err:
         props.get_d_12(P_VALUE, T_VALUE, TDP_VALUE, 'Inman')
-    err_msg = "'Inman' is not a valid ref; try 'Mills', 'Marrero', or 'constant'."
+    err_msg = ("'Inman' is not a valid ref;"
+               " try 'Mills', 'Marrero', or 'constant'.")
     assert err_msg in str(err.value)
 
 
@@ -176,4 +177,11 @@ def test_get_gamma():
     assert math.isclose(
         props.get_gamma(P_VALUE, T_VALUE, TDP_VALUE),
         0.49602914637400736
+        )
+
+
+def test_get_beta_m1():
+    assert math.isclose(
+        props.get_beta_m1(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE),
+        0.002491563166729926
         )

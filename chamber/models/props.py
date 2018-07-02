@@ -36,6 +36,7 @@ Functions
     get_tdp
     get_mol_wgt
     get_gamma
+    get_beta_m1
 
 .. _CoolProp package:
    http://www.coolprop.org/
@@ -54,7 +55,8 @@ M2 = 28.964
 # --------------------------------------------------------------------------- #
 
 def get_c_pm(p, t, t_dp):
-    """Get specific heat of vapor mixture.
+    """
+    Get specific heat of vapor mixture.
 
     Parameters
     ----------
@@ -67,7 +69,7 @@ def get_c_pm(p, t, t_dp):
 
     Returns
     -------
-    c_pm : float
+    float
         The specific heat of the vapor mixture in J/kg K.
 
     Examples
@@ -75,7 +77,7 @@ def get_c_pm(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_c_pm(p, t, t_dp)
+    >>> get_c_pm(p, t, t_dp)
     1017.641910841458
 
     """
@@ -84,7 +86,8 @@ def get_c_pm(p, t, t_dp):
 
 
 def get_c_pm_sat(p, t_s):
-    """Get specific heat of saturated vapor mixture.
+    """
+    Get specific heat of saturated vapor mixture.
 
     Parameters
     ----------
@@ -95,14 +98,14 @@ def get_c_pm_sat(p, t_s):
 
     Returns
     -------
-    c_pm_sat : float
+    float
         The specific heat of the saturated vapor mixture in J/kg K.
 
     Examples
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_c_pm_sat(p, t_s)
+    >>> get_c_pm_sat(p, t_s)
     1022.2835902558337
 
     """
@@ -111,7 +114,8 @@ def get_c_pm_sat(p, t_s):
 
 
 def get_rho_m(p, t, t_dp):
-    """Get specific mass of vapor mixture.
+    """
+    Get specific mass of vapor mixture.
 
     Parameters
     ----------
@@ -124,7 +128,7 @@ def get_rho_m(p, t, t_dp):
 
     Returns
     -------
-    rho_m : float
+    float
         The specific mass of the vapor mixture in kg/m:math:`^3`.
 
     Examples
@@ -132,7 +136,7 @@ def get_rho_m(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_rho_m(p, t, t_dp)
+    >>> get_rho_m(p, t, t_dp)
     1.213231099568598
 
     """
@@ -142,7 +146,8 @@ def get_rho_m(p, t, t_dp):
 
 
 def get_rho_m_sat(p, t_s):
-    """Get specific mass of saturated vapor mixture.
+    """
+    Get specific mass of saturated vapor mixture.
 
     Parameters
     ----------
@@ -153,14 +158,14 @@ def get_rho_m_sat(p, t_s):
 
     Returns
     -------
-    rho_m_sat : float
+    float
         The specific mass of the saturated vapor mixture in kg/m:math:`^3`.
 
     Examples
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_rho_m_sat(p, t_s)
+    >>> get_rho_m_sat(p, t_s)
     1.2327562216963954
 
     """
@@ -170,7 +175,8 @@ def get_rho_m_sat(p, t_s):
 
 
 def get_k_m(p, t, t_dp):
-    """Get thermal conductivity of vapor mixture.
+    """
+    Get thermal conductivity of vapor mixture.
 
     Parameters
     ----------
@@ -183,7 +189,7 @@ def get_k_m(p, t, t_dp):
 
     Returns
     -------
-    k_m : float
+    float
         The thermal conductivity of the vapor mixture in W/m K.
 
     Examples
@@ -191,7 +197,7 @@ def get_k_m(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_k_m(p, t, t_dp)
+    >>> get_k_m(p, t, t_dp)
     0.02563350730647246
 
     """
@@ -200,7 +206,8 @@ def get_k_m(p, t, t_dp):
 
 
 def get_k_m_sat(p, t_s):
-    """Get thermal conductivity of saturated vapor mixture.
+    """
+    Get thermal conductivity of saturated vapor mixture.
 
     Parameters
     ----------
@@ -211,14 +218,14 @@ def get_k_m_sat(p, t_s):
 
     Returns
     -------
-    k_m_sat : float
+    float
         The thermal conductivity of the saturated vapor mixture in W/m K.
 
     Examples
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_k_m_sat(p, t_s)
+    >>> get_k_m_sat(p, t_s)
     0.025260388108991345
 
     """
@@ -227,7 +234,8 @@ def get_k_m_sat(p, t_s):
 
 
 def get_alpha_m(p, t, t_dp):
-    """Get thermal diffusivity of vapor mixture.
+    """
+    Get thermal diffusivity of vapor mixture.
 
     Parameters
     ----------
@@ -240,7 +248,7 @@ def get_alpha_m(p, t, t_dp):
 
     Returns
     -------
-    alpha_m : float
+    float
         The thermal diffusivity of the vapor mixture in m:math:`^2`/s.
 
     Examples
@@ -248,7 +256,7 @@ def get_alpha_m(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_alpha_m(p, t, t_dp)
+    >>> get_alpha_m(p, t, t_dp)
     2.076201562300882e-05
 
     """
@@ -263,7 +271,8 @@ def get_alpha_m(p, t, t_dp):
 
 
 def get_alpha_m_sat(p, t_s):
-    """Get thermal diffusivity of saturated vapor mixture.
+    """
+    Get thermal diffusivity of saturated vapor mixture.
 
     Parameters
     ----------
@@ -274,7 +283,7 @@ def get_alpha_m_sat(p, t_s):
 
     Returns
     -------
-    alpha_m_sat : float
+    float
         The thermal diffusivity of the saturated vapor mixture in
         m:math:`^2`/s.
 
@@ -282,7 +291,7 @@ def get_alpha_m_sat(p, t_s):
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_alpha_m_sat(p, t_s)
+    >>> get_alpha_m_sat(p, t_s)
     2.0044324561030463e-05
 
     """
@@ -297,7 +306,8 @@ def get_alpha_m_sat(p, t_s):
 
 
 def get_d_12(p, t, t_dp, ref):
-    """Get binary species diffusivity of vapor mixture.
+    """
+    Get binary species diffusivity of vapor mixture.
 
     Parameters
     ----------
@@ -312,7 +322,7 @@ def get_d_12(p, t, t_dp, ref):
 
     Returns
     -------
-    d_12 : float
+    float
         The thermal diffusivity of the vapor mixture in m:math:`^2`/s.
 
     Examples
@@ -321,15 +331,15 @@ def get_d_12(p, t, t_dp, ref):
     >>> t = 290
     >>> t_dp = 280
     >>> ref = 'Mills'
-    >>> props.get_d_12(p, t, t_dp, ref)
+    >>> get_d_12(p, t, t_dp, ref)
     2.4306504684558495e-05
 
     >>> ref = 'Marrero'
-    >>> props.get_d_12(p, t, t_dp, ref)
+    >>> get_d_12(p, t, t_dp, ref)
     2.365539793302829e-05
 
     >>> ref = 'constant'
-    >>> props.get_d_12(p, t, t_dp, ref)
+    >>> get_d_12(p, t, t_dp, ref)
     2.416458085635347e-05
 
     Raises
@@ -363,13 +373,15 @@ def get_d_12(p, t, t_dp, ref):
         return d_12
     else:
         err_msg = (
-            "'{0}' is not a valid ref; try 'Mills', 'Marrero', or 'constant'.".format(ref)
+            "'{0}' is not a valid ref; try 'Mills',"
+            " 'Marrero', or 'constant'.".format(ref)
             )
         raise ValueError(err_msg)
 
 
 def get_x_1(p, t, t_dp):
-    """Get mole fraction of water vapor in mixture.
+    """
+    Get mole fraction of water vapor in mixture.
 
     Parameters
     ----------
@@ -382,7 +394,7 @@ def get_x_1(p, t, t_dp):
 
     Returns
     -------
-    x_1 : float
+    float
         The mole fraction of water vapor in the vapor mixture in [0, 1].
 
     Examples
@@ -390,7 +402,7 @@ def get_x_1(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_x_1(p, t, t_dp)
+    >>> get_x_1(p, t, t_dp)
     0.00982822815586041
 
     """
@@ -399,7 +411,8 @@ def get_x_1(p, t, t_dp):
 
 
 def get_x_1_sat(p, t_s):
-    """Get mole fraction of water vapor in saturated mixture.
+    """
+    Get mole fraction of water vapor in saturated mixture.
 
     Parameters
     ----------
@@ -410,7 +423,7 @@ def get_x_1_sat(p, t_s):
 
     Returns
     -------
-    x_1_sat : float
+    float
         The mole fraction of water vapor in the saturated vapor mixture in
         [0, 1].
 
@@ -418,7 +431,7 @@ def get_x_1_sat(p, t_s):
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_x_1_sat(p, t_s)
+    >>> get_x_1_sat(p, t_s)
     0.01376427605764327
 
     """
@@ -427,7 +440,8 @@ def get_x_1_sat(p, t_s):
 
 
 def get_m_1(p, t, t_dp):
-    """Mass fraction of water vapor in the vapor mixture.
+    """
+    Get mass fraction of water vapor in the vapor mixture.
 
     Parameters
     ----------
@@ -440,7 +454,7 @@ def get_m_1(p, t, t_dp):
 
     Returns
     -------
-    m_1 : float
+    float
         Mass fraction of water vapor in the vapor mixture in [0, 1].
 
     Examples
@@ -448,7 +462,7 @@ def get_m_1(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_m_1(p, t, t_dp)
+    >>> get_m_1(p, t, t_dp)
     0.0061357476021502095
 
     """
@@ -458,7 +472,8 @@ def get_m_1(p, t, t_dp):
 
 
 def get_m_1_sat(p, t_s):
-    """Mass fraction of water vapor in the saturated vapor mixture.
+    """
+    Get mass fraction of water vapor in the saturated vapor mixture.
 
     Parameters
     ----------
@@ -469,14 +484,14 @@ def get_m_1_sat(p, t_s):
 
     Returns
     -------
-    m_1_sat : float
+    float
         Mass fraction of water vapor in the saturated vapor mixture in [0, 1].
 
     Examples
     --------
     >>> p = 101325
     >>> t_s = 285
-    >>> props.get_m_1_sat(p, t_s)
+    >>> get_m_1_sat(p, t_s)
     0.008605868703401028
 
     """
@@ -486,7 +501,8 @@ def get_m_1_sat(p, t_s):
 
 
 def get_h_fg_sat(t_s):
-    """Specific enthalpy of vaporization for pure water.
+    """
+    Get specific enthalpy of vaporization for pure water.
 
     Parameters
     ----------
@@ -495,13 +511,13 @@ def get_h_fg_sat(t_s):
 
     Returns
     -------
-    h_fg_sat : float
+    float
         Specific enthalpy of vaporization for pure water in J/kg.
 
     Examples
     --------
     >>> t_s = 285
-    >>> props.get_h_fg_sat(t_s)
+    >>> get_h_fg_sat(t_s)
     2472806.6902607535
 
     """
@@ -512,7 +528,8 @@ def get_h_fg_sat(t_s):
 
 
 def x1_2_m1(x_1):
-    """Convert the mole fraction to mass fraction.
+    """
+    Convert the mole fraction to mass fraction.
 
     Parameters
     ----------
@@ -521,13 +538,13 @@ def x1_2_m1(x_1):
 
     Returns
     -------
-    m_1 : float
+    float
         Relative humidity in [0, 1].
 
     Examples
     --------
     >>> x_1 = 0.01
-    >>> props.x1_2_m1(x_1)
+    >>> x1_2_m1(x_1)
     0.006243391414375084
 
     """
@@ -538,7 +555,8 @@ def x1_2_m1(x_1):
 
 
 def get_mu(p, t, t_dp):
-    """Get dynamic viscocity of vapor mixture.
+    """
+    Get dynamic viscocity of vapor mixture.
 
     Parameters
     ----------
@@ -551,7 +569,7 @@ def get_mu(p, t, t_dp):
 
     Returns
     -------
-    mu : float
+    float
         The viscocity of the vapor mixture in Pa*s.
 
     Examples
@@ -559,8 +577,8 @@ def get_mu(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_mu(p, t, t_dp)
-    1.800077369582236e-5
+    >>> get_mu(p, t, t_dp)
+    1.800077369582236e-05
 
     """
     mu = hap.HAPropsSI('mu', 'P', p, 'T', t, 'Tdp', t_dp)
@@ -572,7 +590,8 @@ def get_mu(p, t, t_dp):
 # --------------------------------------------------------------------------- #
 
 def get_c_pl(t):
-    """Specific heat of pure liquid water.
+    """
+    Get specific heat of pure liquid water.
 
     Parameters
     ----------
@@ -581,13 +600,13 @@ def get_c_pl(t):
 
     Returns
     -------
-    c_pl : float
+    float
         Specific heat of pure liquid water in J/kg K.
 
     Examples
     --------
     >>> t = 285
-    >>> props.get_c_pl(t)
+    >>> get_c_pl(t)
     4192.729295040042
 
     """
@@ -600,7 +619,8 @@ def get_c_pl(t):
 # --------------------------------------------------------------------------- #
 
 def get_rh(p, t, t_dp):
-    """RH based on p, t and t_dp.
+    """
+    Get relative humidity of the vapor liquid mixture.
 
     Parameters
     ----------
@@ -613,7 +633,7 @@ def get_rh(p, t, t_dp):
 
     Returns
     -------
-    rh : float
+    float
         Relative humidity in [0, 1].
 
     Examples
@@ -621,7 +641,7 @@ def get_rh(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_rh(p, t, t_dp)
+    >>> get_rh(p, t, t_dp)
     0.5165573311068835
 
     """
@@ -630,7 +650,8 @@ def get_rh(p, t, t_dp):
 
 
 def get_tdp(p, t, rh):
-    """Get dew point temperature of vapor mixture.
+    """
+    Get dew point temperature of vapor mixture.
 
     Parameters
     ----------
@@ -643,7 +664,7 @@ def get_tdp(p, t, rh):
 
     Returns
     -------
-    t_dp : float
+    float
         The dew point temperature of the vapor mixture in K.
 
     Examples
@@ -651,7 +672,7 @@ def get_tdp(p, t, rh):
     >>> p = 101325
     >>> t = 290
     >>> rh = 0.5
-    >>> props.get_mu(p, t, rh)
+    >>> get_tdp(p, t, rh)
     279.5268317988297
 
     """
@@ -660,7 +681,8 @@ def get_tdp(p, t, rh):
 
 
 def get_mol_wgt(p, t, t_dp):
-    """Get the molar mass of the vapor mixture.
+    """
+    Get the molar mass of the vapor mixture.
 
     Parameters
     ----------
@@ -673,7 +695,7 @@ def get_mol_wgt(p, t, t_dp):
 
     Returns
     -------
-    M : float
+    float
         The total molar mass of the vapor mixture in kg/mol.
 
     Examples
@@ -681,7 +703,7 @@ def get_mol_wgt(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_mol_wgt(p, t, t_dp)
+    >>> get_mol_wgt(p, t, t_dp)
     28.856390729921483
 
     """
@@ -691,7 +713,8 @@ def get_mol_wgt(p, t, t_dp):
 
 
 def get_gamma(p, t, t_dp):
-    """Get the coefficient of volumetric expansion of the vapor mixture.
+    """
+    Get the coefficient of volumetric expansion of the vapor mixture.
 
     Parameters
     ----------
@@ -704,7 +727,7 @@ def get_gamma(p, t, t_dp):
 
     Returns
     -------
-    gamma : float
+    float
         The coefficient of volumetric expansion of the vapor mixture
         in m:math:`^-3`.
 
@@ -713,7 +736,7 @@ def get_gamma(p, t, t_dp):
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> props.get_gamma(p, t, t_dp)
+    >>> get_gamma(p, t, t_dp)
     0.49602914637400736
 
     """
@@ -722,3 +745,39 @@ def get_gamma(p, t, t_dp):
     mol_wgt_r = get_mol_wgt(p, t, t_dp)
     gamma = (1/rho_r)*(mol_wgt_r/M1 - 1)
     return gamma
+
+
+def get_beta_m1(p, t, t_dp, t_s):
+    """
+    Get the mass transfer rate coefficient of the stefan tube system.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+    t_s : int or float
+        Saturated liquid surface temperature in K.
+
+    Returns
+    -------
+    float
+        The mass transfer rate coefficient.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> t_s = 285
+    >>> get_beta_m1(p, t, t_dp, t_s)
+    0.002491563166729926
+
+    """
+    m_1s = get_m_1_sat(p, t_s)
+    m_1e = get_m_1(p, t, t_dp)
+    beta_m1 = (m_1s - m_1e)/(1-m_1s)
+    return beta_m1
