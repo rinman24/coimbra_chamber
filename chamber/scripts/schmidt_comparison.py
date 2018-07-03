@@ -19,7 +19,7 @@ def range_analysis():
                 schmidt_marrero = params.get_schmidt(p, t, t_dp, 'Marrero')
                 df = df.append({
                     'Pressure (Pa)': p, 'Temperature (K)': t,
-                    'Dew Point (K)': t_dp, 'Ralative Humidity': rh,
+                    'Dew Point (K)': t_dp, 'Relative Humidity': rh,
                     'Schmidt Mills': schmidt_mills,
                     'Schmidt Marrero': schmidt_marrero
                     }, ignore_index=True)
