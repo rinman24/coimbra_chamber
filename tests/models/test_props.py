@@ -177,3 +177,10 @@ def test_get_gamma():
         props.get_gamma(P_VALUE, T_VALUE, TDP_VALUE),
         0.49602914637400736
         )
+
+
+def test_get_beta_m1():
+    assert math.isclose(
+        props.get_beta_m1(P_VALUE, T_VALUE, TDP_VALUE, TS_VALUE),
+        0.002491563166729926
+        )

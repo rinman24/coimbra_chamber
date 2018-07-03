@@ -363,7 +363,8 @@ def get_d_12(p, t, t_dp, ref):
         return d_12
     else:
         err_msg = (
-            "'{0}' is not a valid ref; try 'Mills', 'Marrero', or 'constant'.".format(ref)
+            "'{0}' is not a valid ref; try 'Mills',"
+            " 'Marrero', or 'constant'.".format(ref)
             )
         raise ValueError(err_msg)
 
@@ -722,3 +723,38 @@ def get_gamma(p, t, t_dp):
     mol_wgt_r = get_mol_wgt(p, t, t_dp)
     gamma = (1/rho_r)*(mol_wgt_r/M1 - 1)
     return gamma
+
+
+def get_beta_m1(p, t, t_dp, t_s):
+    """Get the mass transfer rate coefficient of the stefan tube system.
+
+    Parameters
+    ----------
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+    t_dp : int or float
+        Dew point temperature in K.
+    t_s : int or float
+        Saturated liquid surface temperature in K.
+
+    Returns
+    -------
+    beta_m1 : float
+        The mass transfer rate coefficient.
+
+    Examples
+    --------
+    >>> p = 101325
+    >>> t = 290
+    >>> t_dp = 280
+    >>> t_s = 285
+    >>> props.get_gamma(p, t, t_dp)
+    0.002491563166729926
+
+    """
+    m_1s = get_m_1_sat(p, t_s)
+    m_1e = get_m_1(p, t, t_dp)
+    beta_m1 = (m_1s - m_1e)/(1-m_1s)
+    return beta_m1
