@@ -20,7 +20,7 @@ def range_analysis():
                     df = df.append({
                         'Pressure (Pa)': p, 'Environment Temp (K)': t,
                         'Surface Temp (K)': t_s, 'Dew Point (K)': t_dp,
-                        'Ralative Humidity': rh, 'Grashof': grashof
+                        'Relative Humidity': rh, 'Grashof': grashof
                         }, ignore_index=True)
     print('Anslysis complete')
     return df

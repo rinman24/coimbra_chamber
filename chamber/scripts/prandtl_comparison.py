@@ -18,7 +18,7 @@ def range_analysis():
                 prandtl = params.get_prandtl(p, t, t_dp)
                 df = df.append({
                     'Pressure (Pa)': p, 'Temperature (K)': t,
-                    'Dew Point (K)': t_dp, 'Ralative Humidity': rh,
+                    'Dew Point (K)': t_dp, 'Relative Humidity': rh,
                     'Prandtl': prandtl
                     }, ignore_index=True)
     print('Anslysis complete.')
