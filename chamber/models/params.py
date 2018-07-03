@@ -24,7 +24,8 @@ RADIUS = 0.015
 
 
 def get_schmidt(p, t, t_dp, ref):
-    """Get Schmidt number for vapor mixture.
+    """
+    Get Schmidt number for vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Schmidt number, the ratio of momentum diffusivity and
@@ -33,25 +34,25 @@ def get_schmidt(p, t, t_dp, ref):
     Parameters
     ----------
     p : int or float
-        Pressure in Pa.
+        Pressure in Pa
     t : int or float
-        Dry bulb temperature in K.
+        Dry bulb temperature in K
     t_dp : int or float
-        Dew point temperature in K.
+        Dew point temperature in K
     ref : {'Mills', 'Marrero', 'constant'}
-        Reference for binary species diffusiity, see ``Notes``.
+        Reference for binary species diffusiity, see ``Notes``
 
     Returns
     -------
-    schmidt : float
-        The schmidt number for the vapor mixture.
+    float
+        The schmidt number for the vapor mixture
 
     Examples
     --------
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> params.get_schmidt(p, t, t_dp, 'Mills')
+    >>> get_schmidt(p, t, t_dp, 'Mills')
     0.6104149007992397
 
     Notes
@@ -75,8 +76,9 @@ def get_schmidt(p, t, t_dp, ref):
     return schmidt
 
 
-def get_grashof(p, t_e, t_dp, t_s):
-    """Get Grashof number for vapor mixture.
+def get_grashof(p, t, t_dp, t_s):
+    """
+    Get Grashof number for vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Grashof number, the ratio of the buoyant force and
@@ -85,18 +87,18 @@ def get_grashof(p, t_e, t_dp, t_s):
     Parameters
     ----------
     p : int or float
-        Pressure in Pa.
-    t_e : int or float
-        Dry bulb temperature in K.
+        Pressure in Pa
+    t : int or float
+        Dry bulb temperature in K
     t_dp : int or float
-        Dew point temperature in K.
+        Dew point temperature in K
     t_s : int or float
-        Saturated liquid surface temperature in K.
+        Saturated liquid surface temperature in K
 
     Returns
     -------
-    grashof : float
-        The Grashof number for the vapor mixture.
+    float
+        The Grashof number for the vapor mixture
 
     Examples
     --------
@@ -104,7 +106,7 @@ def get_grashof(p, t_e, t_dp, t_s):
     >>> t_e = 290
     >>> t_dp = 280
     >>> t_s = 289.5
-    >>> params.get_grashof(p, t_e, t_dp, t_s)
+    >>> get_grashof(p, t, t_dp, t_s)
     230.11072973650792
 
     """
@@ -136,7 +138,8 @@ def get_grashof(p, t_e, t_dp, t_s):
 
 
 def get_prandtl(p, t, t_dp):
-    """Get Prandtl number for vapor mixture.
+    """
+    Get Prandtl number for vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Prandtl number, the ratio of momentum diffusivity and
@@ -145,23 +148,23 @@ def get_prandtl(p, t, t_dp):
     Parameters
     ----------
     p : int or float
-        Pressure in Pa.
+        Pressure in Pa
     t : int or float
-        Dry bulb temperature in K.
+        Dry bulb temperature in K
     t_dp : int or float
-        Dew point temperature in K.
+        Dew point temperature in K
 
     Returns
     -------
-    prandtl : float
-        The Prandtl number for the vapor mixture.
+    float
+        The Prandtl number for the vapor mixture
 
     Examples
     --------
     >>> p = 101325
     >>> t = 290
     >>> t_dp = 280
-    >>> params.get_prandtl(p, t, t_dp)
+    >>> get_prandtl(p, t, t_dp)
     0.7146248666414813
 
     """
@@ -177,7 +180,8 @@ def get_prandtl(p, t, t_dp):
 
 
 def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
-    """Get Sherwood number for vapor mixture.
+    """
+    Get Sherwood number for vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Sherwood number, the ratio of convective mass transfer and
@@ -186,24 +190,24 @@ def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
     Parameters
     ----------
     l : int or float
-        The length of the stefan tube from the water surface in m.
+        The length of the stefan tube from the water surface in m
     m_dot_pp : int or float
-        The evaporation flux in kg/s/m:math:`^3`.
+        The evaporation flux in kg/s/m:math:`^3`
     p : int or float
         Pressure in Pa.
     t : int or float
-        Dry bulb temperature in K.
+        Dry bulb temperature in K
     t_dp : int or float
-        Dew point temperature in K.
+        Dew point temperature in K
     t_s : int or float
-        Saturated liquid surface temperature in K.
+        Saturated liquid surface temperature in K
     ref : {'Mills', 'Marrero', 'constant'}
-        Reference for binary species diffusiity, see ``Notes``.
+        Reference for binary species diffusiity, see ``Notes``
 
     Returns
     -------
-    sherwood : float
-        The Sherwood number for the vapor mixture.
+    float
+        The Sherwood number for the vapor mixture
 
     Examples
     --------
@@ -214,7 +218,7 @@ def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
     >>> t_dp = 280
     >>> t_s = 289
     >>> ref = 'constant'
-    >>> params.get_sherwood(l, m_dot_pp, p, t, t_dp, ref)
+    >>> get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref)
     0.3540373651492251
 
     Notes

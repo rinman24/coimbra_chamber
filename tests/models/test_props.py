@@ -91,7 +91,8 @@ def test_get_d_12():
     # Test raises ValueError
     with pytest.raises(ValueError) as err:
         props.get_d_12(P_VALUE, T_VALUE, TDP_VALUE, 'Inman')
-    err_msg = "'Inman' is not a valid ref; try 'Mills', 'Marrero', or 'constant'."
+    err_msg = ("'Inman' is not a valid ref;"
+               " try 'Mills', 'Marrero', or 'constant'.")
     assert err_msg in str(err.value)
 
 
