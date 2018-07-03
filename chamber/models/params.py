@@ -103,7 +103,7 @@ def get_grashof(p, t, t_dp, t_s):
     Examples
     --------
     >>> p = 101325
-    >>> t = 290
+    >>> t_e = 290
     >>> t_dp = 280
     >>> t_s = 289.5
     >>> get_grashof(p, t, t_dp, t_s)
