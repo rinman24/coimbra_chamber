@@ -3,8 +3,8 @@ import sys
 import pandas as pd
 import pathlib
 
-from chamber.models import props
 from chamber.models import params
+from chamber.models import props
 
 
 def range_analysis():

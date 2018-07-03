@@ -3,8 +3,8 @@ import sys
 import pandas as pd
 import pathlib
 
-from chamber.models import props
 from chamber.models import params
+from chamber.models import props
 
 
 def range_analysis():
@@ -37,7 +37,7 @@ def prandtl_comparison():
     file_path = pathlib.Path('.') / 'chamber' / 'scripts' / 'prandtl_comparison.csv'
     print('Set up complete.')
 
-    df = range_analysis(df)
+    df = range_analysis()
     df_to_csv(df, file_path)
 
 
