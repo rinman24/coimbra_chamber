@@ -115,19 +115,19 @@ def get_grashof(p, t, t_dp, t_s):
     radius = RADIUS
 
     # Calculate water vapor parameters
-    gamma_1 = props.get_gamma(p, t_e, t_dp)
+    gamma_1 = props.get_gamma(p, t, t_dp)
     m_1s = props.get_m_1_sat(p, t_s)
-    m_1e = props.get_m_1(p, t_e, t_dp)
+    m_1e = props.get_m_1(p, t, t_dp)
 
     # Get vapor properties
-    rho = props.get_rho_m(p, t_e, t_dp)
-    mu = props.get_mu(p, t_e, t_dp)
+    rho = props.get_rho_m(p, t, t_dp)
+    mu = props.get_mu(p, t, t_dp)
     nu = mu/rho
-    beta = 1/t_e
+    beta = 1/t
 
     # Calculate Grashof number (Gr)
     grashof = (g
-               * (gamma_1*rho*(m_1s - m_1e) + beta*(t_s - t_e))
+               * (gamma_1*rho*(m_1s - m_1e) + beta*(t_s - t))
                * pow(radius, 3)
                / pow(nu, 2))
 

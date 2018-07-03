@@ -11,8 +11,6 @@ ADD_UNIT = ("INSERT INTO Unit "
             " VALUES "
             "(Percent, Meter, Kilogram, Watt, Pascal, Kelvin, Second);")
 
-TUBE_DATA = {'DiameterIn': 0.03, 'DiameterOut': 0.04, 'Length': 0.06,
-             'Material': 'Delrin', 'Mass': 0.0873832}
 
 # Constants for laser.py
 # ZnSe port parameters (From Spec Sheet)

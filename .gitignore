@@ -34,3 +34,8 @@
 # pytest #
 ##########
 *.pytest_cache/
+
+##########
+# config #
+##########
+config.ini

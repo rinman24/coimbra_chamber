@@ -180,7 +180,7 @@ def est_mix_props(p, t_e, t_dp, t_s, ref, rule):
     rho_m = _est_rho_m(p, t_e, t_dp, t_s, rule)
     k_m = _est_k_m(p, t_e, t_dp, t_s, rule)
     alpha_m = _est_alpha_m(p, t_e, t_dp, t_s, rule)
-    d_12 = _est_d_12(p, t_e, t_s, ref, rule)
+    d_12 = _est_d_12(p, t_e, t_dp, t_s, ref, rule)
     film_props = dict(
         c_pm=c_pm, rho_m=rho_m, k_m=k_m, alpha_m=alpha_m, d_12=d_12
     )
@@ -274,10 +274,10 @@ def _est_alpha_m(p, t_e, t_dp, t_s, rule):
     return alpha_m_film
 
 
-def _est_d_12(p, t_e, t_s, ref, rule):
+def _est_d_12(p, t_e, t_dp, t_s, ref, rule):
     """Estimate binary species diffusivity of the vapor mixture film."""
-    d_12e = props.get_d_12(p, t_e, ref)
-    d_12s = props.get_d_12(p, t_s, ref)
+    d_12e = props.get_d_12(p, t_e, t_dp, ref)
+    d_12s = props.get_d_12(p, t_s, t_s, ref)
 
     d_12_film = use_rule(d_12e, d_12s, rule)
     return d_12_film
