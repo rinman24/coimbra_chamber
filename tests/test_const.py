@@ -36,32 +36,6 @@ INCORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
                                                  'tdms_test_folder_full',
                                                  'test_04.tdms_index')]
 
-
-GET_OBS_DATA_M = ("SELECT"
-                  "    CapManOk, DewPoint, Mass,"
-                  "    OptidewOk, PowOut, PowRef, Pressure "
-                  "FROM"
-                  "    Observation "
-                  "WHERE"
-                  "    TestId={} "
-                  "AND"
-                  "    Idx ={};")
-
-GET_OBS_DATA_T = ("SELECT"
-                  "    CapManOk, DewPoint, OptidewOk,"
-                  "    PowOut, PowRef, Pressure "
-                  "FROM"
-                  "    Observation "
-                  "WHERE"
-                  "    TestId={} "
-                  "AND"
-                  "    Idx ={};")
-
-OBS_DATA_1 = (1, 270.7, 9.8509e-2, 1, -3e-4, 0, 100353)
-OBS_DATA_2 = (1, 270.93, 9.85083e-2, 1, -4e-4, -1e-4, 100428)
-OBS_DATA_3 = (1, 270.09, 1, -3e-4, -1e-4, 100458)
-OBS_DATA_4 = (1, 270.28, 1, -3e-4, -0e-4, 100472)
-
 # Constants for test_results.py
 NORM_TEST = [1, 3, 5, 4, 7]
 NORM_TEST_RESULT = [0, 1 / 3, 2 / 3, 1 / 2, 1]

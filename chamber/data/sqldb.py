@@ -3,9 +3,7 @@ MySQL and TDMS Integration.
 
 Functions
 ---------
-    add_obs_info
-    add_setting_info
-    add_test_info
+    add_tdms_file
     add_tube_info
     connect
     create_tables
@@ -186,7 +184,7 @@ def add_tube_info(cur):
     """
     # First query if the tube exists
     cur.execute(dml.select_tube, ddl.tube_data)
-    
+
     # If the tube does not exist, add it
     # Else, it already exists.
     if not cur.fetchall():
@@ -310,7 +308,7 @@ def _setting_exists(cur, setting_info):
         return setting_id
 
 
-def add_setting_info(cur, tdms_obj):
+def _add_setting_info(cur, tdms_obj):
     """
     Use a MySQL cursor and a TDMS file to add setting info into database.
 
@@ -493,7 +491,7 @@ def _test_exists(cur, test_info):
         return result[0][0]
 
 
-def add_test_info(cur, tdms_obj, setting_id, tube_id):
+def _add_test_info(cur, tdms_obj, setting_id):
     """
     Use a MySQL cursor, TDMS file and setting_id to add test info.
 
@@ -511,9 +509,6 @@ def add_test_info(cur, tdms_obj, setting_id, tube_id):
         159.
     setting_id : int
         SettingID for the MySQL database, which is primary key for the Setting
-        table.
-    tube_id: int
-        TubeID for the MySQL database, which is the primary key for the Tube
         table.
 
     Returns
@@ -613,7 +608,7 @@ def _get_obs_info(tdms_obj, tdms_idx):
                     tdms_obj.object("Data", "PowRef").data[tdms_idx]),
                 'Pressure': int(
                     tdms_obj.object("Data", "Pressure").data[tdms_idx])}
-    
+
     # ------------------------------------------------------------------------
     # If the setting IsMass is True, then also add mass
     if tdms_obj.object("Settings", "IsMass").data[0] == 1:
@@ -623,7 +618,7 @@ def _get_obs_info(tdms_obj, tdms_idx):
     return obs_info
 
 
-def add_obs_info(cur, tdms_obj, test_id, tdms_idx):
+def _add_obs_info(cur, tdms_obj, test_id, tdms_idx):
     """
     Add an observation to the database.
 
@@ -733,7 +728,7 @@ def _get_temp_info(tdms_obj, tdms_idx, couple_idx):
     return temp_info
 
 
-def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
+def _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
     """
     Add a temperature observation to the database.
 
@@ -800,126 +795,59 @@ def add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
     return True
 
 # ----------------------------------------------------------------------------
-# Still to be organized
+# Add all data, main function
 
 
-def add_data(cur, file_name, test=False):
+def add_tdms_file(cur, tdms_obj):
     """
-    Insert tdms files into the MySQL database from argument directory.
+    Insert tdms files into the MySQL database.
 
     Uses loops to structure calls to add_setting, add_test, add_obs, and
-    add_temp to build and execute queries using constants in const.py and
-    populate the MySQL database for all tdms files in the argument directory.
-    Passes cursor into helper functions.
+    add_temp to build and execute queries that populate the MySQL database for
+    a single tdms_obj.
 
     Parameters
     ----------
-    cur : MySQLCursor
-        Cursor used to interact with the MySQL database.
-    directory : string
-        This is the directory to search for tdms files.
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    tdms_obj : nptdms.TdmsFile
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+
+    Returns
+    -------
+    `True` or `None`
+        `True` if sucessful, else `None`.
+
+    Examples
+    --------
+    Add a tdms file to a database using a MySQL cursor:
+
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> _, cur = connect('my-schema')
+    >>> assert add_tdms_file(cur, tdms_obj)
 
     """
-    tdms_obj = nptdms.TdmsFile(file_name)
-    if not _test_exists(cur, _get_test_info(tdms_obj)):
-        # print("WE GOT IN THE LOOP")
-        TUBE_ID_TEMP = 1
-        test_id = add_test_info(cur, tdms_obj, add_setting_info(cur, tdms_obj), TUBE_ID_TEMP)
-        # print("TestID = ", test_id)
-        for tdms_idx in range(len(tdms_obj.object("Data", "Idx").data)):
-            add_obs_info(cur, tdms_obj, test_id, tdms_idx)
-        #   add_temp(cur, tdms_obj, obs_id, obs_idx)
-    # if not test:
-    #    move_files(directory)
+    # ------------------------------------------------------------------------
+    # Setting: call add_setting_info which will add the setting or make a new
+    # setting and return the new id.
+    setting_id = _add_setting_info(cur, tdms_obj)
+    print('SettingID:', setting_id)
 
+    # ------------------------------------------------------------------------
+    # Test: call add_test_info which will add the test or make a new test and
+    # return the new id.
+    test_id = _add_test_info(cur, tdms_obj, setting_id)
+    print('TestID:', test_id)
 
-# Not-Reviewed
+    # ------------------------------------------------------------------------
+    # Observation and TempObservations: call add_obs_info and add_temp_info in
+    # a loop which will add all of the observations from the file.
+    for tdms_idx in range(len(tdms_obj.object("Data", "Idx").data)):
+        assert _add_obs_info(cur, tdms_obj, test_id, tdms_idx)
+        idx = int(tdms_obj.object("Data", "Idx").data[tdms_idx])
+        assert _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx)
 
-# def add_input(cur, directory, test=False):
-#     """Insert tdms files into the MySQL database from argument directory.
-
-#     Uses loops to structure calls to add_setting, add_test, add_obs, and
-#     add_temp to build and execute queries using constants in const.py and
-#     populate the MySQL database for all tdms files in the argument directory.
-#     Passes cursor into helper functions.
-
-#     Parameters
-#     ----------
-#     cur : MySQLCursor
-#         Cursor used to interact with the MySQL database.
-#     directory : string
-#         This is the directory to search for tdms files.
-#     """
-#     for file_name in list_tdms(directory):
-#         # print(file_name)
-#         tdms_obj = nptdms.TdmsFile(file_name)
-#         # print(test_exists(cur, get_test_info(tdms_obj))) # DELEDTE
-#         if not test_exists(cur, get_test_info(tdms_obj)):
-#             # print("WE GOT IN THE LOOP")
-#             test_id = add_test_info(
-#                 cur, tdms_obj, add_setting_info(cur, tdms_obj))
-#             # print("TestID = ", test_id)
-#             for obs_idx in range(len(tdms_obj.object("Data", "Idx").data)):
-#                 obs_id = add_obs_info(cur, tdms_obj, test_id, obs_idx)
-#         #        add_temp(cur, tdms_obj, obs_id, obs_idx)
-#     # if not test:
-#     #    move_files(directory)
-
-
-# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
-# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
-# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
-# DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED DEPRECIATED
-
-# def list_tdms(file_path, file_list=None):
-#     """Use the file_path to find tdms files.
-
-#     This function recursively searches through the argument directory and
-#     returns a list of all filepaths for files with the tdms extension.
-
-#     Parameters
-#     ----------
-#     file_path : string
-#         This is the directory to search for tdms files.
-#     file_list : empty list
-#         This is an empty list when the function is called with only a
-# directory
-#         argument. File_list is then populated recursively.
-
-#     Returns
-#     -------
-#     file_list : list of strings
-#         List of absolute filepaths of files with a .tdms extension. Elements
-# of
-#         list are type string.
-#     """
-#     if file_list is None:
-#         file_list = []
-#     try:
-#         for file_name in os.listdir(file_path):
-#             list_tdms(os.path.join(file_path, file_name), file_list)
-#     except NotADirectoryError:
-#         regex = re.compile(r".tdms$")
-#         if regex.search(file_path):
-#             return file_list.append(file_path)
-#     return file_list
-
-# def move_files(directory):
-#     """Move all tdms files into new directory maintaining file structure.
-
-#     This function moves all tdms files in directory into the directory
-#     '/home/user/read_files/'.
-
-#     Parameters
-#     ----------
-#     directory : string
-#         This is the directory to move tdms files from.
-#     """
-#     for file_path in list_tdms(directory):
-#         if not os.stat(file_path).st_size == 0:
-#             new_file_path = os.path.join(os.path.join(
-#                             str(Path.home()), "read_files"),
-#                             os.path.relpath(file_path)[3:])
-#             if not os.path.exists(os.path.split(new_file_path)[0]):
-#                 os.makedirs(os.path.split(new_file_path)[0])
-#             shutil.move(file_path, new_file_path)
+    return True

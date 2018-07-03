@@ -86,7 +86,10 @@ TEMP_OBS_3 = [283.59, 283.46, 283.34, 283.48, 282.84, 280.51, 280.82,
 TEMP_OBS_4 = [283.54, 283.41, 283.28, 283.44, 282.59, 280.51, 280.81,
               282.29, 282.41, 280.84, 280.33, 280.71, 280.37, 282.27]
 
-TEST_DIRECTORY = os.path.join(os.getcwd(), 'tests', 'data_transfer_test_files')
+OBS_DATA_1 = (1, 270.7, 9.8509e-2, 1, -3e-4, 0, 100353)
+OBS_DATA_2 = (1, 270.93, 9.85083e-2, 1, -4e-4, -1e-4, 100428)
+OBS_DATA_3 = (1, 270.09, 1, -3e-4, -1e-4, 100458)
+OBS_DATA_4 = (1, 270.28, 1, -3e-4, -0e-4, 100472)
 
 
 @pytest.fixture(scope='module')
@@ -254,10 +257,9 @@ def test__get_obs_info(test_tdms_obj):
 
 def test_add_tube_info(cursor):
     """Test add_tube_info."""
-    
     # Add the tube the first time and we should get true
     assert sqldb.add_tube_info(cursor)
-    
+
     # Check that there is one and only one tube with this id
     cursor.execute("SELECT TubeID FROM Tube;")
     assert cursor.fetchone()[0] == 1
@@ -284,12 +286,12 @@ def test_add_tube_info(cursor):
     assert not sqldb.add_tube_info(cursor)
 
 
-def test_add_setting_info(cursor, test_tdms_obj):
-    """Test add_setting_info."""
+def test__add_setting_info(cursor, test_tdms_obj):
+    """Test _add_setting_info."""
     # ------------------------------------------------------------------------
     # File 1
     # Add a new setting and assert that its id is 1
-    setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[0])
+    setting_id = sqldb._add_setting_info(cursor, test_tdms_obj[0])
     assert setting_id == 1
     # Query the new setting and check the results
     cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
@@ -298,7 +300,7 @@ def test_add_setting_info(cursor, test_tdms_obj):
 
     # ------------------------------------------------------------------------
     # File 2
-    setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[1])
+    setting_id = sqldb._add_setting_info(cursor, test_tdms_obj[1])
     assert setting_id == 2
     cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
                    cursor.lastrowid))
@@ -306,7 +308,7 @@ def test_add_setting_info(cursor, test_tdms_obj):
 
     # ------------------------------------------------------------------------
     # File 3
-    setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[2])
+    setting_id = sqldb._add_setting_info(cursor, test_tdms_obj[2])
     assert setting_id == 3
     cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
                    cursor.lastrowid))
@@ -314,18 +316,18 @@ def test_add_setting_info(cursor, test_tdms_obj):
 
     # ------------------------------------------------------------------------
     # File 4
-    setting_id = sqldb.add_setting_info(cursor, test_tdms_obj[3])
+    setting_id = sqldb._add_setting_info(cursor, test_tdms_obj[3])
     assert setting_id == 2  # This test has the same setting at 2
     cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(2))
     assert cursor.fetchall() == TDMS_02_ADD_SETTING
 
 
-def test_add_test_info(cursor, test_tdms_obj):
-    """Test add_test_info."""
+def test__add_test_info(cursor, test_tdms_obj):
+    """Test _add_test_info."""
     # ------------------------------------------------------------------------
     # File 1
     # Add a new test and assert that its id is 1
-    test_id = sqldb.add_test_info(cursor, test_tdms_obj[0], 1, 1)
+    test_id = sqldb._add_test_info(cursor, test_tdms_obj[0], 1)
     assert test_id == 1
     # Query the new test and check the results
     cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
@@ -334,7 +336,7 @@ def test_add_test_info(cursor, test_tdms_obj):
 
     # ------------------------------------------------------------------------
     # File 2
-    test_id = sqldb.add_test_info(cursor, test_tdms_obj[1], 2, 1)
+    test_id = sqldb._add_test_info(cursor, test_tdms_obj[1], 2)
     assert test_id == 2
     cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
                    test_id))
@@ -342,7 +344,7 @@ def test_add_test_info(cursor, test_tdms_obj):
 
     # ------------------------------------------------------------------------
     # File 3
-    test_id = sqldb.add_test_info(cursor, test_tdms_obj[2], 3, 1)
+    test_id = sqldb._add_test_info(cursor, test_tdms_obj[2], 3)
     assert test_id == 3
     cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
                    test_id))
@@ -350,7 +352,7 @@ def test_add_test_info(cursor, test_tdms_obj):
 
     # ------------------------------------------------------------------------
     # File 4
-    test_id = sqldb.add_test_info(cursor, test_tdms_obj[3], 2, 1)
+    test_id = sqldb._add_test_info(cursor, test_tdms_obj[3], 2)
     assert test_id == 4
     cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
                    test_id))
@@ -391,15 +393,15 @@ def test__test_exists(cursor, test_tdms_obj):
     assert not 6 == sqldb._test_exists(cursor, '')
 
 
-def test_add_obs_info(cursor, test_tdms_obj):
-    """Test add_obs_info."""
+def test__add_obs_info(cursor, test_tdms_obj):
+    """Test _add_obs_info."""
     # ------------------------------------------------------------------------
     # File 1
     # For every index in the data enter all of the data
     for tdms_idx in range(
             len(test_tdms_obj[0].object("Data", "Idx").data)
             ):
-        assert sqldb.add_obs_info(cursor, test_tdms_obj[0], 1, tdms_idx)
+        assert sqldb._add_obs_info(cursor, test_tdms_obj[0], 1, tdms_idx)
     # Then check that you can get the last dew point correct
     cursor.execute(dml.get_last_dew_point.format(1))
     assert cursor.fetchall()[0][0] == Decimal('270.78')
@@ -409,7 +411,7 @@ def test_add_obs_info(cursor, test_tdms_obj):
     for tdms_idx in range(
             len(test_tdms_obj[1].object("Data", "Idx").data)
             ):
-        assert sqldb.add_obs_info(cursor, test_tdms_obj[1], 2, tdms_idx)
+        assert sqldb._add_obs_info(cursor, test_tdms_obj[1], 2, tdms_idx)
     cursor.execute(dml.get_last_dew_point.format(2))
     assert cursor.fetchall()[0][0] == Decimal('270.93')
 
@@ -418,7 +420,7 @@ def test_add_obs_info(cursor, test_tdms_obj):
     for tdms_idx in range(
             len(test_tdms_obj[2].object("Data", "Idx").data)
             ):
-        assert sqldb.add_obs_info(cursor, test_tdms_obj[2], 3, tdms_idx)
+        assert sqldb._add_obs_info(cursor, test_tdms_obj[2], 3, tdms_idx)
     cursor.execute(dml.get_last_dew_point.format(3))
     assert cursor.fetchall()[0][0] == Decimal('270.20')
 
@@ -427,18 +429,18 @@ def test_add_obs_info(cursor, test_tdms_obj):
     for tdms_idx in range(
             len(test_tdms_obj[3].object("Data", "Idx").data)
             ):
-        assert sqldb.add_obs_info(cursor, test_tdms_obj[3], 4, tdms_idx)
+        assert sqldb._add_obs_info(cursor, test_tdms_obj[3], 4, tdms_idx)
     cursor.execute(dml.get_last_dew_point.format(4))
     assert cursor.fetchall()[0][0] == Decimal('270.32')
 
 
-def test_add_temp_info(cursor, test_tdms_obj):
-    """Test add_temp."""
+def test__add_temp_info(cursor, test_tdms_obj):
+    """Test _add_temp_info."""
     # ------------------------------------------------------------------------
     # File 1
 
     # Add temps with tdms_idx 7 and Idx 8
-    assert sqldb.add_temp_info(
+    assert sqldb._add_temp_info(
         cursor, test_tdms_obj[0], 1, TEST_INDEX, TEST_INDEX+1
         )
     # Now query these with the TestId and Idx
@@ -450,7 +452,7 @@ def test_add_temp_info(cursor, test_tdms_obj):
 
     # ------------------------------------------------------------------------
     # File 2
-    assert sqldb.add_temp_info(
+    assert sqldb._add_temp_info(
         cursor, test_tdms_obj[1], 2, TEST_INDEX, TEST_INDEX
         )
     cursor.execute(
@@ -461,7 +463,7 @@ def test_add_temp_info(cursor, test_tdms_obj):
 
     # ------------------------------------------------------------------------
     # File 3
-    assert sqldb.add_temp_info(
+    assert sqldb._add_temp_info(
         cursor, test_tdms_obj[2], 3, TEST_INDEX, TEST_INDEX+1
         )
     cursor.execute(
@@ -472,7 +474,7 @@ def test_add_temp_info(cursor, test_tdms_obj):
 
     # ------------------------------------------------------------------------
     # File 4
-    assert sqldb.add_temp_info(
+    assert sqldb._add_temp_info(
         cursor, test_tdms_obj[3], 4, TEST_INDEX, TEST_INDEX+1
         )
     cursor.execute(
@@ -482,58 +484,94 @@ def test_add_temp_info(cursor, test_tdms_obj):
     assert res == TEMP_OBS_4
 
 
-def test_add_data(cursor):
+def test_add_tdms_file(cursor, test_tdms_obj):
     """
-    Test add_data.
+    Test add_tdms_file.
 
     Test overall data insertion, the final table in cascade.
     """
     # ------------------------------------------------------------------------
     # Clear all of the previous work we have done in the database
+    truncate(cursor, 'TempObservation')
     truncate(cursor, 'Observation')
     truncate(cursor, 'Test')
     truncate(cursor, 'Setting')
 
     # ------------------------------------------------------------------------
     # File 1
-    fp = os.path.join(TEST_DIRECTORY, 'test_01.tdms')
-    sqldb.add_data(cursor, fp, True)
-    cursor.execute(
-        test_const.GET_OBS_DATA_M.format(1, TEST_INDEX)
-        )
+    assert sqldb.add_tdms_file(cursor, test_tdms_obj[0])
+    # Verify the data in the 'Setting' table:
+    cursor.execute('SELECT * FROM Setting WHERE SettingID=1;')
+    assert cursor.fetchall() == TDMS_01_ADD_SETTING
+    # Verify the data in the 'Test' table:
+    cursor.execute('SELECT * FROM Test WHERE TestID=1;')
+    assert cursor.fetchall() == TDMS_01_ADD_TEST
+    # Verify the data in the `Observation` table:
+    cursor.execute(dml.get_obs_data_m.format(1, TEST_INDEX))
     res = cursor.fetchall()[0]
     for i in range(len(res)):
-        assert isclose(res[i], test_const.OBS_DATA_1[i])
+        assert isclose(res[i], OBS_DATA_1[i])
+    # Verify the data in the 'TempObservation` table:
+    cursor.execute(dml.get_temp_obs_data.format(1, TEST_INDEX, TEST_INDEX))
+    res = cursor.fetchall()[0][0]
+    assert isclose(res, 284.69)
 
-    fp = os.path.join(TEST_DIRECTORY, 'tdms_test_folder', 'test_02.tdms')
-    sqldb.add_data(cursor, fp, True)
-    cursor.execute(
-        test_const.GET_OBS_DATA_M.format(2, TEST_INDEX)
-        )
+    # ------------------------------------------------------------------------
+    # File 2
+    assert sqldb.add_tdms_file(cursor, test_tdms_obj[1])
+    # Verify the data in the 'Setting' table:
+    cursor.execute('SELECT * FROM Setting WHERE SettingID=2;')
+    assert cursor.fetchall() == TDMS_02_ADD_SETTING
+    # Verify the data in the 'Test' table:
+    cursor.execute('SELECT * FROM Test WHERE TestID=2;')
+    assert cursor.fetchall() == TDMS_02_ADD_TEST
+    # Verify the data in the `Observation` table:
+    cursor.execute(dml.get_obs_data_m.format(2, TEST_INDEX))
     res = cursor.fetchall()[0]
     for i in range(len(res)):
-        assert isclose(res[i], test_const.OBS_DATA_2[i])
+        assert isclose(res[i], OBS_DATA_2[i])
+    # Verify the data in the 'TempObservation` table:
+    cursor.execute(dml.get_temp_obs_data.format(2, TEST_INDEX, TEST_INDEX))
+    res = cursor.fetchall()[0][0]
+    assert isclose(res, 283.55)
 
-    fp = os.path.join(TEST_DIRECTORY, 'test_03.tdms')
-    sqldb.add_data(cursor, fp, True)
-    cursor.execute(
-        test_const.GET_OBS_DATA_T.format(3, TEST_INDEX)
-        )
+    # ------------------------------------------------------------------------
+    # File 3
+    assert sqldb.add_tdms_file(cursor, test_tdms_obj[2])
+    # Verify the data in the 'Setting' table:
+    cursor.execute('SELECT * FROM Setting WHERE SettingID=3;')
+    assert cursor.fetchall() == TDMS_03_ADD_SETTING
+    # Verify the data in the 'Test' table:
+    cursor.execute('SELECT * FROM Test WHERE TestID=3;')
+    assert cursor.fetchall() == TDMS_03_ADD_TEST
+    # Verify the data in the `Observation` table:
+    cursor.execute(dml.get_obs_data_t.format(3, TEST_INDEX))
     res = cursor.fetchall()[0]
     for i in range(len(res)):
-        assert isclose(res[i], test_const.OBS_DATA_3[i])
+        assert isclose(res[i], OBS_DATA_3[i])
+    # Verify the data in the 'TempObservation` table:
+    cursor.execute(dml.get_temp_obs_data.format(3, TEST_INDEX, TEST_INDEX))
+    res = cursor.fetchall()[0][0]
+    assert isclose(res, 282.45)
 
-    fp = os.path.join(
-        TEST_DIRECTORY, 'tdms_test_folder', 'tdms_test_folder_full',
-        'test_04.tdms'
-        )
-    sqldb.add_data(cursor, fp, True)
-    cursor.execute(
-        test_const.GET_OBS_DATA_T.format(4, TEST_INDEX)
-        )
+    # ------------------------------------------------------------------------
+    # File 4
+    assert sqldb.add_tdms_file(cursor, test_tdms_obj[3])
+    # Verify the data in the 'Setting' table:
+    cursor.execute('SELECT * FROM Setting WHERE SettingID=2;')
+    assert cursor.fetchall() == TDMS_02_ADD_SETTING
+    # Verify the data in the 'Test' table:
+    cursor.execute('SELECT * FROM Test WHERE TestID=4;')
+    assert cursor.fetchall() == TDMS_04_ADD_TEST
+    # Verify the data in the `Observation` table:
+    cursor.execute(dml.get_obs_data_t.format(4, TEST_INDEX))
     res = cursor.fetchall()[0]
     for i in range(len(res)):
-        assert isclose(res[i], test_const.OBS_DATA_4[i])
+        assert isclose(res[i], OBS_DATA_4[i])
+    # Verify the data in the 'TempObservation` table:
+    cursor.execute(dml.get_temp_obs_data.format(4, TEST_INDEX, TEST_INDEX))
+    res = cursor.fetchall()[0][0]
+    assert isclose(res, 282.28)
 
 
 def drop_tables(cursor, bol):
@@ -551,26 +589,3 @@ def truncate(cursor, table):
     cursor.execute('SET FOREIGN_KEY_CHECKS=0')
     cursor.execute('TRUNCATE {}'.format(table))
     cursor.execute('SET FOREIGN_KEY_CHECKS=1')
-
-
-# def test_list_tdms(self):
-    #     """Can tdms files be located?"""
-    #     files = sqldb.list_tdms(test_const.TEST_DIRECTORY)
-    #     assert len(files) == len(test_const.CORRECT_FILE_LIST)
-    #     for f in files:
-    #         assert f not in test_const.INCORRECT_FILE_LIST
-    #         assert f in test_const.CORRECT_FILE_LIST
-
-    # def test_move_files(self):
-    #     """Test that files are removed from the directory and into user."""
-    #     try:
-    #         assert path.exists(test_const.CORRECT_FILE_LIST[2])
-    #         sqldb.move_files(path.split(test_const.CORRECT_FILE_LIST[2])[0])
-    #         assert not path.exists(test_const.CORRECT_FILE_LIST[2])
-    #         new_path = path.join(
-    #             path.join(str(Path.home()), "read_files"),
-    #             path.relpath(test_const.CORRECT_FILE_LIST[2])[3:])
-    #         assert path.exists(new_path)
-    #         move(new_path, path.split(test_const.CORRECT_FILE_LIST[2])[0])
-    #     except FileNotFoundError:
-    #         assert False

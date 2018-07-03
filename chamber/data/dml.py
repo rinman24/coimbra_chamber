@@ -77,3 +77,34 @@ get_temp_obs = ("SELECT"
                 "AND"
                 "    Idx={} "
                 "ORDER BY ThermocoupleNum ASC;")
+
+get_obs_data_m = ("SELECT"
+                  "    CapManOk, DewPoint, Mass,"
+                  "    OptidewOk, PowOut, PowRef, Pressure "
+                  "FROM"
+                  "    Observation "
+                  "WHERE"
+                  "    TestId={} "
+                  "AND"
+                  "    Idx ={};")
+
+get_obs_data_t = ("SELECT"
+                  "    CapManOk, DewPoint, OptidewOk,"
+                  "    PowOut, PowRef, Pressure "
+                  "FROM"
+                  "    Observation "
+                  "WHERE"
+                  "    TestId={} "
+                  "AND"
+                  "    Idx ={};")
+
+get_temp_obs_data = ("SELECT"
+                     "    Temperature "
+                     "FROM"
+                     "    TempObservation "
+                     "WHERE"
+                     "    TestId = {} "
+                     "AND"
+                     "    Idx = {} "
+                     "AND"
+                     "    ThermocoupleNum = {};")
