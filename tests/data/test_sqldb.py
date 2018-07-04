@@ -16,10 +16,27 @@ import pytest
 
 import chamber.const as const
 from chamber.data import sqldb, ddl, dml
-import tests.test_const as test_const
 
 config = configparser.ConfigParser()
 config.read('config.ini')
+
+# ----------------------------------------------------------------------------
+# Global variables
+CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
+                                               'data_transfer_test_files',
+                                               'test_01.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_transfer_test_files',
+                                               'tdms_test_folder',
+                                               'test_02.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_transfer_test_files',
+                                               'test_03.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_transfer_test_files',
+                                               'tdms_test_folder',
+                                               'tdms_test_folder_full',
+                                               'test_04.tdms')]
 
 SETTINGS_TEST_1 = dict(Duty=10, Pressure=100000, Temperature=300)
 SETTINGS_TEST_2 = dict(Duty=20, Pressure=110000, Temperature=270)
@@ -112,13 +129,13 @@ def cursor():
 def test_tdms_obj():
     """Fixture to instantiate only one nptdms.TdmsFile object for testing."""
     return (  # IsMass 1 Duty 5%
-            nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[0]),
+            nptdms.TdmsFile(CORRECT_FILE_LIST[0]),
             # IsMass 1 Duty 0%
-            nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[1]),
+            nptdms.TdmsFile(CORRECT_FILE_LIST[1]),
             # IsMass 0 Duty 5%
-            nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[2]),
+            nptdms.TdmsFile(CORRECT_FILE_LIST[2]),
             # IsMass 0 Duty 0%
-            nptdms.TdmsFile(test_const.CORRECT_FILE_LIST[3]))
+            nptdms.TdmsFile(CORRECT_FILE_LIST[3]))
 
 
 def test_connect(cursor):
