@@ -1,5 +1,5 @@
 .. chamber documentation master file, created by
-   sphinx-quickstart on Fri Apr 27 12:33:29 2018.
+   sphinx-quickstart on Wed Jul  4 08:52:20 2018.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -11,19 +11,12 @@ Welcome to chamber's documentation!
 :Version: |version|
 :Date: |today|
 
-Contents
---------
-
-Technical documentation
-^^^^^^^^^^^^^^^^^^^^^^^
-
-Description...
-
 .. toctree::
-   :maxdepth: 1
-   
-   mathdoc
+   :maxdepth: 2
+   :caption: Contents:
 
+   mathdoc
+   modules
 
 
 Indices and tables
