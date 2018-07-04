@@ -180,7 +180,7 @@ def get_prandtl(p, t, t_dp):
 
 
 def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
-    """
+    r"""
     Get Sherwood number for vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
@@ -192,7 +192,7 @@ def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
     l : int or float
         The length of the stefan tube from the water surface in m.
     m_dot_pp : int or float
-        The evaporation flux in kg/s/m\\ :sup:`3`.
+        The evaporation flux in kg/s/m\ :sup:`3`.
     p : int or float
         Pressure in Pa.
     t : int or float

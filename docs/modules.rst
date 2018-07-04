@@ -2,8 +2,9 @@ Chamber Code Documentation
 ==========================
 
 .. toctree::
-   :maxdepth: 4
+    :maxdepth: 4
 
-   source/const
-   source/models
-   source/data
+    source/analysis
+    source/const
+    source/data
+    source/models

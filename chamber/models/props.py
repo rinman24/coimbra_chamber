@@ -1,4 +1,4 @@
-"""
+r"""
 Thermophysical properties of water and humid air.
 
 This module provides a convenient wrapper around specific funtionality of the
@@ -9,34 +9,34 @@ in Pa, dry bulb temperature `t` in K, and dew point `t_dp` in K.
 Attributes
 ----------
     M1 : float
-        Molecular weight of H\\ :sub:`2`\\ O (species-1) in kg/kmol.
+        Molecular weight of H\ :sub:`2`\ O (species-1) in kg/kmol.
     M2 : float
         Molecular weight of dry-air (species-2) in kg/kmol.
 
 Functions
 ---------
-    get_c_pm
-    get_c_pm_sat
-    get_rho_m
-    get_rho_m_sat
-    get_k_m
-    get_k_m_sat
     get_alpha_m
     get_alpha_m_sat
+    get_beta_m1
+    get_c_pl
+    get_c_pm
+    get_c_pm_sat
     get_d_12
-    get_x_1
-    get_x_1_sat
+    get_gamma
+    get_h_fg_sat
+    get_k_m
+    get_k_m_sat
     get_m_1
     get_m_1_sat
-    get_h_fg
-    x1_2_m1
-    get_mu
-    get_c_pl
-    get_rh
-    get_tdp
     get_mol_wgt
-    get_gamma
-    get_beta_m1
+    get_mu
+    get_rh
+    get_rho_m
+    get_rho_m_sat
+    get_tdp
+    get_x_1
+    get_x_1_sat
+    x1_2_m1
 
 .. _CoolProp package:
    http://www.coolprop.org/
@@ -114,7 +114,7 @@ def get_c_pm_sat(p, t_s):
 
 
 def get_rho_m(p, t, t_dp):
-    """
+    r"""
     Get specific mass of vapor mixture.
 
     Parameters
@@ -129,7 +129,7 @@ def get_rho_m(p, t, t_dp):
     Returns
     -------
     float
-        The specific mass of the vapor mixture in kg/m\\ :sup:`3`.
+        The specific mass of the vapor mixture in kg/m\ :sup:`3`.
 
     Examples
     --------
@@ -146,7 +146,7 @@ def get_rho_m(p, t, t_dp):
 
 
 def get_rho_m_sat(p, t_s):
-    """
+    r"""
     Get specific mass of saturated vapor mixture.
 
     Parameters
@@ -159,7 +159,7 @@ def get_rho_m_sat(p, t_s):
     Returns
     -------
     float
-        The specific mass of the saturated vapor mixture in kg/m\\ :sup:`3`.
+        The specific mass of the saturated vapor mixture in kg/m\ :sup:`3`.
 
     Examples
     --------
@@ -234,7 +234,7 @@ def get_k_m_sat(p, t_s):
 
 
 def get_alpha_m(p, t, t_dp):
-    """
+    r"""
     Get thermal diffusivity of vapor mixture.
 
     Parameters
@@ -249,7 +249,7 @@ def get_alpha_m(p, t, t_dp):
     Returns
     -------
     float
-        The thermal diffusivity of the vapor mixture in m\\ :sup:`2`\\ /s.
+        The thermal diffusivity of the vapor mixture in m\ :sup:`2`\ /s.
 
     Examples
     --------
@@ -271,7 +271,7 @@ def get_alpha_m(p, t, t_dp):
 
 
 def get_alpha_m_sat(p, t_s):
-    """
+    r"""
     Get thermal diffusivity of saturated vapor mixture.
 
     Parameters
@@ -285,7 +285,7 @@ def get_alpha_m_sat(p, t_s):
     -------
     float
         The thermal diffusivity of the saturated vapor mixture in
-        m\\ :sup:`2`\\ /s.
+        m\ :sup:`2`\ /s.
 
     Examples
     --------
@@ -306,7 +306,7 @@ def get_alpha_m_sat(p, t_s):
 
 
 def get_d_12(p, t, t_dp, ref):
-    """
+    r"""
     Get binary species diffusivity of vapor mixture.
 
     Parameters
@@ -323,7 +323,7 @@ def get_d_12(p, t, t_dp, ref):
     Returns
     -------
     float
-        The thermal diffusivity of the vapor mixture in m\\ :sup:`2`\\ /s.
+        The thermal diffusivity of the vapor mixture in m\ :sup:`2`\ /s.
 
     Examples
     --------
