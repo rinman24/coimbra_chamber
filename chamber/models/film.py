@@ -1,7 +1,3 @@
-"""Calculate film parameters."""
-
-from chamber.models import props
-
 """
 Thermophysical film properties of humid air.
 
@@ -17,11 +13,15 @@ Functions
 
 .. _CoolProp package:
    http://www.coolprop.org/
+
 """
+
+from chamber.models import props
 
 
 def use_rule(e_value, s_value, rule):
-    """Calculate film state by applying the given rule.
+    """
+    Calculate film state by applying the given rule.
 
     This function returns the value of a film property given the `e_value`,
     `s_value`, and a `rule`.
@@ -37,7 +37,7 @@ def use_rule(e_value, s_value, rule):
 
     Returns
     -------
-    film_prop : float
+    float
         The film property in the same units as `e_value` and `s_value`.
 
     Examples
@@ -45,11 +45,11 @@ def use_rule(e_value, s_value, rule):
     >>> e_temp = 300
     >>> s_temp = 290
     >>> rule = '1/2'
-    >>> film.use_rule(e_temp, s_temp, rule)
+    >>> use_rule(e_temp, s_temp, rule)
     295.0
 
     >>> rule = '1/3'
-    >>> film.use_rule(e_temp, s_temp, rule)
+    >>> use_rule(e_temp, s_temp, rule)
     293.3333333333333
 
     Raises
@@ -59,11 +59,11 @@ def use_rule(e_value, s_value, rule):
 
     Notes
     -----
-    For more information regarding the choices for `rule` see [1]_.
+    For more information regarding the choices for `rule` see [5]_.
 
     References
     ----------
-    .. [1] Mills, A. F. and Coimbra, C. F. M., 2016
+    .. [5] Mills, A. F. and Coimbra, C. F. M., 2016
        *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
 
     """
@@ -81,18 +81,19 @@ def use_rule(e_value, s_value, rule):
 
 
 def est_mix_props(p, t_e, t_dp, t_s, ref, rule):
-    """Estimates of film properties.
+    """
+    Estimates of film properties.
 
     This function calculates estimations of constant film properties based on
     input parameters. Properties are returned in a `dict` with the follwoing
     keys:
-        * 'c_pm': Specific heat of vapor mixture film in J/kg K
-        * 'rho_m': Specific mass of vapor mixture film in kg/m:math:`^3`
-        * 'k_m': Thermal conductivity of the vapor mixture film in W/m K.
-        * 'alpha_m': Thermal diffusivity of the vapor mixture film in
-          m:math:`^2`/s.
-        * 'd_12': Binary species diffusivity of the vapor mixture film in
-          m:math:`^2`/s
+    * 'c_pm': Specific heat of vapor mixture film in J/kg K
+    * 'rho_m': Specific mass of vapor mixture film in kg/m:math:`^3`
+    * 'k_m': Thermal conductivity of the vapor mixture film in W/m K.
+    * 'alpha_m': Thermal diffusivity of the vapor mixture film in
+    m:math:`^2`/s.
+    * 'd_12': Binary species diffusivity of the vapor mixture film in
+    m:math:`^2`/s
 
     Parameters
     ----------
@@ -104,14 +105,14 @@ def est_mix_props(p, t_e, t_dp, t_s, ref, rule):
         Dry bulb temperature of saturated vapor mixture in K.
     t_dp : int or float
         Dew point temperature in K.
-    ref : {'Mills', 'Marrero'}
+    ref : {'Mills', 'Marrero', 'constant'}
         Reference for binary species diffusiity, see ``Notes``.
     rule : {'1/2', '1/3'}
         Rule for calculating the `film_prop`, see ``Notes``.
 
     Returns
     -------
-    film_props : dict(float)
+    dict(float)
         The film properties in the same units as inputs.
 
     Examples
@@ -125,7 +126,7 @@ def est_mix_props(p, t_e, t_dp, t_s, ref, rule):
     >>> t_s = 285
     >>> ref = 'Mills'
     >>> rule = '1/2'
-    >>> film_props = film.est_mix_props(p, t, t_dp, t_s, ref, rule)
+    >>> film_props = est_mix_props(p, t, t_dp, t_s, ref, rule)
     >>> film_props['c_pm']
     1019.9627505486458
     >>> film_props['rho_m']
@@ -140,7 +141,7 @@ def est_mix_props(p, t_e, t_dp, t_s, ref, rule):
     Change `rule` to '1/3'
 
     >>> rule = '1/3'
-    >>> film_props = film.est_mix_props(p, t, t_dp, t_s, ref, rule)
+    >>> film_props = est_mix_props(p, t, t_dp, t_s, ref, rule)
     >>> film_props['c_pm']
     1020.7363637843752
     >>> film_props['rho_m']
@@ -155,7 +156,7 @@ def est_mix_props(p, t_e, t_dp, t_s, ref, rule):
     Change `ref` to 'Marrero'. Only `film_props['d_12']` will update
 
     >>> ref = 'Marrero'
-    >>> film_props = film.est_mix_props(p, t, t_dp, t_s, ref, rule)
+    >>> film_props = est_mix_props(p, t, t_dp, t_s, ref, rule)
     >>> film_props['d_12']
     2.3097223037856368e-05
 
@@ -188,12 +189,13 @@ def est_mix_props(p, t_e, t_dp, t_s, ref, rule):
 
 
 def est_liq_props(t_s, t_t, rule):
-    """Estimates of liquid properties.
+    """
+    Estimates of liquid properties.
 
     This function calculates estimations of constant liquid properties.
     Properties are returned in a `dict` with the follwoing
     keys:
-        * 'c_pl': Specific heat of vapor mixture film in J/kg K
+    * 'c_pl': Specific heat of vapor mixture film in J/kg K
 
     Parameters
     ----------
@@ -206,7 +208,7 @@ def est_liq_props(t_s, t_t, rule):
 
     Returns
     -------
-    liq_props : dict(float)
+    dict(float)
         The film properties in the same units as inputs.
 
     Examples
@@ -216,15 +218,15 @@ def est_liq_props(t_s, t_t, rule):
     >>> t_s = 285
     >>> t_t = 290
     >>> rule = '1/2'
-    >>> liq_props = film.est_liq_props(t_s, t_t, rule)
+    >>> liq_props = est_liq_props(t_s, t_t, rule)
     >>> liq_props['c_pl']
     4189.82872258844
 
     Change `rule` to '1/3'
 
     >>> rule = '1/3'
-    >>> liq_props = film.est_liq_props(t_s, t_t, rule)
-    >>> film_props['c_pl']
+    >>> liq_props = est_liq_props(t_s, t_t, rule)
+    >>> liq_props['c_pl']
     4190.7955800723075
 
     Raises

@@ -9,7 +9,7 @@ in Pa, dry bulb temperature `t` in K, and dew point `t_dp` in K.
 Attributes
 ----------
     M1 : float
-        Molecular weight of H:math:`_2`O (species-1) in kg/kmol.
+        Molecular weight of H\\ :sub:`2`\\ O (species-1) in kg/kmol.
     M2 : float
         Molecular weight of dry-air (species-2) in kg/kmol.
 
@@ -129,7 +129,7 @@ def get_rho_m(p, t, t_dp):
     Returns
     -------
     float
-        The specific mass of the vapor mixture in kg/m:math:`^3`.
+        The specific mass of the vapor mixture in kg/m\\ :sup:`3`.
 
     Examples
     --------
@@ -159,7 +159,7 @@ def get_rho_m_sat(p, t_s):
     Returns
     -------
     float
-        The specific mass of the saturated vapor mixture in kg/m:math:`^3`.
+        The specific mass of the saturated vapor mixture in kg/m\\ :sup:`3`.
 
     Examples
     --------
@@ -249,7 +249,7 @@ def get_alpha_m(p, t, t_dp):
     Returns
     -------
     float
-        The thermal diffusivity of the vapor mixture in m:math:`^2`/s.
+        The thermal diffusivity of the vapor mixture in m\\ :sup:`2`\\ /s.
 
     Examples
     --------
@@ -285,7 +285,7 @@ def get_alpha_m_sat(p, t_s):
     -------
     float
         The thermal diffusivity of the saturated vapor mixture in
-        m:math:`^2`/s.
+        m\\ :sup:`2`\\ /s.
 
     Examples
     --------
@@ -323,7 +323,7 @@ def get_d_12(p, t, t_dp, ref):
     Returns
     -------
     float
-        The thermal diffusivity of the vapor mixture in m:math:`^2`/s.
+        The thermal diffusivity of the vapor mixture in m\\ :sup:`2`\\ /s.
 
     Examples
     --------
@@ -349,11 +349,11 @@ def get_d_12(p, t, t_dp, ref):
 
     Notes
     -----
-    For more information regarding the choices for `ref` see Appendix of [1]_.
+    For more information regarding the choices for `ref` see Appendix of [3]_.
 
     References
     ----------
-    .. [1] Mills, A. F. and Coimbra, C. F. M., 2016
+    .. [3] Mills, A. F. and Coimbra, C. F. M., 2016
        *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
 
     """
@@ -728,8 +728,8 @@ def get_gamma(p, t, t_dp):
     Returns
     -------
     float
-        The coefficient of volumetric expansion of the vapor mixture
-        in m:math:`^-3`.
+        The coefficient of volumetric expansion of the vapor mixture.
+        in m:math:`^-3`
 
     Examples
     --------
