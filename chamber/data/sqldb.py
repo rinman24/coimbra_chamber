@@ -3,10 +3,10 @@ MySQL and TDMS Integration.
 
 Functions
 ---------
-    add_tdms_file
-    add_tube_info
-    connect
-    create_tables
+- `add_tdms_file` -- insert tdms files into the MySQL database.
+- `add_tube_info` -- add test-independant Tube info into the MySQL database.
+- `connect` -- get a connection and cursor to a MySQL database.
+- `create_tables` -- create tables in the MySQL database.
 
 """
 import configparser

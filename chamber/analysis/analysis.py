@@ -12,9 +12,9 @@ the following implementation will allow futher development.
 
 Functions
 ---------
-    analysis
-    preprocess
-    results_from_csv
+- `analysis` -- perform analysis on the experimental data.
+- `preprocess` -- ready a `DataFrame` for analysis.
+- `results_from_csv` -- get analysis results from a .csv file.
 
 """
 import math

@@ -8,10 +8,10 @@ Attributes
 
 Functions
 ---------
-    get_grashof
-    get_schmidt
-    get_sherwood
-    get_prandtl
+- `get_grashof` -- get the Grashof number for the vapor mixture.
+- `get_prandtl` -- get the Prandtl number for the vapor mixture.
+- `get_schmidt` -- get the Sherwood number for the vapor mixture.
+- `get_sherwood` -- get the Sherwood number for the vapor mixture.
 
 """
 
@@ -25,7 +25,7 @@ RADIUS = 0.015
 
 def get_schmidt(p, t, t_dp, ref):
     """
-    Get Schmidt number for vapor mixture.
+    Get the Schmidt number for the vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Schmidt number, the ratio of momentum diffusivity and
@@ -57,12 +57,7 @@ def get_schmidt(p, t, t_dp, ref):
 
     Notes
     -----
-    For more information regarding the choices for `ref` see Appendix of [4]_.
-
-    References
-    ----------
-    .. [4] Mills, A. F. and Coimbra, C. F. M., 2016
-       *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
+    For more information regarding the choices for `ref` see Appendix of [1]_.
 
     """
     # Get vapor properties
@@ -78,7 +73,7 @@ def get_schmidt(p, t, t_dp, ref):
 
 def get_grashof(p, t, t_dp, t_s):
     """
-    Get Grashof number for vapor mixture.
+    Get the Grashof number for the vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Grashof number, the ratio of the buoyant force and
@@ -139,7 +134,7 @@ def get_grashof(p, t, t_dp, t_s):
 
 def get_prandtl(p, t, t_dp):
     """
-    Get Prandtl number for vapor mixture.
+    Get the Prandtl number for the vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Prandtl number, the ratio of momentum diffusivity and
@@ -181,7 +176,7 @@ def get_prandtl(p, t, t_dp):
 
 def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
     r"""
-    Get Sherwood number for vapor mixture.
+    Get the Sherwood number for the vapor mixture.
 
     This function uses the humid air property getter functions in props.py to
     calculate the Sherwood number, the ratio of convective mass transfer and
@@ -224,12 +219,7 @@ def get_sherwood(l, m_dot_pp, p, t, t_dp, t_s, ref):
 
     Notes
     -----
-    For more information regarding the choices for `ref` see Appendix of [2]_.
-
-    References
-    ----------
-    .. [2] Mills, A. F. and Coimbra, C. F. M., 2016
-       *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
+    For more information regarding the choices for `ref` see Appendix of [1]_.
 
     """
     # Get vapor properties
