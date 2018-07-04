@@ -8,10 +8,10 @@ Attributes
 
 Functions
 ---------
-    get_schmidt
     get_grashof
-    get_prandtl
+    get_schmidt
     get_sherwood
+    get_prandtl
 
 """
 
