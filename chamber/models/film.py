@@ -59,12 +59,7 @@ def use_rule(e_value, s_value, rule):
 
     Notes
     -----
-    For more information regarding the choices for `rule` see [5]_.
-
-    References
-    ----------
-    .. [5] Mills, A. F. and Coimbra, C. F. M., 2016
-       *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
+    For more information regarding the choices for `rule` see [1]_.
 
     """
     if rule == '1/2':
