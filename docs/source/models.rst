@@ -1,5 +1,5 @@
-models package
-==============
+models subpackage
+=================
 
 models.film module
 ------------------

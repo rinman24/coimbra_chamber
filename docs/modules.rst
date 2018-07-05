@@ -1,5 +1,5 @@
-Code Documentation
-==================
+Chamber Package Documentaiton
+=============================
 
 .. toctree::
     :maxdepth: 4

@@ -1,5 +1,5 @@
-analysis package
-================
+analysis subpackage
+===================
 
 analysis.analysis module
 ------------------------

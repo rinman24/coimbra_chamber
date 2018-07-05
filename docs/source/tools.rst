@@ -1,5 +1,5 @@
-tools package
-=============
+tools subpackage
+================
 
 tools.laser module
 ------------------
