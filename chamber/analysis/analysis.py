@@ -49,8 +49,39 @@ def results_from_csv(
     """
     Get results from csv.
 
-    Open a csv file, preprocesses the data, perform the chi-square regression,
-    and return the data and results in separate `DataFrames`.
+    This function opens a csv file, preprocesses the data, performs the
+    chi-square regression, and returns the data and results in separate
+    `DataFrames`.
+
+    Parameters
+    ----------
+    filepath : str, pathlib.Path, py._path.local.LocalPath or any \
+        object with a read() method
+        The filepath to a csv file.
+    purge : bool
+        If `True` the original, unpreprocessed data is removed from the
+        preprocessed `DataFrame`. If `False` the unpreprocessed data remains in
+        the preprocessed 'DataFrame'. Defaults to `False`.
+    param_list : list(str)
+        List of parameters to use to calculate the relative humidity using the
+        CoolProp API, see `_get_coolprop_rh` docstring for more detail.
+        Defaults to: `['PressureSmooth', 'TeSmooth', 'DewPointSmooth']`.
+    sigma : float
+        Standard deviation of mass measurement. Defaults to 4e-8 accoriding to
+        the spec sheet.
+    steps : int
+        Steps to increase the `half_length`.
+
+    Returns
+    -------
+    (DataFrame, DataFrame)
+        A tuple of a `DataFrame` containing the preprocessed experimental data
+        and a second `DataFrame` containing the chi-square analysis results.
+
+    Examples
+    --------
+    .. todo:: Examples.
+
     """
     dataframe = pd.read_csv(filepath)
     dataframe = preprocess(dataframe, param_list=param_list, purge=purge)
@@ -64,7 +95,35 @@ def preprocess(
         param_list=['PressureSmooth', 'TeSmooth', 'DewPointSmooth'],
         purge=False
         ):
-    """Call all of the helper functions to preprocess the `DataFrame`."""
+    """
+    Readies a `DataFrame` for further analysis.
+
+    This function takes in a `DataFrame` and calls all of the module helper
+    functions to produce a `DataFrame` that is ready for analysis.
+
+    Parameters
+    ----------
+    dataframe: DataFrame
+        A `DataFrame` of experimental data to be preprocessed.
+    param_list: list(str)
+        List of parameters to use to calculate the relative humidity using the
+        CoolProp API, see `_get_coolprop_rh` docstring for more detail.
+        Defaults to: `['PressureSmooth', 'TeSmooth', 'DewPointSmooth']`.
+    purge: bool
+        If `True` the original, unpreprocessed data is removed from the
+        returned `DataFrame`. If `False` the unpreprocessed data remains in the
+        'DataFrame'. Defaults to `False`.
+
+    Returns
+    -------
+    DataFrame
+        The preprocessed data.
+
+    Examples
+    --------
+    .. todo:: Examples.
+
+    """
     dataframe = _zero_time(dataframe)
 
     dataframe = _format_temp(dataframe)
@@ -114,6 +173,10 @@ def analysis(dataframe, sigma=4e-8, steps=100, plot=False):
         - `Q`: goodness of fit score (survival function)
         - `nu`: degrees of freedom
         - `RH`: target relative humidity
+
+    Examples
+    --------
+    .. todo:: Examples.
 
     """
     rh_targets = _get_valid_rh_targets(dataframe)

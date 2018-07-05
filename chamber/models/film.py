@@ -7,9 +7,9 @@ film properties based on an e-state, s-state, and averaging rule.
 
 Functions
 ---------
-    use_rule
-    est_mix_props
-    est_liq_props
+- `est_liq_props` -- estimates of liquid properties.
+- `est_mix_props` -- estimates of film properties.
+- `use_rule` -- calculate film state by applying the given rule.
 
 .. _CoolProp package:
    http://www.coolprop.org/
@@ -83,12 +83,12 @@ def est_mix_props(p, t_e, t_dp, t_s, ref, rule):
     input parameters. Properties are returned in a `dict` with the follwoing
     keys:
     * 'c_pm': Specific heat of vapor mixture film in J/kg K
-    * 'rho_m': Specific mass of vapor mixture film in kg/m:math:`^3`
+    * 'rho_m': Specific mass of vapor mixture film in kg/m:sup:`3`
     * 'k_m': Thermal conductivity of the vapor mixture film in W/m K.
     * 'alpha_m': Thermal diffusivity of the vapor mixture film in
-    m:math:`^2`/s.
+    m:sup:`2`/s.
     * 'd_12': Binary species diffusivity of the vapor mixture film in
-    m:math:`^2`/s
+    m:sup:`2`/s
 
     Parameters
     ----------

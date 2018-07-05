@@ -1,4 +1,4 @@
-r"""
+"""
 Thermophysical properties of water and humid air.
 
 This module provides a convenient wrapper around specific funtionality of the
@@ -9,25 +9,29 @@ in Pa, dry bulb temperature `t` in K, and dew point `t_dp` in K.
 Attributes
 ----------
     M1 : float
-        Molecular weight of H\ :sub:`2`\ O (species-1) in kg/kmol.
+        Molecular weight of H\\ :sub:`2`\\ O (species-1) in kg/kmol.
     M2 : float
         Molecular weight of dry-air (species-2) in kg/kmol.
 
 Functions
 ---------
 - `get_alpha_m` -- get the thermal diffusivity of the vapor mixture.
-- `get_alpha_m_sat` -- get the thermal diffusivity of the saturated vapor mixture.
-- `get_beta_m1` -- get the mass transfer rate coefficient of the stefan tube system.
+- `get_alpha_m_sat` -- get the thermal diffusivity of the saturated vapor \
+    mixture.
+- `get_beta_m1` -- get the mass transfer rate coefficient of the stefan tube \
+    system.
 - `get_c_pl` -- get the specific heat of pure liquid water.
 - `get_c_pm` -- get the specific heat of the vapor mixture.
 - `get_c_pm_sat` -- get the specific heat of the saturated vapor mixture.
 - `get_d_12` -- get the binary species diffusivity of the vapor mixture.
-- `get_gamma` -- get the coefficient of volumetric expansion of the vapor mixture.
+- `get_gamma` -- get the coefficient of volumetric expansion of the vapor \
+    mixture.
 - `get_h_fg_sat` -- get the specific enthalpy of vaporization for pure water.
 - `get_k_m` -- get the thermal conductivity of the vapor mixture.
 - `get_k_m_sat` -- get the thermal conductivity of the saturated vapor mixture.
 - `get_m_1` -- get the mass fraction of water vapor in the vapor mixture.
-- `get_m_1_sat` -- get the mass fraction of water vapor in the saturated vapor mixture.
+- `get_m_1_sat` -- get the mass fraction of water vapor in the saturated \
+    vapor mixture.
 - `get_mol_wgt` -- get the molar mass of the vapor mixture.
 - `get_mu` -- get the dynamic viscocity of the vapor mixture.
 - `get_rh` -- get the relative humidity of the vapor liquid mixture.
@@ -35,7 +39,8 @@ Functions
 - `get_rho_m_sat` -- get the specific mass of the saturated vapor mixture.
 - `get_tdp` -- get the dew point temperature of the vapor mixture.
 - `get_x_1` -- get the mole fraction of water vapor in mixture.
-- `get_x_1_sat` -- get the mole fraction of water vapor in the saturated mixture.
+- `get_x_1_sat` -- get the mole fraction of water vapor in the saturated \
+    mixture.
 - `x1_2_m1` -- convert the mole fraction to mass fraction.
 
 .. _CoolProp package:

@@ -1,4 +1,12 @@
-"""Module for performing chi-squared linear regression."""
+"""
+Module for performing chi-squared linear regression.
+
+Functions
+---------
+
+- `chi2` -- perfroms a chi-squared linear regression.
+
+"""
 
 import math
 import random
@@ -71,7 +79,12 @@ def _chi2(x, y, a, b, sigma):
 
 
 def chi2(x, y, sigma, plot=False):
-    """Use all of the helper function above to determine chi2 stats."""
+    """
+    Use all of the helper function above to determine chi2 stats.
+
+    .. todo:: chi2 docstring.
+
+    """
     s_res = _s(sigma, len(x))
     sx_res = _s1(x, sigma)
     sy_res = _s1(y, sigma)
@@ -130,12 +143,20 @@ def _calc_bins(y, res):
 
 
 def add_steps(y, resolution):
-    """Use bins to digitize y in to specified resolution."""
+    """Use bins to digitize y in to specified resolution.
+
+    .. todo:: add_steps docstring or make function private.
+
+    """
     bins = _calc_bins(y, resolution)
     idx = np.digitize(y, bins)
     return [bins[i-1] + 0.5*resolution for i in idx]
 
 
 def add_noise(y, amp):
-    """Use amp to add noise to _y attribute."""
+    """Use amp to add noise to _y attribute.
+
+    .. todo:: add_noise docstring or make function private.
+
+    """
     return list(map(lambda x: x + random.uniform(-1, 1)*amp, y))

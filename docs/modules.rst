@@ -7,3 +7,4 @@ Code Documentation
     source/analysis
     source/data
     source/models
+    source/tools
