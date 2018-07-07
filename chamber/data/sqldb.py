@@ -8,6 +8,9 @@ Functions
     connect
     create_tables
 
+To Do
+-----
+    Decouple database and tdms volatility via modulde encapsulation.
 """
 import configparser
 import re
@@ -43,19 +46,15 @@ def connect(database):
     -------
     cnx : mysql.connector.connection.MySQLConnection
         Connection to MySQL database.
-    cur : mysql.connector.cursor.MySqlCursor
-        Cursor for MySQL database.
 
     Examples
     --------
     Obtain a connection and cursor to a schema named 'test' using built in
     config.ini:
 
-    >>> cnx, cur = connect('test')
+    >>> cnx = connect('test')
     >>> type(cnx)
     <class 'mysql.connector.connection.MySQLConnection'>
-    >>> type(cur)
-    <class 'mysql.connector.cursor.MySQLCursor'>
 
     """
     # Parse the 'MySQL-Server' section of the config file.
@@ -78,7 +77,7 @@ def connect(database):
         else:
             print(err)
     else:
-        return cnx, cnx.cursor()
+        return cnx
 
 
 def create_tables(cur, tables):
@@ -114,8 +113,9 @@ def create_tables(cur, tables):
     Create tables in the MySQL database:
 
     >>> from chamebr.database import ddl
-    >>> _, cur = connect('my-schema')
-    >>> status = create_tables(cur, ddl.tables)
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> assert create_tables(cur, ddl.tables)
     Setting up tables...
     Setting  OK
     Tube  OK
@@ -123,8 +123,6 @@ def create_tables(cur, tables):
     Observation  OK
     TempObservation  OK
     Unit  OK
-    >>> status
-    True
 
     """
     print('Setting up tables...')
@@ -168,18 +166,15 @@ def add_tube_info(cur):
     --------
     Add the tube for the first time:
 
-    >>> _, cur = connect('my-schema')
-    >>> status = add_tube_info(cur)
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> assert add_tube_info(cur)
     Tube added.
-    >>> status
-    True
 
     Now add it again:
 
-    >>> status = add_tube_info(cur)
+    >>> assert not add_tube_info(cur)
     Tube already exists.
-    >>> status
-    False
 
     """
     # First query if the tube exists
@@ -281,7 +276,8 @@ def _setting_exists(cur, setting_info):
     --------
     Obtain a setting ID that already exists:
 
-    >>> _, cur = connect('my-schema')
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
     >>> setting_info = dict(Duty=10, Pressure=100000, Temperature=300)
     >>> setting_id = setting_exists(cur, setting_info)
     >>> setting_id
@@ -339,7 +335,8 @@ def _add_setting_info(cur, tdms_obj):
 
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> _, cur = connect('my-schema')
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
     >>> setting_id = add_setting_info(cur, tdms_file)
     >>> setting_id
     1
@@ -452,7 +449,8 @@ def _test_exists(cur, test_info):
     Check for test info that already exists in the database:
 
     >>> import datetime
-    >>> _, cur = connect('my_schema')
+    >>> cnx = connect('my_schema')
+    >>> cur = cnx.cursor()
     >>> test_info = dict(Author='author_01',
     ... DateTime=datetime.datetime(2018, 1, 29, 17, 54, 12),
     ... Description='description_01', IsMass=1, TimeStep=1)
@@ -523,7 +521,8 @@ def _add_test_info(cur, tdms_obj, setting_id):
 
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> _, cur = connect('my-schema')
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
     >>> test_id = add_test_info(cur, tdms_file, 1, 2)
     >>> test_id
     1
@@ -652,7 +651,8 @@ def _add_obs_info(cur, tdms_obj, test_id, tdms_idx):
 
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> _, cur = connect('my-schema')
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
     >>> assert add_obs_info(cur, tdms_file, 1, 0)
 
     Add all observations in a file with test_id 2:
@@ -766,7 +766,8 @@ def _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
 
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> _, cur = connect('my-schema')
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
     >>> assert add_temp_info(cur, tdms_file, 1, 0, 99)
 
     """
@@ -798,7 +799,7 @@ def _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
 # Add all data, main function
 
 
-def add_tdms_file(cur, tdms_obj):
+def add_tdms_file(cnx, tdms_obj):
     """
     Insert tdms files into the MySQL database.
 
@@ -826,28 +827,45 @@ def add_tdms_file(cur, tdms_obj):
 
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> _, cur = connect('my-schema')
-    >>> assert add_tdms_file(cur, tdms_obj)
+    >>> cnx = connect('my-schema')
+    >>> assert add_tdms_file(cnx, tdms_obj)
 
     """
-    # ------------------------------------------------------------------------
-    # Setting: call add_setting_info which will add the setting or make a new
-    # setting and return the new id.
-    setting_id = _add_setting_info(cur, tdms_obj)
-    print('SettingID:', setting_id)
+    try:
+        # --------------------------------------------------------------------
+        # Create a cursor and start the transaction
+        cur = cnx.cursor()
+        assert not cnx.in_transaction
 
-    # ------------------------------------------------------------------------
-    # Test: call add_test_info which will add the test or make a new test and
-    # return the new id.
-    test_id = _add_test_info(cur, tdms_obj, setting_id)
-    print('TestID:', test_id)
+        # --------------------------------------------------------------------
+        # Setting: call add_setting_info which will add the setting or make a
+        # new setting and return the new id.
+        setting_id = _add_setting_info(cur, tdms_obj)
+        assert cnx.in_transaction
+        print('SettingID:', setting_id)
 
-    # ------------------------------------------------------------------------
-    # Observation and TempObservations: call add_obs_info and add_temp_info in
-    # a loop which will add all of the observations from the file.
-    for tdms_idx in range(len(tdms_obj.object("Data", "Idx").data)):
-        assert _add_obs_info(cur, tdms_obj, test_id, tdms_idx)
-        idx = int(tdms_obj.object("Data", "Idx").data[tdms_idx])
-        assert _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx)
+        # --------------------------------------------------------------------
+        # Test: call add_test_info which will add the test or make a new test
+        # and return the new id.
+        test_id = _add_test_info(cur, tdms_obj, setting_id)
+        print('TestID:', test_id)
 
-    return True
+        # --------------------------------------------------------------------
+        # Observation and TempObservations: call add_obs_info and
+        # add_temp_info in a loop which will add all of the observations from
+        # the file.
+        for tdms_idx in range(len(tdms_obj.object("Data", "Idx").data)):
+            assert _add_obs_info(cur, tdms_obj, test_id, tdms_idx)
+            idx = int(tdms_obj.object("Data", "Idx").data[tdms_idx])
+            assert _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx)
+
+        assert cnx.in_transaction
+        cnx.commit()
+        assert not cnx.in_transaction
+        assert cur.close()
+        return True
+    except mysql.connector.Error as err:
+        # --------------------------------------------------------------------
+        # Rollback transaction if there is an issue
+        cnx.rollback()
+        print("MySqlError: {}".format(err))

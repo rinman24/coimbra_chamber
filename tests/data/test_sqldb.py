@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test sqldb."""
 import configparser
 from datetime import datetime
 from decimal import Decimal
@@ -8,9 +8,7 @@ from shutil import move
 
 from math import isclose
 
-import mysql.connector as conn
-from mysql.connector.cursor import MySQLCursor
-from mysql.connector import errorcode
+import mysql.connector
 import nptdms
 import pytest
 
@@ -21,7 +19,7 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 # ----------------------------------------------------------------------------
-# Global variables
+# Global test variables
 CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
                                                'data_transfer_test_files',
                                                'test_01.tdms'),
@@ -110,24 +108,48 @@ OBS_DATA_4 = (1, 270.28, 1, -3e-4, -0e-4, 100472)
 
 
 @pytest.fixture(scope='module')
-def cursor():
-    """Cursor Fixture at module level so that only one connection is made."""
-    print("\nConnecting to MySQL...")
-    cnx, cur = sqldb.connect("test")
-    print("Connected.")
-    yield cur
+def cnx():
+    """Connect to database with module level fixture."""
+    # ------------------------------------------------------------------------
+    # Connect
+    print("\nConnecting to MySQL Server...")
+    cnx = sqldb.connect("test")
+    print("Successfully connected.")
+    yield cnx
+
+    # ------------------------------------------------------------------------
+    # Cleanup with new cursor
     print("\nCleaning up test database...")
+    cur = cnx.cursor()
+
     drop_tables(cur, True)
     print("Disconnecting from MySQL...")
     cnx.commit()
-    cur.close()
+    assert cur.close()
     cnx.close()
     print("Connection to MySQL closed.")
 
 
 @pytest.fixture(scope='module')
+def cur(cnx):
+    """Obtain a cursor to use at the module level."""
+    # ------------------------------------------------------------------------
+    # Get cursor
+    print("\nObtaining a cursor for the connection...")
+    cur = cnx.cursor()
+    print("Cursor obtained.")
+    yield cur
+
+    # ------------------------------------------------------------------------
+    # Close cursor
+    print("\nClosing module level cursor...")
+    assert cur.close()
+    print("Module level cursor closed.")
+
+
+@pytest.fixture(scope='module')
 def test_tdms_obj():
-    """Fixture to instantiate only one nptdms.TdmsFile object for testing."""
+    """Construct list of nptdms.TdmsFile as module level fixture."""
     return (  # IsMass 1 Duty 5%
             nptdms.TdmsFile(CORRECT_FILE_LIST[0]),
             # IsMass 1 Duty 0%
@@ -138,42 +160,48 @@ def test_tdms_obj():
             nptdms.TdmsFile(CORRECT_FILE_LIST[3]))
 
 
-def test_connect(cursor):
+def test_connect(cnx):
         """Test connection to database."""
-        assert cursor
-        assert isinstance(cursor, MySQLCursor)
+        assert cnx
+        assert isinstance(cnx, mysql.connector.connection.MySQLConnection)
+        assert not cnx.in_transaction
 
 
-def test_create_tables(cursor):
-    """Test creation of tables."""
+def test_create_tables(cur):
+    """Test create_tables."""
     # Create the tables
-    assert sqldb.create_tables(cursor, ddl.tables)
+    assert sqldb.create_tables(cur, ddl.tables)
 
     # Now check that all tables exist
     table_names_set = set(ddl.table_name_list)
-    cursor.execute("SHOW TABLES;")
-    for row in cursor:
+    cur.execute("SHOW TABLES;")
+    for row in cur:
         assert row[0] in table_names_set
 
 
-def test__setting_exists(cursor):
+def test__setting_exists(cur):
     """Test _setting_exists."""
     # ------------------------------------------------------------------------
     # Manually add a setting and assert the setting id is 1
-    cursor.execute(dml.add_setting, SETTINGS_TEST_1)
-    assert 1 == sqldb._setting_exists(cursor, SETTINGS_TEST_1)
+    cur.execute(dml.add_setting, SETTINGS_TEST_1)
+    assert 1 == sqldb._setting_exists(cur, SETTINGS_TEST_1)
 
     # ------------------------------------------------------------------------
     # Assert that other settings do not exist
-    assert not sqldb._setting_exists(cursor, SETTINGS_TEST_2)
+    assert not sqldb._setting_exists(cur, SETTINGS_TEST_2)
 
     # ------------------------------------------------------------------------
     # Truncate table so it can be used in subsequent tests
-    truncate(cursor, 'Setting')
+    truncate(cur, 'Setting')
 
 
 def test__get_temp_info(test_tdms_obj):
-    """Test get_temp_info."""
+    """
+    Test get_temp_info.
+
+    NOTE: Dependencies require this test to be run before
+    test__get_setting_info.
+    """
     # ------------------------------------------------------------------------
     # File 1
     assert (
@@ -272,145 +300,150 @@ def test__get_obs_info(test_tdms_obj):
             )
 
 
-def test_add_tube_info(cursor):
+def test_add_tube_info(cur):
     """Test add_tube_info."""
     # Add the tube the first time and we should get true
-    assert sqldb.add_tube_info(cursor)
+    assert sqldb.add_tube_info(cur)
 
     # Check that there is one and only one tube with this id
-    cursor.execute("SELECT TubeID FROM Tube;")
-    assert cursor.fetchone()[0] == 1
-    cursor.execute("SELECT TubeID FROM Tube;")
-    assert len(cursor.fetchall()) == 1
+    cur.execute("SELECT TubeID FROM Tube;")
+    assert cur.fetchone()[0] == 1
+    cur.execute("SELECT TubeID FROM Tube;")
+    assert len(cur.fetchall()) == 1
 
-    cursor.execute("SELECT DiameterIn FROM Tube WHERE TubeID=1;")
-    assert cursor.fetchone()[0] == Decimal('0.0300000')
+    cur.execute("SELECT DiameterIn FROM Tube WHERE TubeID=1;")
+    assert cur.fetchone()[0] == Decimal('0.0300000')
 
-    cursor.execute("SELECT DiameterOut FROM Tube WHERE TubeID=1;")
-    assert cursor.fetchone()[0] == Decimal('0.0400000')
+    cur.execute("SELECT DiameterOut FROM Tube WHERE TubeID=1;")
+    assert cur.fetchone()[0] == Decimal('0.0400000')
 
-    cursor.execute("SELECT Length FROM Tube WHERE TubeID=1;")
-    assert cursor.fetchone()[0] == Decimal('0.0600000')
+    cur.execute("SELECT Length FROM Tube WHERE TubeID=1;")
+    assert cur.fetchone()[0] == Decimal('0.0600000')
 
-    cursor.execute("SELECT Material FROM Tube WHERE TubeID=1;")
-    assert cursor.fetchone()[0] == 'Delrin'
+    cur.execute("SELECT Material FROM Tube WHERE TubeID=1;")
+    assert cur.fetchone()[0] == 'Delrin'
 
-    cursor.execute("SELECT Mass FROM Tube WHERE TubeID=1;")
-    assert cursor.fetchone()[0] == Decimal('0.0873832')
+    cur.execute("SELECT Mass FROM Tube WHERE TubeID=1;")
+    assert cur.fetchone()[0] == Decimal('0.0873832')
 
     # Now that it is added, we should get a False indicating that it could not
     # be added
-    assert not sqldb.add_tube_info(cursor)
+    assert not sqldb.add_tube_info(cur)
 
 
-def test__add_setting_info(cursor, test_tdms_obj):
+def test__add_setting_info(cur, test_tdms_obj):
     """Test _add_setting_info."""
     # ------------------------------------------------------------------------
     # File 1
     # Add a new setting and assert that its id is 1
-    setting_id = sqldb._add_setting_info(cursor, test_tdms_obj[0])
+    setting_id = sqldb._add_setting_info(cur, test_tdms_obj[0])
     assert setting_id == 1
     # Query the new setting and check the results
-    cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
-                   cursor.lastrowid))
-    assert cursor.fetchall() == TDMS_01_ADD_SETTING
+    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
+                   cur.lastrowid))
+    assert cur.fetchall() == TDMS_01_ADD_SETTING
 
     # ------------------------------------------------------------------------
     # File 2
-    setting_id = sqldb._add_setting_info(cursor, test_tdms_obj[1])
+    setting_id = sqldb._add_setting_info(cur, test_tdms_obj[1])
     assert setting_id == 2
-    cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
-                   cursor.lastrowid))
-    assert cursor.fetchall() == TDMS_02_ADD_SETTING
+    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
+                   cur.lastrowid))
+    assert cur.fetchall() == TDMS_02_ADD_SETTING
 
     # ------------------------------------------------------------------------
     # File 3
-    setting_id = sqldb._add_setting_info(cursor, test_tdms_obj[2])
+    setting_id = sqldb._add_setting_info(cur, test_tdms_obj[2])
     assert setting_id == 3
-    cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
-                   cursor.lastrowid))
-    assert cursor.fetchall() == TDMS_03_ADD_SETTING
+    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
+                   cur.lastrowid))
+    assert cur.fetchall() == TDMS_03_ADD_SETTING
 
     # ------------------------------------------------------------------------
     # File 4
-    setting_id = sqldb._add_setting_info(cursor, test_tdms_obj[3])
+    setting_id = sqldb._add_setting_info(cur, test_tdms_obj[3])
     assert setting_id == 2  # This test has the same setting at 2
-    cursor.execute('SELECT * FROM Setting WHERE SettingID={}'.format(2))
-    assert cursor.fetchall() == TDMS_02_ADD_SETTING
+    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(2))
+    assert cur.fetchall() == TDMS_02_ADD_SETTING
 
 
-def test__add_test_info(cursor, test_tdms_obj):
-    """Test _add_test_info."""
+def test__add_test_info(cur, test_tdms_obj):
+    """
+    Test _add_test_info.
+
+    NOTE: This must be run before test__test_exists in order to populate the
+    Test table.
+    """
     # ------------------------------------------------------------------------
     # File 1
     # Add a new test and assert that its id is 1
-    test_id = sqldb._add_test_info(cursor, test_tdms_obj[0], 1)
+    test_id = sqldb._add_test_info(cur, test_tdms_obj[0], 1)
     assert test_id == 1
     # Query the new test and check the results
-    cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
+    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
                    test_id))
-    assert cursor.fetchall() == TDMS_01_ADD_TEST
+    assert cur.fetchall() == TDMS_01_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 2
-    test_id = sqldb._add_test_info(cursor, test_tdms_obj[1], 2)
+    test_id = sqldb._add_test_info(cur, test_tdms_obj[1], 2)
     assert test_id == 2
-    cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
+    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
                    test_id))
-    assert cursor.fetchall() == TDMS_02_ADD_TEST
+    assert cur.fetchall() == TDMS_02_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 3
-    test_id = sqldb._add_test_info(cursor, test_tdms_obj[2], 3)
+    test_id = sqldb._add_test_info(cur, test_tdms_obj[2], 3)
     assert test_id == 3
-    cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
+    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
                    test_id))
-    assert cursor.fetchall() == TDMS_03_ADD_TEST
+    assert cur.fetchall() == TDMS_03_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 4
-    test_id = sqldb._add_test_info(cursor, test_tdms_obj[3], 2)
+    test_id = sqldb._add_test_info(cur, test_tdms_obj[3], 2)
     assert test_id == 4
-    cursor.execute('SELECT * FROM Test WHERE TestID={}'.format(
+    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
                    test_id))
-    assert cursor.fetchall() == TDMS_04_ADD_TEST
+    assert cur.fetchall() == TDMS_04_ADD_TEST
 
 
-def test__test_exists(cursor, test_tdms_obj):
+def test__test_exists(cur, test_tdms_obj):
     """
     Test _test_exists.
 
-    The tests were previously added. All that is left to do is to assert that
-    the tests exist.
+    NOTE: The tests were previously added. All that is left to do is to assert
+    that the tests exist.
 
     Files 1-4 should exist. However, 5 and 6 shouldn't exist.
     """
     # ------------------------------------------------------------------------
     # File 1
-    assert 1 == sqldb._test_exists(cursor, TDMS_01_TEST)
+    assert 1 == sqldb._test_exists(cur, TDMS_01_TEST)
 
     # ------------------------------------------------------------------------
     # File 2
-    assert 2 == sqldb._test_exists(cursor, TDMS_02_TEST)
+    assert 2 == sqldb._test_exists(cur, TDMS_02_TEST)
 
     # ------------------------------------------------------------------------
     # File 3
-    assert 3 == sqldb._test_exists(cursor, TDMS_03_TEST)
+    assert 3 == sqldb._test_exists(cur, TDMS_03_TEST)
 
     # ------------------------------------------------------------------------
     # File 4
-    assert 4 == sqldb._test_exists(cursor, TDMS_04_TEST)
+    assert 4 == sqldb._test_exists(cur, TDMS_04_TEST)
 
     # ------------------------------------------------------------------------
     # File 5: Should not exist
-    assert not 5 == sqldb._test_exists(cursor, TDMS_01_TEST)
+    assert not 5 == sqldb._test_exists(cur, TDMS_01_TEST)
 
     # ------------------------------------------------------------------------
     # File 6: Should not exist
-    assert not 6 == sqldb._test_exists(cursor, '')
+    assert not 6 == sqldb._test_exists(cur, '')
 
 
-def test__add_obs_info(cursor, test_tdms_obj):
+def test__add_obs_info(cur, test_tdms_obj):
     """Test _add_obs_info."""
     # ------------------------------------------------------------------------
     # File 1
@@ -418,90 +451,90 @@ def test__add_obs_info(cursor, test_tdms_obj):
     for tdms_idx in range(
             len(test_tdms_obj[0].object("Data", "Idx").data)
             ):
-        assert sqldb._add_obs_info(cursor, test_tdms_obj[0], 1, tdms_idx)
+        assert sqldb._add_obs_info(cur, test_tdms_obj[0], 1, tdms_idx)
     # Then check that you can get the last dew point correct
-    cursor.execute(dml.get_last_dew_point.format(1))
-    assert cursor.fetchall()[0][0] == Decimal('270.78')
+    cur.execute(dml.get_last_dew_point.format(1))
+    assert cur.fetchall()[0][0] == Decimal('270.78')
 
     # ------------------------------------------------------------------------
     # File 2
     for tdms_idx in range(
             len(test_tdms_obj[1].object("Data", "Idx").data)
             ):
-        assert sqldb._add_obs_info(cursor, test_tdms_obj[1], 2, tdms_idx)
-    cursor.execute(dml.get_last_dew_point.format(2))
-    assert cursor.fetchall()[0][0] == Decimal('270.93')
+        assert sqldb._add_obs_info(cur, test_tdms_obj[1], 2, tdms_idx)
+    cur.execute(dml.get_last_dew_point.format(2))
+    assert cur.fetchall()[0][0] == Decimal('270.93')
 
     # ------------------------------------------------------------------------
     # File 3
     for tdms_idx in range(
             len(test_tdms_obj[2].object("Data", "Idx").data)
             ):
-        assert sqldb._add_obs_info(cursor, test_tdms_obj[2], 3, tdms_idx)
-    cursor.execute(dml.get_last_dew_point.format(3))
-    assert cursor.fetchall()[0][0] == Decimal('270.20')
+        assert sqldb._add_obs_info(cur, test_tdms_obj[2], 3, tdms_idx)
+    cur.execute(dml.get_last_dew_point.format(3))
+    assert cur.fetchall()[0][0] == Decimal('270.20')
 
     # ------------------------------------------------------------------------
     # File 4
     for tdms_idx in range(
             len(test_tdms_obj[3].object("Data", "Idx").data)
             ):
-        assert sqldb._add_obs_info(cursor, test_tdms_obj[3], 4, tdms_idx)
-    cursor.execute(dml.get_last_dew_point.format(4))
-    assert cursor.fetchall()[0][0] == Decimal('270.32')
+        assert sqldb._add_obs_info(cur, test_tdms_obj[3], 4, tdms_idx)
+    cur.execute(dml.get_last_dew_point.format(4))
+    assert cur.fetchall()[0][0] == Decimal('270.32')
 
 
-def test__add_temp_info(cursor, test_tdms_obj):
+def test__add_temp_info(cur, test_tdms_obj):
     """Test _add_temp_info."""
     # ------------------------------------------------------------------------
     # File 1
 
     # Add temps with tdms_idx 7 and Idx 8
     assert sqldb._add_temp_info(
-        cursor, test_tdms_obj[0], 1, TEST_INDEX, TEST_INDEX+1
+        cur, test_tdms_obj[0], 1, TEST_INDEX, TEST_INDEX+1
         )
     # Now query these with the TestId and Idx
-    cursor.execute(
+    cur.execute(
         dml.get_temp_obs.format(1, TEST_INDEX+1)
         )
-    res = [float(r[0]) for r in cursor.fetchall()]
+    res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_1
 
     # ------------------------------------------------------------------------
     # File 2
     assert sqldb._add_temp_info(
-        cursor, test_tdms_obj[1], 2, TEST_INDEX, TEST_INDEX
+        cur, test_tdms_obj[1], 2, TEST_INDEX, TEST_INDEX
         )
-    cursor.execute(
+    cur.execute(
         dml.get_temp_obs.format(2, TEST_INDEX)
         )
-    res = [float(r[0]) for r in cursor.fetchall()]
+    res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_2
 
     # ------------------------------------------------------------------------
     # File 3
     assert sqldb._add_temp_info(
-        cursor, test_tdms_obj[2], 3, TEST_INDEX, TEST_INDEX+1
+        cur, test_tdms_obj[2], 3, TEST_INDEX, TEST_INDEX+1
         )
-    cursor.execute(
+    cur.execute(
         dml.get_temp_obs.format(3, TEST_INDEX+1)
         )
-    res = [float(r[0]) for r in cursor.fetchall()]
+    res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_3
 
     # ------------------------------------------------------------------------
     # File 4
     assert sqldb._add_temp_info(
-        cursor, test_tdms_obj[3], 4, TEST_INDEX, TEST_INDEX+1
+        cur, test_tdms_obj[3], 4, TEST_INDEX, TEST_INDEX+1
         )
-    cursor.execute(
+    cur.execute(
         dml.get_temp_obs.format(4, TEST_INDEX+1)
         )
-    res = [float(r[0]) for r in cursor.fetchall()]
+    res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_4
 
 
-def test_add_tdms_file(cursor, test_tdms_obj):
+def test_add_tdms_file(cnx, cur, test_tdms_obj):
     """
     Test add_tdms_file.
 
@@ -509,96 +542,113 @@ def test_add_tdms_file(cursor, test_tdms_obj):
     """
     # ------------------------------------------------------------------------
     # Clear all of the previous work we have done in the database
-    truncate(cursor, 'TempObservation')
-    truncate(cursor, 'Observation')
-    truncate(cursor, 'Test')
-    truncate(cursor, 'Setting')
+    truncate(cur, 'TempObservation')
+    truncate(cur, 'Observation')
+    truncate(cur, 'Test')
+    truncate(cur, 'Setting')
+    # assert cnx.in_transaction
+    # cnx.commit()
+    assert not cnx.in_transaction
 
     # ------------------------------------------------------------------------
     # File 1
-    assert sqldb.add_tdms_file(cursor, test_tdms_obj[0])
+    assert sqldb.add_tdms_file(cnx, test_tdms_obj[0])
     # Verify the data in the 'Setting' table:
-    cursor.execute('SELECT * FROM Setting WHERE SettingID=1;')
-    assert cursor.fetchall() == TDMS_01_ADD_SETTING
+    cur.execute('SELECT * FROM Setting WHERE SettingID=1;')
+    assert cur.fetchall() == TDMS_01_ADD_SETTING
     # Verify the data in the 'Test' table:
-    cursor.execute('SELECT * FROM Test WHERE TestID=1;')
-    assert cursor.fetchall() == TDMS_01_ADD_TEST
+    cur.execute('SELECT * FROM Test WHERE TestID=1;')
+    assert cur.fetchall() == TDMS_01_ADD_TEST
     # Verify the data in the `Observation` table:
-    cursor.execute(dml.get_obs_data_m.format(1, TEST_INDEX))
-    res = cursor.fetchall()[0]
+    cur.execute(dml.get_obs_data_m.format(1, TEST_INDEX))
+    res = cur.fetchall()[0]
     for i in range(len(res)):
         assert isclose(res[i], OBS_DATA_1[i])
     # Verify the data in the 'TempObservation` table:
-    cursor.execute(dml.get_temp_obs_data.format(1, TEST_INDEX, TEST_INDEX))
-    res = cursor.fetchall()[0][0]
+    cur.execute(dml.get_temp_obs_data.format(1, TEST_INDEX, TEST_INDEX))
+    res = cur.fetchall()[0][0]
     assert isclose(res, 284.69)
+    # Commit transaction before next test
+    assert cnx.in_transaction
+    cnx.commit()
+    assert not cnx.in_transaction
 
     # ------------------------------------------------------------------------
     # File 2
-    assert sqldb.add_tdms_file(cursor, test_tdms_obj[1])
+    assert sqldb.add_tdms_file(cnx, test_tdms_obj[1])
     # Verify the data in the 'Setting' table:
-    cursor.execute('SELECT * FROM Setting WHERE SettingID=2;')
-    assert cursor.fetchall() == TDMS_02_ADD_SETTING
+    cur.execute('SELECT * FROM Setting WHERE SettingID=2;')
+    assert cur.fetchall() == TDMS_02_ADD_SETTING
     # Verify the data in the 'Test' table:
-    cursor.execute('SELECT * FROM Test WHERE TestID=2;')
-    assert cursor.fetchall() == TDMS_02_ADD_TEST
+    cur.execute('SELECT * FROM Test WHERE TestID=2;')
+    assert cur.fetchall() == TDMS_02_ADD_TEST
     # Verify the data in the `Observation` table:
-    cursor.execute(dml.get_obs_data_m.format(2, TEST_INDEX))
-    res = cursor.fetchall()[0]
+    cur.execute(dml.get_obs_data_m.format(2, TEST_INDEX))
+    res = cur.fetchall()[0]
     for i in range(len(res)):
         assert isclose(res[i], OBS_DATA_2[i])
     # Verify the data in the 'TempObservation` table:
-    cursor.execute(dml.get_temp_obs_data.format(2, TEST_INDEX, TEST_INDEX))
-    res = cursor.fetchall()[0][0]
+    cur.execute(dml.get_temp_obs_data.format(2, TEST_INDEX, TEST_INDEX))
+    res = cur.fetchall()[0][0]
     assert isclose(res, 283.55)
+    # Commit transaction before next test
+    assert cnx.in_transaction
+    cnx.commit()
+    assert not cnx.in_transaction
 
     # ------------------------------------------------------------------------
     # File 3
-    assert sqldb.add_tdms_file(cursor, test_tdms_obj[2])
+    assert sqldb.add_tdms_file(cnx, test_tdms_obj[2])
     # Verify the data in the 'Setting' table:
-    cursor.execute('SELECT * FROM Setting WHERE SettingID=3;')
-    assert cursor.fetchall() == TDMS_03_ADD_SETTING
+    cur.execute('SELECT * FROM Setting WHERE SettingID=3;')
+    assert cur.fetchall() == TDMS_03_ADD_SETTING
     # Verify the data in the 'Test' table:
-    cursor.execute('SELECT * FROM Test WHERE TestID=3;')
-    assert cursor.fetchall() == TDMS_03_ADD_TEST
+    cur.execute('SELECT * FROM Test WHERE TestID=3;')
+    assert cur.fetchall() == TDMS_03_ADD_TEST
     # Verify the data in the `Observation` table:
-    cursor.execute(dml.get_obs_data_t.format(3, TEST_INDEX))
-    res = cursor.fetchall()[0]
+    cur.execute(dml.get_obs_data_t.format(3, TEST_INDEX))
+    res = cur.fetchall()[0]
     for i in range(len(res)):
         assert isclose(res[i], OBS_DATA_3[i])
     # Verify the data in the 'TempObservation` table:
-    cursor.execute(dml.get_temp_obs_data.format(3, TEST_INDEX, TEST_INDEX))
-    res = cursor.fetchall()[0][0]
+    cur.execute(dml.get_temp_obs_data.format(3, TEST_INDEX, TEST_INDEX))
+    res = cur.fetchall()[0][0]
     assert isclose(res, 282.45)
+    # Commit transaction before next test
+    assert cnx.in_transaction
+    cnx.commit()
+    assert not cnx.in_transaction
 
     # ------------------------------------------------------------------------
     # File 4
-    assert sqldb.add_tdms_file(cursor, test_tdms_obj[3])
+    assert sqldb.add_tdms_file(cnx, test_tdms_obj[3])
     # Verify the data in the 'Setting' table:
-    cursor.execute('SELECT * FROM Setting WHERE SettingID=2;')
-    assert cursor.fetchall() == TDMS_02_ADD_SETTING
+    cur.execute('SELECT * FROM Setting WHERE SettingID=2;')
+    assert cur.fetchall() == TDMS_02_ADD_SETTING
     # Verify the data in the 'Test' table:
-    cursor.execute('SELECT * FROM Test WHERE TestID=4;')
-    assert cursor.fetchall() == TDMS_04_ADD_TEST
+    cur.execute('SELECT * FROM Test WHERE TestID=4;')
+    assert cur.fetchall() == TDMS_04_ADD_TEST
     # Verify the data in the `Observation` table:
-    cursor.execute(dml.get_obs_data_t.format(4, TEST_INDEX))
-    res = cursor.fetchall()[0]
+    cur.execute(dml.get_obs_data_t.format(4, TEST_INDEX))
+    res = cur.fetchall()[0]
     for i in range(len(res)):
         assert isclose(res[i], OBS_DATA_4[i])
     # Verify the data in the 'TempObservation` table:
-    cursor.execute(dml.get_temp_obs_data.format(4, TEST_INDEX, TEST_INDEX))
-    res = cursor.fetchall()[0][0]
+    cur.execute(dml.get_temp_obs_data.format(4, TEST_INDEX, TEST_INDEX))
+    res = cur.fetchall()[0][0]
     assert isclose(res, 282.28)
+    # Commit transaction before next test
+    assert cnx.in_transaction
+    cnx.commit()
+    assert not cnx.in_transaction
 
 
 def drop_tables(cursor, bol):
-    """Drop databese tables if bol is true."""
-    if bol:
-        print("Dropping tables...")
-        cursor.execute("DROP TABLE IF EXISTS " +
-                       ", ".join(ddl.table_name_list) + ";")
-    else:
-        print("Tables not dropped.")
+    """Drop databese tables."""
+    print("Dropping tables...")
+    cursor.execute("DROP TABLE IF EXISTS " +
+                   ", ".join(ddl.table_name_list) +
+                   ";")
 
 
 def truncate(cursor, table):
