@@ -37,7 +37,7 @@ def get_t_data(tdms_obj):
     # Gets the temperature data of the thermocouples
     # measureing chamber temperature
     t_data = array([tdms_obj.object(
-        "Data", "TC{}".format(cpl_idx)).data for cpl_idx in range(4,14)])
+        "Data", "TC{}".format(cpl_idx)).data for cpl_idx in range(4, 14)])
     return t_data
 
 
@@ -65,7 +65,7 @@ def plot_mass(m_data):
 
 def plot_rh_t_dp(rh_data, t_dp_data):
     # Plots Relative Humidity vs time and Dew Point vs time
-    
+
     # Mass vs. time plot
     fig, ax1 = plt.subplots()
     ax1.plot(t_dp_data, 'r', label='Dew Point Data')
