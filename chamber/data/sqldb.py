@@ -225,7 +225,8 @@ def _get_setting_info(tdms_obj):
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
     >>> get_setting_info(tdms_file)
-    {'Duty': '5.0', 'Pressure': 100000, 'Temperature': 285}
+    {'Reservoir': 0, 'Duty': '0.0', 'IsMass': 0, 'Temperature': 290,
+    'Pressure': 100000, 'TubeId': 1}
 
     """
     # ------------------------------------------------------------------------
@@ -246,9 +247,21 @@ def _get_setting_info(tdms_obj):
     rounded_pressure = 5000*round(float(pressure)/5000)
 
     # ------------------------------------------------------------------------
+    # Read IsMass
+    is_mass = int(tdms_obj.object('Settings', 'IsMass').data[0])
+
+    # ------------------------------------------------------------------------
+    # Read Reservoir
+    reservoir = int(tdms_obj.object('Settings', 'Reservoir').data[0])
+
+    # ------------------------------------------------------------------------
+    # Read TubeId
+    tube_id = int(tdms_obj.object('Settings', 'TubeID').data[0])
+
+    # ------------------------------------------------------------------------
     # Construct dictionary to return
     setting_info = dict(
-        Duty=rounded_duty, Pressure=rounded_pressure, Temperature=rounded_temp
+        Duty=rounded_duty, IsMass=is_mass, Pressure=rounded_pressure, Reservoir=reservoir, Temperature=rounded_temp, TubeId=tube_id
         )
 
     return setting_info
@@ -390,9 +403,8 @@ def _get_test_info(tdms_obj):
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
     >>> get_test_info(tdms_file)
-    {'Description': 'description', 'TimeStep': 1, 'IsMass': 1, 'Author':
-    'RHI', 'DateTime': datetime.datetime(2018, 1, 29, 17, 54, 12), 'TubeId':
-    1}
+    {'Description': 'description', 'TimeStep': 1, 'Author': 'RHI', 'DateTime':
+    datetime.datetime(2018, 1, 29, 17, 54, 12)}
 
     """
     # ------------------------------------------------------------------------
@@ -405,9 +417,7 @@ def _get_test_info(tdms_obj):
             .replace(microsecond=0).replace(tzinfo=None)
             ),
         Description='',
-        IsMass=int(tdms_obj.object("Settings", "IsMass").data[0]),
         TimeStep=int(tdms_obj.object("Settings", "TimeStep").data[0]),
-        TubeID=int(tdms_obj.object("Settings", "TubeID").data[0])
         )
 
     # ------------------------------------------------------------------------
