@@ -4,21 +4,6 @@ import os
 
 
 # Constants for test_sqldb.py
-CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'test_01.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'tdms_test_folder',
-                                               'test_02.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'test_03.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'tdms_test_folder',
-                                               'tdms_test_folder_full',
-                                               'test_04.tdms')]
 
 INCORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
                                                  'data_transfer_test_files',
