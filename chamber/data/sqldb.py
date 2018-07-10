@@ -3,14 +3,12 @@ MySQL and TDMS Integration.
 
 Functions
 ---------
-    add_tdms_file
-    add_tube_info
-    connect
-    create_tables
+- `add_tdms_file` -- Insert tdms files into the MySQL database.
+- `add_tube_info` -- Add test-independant Tube information.
+- `connect` -- Get a connection and cursor to a MySQL database.
+- `create_tables` -- Create tables in the database.
 
-To Do
------
-    Decouple database and tdms volatility via modulde encapsulation.
+.. todo:: Decouple database and tdms volatility via modulde encapsulation.
 """
 import configparser
 import re
@@ -479,9 +477,7 @@ def _test_exists(cur, test_info):
     >>> _test_exists(cur, test_info)
     False
 
-    Todo
-    ----
-    Raise exception rather than print message.
+    .. todo:: Raise exception rather than print message.
 
     """
     # ------------------------------------------------------------------------
