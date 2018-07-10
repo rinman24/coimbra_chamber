@@ -51,7 +51,8 @@ def meshgrid_pol2cart(r_grid, phi_grid):
 
 
 def get_db_data(test_id):
-    """Connect to database and gets mass and relative humidity data.
+    """
+    Connect to database and gets mass and relative humidity data.
 
     Creates a connection to the chamber MySql database and gets the mass and
     calculated relative humidity data using CoolProp.
@@ -63,9 +64,9 @@ def get_db_data(test_id):
 
     Returns
     -------
-    mass : list of floats
+    list(floats)
         List of mass data pertaining to the TestID.
-    rel_hum: list of floats
+    list(floats)
         List of calculated relative humidity data pertaining to the TestID.
     """
     cnx = sqldb.connect_sqldb('test_chamber')
@@ -82,7 +83,8 @@ def get_db_data(test_id):
 
 
 def get_hum_index(rel_hum):
-    """Finds the indicies of relative humidities that are multiples of 10%.
+    """
+    Finds the indicies of relative humidities that are multiples of 10%.
 
     Searches the full list of relative humidities rel_hum and returns the
     indicies where the relative humidity is a multiple of 10%.
@@ -94,7 +96,7 @@ def get_hum_index(rel_hum):
 
     Returns
     -------
-    hum_index : list
+    list(int)
         List of indicies where the relative humidity is a multiple of 10% in
         rel_hum.
     """

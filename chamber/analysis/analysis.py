@@ -4,9 +4,18 @@ Analysis of test results.
 Description to come, see:
 http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 
-Note: This could actually be a class that extends DataFrame. In this case,
+Notes
+-----
+This could actually be a class that extends DataFrame. In this case,
 the module level functions would become methods of the class. But for now,
 the following implementation will allow futher development.
+
+Functions
+---------
+- `analysis` -- perform analysis on the experimental data.
+- `preprocess` -- ready a `DataFrame` for analysis.
+- `results_from_csv` -- get analysis results from a .csv file.
+
 """
 import math
 
@@ -40,8 +49,39 @@ def results_from_csv(
     """
     Get results from csv.
 
-    Open a csv file, preprocesses the data, perform the chi-square regression,
-    and return the data and results in separate `DataFrames`.
+    This function opens a csv file, preprocesses the data, performs the
+    chi-square regression, and returns the data and results in separate
+    `DataFrames`.
+
+    Parameters
+    ----------
+    filepath : str, pathlib.Path, py._path.local.LocalPath or any \
+        object with a read() method
+        The filepath to a csv file.
+    purge : bool
+        If `True` the original, unpreprocessed data is removed from the
+        preprocessed `DataFrame`. If `False` the unpreprocessed data remains in
+        the preprocessed 'DataFrame'. Defaults to `False`.
+    param_list : list(str)
+        List of parameters to use to calculate the relative humidity using the
+        CoolProp API, see `_get_coolprop_rh` docstring for more detail.
+        Defaults to: `['PressureSmooth', 'TeSmooth', 'DewPointSmooth']`.
+    sigma : float
+        Standard deviation of mass measurement. Defaults to 4e-8 accoriding to
+        the spec sheet.
+    steps : int
+        Steps to increase the `half_length`.
+
+    Returns
+    -------
+    (DataFrame, DataFrame)
+        A tuple of a `DataFrame` containing the preprocessed experimental data
+        and a second `DataFrame` containing the chi-square analysis results.
+
+    Examples
+    --------
+    .. todo:: Examples.
+
     """
     dataframe = pd.read_csv(filepath)
     dataframe = preprocess(dataframe, param_list=param_list, purge=purge)
@@ -55,7 +95,35 @@ def preprocess(
         param_list=['PressureSmooth', 'TeSmooth', 'DewPointSmooth'],
         purge=False
         ):
-    """Call all of the helper functions to preprocess the `DataFrame`."""
+    """
+    Readies a `DataFrame` for further analysis.
+
+    This function takes in a `DataFrame` and calls all of the module helper
+    functions to produce a `DataFrame` that is ready for analysis.
+
+    Parameters
+    ----------
+    dataframe: DataFrame
+        A `DataFrame` of experimental data to be preprocessed.
+    param_list: list(str)
+        List of parameters to use to calculate the relative humidity using the
+        CoolProp API, see `_get_coolprop_rh` docstring for more detail.
+        Defaults to: `['PressureSmooth', 'TeSmooth', 'DewPointSmooth']`.
+    purge: bool
+        If `True` the original, unpreprocessed data is removed from the
+        returned `DataFrame`. If `False` the unpreprocessed data remains in the
+        'DataFrame'. Defaults to `False`.
+
+    Returns
+    -------
+    DataFrame
+        The preprocessed data.
+
+    Examples
+    --------
+    .. todo:: Examples.
+
+    """
     dataframe = _zero_time(dataframe)
 
     dataframe = _format_temp(dataframe)
@@ -83,22 +151,32 @@ def analysis(dataframe, sigma=4e-8, steps=100, plot=False):
     RH occurs, generates windows up to `max_half_length`, performs analysis
     on each window, and returns the results.
 
-    Args:
-        dataframe (DataFrame): Processed experimental data.
-        sigma (float): Standard deviation of mass measurement. Defaults to
-            4e-8 accoriding to the spec sheet.
-        steps (int): Steps to increase the `half_length`.
+    Parameters
+    ----------
+    dataframe:  DataFrame
+        Processed experimental data.
+    sigma: float
+        Standard deviation of mass measurement. Defaults to 4e-8 accoriding to
+        the spec sheet.
+    steps: int
+        Steps to increase the `half_length`.
 
-    Returns:
-        DataFrame: Results of the analysis of the test. Attributes include:
-            - `a`: y-intercept
-            - `sig_a`: standard deviation of `a`
-            - `b`: slope (mass-transfer)
-            - `b_sig`: standard deviation of `b`
-            - `chi_2`: chi-square metric
-            - `Q`: goodness of fit score (survival function)
-            - `nu`: degrees of freedom
-            - `RH`: target relative humidity
+    Returns
+    -------
+    DataFrame
+        Results of the analysis of the test. Attributes include:
+        - `a`: y-intercept
+        - `sig_a`: standard deviation of `a`
+        - `b`: slope (mass-transfer)
+        - `b_sig`: standard deviation of `b`
+        - `chi_2`: chi-square metric
+        - `Q`: goodness of fit score (survival function)
+        - `nu`: degrees of freedom
+        - `RH`: target relative humidity
+
+    Examples
+    --------
+    .. todo:: Examples.
 
     """
     rh_targets = _get_valid_rh_targets(dataframe)
@@ -177,19 +255,24 @@ def _add_avg_te(dataframe, purge=False):
     Add `Te` attribute to the `DataFrame` that is an average of all other
     thermocouple attributes. Operation is performed in place.
 
-    thermocouple attributes:
+    thermocouple attributes
+    -----------------------
         `TC4`, `TC5`, `TC6`, `TC7`, `TC8`, `TC9`, `TC10`, `TC11`, `TC12`,
         `TC13`
 
-    Args:
-        dataframe (DataFrame): Experimental data containing TC4-TC13
-            attributes.
-        purge (bool): If `True` delete TC4-TC13 attributes from
-           `DataFrame` in place. Defaults to `False`.
+    Parameters
+    ----------
+    dataframe: DataFrame
+        Experimental data containing TC4-TC13 attributes.
+    purge: bool
+        If `True` delete TC4-TC13 attributes from `DataFrame` in place.
+        Defaults to `False`.
 
-    Returns:
-        DataFrame: Transformed `DataFrame` containing a new `Te` attribute.
-            If `purge == True` then TC4-TC13 will have been dropped.
+    Returns
+    -------
+    DataFrame:
+        Tansformed `DataFrame` containing a new `Te` attribute.
+        If `purge == True` then TC4-TC13 will have been dropped.
 
     """
     dataframe['Te'] = dataframe.loc[:, TC_LIST].apply(np.mean, axis=1).round(1)
@@ -208,14 +291,19 @@ def _add_smooth_avg_te(dataframe, purge=False):
     Add `TeSmooth` attribute to the `DataFrame`. Operation is performed
     in place.
 
-    Args:
-        dataframe (DataFrame): Experimental data containing `Te` attribute.
-        purge (bool): If `True` delete `Te` attributes from
-           `DataFrame` in place. Defaults to `False`.
+    Parameters
+    ----------
+    dataframe: DataFrame
+        Experimental data containing `Te` attribute.
+    purge: bool
+        If `True` delete `Te` attributes from `DataFrame` in place.
+        Defaults to `False`.
 
-    Returns:
-        DataFrame: Transformed `DataFrame` containing a new `TeSmooth`
-            attribute. If `purge == True` then `Te` attribute was dropped.
+    Returns
+    -------
+    DataFrame
+        Transformed `DataFrame` containing a new `TeSmooth` attribute.
+        If `purge == True` then `Te` attribute was dropped.
 
     """
     dataframe['TeSmooth'] = signal.savgol_filter(
@@ -234,16 +322,19 @@ def _add_smooth_dew_point(dataframe, purge=False):
     Add `DewPointSmooth` attribute to the `DataFrame`. Operation is performed
     in place.
 
-    Args:
-        dataframe (DataFrame): Experimental data containing `DewPoint`
-            attribute.
-        purge (bool): If `True` delete `DewPoint` attributes from `DataFrame``
-            in place. Defaults to `False`.
+    Parameters
+    ----------
+    dataframe: DataFrame
+        Experimental data containing `DewPoint` attribute.
+    purge: bool
+        If `True` delete `DewPoint` attributes from `DataFrame` in place.
+        Defaults to `False`.
 
-    Returns:
-        DataFrame: Transformed `DataFrame` containing a new `DewPointSmooth`
-            attribute. If `purge == True` then `DewPoint`attribute was
-            dropped.
+    Returns
+    -------
+    DataFrame
+        Transformed `DataFrame` containing a new `DewPointSmooth` attribute.
+        If `purge == True` then `DewPoint`attribute was dropped.
 
     """
     dataframe['DewPointSmooth'] = signal.savgol_filter(
@@ -262,16 +353,19 @@ def _add_smooth_pressure(dataframe, purge=False):
     Add `PressureSmooth` attribute to the `DataFrame`. Operation is performed
     in place.
 
-    Args:
-        dataframe (DataFrame): Experimental data containing `Pressure`
-            attribute.
-        purge (bool): If `True` delete `Pressure` attributes from `DataFrame`
-            in place. Defaults to `False`.
+    Parameters
+    ----------
+    dataframe: DataFrame
+        Experimental data containing `Pressure` attribute.
+    purge: bool
+        If `True` delete `Pressure` attributes from `DataFrame` in place.
+        Defaults to `False`.
 
-    Returns:
-        DataFrame: Transformed `DataFrame` containing a new `DewPointSmooth`
-            attribute. If `purge == True` then `DewPoint` attribute was
-            dropped.
+    Returns
+    -------
+    DataFrame
+        Transformed `DataFrame` containing a new `DewPointSmooth` attribute.
+        If `purge == True` then `DewPoint` attribute was dropped.
 
     """
     dataframe['PressureSmooth'] = signal.savgol_filter(
@@ -297,14 +391,17 @@ def _get_coolprop_rh(params):
     This allows the use of pandas.DataFrame.apply(_get_rh, axis=1) which is
     more readable.
 
-    Args:
-        params (list): A list of at least three elements where the first,
-            second, and third elements are the values of pressure (Pa),
-            temperature (K), and dew-point (K) respectively.
+    Parameters
+    ----------
+    params: list(float)
+        A list of at least three elements where the first, second, and third
+        elements are the values of pressure (Pa), temperature (K),
+        and dew-point (K) respectively.
 
-    Returns:
-        float: Dimensionless relative humidity as specified by the `param`
-            input list.
+    Returns
+    -------
+    float
+        Dimensionless relative humidity as specified by the `param` input list.
 
     """
     pressure = params[0]
@@ -325,23 +422,26 @@ def _add_rh(
     uses the `_get_coolprop_rh` wrapper for the CoolProp.HumidAirProp.HAPropsSI
     API in Python.
 
-    Args:
-        dataframe (DataFrame): Experimental data containing (by default)
-            `PressureSmooth`, `TeSmooth`, and `DewPointSmooth` attributes.
-            This behavior can be modified using the optional `param_list`
-            parameter, see below.
-        param_list (list): List of parameters to use to calculate the
-            relative humidity using the CoolProp API, see `_get_coolprop_rh`
-            docstring for more detail.
-        purge (bool): If `True` delete the third element from the
-            `param_list`. This third element (index = 2) represents the
-            dew-point. It could be `DewPoint`, `DewPointSmooth`, etc.
-            Defaults to `False`.
+    Parameters
+    ----------
+    dataframe: DataFrame
+        Experimental data containing (by default) `PressureSmooth`, `TeSmooth`,
+        and `DewPointSmooth` attributes. This behavior can be modified using
+        the optional `param_list` parameter, see below.
+    param_list: list(str)
+        List of parameters to use to calculate the relative humidity using the
+        CoolProp API, see `_get_coolprop_rh` docstring for more detail.
+    purge: bool
+        If `True` delete the third element from the `param_list`. This third
+        element (index = 2) represents the dew-point. It could be `DewPoint`,
+        `DewPointSmooth`, etc. Defaults to `False`.
 
-    Returns:
-        DataFrame: Transformed `DataFrame` containing a new `RH` attribute.
-            If `purge == True` then the attribute representing the dew-point
-            was dropped.
+    Returns
+    -------
+    DataFrame
+        Transformed `DataFrame` containing a new `RH` attribute.
+        If `purge == True` then the attribute representing the dew-point
+        was dropped.
 
     """
     dataframe['RH'] = (
@@ -364,25 +464,32 @@ def _get_max_half_len(dataframe, target_idx, max_=10000):
     to extract a sample of 2*half-length + 1 data points centered at the
     target index.
 
-    Args:
-        dataframe (DataFrame): Experimental data. The DataFrame is only used
-            to determine the number of elements it contains. The dataframe is
-            input rather than its length explicitly to increase readability
-            and code consistancy. Other much more substantial bottlenecks exist
-            in this module; for example, the adding relative humidity.
-        target_idx (int): Index in the dataframe that corresponds to the
-            relative humidity. When the time-step is one second, the `Idx`
-            attribute and the DataFrame.index will be the same, however, this
-            is not always the case. Because the sampling rate may change, the
-            decision is made to make the DataFrame.index the standard, unless
-            regression analysis is being performed.
+    Parameters
+    ----------
+    dataframe: DataFrame
+        Experimental data. The DataFrame is only used to determine the number
+        of elements it contains. The dataframe is input rather than its length
+        explicitly to increase readability and code consistancy. Other much
+        more substantial bottlenecks exist in this module; for example,
+        the adding relative humidity.
+    target_idx: int
+        Index in the dataframe that corresponds to the relative humidity.
+        When the time-step is one second, the `Idx` attribute and the
+        DataFrame.index will be the same, however, this is not always the case.
+        Because the sampling rate may change, the decision is made to make the
+        DataFrame.index the standard, unless regression analysis is being
+        performed.
 
-    Returns:
-        int: maximum half window length
+    Returns
+    -------
+    int
+        Maximum half window length.
 
-    Raises:
-        IndexError: If calculated `max_half_length is zero or negative. This
-            occurs when the `target_idx` is negative, zero, >= len(DataFrame).
+    Raises
+    ------
+    IndexError
+        If calculated `max_half_length is zero or negative. This occurs when
+        the `target_idx` is negative, zero, >= len(DataFrame).
 
     """
     to_the_right = (len(dataframe)-1) - target_idx
@@ -416,14 +523,17 @@ def _get_target_idx(dataframe, target_rh):
     observed RH is less than the target. As a result, the function looks
     for a minimum positive value.
 
-    Args:
-        dataframe (DataFrame): Experimental data containing `RH`
-            attribute.
-        target_rh (float): Dimensionless relative humidity, typically
-            between zero and one.
+    Parameters
+    ----------
+    dataframe: DataFrame
+        Experimental data containing `RH` attribute.
+    target_rh: float
+        Dimensionless relative humidity, typically between zero and one.
 
-    Returns:
-        int: The DataFrame.index coresponding to the earliert time the
+    Returns
+    -------
+    int
+        The DataFrame.index coresponding to the earliert time the
         observed dimensionless relative humidity obtained the value
         before it exceeded or equaled the target.
 
@@ -445,23 +555,29 @@ def _get_stat_group(dataframe, target_idx, half_len):
     returns a copy of the data for statistical analysis so that there is no
     risk of contamination durring analysis.
 
-    NOTE: This method employs pandas.DataFrame.loc[], which is inclusive
+    Notes
+    -----
+        This method employs pandas.DataFrame.loc[], which is inclusive
         unline python's list indexing.
 
-    Args:
-        dataframe (DataFrame): Experimental data containing `Idx` and
-            `Mass` attributes.
-        target_idx (int): Index in the dataframe that corresponds to the
-            relative humidity. When the time-step is one second, the `Idx`
-            attribute and the DataFrame.index will be the same, however, this
-            is not always the case. Because the sampling rate may change, the
-            decision is made to make the DataFrame.index the standard, unless
-            regression analysis is being performed.
-        half_len (int): The number of elements to select on either side of
-            the target index.
+    Parameters
+    ----------
+    dataframe: DataFrame
+        Experimental data containing `Idx` and `Mass` attributes.
+    target_idx: int
+        Index in the dataframe that corresponds to the relative humidity.
+        When the time-step is one second, the `Idx` attribute and the
+        DataFrame.index will be the same, however, this is not always the case.
+        Because the sampling rate may change, the decision is made to make the
+        DataFrame.index the standard, unless regression analysis is being
+        performed.
+    half_len: int
+        The number of elements to select on either side of the target index.
 
-    Returns:
-        list: List of length 2. The first element (index 0) is a copy of
+    Returns
+    -------
+    list
+        List of length 2. The first element (index 0) is a copy of
         the `Idx` attribute of the `DataFrame` for analysis. The second
         element (index 1) is a copy of the `Mass` attribute of the `DataFrame`
         for analysis.
@@ -478,13 +594,18 @@ def _get_valid_rh_targets(dataframe, rh_step_pct=5):
     """
     Use the dataframe to return a list of valid RH values for analysis.
 
-    Args:
-        dataframe (DataFrame): Experimental data containing `RH` attribute.
-        rh_ste_pct (int): Size of RH steps in percent. Defaults to 5.
+    Parameters
+    ----------
+    dataframe: DataFrame
+        Experimental data containing `RH` attribute.
+    rh_ste_pct: int
+        Size of RH steps in percent. Defaults to 5.
 
-    Returns:
-        list: List of all the valid relative humidity targets for the given
-            `DataFrame`.
+    Returns
+    -------
+    list
+        List of all the valid relative humidity targets for the given
+        `DataFrame`.
 
     """
     # Multipy by 100 to get into percent
@@ -510,12 +631,15 @@ def _half_len_gen(dataframe, target_idx, steps=100):
     Progressively increase the the `half_length` until you exceed the maximum
     half length as specified by `_get_max_half_len()`.
 
-    Args:
-        dataframe (DataFrame): Experimental data required for
-            `_get_max_half_length()`.
+    Parameters
+    ----------
+    dataframe: DataFrame
+        Experimental data required for `_get_max_half_length()`.
 
-    Yields:
-        int: The next `half_lenth` to be used to grab data.
+    Yeilds
+    -------
+    int
+        The next `half_lenth` to be used to grab data.
 
     """
     max_half_len = _get_max_half_len(dataframe, target_idx)

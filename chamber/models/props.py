@@ -9,34 +9,39 @@ in Pa, dry bulb temperature `t` in K, and dew point `t_dp` in K.
 Attributes
 ----------
     M1 : float
-        Molecular weight of H:math:`_2`O (species-1) in kg/kmol.
+        Molecular weight of H\\ :sub:`2`\\ O (species-1) in kg/kmol.
     M2 : float
         Molecular weight of dry-air (species-2) in kg/kmol.
 
 Functions
 ---------
-    get_c_pm
-    get_c_pm_sat
-    get_rho_m
-    get_rho_m_sat
-    get_k_m
-    get_k_m_sat
-    get_alpha_m
-    get_alpha_m_sat
-    get_d_12
-    get_x_1
-    get_x_1_sat
-    get_m_1
-    get_m_1_sat
-    get_h_fg
-    x1_2_m1
-    get_mu
-    get_c_pl
-    get_rh
-    get_tdp
-    get_mol_wgt
-    get_gamma
-    get_beta_m1
+- `get_alpha_m` -- get the thermal diffusivity of the vapor mixture.
+- `get_alpha_m_sat` -- get the thermal diffusivity of the saturated vapor \
+    mixture.
+- `get_beta_m1` -- get the mass transfer rate coefficient of the stefan tube \
+    system.
+- `get_c_pl` -- get the specific heat of pure liquid water.
+- `get_c_pm` -- get the specific heat of the vapor mixture.
+- `get_c_pm_sat` -- get the specific heat of the saturated vapor mixture.
+- `get_d_12` -- get the binary species diffusivity of the vapor mixture.
+- `get_gamma` -- get the coefficient of volumetric expansion of the vapor \
+    mixture.
+- `get_h_fg_sat` -- get the specific enthalpy of vaporization for pure water.
+- `get_k_m` -- get the thermal conductivity of the vapor mixture.
+- `get_k_m_sat` -- get the thermal conductivity of the saturated vapor mixture.
+- `get_m_1` -- get the mass fraction of water vapor in the vapor mixture.
+- `get_m_1_sat` -- get the mass fraction of water vapor in the saturated \
+    vapor mixture.
+- `get_mol_wgt` -- get the molar mass of the vapor mixture.
+- `get_mu` -- get the dynamic viscocity of the vapor mixture.
+- `get_rh` -- get the relative humidity of the vapor liquid mixture.
+- `get_rho_m` -- get the specific mass of the vapor mixture.
+- `get_rho_m_sat` -- get the specific mass of the saturated vapor mixture.
+- `get_tdp` -- get the dew point temperature of the vapor mixture.
+- `get_x_1` -- get the mole fraction of water vapor in mixture.
+- `get_x_1_sat` -- get the mole fraction of water vapor in the saturated \
+    mixture.
+- `x1_2_m1` -- convert the mole fraction to mass fraction.
 
 .. _CoolProp package:
    http://www.coolprop.org/
@@ -56,7 +61,7 @@ M2 = 28.964
 
 def get_c_pm(p, t, t_dp):
     """
-    Get specific heat of vapor mixture.
+    Get the specific heat of th evapor mixture.
 
     Parameters
     ----------
@@ -87,7 +92,7 @@ def get_c_pm(p, t, t_dp):
 
 def get_c_pm_sat(p, t_s):
     """
-    Get specific heat of saturated vapor mixture.
+    Get the specific heat of the saturated vapor mixture.
 
     Parameters
     ----------
@@ -114,8 +119,8 @@ def get_c_pm_sat(p, t_s):
 
 
 def get_rho_m(p, t, t_dp):
-    """
-    Get specific mass of vapor mixture.
+    r"""
+    Get the specific mass of the vapor mixture.
 
     Parameters
     ----------
@@ -129,7 +134,7 @@ def get_rho_m(p, t, t_dp):
     Returns
     -------
     float
-        The specific mass of the vapor mixture in kg/m:math:`^3`.
+        The specific mass of the vapor mixture in kg/m\ :sup:`3`.
 
     Examples
     --------
@@ -146,8 +151,8 @@ def get_rho_m(p, t, t_dp):
 
 
 def get_rho_m_sat(p, t_s):
-    """
-    Get specific mass of saturated vapor mixture.
+    r"""
+    Get the specific mass of the saturated vapor mixture.
 
     Parameters
     ----------
@@ -159,7 +164,7 @@ def get_rho_m_sat(p, t_s):
     Returns
     -------
     float
-        The specific mass of the saturated vapor mixture in kg/m:math:`^3`.
+        The specific mass of the saturated vapor mixture in kg/m\ :sup:`3`.
 
     Examples
     --------
@@ -176,7 +181,7 @@ def get_rho_m_sat(p, t_s):
 
 def get_k_m(p, t, t_dp):
     """
-    Get thermal conductivity of vapor mixture.
+    Get the thermal conductivity of the vapor mixture.
 
     Parameters
     ----------
@@ -207,7 +212,7 @@ def get_k_m(p, t, t_dp):
 
 def get_k_m_sat(p, t_s):
     """
-    Get thermal conductivity of saturated vapor mixture.
+    Get the thermal conductivity of the saturated vapor mixture.
 
     Parameters
     ----------
@@ -234,8 +239,8 @@ def get_k_m_sat(p, t_s):
 
 
 def get_alpha_m(p, t, t_dp):
-    """
-    Get thermal diffusivity of vapor mixture.
+    r"""
+    Get the thermal diffusivity of the vapor mixture.
 
     Parameters
     ----------
@@ -249,7 +254,7 @@ def get_alpha_m(p, t, t_dp):
     Returns
     -------
     float
-        The thermal diffusivity of the vapor mixture in m:math:`^2`/s.
+        The thermal diffusivity of the vapor mixture in m\ :sup:`2`\ /s.
 
     Examples
     --------
@@ -271,8 +276,8 @@ def get_alpha_m(p, t, t_dp):
 
 
 def get_alpha_m_sat(p, t_s):
-    """
-    Get thermal diffusivity of saturated vapor mixture.
+    r"""
+    Get the thermal diffusivity of the saturated vapor mixture.
 
     Parameters
     ----------
@@ -285,7 +290,7 @@ def get_alpha_m_sat(p, t_s):
     -------
     float
         The thermal diffusivity of the saturated vapor mixture in
-        m:math:`^2`/s.
+        m\ :sup:`2`\ /s.
 
     Examples
     --------
@@ -306,8 +311,8 @@ def get_alpha_m_sat(p, t_s):
 
 
 def get_d_12(p, t, t_dp, ref):
-    """
-    Get binary species diffusivity of vapor mixture.
+    r"""
+    Get the binary species diffusivity of the vapor mixture.
 
     Parameters
     ----------
@@ -323,7 +328,7 @@ def get_d_12(p, t, t_dp, ref):
     Returns
     -------
     float
-        The thermal diffusivity of the vapor mixture in m:math:`^2`/s.
+        The thermal diffusivity of the vapor mixture in m\ :sup:`2`\ /s.
 
     Examples
     --------
@@ -351,11 +356,6 @@ def get_d_12(p, t, t_dp, ref):
     -----
     For more information regarding the choices for `ref` see Appendix of [1]_.
 
-    References
-    ----------
-    .. [1] Mills, A. F. and Coimbra, C. F. M., 2016
-       *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
-
     """
     p_norm = p/101325
     if ref == 'Mills':
@@ -381,7 +381,7 @@ def get_d_12(p, t, t_dp, ref):
 
 def get_x_1(p, t, t_dp):
     """
-    Get mole fraction of water vapor in mixture.
+    Get the mole fraction of water vapor in mixture.
 
     Parameters
     ----------
@@ -412,7 +412,7 @@ def get_x_1(p, t, t_dp):
 
 def get_x_1_sat(p, t_s):
     """
-    Get mole fraction of water vapor in saturated mixture.
+    Get the mole fraction of water vapor in the saturated mixture.
 
     Parameters
     ----------
@@ -441,7 +441,7 @@ def get_x_1_sat(p, t_s):
 
 def get_m_1(p, t, t_dp):
     """
-    Get mass fraction of water vapor in the vapor mixture.
+    Get the mass fraction of water vapor in the vapor mixture.
 
     Parameters
     ----------
@@ -473,7 +473,7 @@ def get_m_1(p, t, t_dp):
 
 def get_m_1_sat(p, t_s):
     """
-    Get mass fraction of water vapor in the saturated vapor mixture.
+    Get the mass fraction of water vapor in the saturated vapor mixture.
 
     Parameters
     ----------
@@ -502,7 +502,7 @@ def get_m_1_sat(p, t_s):
 
 def get_h_fg_sat(t_s):
     """
-    Get specific enthalpy of vaporization for pure water.
+    Get the specific enthalpy of vaporization for pure water.
 
     Parameters
     ----------
@@ -556,7 +556,7 @@ def x1_2_m1(x_1):
 
 def get_mu(p, t, t_dp):
     """
-    Get dynamic viscocity of vapor mixture.
+    Get the dynamic viscocity of the vapor mixture.
 
     Parameters
     ----------
@@ -591,7 +591,7 @@ def get_mu(p, t, t_dp):
 
 def get_c_pl(t):
     """
-    Get specific heat of pure liquid water.
+    Get the specific heat of pure liquid water.
 
     Parameters
     ----------
@@ -620,7 +620,7 @@ def get_c_pl(t):
 
 def get_rh(p, t, t_dp):
     """
-    Get relative humidity of the vapor liquid mixture.
+    Get the relative humidity of the vapor liquid mixture.
 
     Parameters
     ----------
@@ -651,7 +651,7 @@ def get_rh(p, t, t_dp):
 
 def get_tdp(p, t, rh):
     """
-    Get dew point temperature of vapor mixture.
+    Get the dew point temperature of the vapor mixture.
 
     Parameters
     ----------
@@ -728,8 +728,8 @@ def get_gamma(p, t, t_dp):
     Returns
     -------
     float
-        The coefficient of volumetric expansion of the vapor mixture
-        in m:math:`^-3`.
+        The coefficient of volumetric expansion of the vapor mixture.
+        in m:math:`^-3`
 
     Examples
     --------

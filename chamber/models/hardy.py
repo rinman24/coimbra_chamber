@@ -1,4 +1,27 @@
-"""Implementaion of Hardy equations for water vapor content in air."""
+"""
+Implementaion of Hardy equations for water vapor content in air.
+
+Attributes
+----------
+A_COEFF_ICE : (float, float, float, float)
+    .. todo:: A_COEFF_ICE description.
+A_COEFF_WATER : (float, float, float, float)
+    .. todo:: A_COEFF_WATER description.
+B_COEFF_ICE : (float, float, float, float)
+    .. todo:: B_COEFF_ICE description.
+B_COEFF_WATER : (float, float, float, float)
+    .. todo:: B_COEFF_WATER description.
+G_COEFF : (float, float, float, float, float, float, float, float)
+    .. todo:: G_COEFF desctiption.
+K_COEFF : (float, float, float, float, float, float)
+    .. todo:: K_COEFF desctiption.
+
+
+Functions
+---------
+- `get_p_sat` -- get the saturation vapor pressure.
+
+"""
 import math
 
 G_COEFF = (-2.8365744e3, -6.028076559e3, 1.954263612e1, -2.737830188e-2,
@@ -17,7 +40,11 @@ B_COEFF_ICE = (-8.2308868e1, 5.6519110e-1, -1.5304505e-3, 1.5395086e-6)
 
 
 def get_p_sat(p_in, t_in):
-    """Get saturation vapor pressure."""
+    """Get saturation vapor pressure.
+
+    .. todo:: get_p_sat documentation.
+
+    """
     enh_fact, p_sat_ideal = _get_enh_fact(p_in, t_in, retrun_p=True)
     p_sat = enh_fact*p_sat_ideal
     return p_sat
