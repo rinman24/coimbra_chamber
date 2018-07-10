@@ -477,9 +477,7 @@ def _test_exists(cur, test_info):
     >>> _test_exists(cur, test_info)
     False
 
-    Todo
-    ----
-    Raise exception rather than print message.
+    .. todo:: Raise exception rather than print message.
 
     """
     # ------------------------------------------------------------------------
