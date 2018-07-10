@@ -39,57 +39,79 @@ CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
 # ----------------------------------------------------------------------------
 # Settings global
 SETTINGS_TEST_1 = dict(
-    Duty=10, IsMass=1, Pressure=100000, Reservoir=1, Temperature=300, TubeId=1
+    Duty=10, IsMass=1, Pressure=100000, Reservoir=1, Temperature=300,
+    TimeStep='1.00', TubeId=1
     )
 SETTINGS_TEST_2 = dict(
-    Duty=20, IsMass=0, Pressure=110000, Reservoir=0, Temperature=270, TubeId=2
+    Duty=20, IsMass=0, Pressure=110000, Reservoir=0, Temperature=270,
+    TimeStep='5.00', TubeId=2
     )
 
 TDMS_01_SETTING = dict(
     Duty='0.0', IsMass=0, Pressure=100000, Reservoir=0, Temperature=290,
-    TubeId=1
+    TimeStep='1.00', TubeId=1
     )
 TDMS_02_SETTING = dict(
     Duty='5.0', IsMass=1, Pressure=100000, Reservoir=0, Temperature=290,
-    TubeId=1
+    TimeStep='1.00', TubeId=1
     )
 TDMS_03_SETTING = dict(
     Duty='0.0', IsMass=0, Pressure=100000, Reservoir=1, Temperature=290,
-    TubeId=1
+    TimeStep='1.00', TubeId=1
     )
 TDMS_04_SETTING = dict(
     Duty='5.0', IsMass=1, Pressure=100000, Reservoir=1, Temperature=290,
-    TubeId=1
+    TimeStep='1.00', TubeId=1
     )
 
-TDMS_01_ADD_SETTING = [(1, Decimal('0.0'), 0, 100000, Decimal('290.0'), 0, 1)]
-TDMS_02_ADD_SETTING = [(2, Decimal('5.0'), 1, 100000, Decimal('290.0'), 0, 1)]
-TDMS_03_ADD_SETTING = [(3, Decimal('0.0'), 0, 100000, Decimal('290.0'), 1, 1)]
-TDMS_04_ADD_SETTING = [(4, Decimal('5.0'), 1, 100000, Decimal('290.0'), 1, 1)]
+TDMS_01_ADD_SETTING = [
+    (
+        1, Decimal('0.0'), 0, 100000, Decimal('290.0'),
+        Decimal('1.00'), 0, 1
+        )
+    ]
+TDMS_02_ADD_SETTING = [
+        (
+            2, Decimal('5.0'), 1, 100000, Decimal('290.0'), Decimal('1.00'),
+            0, 1
+        )
+    ]
+TDMS_03_ADD_SETTING = [
+        (
+            3, Decimal('0.0'), 0, 100000, Decimal('290.0'), Decimal('1.00'),
+            1, 1
+        )
+    ]
+TDMS_04_ADD_SETTING = [
+        (
+            4, Decimal('5.0'), 1, 100000, Decimal('290.0'), Decimal('1.00'),
+            1, 1
+        )
+    ]
 
 # ----------------------------------------------------------------------------
 # Test globals
 TDMS_01_TEST = dict(Author='author_1',
                     DateTime=datetime(2018, 6, 28, 17, 29, 39),
-                    Description='Duty 0; Resevoir Off; IsMass No', TimeStep=1)
+                    Description='Duty 0; Resevoir Off; IsMass No')
 TDMS_02_TEST = dict(Author='author_2',
                     DateTime=datetime(2018, 6, 28, 17, 41, 18),
-                    Description='Duty 5; Resevoir Off; IsMass Yes', TimeStep=1)
+                    Description='Duty 5; Resevoir Off; IsMass Yes')
 TDMS_03_TEST = dict(Author='author_3',
                     DateTime=datetime(2018, 6, 28, 17, 38, 23),
-                    Description='Duty 0; Resevoir On; IsMass No', TimeStep=1)
+                    Description='Duty 0; Resevoir On; IsMass No')
 TDMS_04_TEST = dict(Author='author_4',
                     DateTime=datetime(2018, 6, 28, 17, 42, 32),
-                    Description='Duty 5; Resevoir On; IsMass Yes', TimeStep=1)
+                    Description='Duty 5; Resevoir On; IsMass Yes')
 
 TDMS_01_ADD_TEST = [(1, 'author_1', datetime(2018, 6, 28, 17, 29, 39),
-                     'Duty 0; Resevoir Off; IsMass No', Decimal('1.00'), 1)]
+                     'Duty 0; Resevoir Off; IsMass No', 1)]
 TDMS_02_ADD_TEST = [(2, 'author_2', datetime(2018, 6, 28, 17, 41, 18),
-                     'Duty 5; Resevoir Off; IsMass Yes', Decimal('1.00'), 2)]
+                     'Duty 5; Resevoir Off; IsMass Yes', 2)]
 TDMS_03_ADD_TEST = [(3, 'author_3', datetime(2018, 6, 28, 17, 38, 23),
-                     'Duty 0; Resevoir On; IsMass No', Decimal('1.00'), 3)]
+                     'Duty 0; Resevoir On; IsMass No', 3)]
 TDMS_04_ADD_TEST = [(4, 'author_4', datetime(2018, 6, 28, 17, 42, 32),
-                     'Duty 5; Resevoir On; IsMass Yes', Decimal('1.00'), 4)]
+                     'Duty 5; Resevoir On; IsMass Yes', 4)]
 
 # ----------------------------------------------------------------------------
 # Observation globals
@@ -104,10 +126,20 @@ TDMS_04_OBS_07 = dict(CapManOk=1, DewPoint='286.94', Idx=9, OptidewOk=1,
                       PowOut='0.0003', PowRef='0.0000', Pressure=99924,
                       Mass='0.0994310')
 
-OBS_DATA_1 = (1, Decimal('286.54'), 1, Decimal('0.0000'), Decimal('0.0000'), 99933)
-OBS_DATA_2 = (1, Decimal('286.90'), Decimal('0.0994314'), 1, Decimal('0.0002'), Decimal('0.0000'), 99946)
-OBS_DATA_3 = (1, Decimal('286.71'), 1, Decimal('0.0001'), Decimal('0.0001'), 99964)
-OBS_DATA_4 = (1, Decimal('286.98'), Decimal('0.0994310'), 1, Decimal('0.0001'), Decimal('0.0001'), 99937)
+OBS_DATA_1 = (
+    1, Decimal('286.54'), 1, Decimal('0.0000'), Decimal('0.0000'), 99933
+    )
+OBS_DATA_2 = (
+    1, Decimal('286.90'), Decimal('0.0994314'), 1, Decimal('0.0002'),
+    Decimal('0.0000'), 99946
+    )
+OBS_DATA_3 = (
+    1, Decimal('286.71'), 1, Decimal('0.0001'), Decimal('0.0001'), 99964
+    )
+OBS_DATA_4 = (
+    1, Decimal('286.98'), Decimal('0.0994310'), 1, Decimal('0.0001'),
+    Decimal('0.0001'), 99937
+    )
 
 # ----------------------------------------------------------------------------
 # TempObservation globals
@@ -132,7 +164,6 @@ TEMP_OBS_4 = [
 # Indexes
 TEST_INDEX = 7
 TC_INDEX = 7
-
 
 
 @pytest.fixture(scope='module')
@@ -591,7 +622,6 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     cur.execute(dml.get_obs_data_t.format(1, TEST_INDEX))
     res = cur.fetchall()[0]
     for i in range(len(res)):
-        print(i)
         assert isclose(res[i], OBS_DATA_1[i])
     # Verify the data in the 'TempObservation` table:
     cur.execute(dml.get_temp_obs_data.format(1, TEST_INDEX, TEST_INDEX))
@@ -638,7 +668,6 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     cur.execute(dml.get_obs_data_t.format(3, TEST_INDEX))
     res = cur.fetchall()[0]
     for i in range(len(res)):
-        print(i)
         assert isclose(res[i], OBS_DATA_3[i])
     # Verify the data in the 'TempObservation` table:
     cur.execute(dml.get_temp_obs_data.format(3, TEST_INDEX, TEST_INDEX))

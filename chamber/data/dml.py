@@ -2,17 +2,18 @@
 
 
 add_setting = ("INSERT INTO Setting "
-               "(Duty, IsMass, Pressure, Reservoir, Temperature, TubeId)"
+               "(Duty, IsMass, Pressure, Reservoir, Temperature, TimeStep,"
+               " TubeId)"
                " VALUES "
                "(%(Duty)s, %(IsMass)s, %(Pressure)s, %(Reservoir)s, "
-               "%(Temperature)s, %(TubeId)s)")
+               "%(Temperature)s, %(TimeStep)s, %(TubeId)s)")
 
 add_test = ("INSERT INTO Test "
-            "(Author, DateTime, Description, TimeStep,"
+            "(Author, DateTime, Description,"
             " SettingID)"
             " VALUES "
             "(%(Author)s, %(DateTime)s, %(Description)s,"
-            " %(TimeStep)s, %(SettingID)s)")
+            " %(SettingID)s)")
 
 add_obs_m_t = ("INSERT INTO Observation "
                "(CapManOk, DewPoint, Idx, Mass, OptidewOk, PowOut, PowRef,"
@@ -51,6 +52,7 @@ select_setting = ("SELECT SettingID FROM Setting WHERE "
                   "  Temperature = %(Temperature)s AND"
                   "  IsMass = %(IsMass)s AND"
                   "  Reservoir = %(Reservoir)s AND"
+                  "  TimeStep = %(TimeStep)s AND"
                   "  TubeId = %(TubeId)s;")
 
 select_test = ("SELECT TestID FROM Test WHERE "

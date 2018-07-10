@@ -224,9 +224,9 @@ def _get_setting_info(tdms_obj):
 
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> get_setting_info(tdms_file)
+    >>> _get_setting_info(tdms_file)
     {'Reservoir': 0, 'Duty': '0.0', 'IsMass': 0, 'Temperature': 290,
-    'Pressure': 100000, 'TubeId': 1}
+    'TimeStep': '1.00', 'Pressure': 100000, 'TubeId': 1}
 
     """
     # ------------------------------------------------------------------------
@@ -259,9 +259,16 @@ def _get_setting_info(tdms_obj):
     tube_id = int(tdms_obj.object('Settings', 'TubeID').data[0])
 
     # ------------------------------------------------------------------------
+    # Read TimeStep
+    time_step = tdms_obj.object("Settings", "TimeStep").data[0]
+    time_step_str = '{:.2f}'.format(round(time_step, 2))
+
+    # ------------------------------------------------------------------------
     # Construct dictionary to return
     setting_info = dict(
-        Duty=rounded_duty, IsMass=is_mass, Pressure=rounded_pressure, Reservoir=reservoir, Temperature=rounded_temp, TubeId=tube_id
+        Duty=rounded_duty, IsMass=is_mass, Pressure=rounded_pressure,
+        Reservoir=reservoir, Temperature=rounded_temp, TimeStep=time_step_str,
+        TubeId=tube_id
         )
 
     return setting_info
@@ -292,13 +299,13 @@ def _setting_exists(cur, setting_info):
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
     >>> setting_info = dict(Duty=10, Pressure=100000, Temperature=300)
-    >>> setting_id = setting_exists(cur, setting_info)
+    >>> setting_id = _setting_exists(cur, setting_info)
     >>> setting_id
     1
 
     Attempt to obtain a setting ID that doesn't exist:
     >>> setting_info['Duty'] = 20
-    >>> setting_id = setting_exists(cur, setting_info)
+    >>> setting_id = _setting_exists(cur, setting_info)
     >>> setting_id
     False
 
@@ -350,7 +357,7 @@ def _add_setting_info(cur, tdms_obj):
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
-    >>> setting_id = add_setting_info(cur, tdms_file)
+    >>> setting_id = _add_setting_info(cur, tdms_file)
     >>> setting_id
     1
 
@@ -402,8 +409,8 @@ def _get_test_info(tdms_obj):
 
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> get_test_info(tdms_file)
-    {'Description': 'description', 'TimeStep': 1, 'Author': 'RHI', 'DateTime':
+    >>> _get_test_info(tdms_file)
+    {'Description': 'description', 'Author': 'RHI', 'DateTime':
     datetime.datetime(2018, 1, 29, 17, 54, 12)}
 
     """
@@ -417,7 +424,6 @@ def _get_test_info(tdms_obj):
             .replace(microsecond=0).replace(tzinfo=None)
             ),
         Description='',
-        TimeStep=int(tdms_obj.object("Settings", "TimeStep").data[0]),
         )
 
     # ------------------------------------------------------------------------
@@ -464,13 +470,13 @@ def _test_exists(cur, test_info):
     >>> test_info = dict(Author='author_01',
     ... DateTime=datetime.datetime(2018, 1, 29, 17, 54, 12),
     ... Description='description_01', IsMass=1, TimeStep=1)
-    >>> test_exists(cur, test_info)
+    >>> _test_exists(cur, test_info)
     1
 
     Check for test info that does not exist in the database:
 
     >>> test_info['Author'] = 'foo'
-    >>> test_exists(cur, test_info)
+    >>> _test_exists(cur, test_info)
     False
 
     Todo
@@ -533,7 +539,7 @@ def _add_test_info(cur, tdms_obj, setting_id):
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
-    >>> test_id = add_test_info(cur, tdms_file, 1, 2)
+    >>> test_id = _add_test_info(cur, tdms_file, 1, 2)
     >>> test_id
     1
 
@@ -595,7 +601,7 @@ def _get_obs_info(tdms_obj, tdms_idx):
 
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> get_obs_info(tdms_file, 10)
+    >>> _get_obs_info(tdms_file, 10)
     {'DewPoint': '270.69', 'Idx': 8, 'Mass': '0.0985090', 'CapManOk': 1,
     'Pressure': 100393, 'OptidewOk': 1, 'PowRef': '-0.0003', 'PowOut':
     '-0.0003'}
@@ -663,7 +669,7 @@ def _add_obs_info(cur, tdms_obj, test_id, tdms_idx):
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
-    >>> assert add_obs_info(cur, tdms_file, 1, 0)
+    >>> assert _add_obs_info(cur, tdms_file, 1, 0)
 
     Add all observations in a file with test_id 2:
 
@@ -723,7 +729,7 @@ def _get_temp_info(tdms_obj, tdms_idx, couple_idx):
 
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> get_temp_info(tdms_file, 1, 4)
+    >>> _get_temp_info(tdms_file, 1, 4)
     '280.24'
 
     """
@@ -778,7 +784,7 @@ def _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
-    >>> assert add_temp_info(cur, tdms_file, 1, 0, 99)
+    >>> assert _add_temp_info(cur, tdms_file, 1, 0, 99)
 
     """
     # ------------------------------------------------------------------------
