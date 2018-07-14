@@ -5,6 +5,7 @@ from nptdms import TdmsFile
 from numpy import array
 
 from chamber.models import props
+from chamber.data import sqldb
 
 
 def get_tdms_obj(file_path):
@@ -105,9 +106,7 @@ def plot_t_p(t_data, p_data):
     plt.show()
 
 
-def make_plots(file_path):
-    tdms_obj = get_tdms_obj(file_path)
-
+def make_plots(tdms_obj):
     print('Gathering data...')
     is_mass = get_is_mass(tdms_obj)
     if is_mass:
@@ -125,7 +124,25 @@ def make_plots(file_path):
     plot_t_p(t_data, p_data)
 
 
+def add_to_database(tdms_obj):
+    add_test = input('Add test to database? [y/n]')
+    if add_test == 'y':
+        print('Adding test...')
+        cnx = sqldb.connect('test_results')
+        sqldb.add_tdms_file(cnx, tdms_obj)
+        print('Test added.')
+    elif add_tets == 'n':
+        print('Test not added.')
+    else:
+        add_to_database(tdms_obj)
+
+
+def qc_check():
+    tdms_obj = get_tdms_obj(argv[1])
+    make_plots(tdms_obj)
+    add_to_database(tdms_obj)
+
+
 print('Starting QC check...')
-FILEPATH = argv[1]
-make_plots(FILEPATH)
+qc_check()
 print('QC check complete.')
