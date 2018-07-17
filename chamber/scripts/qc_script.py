@@ -9,7 +9,7 @@ from chamber.data import sqldb
 
 
 def get_tdms_obj(file_path):
-    # Returns the npTDMS object coresponding to the argument file
+    # Returns the nptdms.TdmsFile object generated from the argument file path
     print('Loading TDMS file...')
     tdms_obj = TdmsFile(file_path)
     print('TDMS file loaded.')
@@ -17,19 +17,19 @@ def get_tdms_obj(file_path):
 
 
 def get_is_mass(tdms_obj):
-    # Gets the IsMass value
+    # Gets the IsMass value from a nptdms.TdmsFile object
     is_mass = tdms_obj.object('Settings', 'IsMass').data[0]
     return is_mass
 
 
 def get_m_data(tdms_obj):
-    # Gets the mass data if IsMass = 1
+    # Gets the mass data from a nptdms.TdmsFile object if IsMass = 1
     m_data = tdms_obj.object('Data', 'Mass').data
     return m_data
 
 
 def get_p_data(tdms_obj):
-    # Gets the pressure data
+    # Gets the pressure data from a nptdms.TdmsFile object
     p_data = tdms_obj.object('Data', 'Pressure').data
     return p_data
 
@@ -43,13 +43,13 @@ def get_t_data(tdms_obj):
 
 
 def get_t_dp_data(tdms_obj):
-    # Gets the dewpoint data
+    # Gets the dewpoint data form a nptdms.TdmsFile object
     t_dp_data = tdms_obj.object('Data', 'DewPoint').data
     return t_dp_data
 
 
 def get_rh_data(t_data, p_data, t_dp_data):
-    # Uses props to calculate the rh data
+    # Uses props module to calculate the rh data
     t_data_avg = t_data.mean(axis=0)
     rh_data = props.get_rh(p_data, t_data_avg, t_dp_data)
     return rh_data
@@ -107,6 +107,7 @@ def plot_t_p(t_data, p_data):
 
 
 def make_plots(tdms_obj):
+    # Gets data from a nptdms.TdmsFile and plots it using above functions
     print('Gathering data...')
     is_mass = get_is_mass(tdms_obj)
     if is_mass:
@@ -125,6 +126,7 @@ def make_plots(tdms_obj):
 
 
 def add_to_database(tdms_obj):
+    # Adds the test to the database from a nptdms.TdmsFile if user input is 'y'
     add_test = input('Add test to database? [y/n]')
     if add_test == 'y':
         print('Adding test...')
@@ -138,6 +140,7 @@ def add_to_database(tdms_obj):
 
 
 def qc_check():
+    # Creates a nptdms.TdmsFile object and calls the plot and adding functions
     tdms_obj = get_tdms_obj(argv[1])
     make_plots(tdms_obj)
     add_to_database(tdms_obj)
