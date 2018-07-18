@@ -3,6 +3,7 @@ import configparser
 from datetime import datetime
 from decimal import Decimal
 import os
+import pandas as pd
 from pathlib import Path
 from shutil import move
 
@@ -700,6 +701,22 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     assert cnx.in_transaction
     cnx.commit()
     assert not cnx.in_transaction
+
+
+def test_get_test_df(cnx):
+    """
+    Test get_test_df.
+
+    Test resultant `DataFrame` accuracy and structure.
+    """
+    test_dict = sqldb.get_test_df(1, cnx)
+    settings_df = pd.DataFrame(TDMS_01_SETTING, index=[0])
+    test_info_df = pd.DataFrame(TDMS_01_TEST, index=[0])
+    info_results_df = settings_df.join(test_info_df)
+    info_results_df['TestId'] = 1
+    info_results_df['SettingId'] = 1
+    assert test_dict['info']['Duty'].iloc[0] == Decimal(info_results_df['Duty'].iloc[0])
+    assert test_dict['info']['Author'].iloc[0] == info_results_df['Author'].iloc[0]
 
 
 def drop_tables(cursor, bol):

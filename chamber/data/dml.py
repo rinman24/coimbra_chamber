@@ -138,7 +138,7 @@ get_temp_df = ("SELECT Idx,"
 get_obs_df = ("SELECT Idx, DewPoint, Mass, Pressure, PowOut, PowRef, "
               "OptidewOk FROM Observation WHERE TestId={};")
 
-info_querry = ("SELECT Temperature, Pressure, Duty, IsMass, Reservoir, "
+get_info_df = ("SELECT Temperature, Pressure, Duty, IsMass, Reservoir, "
                "TimeStep, Test.DateTime, Author, Description, TubeId, TestId, "
                "Setting.SettingId FROM Test INNER JOIN Setting ON "
                "Setting.SettingId=Test.SettingId WHERE TestId={};")
