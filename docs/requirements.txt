@@ -1,0 +1,10 @@
+###### Requirements from Chamber module ######
+CoolProp
+pandas
+matplotlib
+mysql.connector
+nptdms
+numpy
+scipy
+pathlib
+mpl_toolkist.mplot3d
