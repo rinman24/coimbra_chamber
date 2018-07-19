@@ -12,8 +12,13 @@ setup(
     description=('Python programs for Rich Inman\'s PhD work involving the the'
                  'Coimbra Chamber at UCSD. '),
     # long_description=open('README.rst').read(),
-    # install_requires=[
-    # "nptdms >= 1.1.1",
-    # "test2 == 0.1.4",
-    # ],
+    install_requires=[
+        "CoolProp",
+        "matplotlib",
+        "mysql.connector",
+        "nptdms",
+        "pandas",
+        "numpy",
+        "scipy"
+    ],
 )
