@@ -1,4 +1,16 @@
-from sys import argv
+"""
+Script for quality chcking before inserting into a database.
+
+This script should be called as follows:
+
+   $ python -m chamber.scripts.qc_script <filepath> <database>
+
+Where the filepath is the tdms file to be quality checkd and database is the
+name of the schema to insert the results into.
+
+"""
+
+import sys
 
 import matplotlib.pyplot as plt
 from nptdms import TdmsFile
@@ -9,7 +21,7 @@ from chamber.data import sqldb
 
 
 def get_tdms_obj(file_path):
-    # Returns the nptdms.TdmsFile object generated from the argument file path
+    """Returns the nptdms.TdmsFile object generated from the argument file path."""
     print('Loading TDMS file...')
     tdms_obj = TdmsFile(file_path)
     print('TDMS file loaded.')
@@ -17,46 +29,45 @@ def get_tdms_obj(file_path):
 
 
 def get_is_mass(tdms_obj):
-    # Gets the IsMass value from a nptdms.TdmsFile object
+    """Gets the IsMass value from a nptdms.TdmsFile object."""
     is_mass = tdms_obj.object('Settings', 'IsMass').data[0]
     return is_mass
 
 
 def get_m_data(tdms_obj):
-    # Gets the mass data from a nptdms.TdmsFile object if IsMass = 1
+    """Gets the mass data from a nptdms.TdmsFile object if IsMass = 1."""
     m_data = tdms_obj.object('Data', 'Mass').data
     return m_data
 
 
 def get_p_data(tdms_obj):
-    # Gets the pressure data from a nptdms.TdmsFile object
+    """Gets the pressure data from a nptdms.TdmsFile object."""
     p_data = tdms_obj.object('Data', 'Pressure').data
     return p_data
 
 
 def get_t_data(tdms_obj):
-    # Gets the temperature data of the thermocouples
-    # measureing chamber temperature
+    """Gets the temperature data of the thermocouples measureing chamber temperature."""
     t_data = array([tdms_obj.object(
         "Data", "TC{}".format(cpl_idx)).data for cpl_idx in range(4, 14)])
     return t_data
 
 
 def get_t_dp_data(tdms_obj):
-    # Gets the dewpoint data form a nptdms.TdmsFile object
+    """Gets the dewpoint data form a nptdms.TdmsFile object."""
     t_dp_data = tdms_obj.object('Data', 'DewPoint').data
     return t_dp_data
 
 
 def get_rh_data(t_data, p_data, t_dp_data):
-    # Uses props module to calculate the rh data
+    """Uses props module to calculate the rh data."""
     t_data_avg = t_data.mean(axis=0)
     rh_data = props.get_rh(p_data, t_data_avg, t_dp_data)
     return rh_data
 
 
 def plot_mass(m_data):
-    # Plots mass vs time
+    """Plots mass vs time."""
     plt.plot(m_data, label='Mass ata')
     plt.xlabel('Time (s)')
     plt.ylabel('Mass (kg)')
@@ -65,7 +76,7 @@ def plot_mass(m_data):
 
 
 def plot_rh_t_dp(rh_data, t_dp_data):
-    # Plots Relative Humidity vs time and Dew Point vs time
+    """Plots Relative Humidity vs time and Dew Point vs time."""
 
     # Mass vs. time plot
     fig, ax1 = plt.subplots()
@@ -85,7 +96,7 @@ def plot_rh_t_dp(rh_data, t_dp_data):
 
 
 def plot_t_p(t_data, p_data):
-    # Plots temperature vs time and pressure vs time
+    """Plots temperature vs time and pressure vs time."""
 
     # Temperature vs time plot
     fig, ax1 = plt.subplots()
@@ -107,7 +118,7 @@ def plot_t_p(t_data, p_data):
 
 
 def make_plots(tdms_obj):
-    # Gets data from a nptdms.TdmsFile and plots it using above functions
+    """Gets data from a nptdms.TdmsFile and plots it using above functions."""
     print('Gathering data...')
     is_mass = get_is_mass(tdms_obj)
     if is_mass:
@@ -125,26 +136,26 @@ def make_plots(tdms_obj):
     plot_t_p(t_data, p_data)
 
 
-def add_to_database(tdms_obj, schema):
-    # Adds the test to the database from a nptdms.TdmsFile if user input is 'y'
+def add_to_database(tdms_obj, database):
+    """Adds the test to the database from a nptdms.TdmsFile if user input is 'y'."""
     add_test = input('Add test to database? [y/n]')
     if add_test == 'y':
         print('Adding test...')
-        cnx = sqldb.connect(schema)
+        cnx = sqldb.connect(database)
         sqldb.add_tdms_file(cnx, tdms_obj)
-        print('Test added.')
+        print('Done.')
     elif add_test == 'n':
         print('Test not added.')
     else:
-        add_to_database(tdms_obj, schema)
+        add_to_database(tdms_obj, database)
 
 
 def qc_check():
-    # Creates a nptdms.TdmsFile object and calls the plot and adding functions
-    tdms_obj = get_tdms_obj(argv[1])
-    schema = argv[2]
+    """Creates a nptdms.TdmsFile object and calls the plot and adding functions."""
+    tdms_obj = get_tdms_obj(sys.argv[1])
+    database = sys.argv[2]
     make_plots(tdms_obj)
-    add_to_database(tdms_obj, schema)
+    add_to_database(tdms_obj, database)
 
 if __name__ == '__main__':
     print('Starting QC check...')
