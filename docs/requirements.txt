@@ -1,10 +1,9 @@
-###### Requirements from Chamber module ######
-CoolProp
-pandas
-matplotlib
-mysql.connector
-nptdms
-numpy
-scipy
-pathlib
-mpl_toolkist.mplot3d
+npTDMS==0.11.3
+matplotlib==2.1.0
+tabulate==0.8.1
+scipy==0.19.1
+numpy==1.13.3
+pandas==0.22.0
+CoolProp==6.1.0
+mysql_connector_repackaged==0.3.1
+schedule==0.5.0
