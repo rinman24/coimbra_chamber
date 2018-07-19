@@ -913,8 +913,11 @@ def get_test_df(test_id, cnx):
     Get the `dict` of `DataFrame`s for a test with TestId=4.
 
     >>> cnx = connect('my-schema')
-    >>> get_test_df(4, cnx)
-    >>>
+    >>> test_dict = get_test_df(4, cnx)
+    >>> print(test_dict['info']['author'].iloc[0])
+    >>> author_1
+    >>> print(test_dict['data']['TC2'].iloc[4])
+    >>> 293.01
 
     """
     # Build DataFrames
