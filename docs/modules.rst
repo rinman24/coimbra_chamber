@@ -8,3 +8,4 @@ Chamber Package Documentaiton
     source/data
     source/models
     source/tools
+    source/const
