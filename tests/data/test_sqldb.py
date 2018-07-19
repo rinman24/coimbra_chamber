@@ -176,6 +176,22 @@ TEST_1_INFO_DF = TEST_1_INFO_DF[['Temperature', 'Pressure', 'Duty', 'IsMass',
                                  'Description', 'TubeId', 'TestId',
                                  'SettingId']]
 
+TEST_1_STATS_DF = pd.DataFrame(dict(
+    idx=['sum', 'mean', 'min', 'max', 'var'],
+    TC0=[7929.21, 293.67444444444442, 293.65, 293.71, 0.00031794871794867406],
+    TC1=[7911.38, 293.014074, 292.99, 293.04, 0.00014045584045569836],
+    TC7=[7882.79, 291.955185, 291.94, 291.98, 0.00011054131054147711],
+    TC13=[7878.85, 291.809259, 291.80, 291.81999999999999,
+          2.2507122507081566e-05],
+    Pressure=[2698644, 99949.7778, 99929, 99986, 248.48717948717953],
+    PowOut=[0.0051, 0.00018888888888888883, -0.0001, 0.0004,
+            1.3333333333333332e-08],
+    PowRef=[-0.0009, -3.3333333333333335e-05, -0.0003, 0.0002,
+            9.2307692307692321e-09],
+    DewPoint=[7737.23, 286.564074, 286.52, 286.63, 0.00073276353276327522],
+    )
+).set_index('idx')
+
 # ----------------------------------------------------------------------------
 # Indexes
 TEST_INDEX = 7
@@ -728,13 +744,34 @@ def test_get_test_df(cnx):
     assert pd.testing.assert_frame_equal(test_dict['info'],
                                          TEST_1_INFO_DF) is None
 
+    assert test_dict['data']['Idx'].iloc[3] == 5
+
+    assert test_dict['data']['OptidewOk'].iloc[3] == 1
+
+    assert test_dict['data']['CapManOk'].iloc[17] == 1
+
+    for col in TEST_1_STATS_DF.keys():
+        assert isclose(test_dict['data'][col].sum(),
+                       TEST_1_STATS_DF.loc['sum', col])
+        assert isclose(test_dict['data'][col].mean(),
+                       TEST_1_STATS_DF.loc['mean', col])
+        assert isclose(test_dict['data'][col].min(),
+                       TEST_1_STATS_DF.loc['min', col])
+        assert isclose(test_dict['data'][col].max(),
+                       TEST_1_STATS_DF.loc['max', col])
+        assert isclose(test_dict['data'][col].var(),
+                       TEST_1_STATS_DF.loc['var', col])
+
 
 def drop_tables(cursor, bol):
     """Drop databese tables."""
-    print("Dropping tables...")
-    cursor.execute("DROP TABLE IF EXISTS " +
-                   ", ".join(ddl.table_name_list) +
-                   ";")
+    if bol:
+        print("Dropping tables...")
+        cursor.execute("DROP TABLE IF EXISTS " +
+                       ", ".join(ddl.table_name_list) +
+                       ";")
+    else:
+        print('Tables not dropped.')
 
 
 def truncate(cursor, table):

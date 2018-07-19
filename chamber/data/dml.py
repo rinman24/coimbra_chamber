@@ -116,7 +116,7 @@ get_temp_obs_data = ("SELECT"
                      "    ThermocoupleNum = {};")
 
 get_temp_df = ("SELECT Idx,"
-               "MAX(CASE WHEN ThermocoupleNum=1 THEN VALUE ELSE 0 END) TC0, "
+               "MAX(CASE WHEN ThermocoupleNum=0 THEN VALUE ELSE 0 END) TC0, "
                "MAX(CASE WHEN ThermocoupleNum=1 THEN VALUE ELSE 0 END) TC1, "
                "MAX(CASE WHEN ThermocoupleNum=2 THEN VALUE ELSE 0 END) TC2, "
                "MAX(CASE WHEN ThermocoupleNum=3 THEN VALUE ELSE 0 END) TC3, "
@@ -136,7 +136,7 @@ get_temp_df = ("SELECT Idx,"
                " src GROUP BY Idx;")
 
 get_obs_df = ("SELECT Idx, DewPoint, Mass, Pressure, PowOut, PowRef, "
-              "OptidewOk FROM Observation WHERE TestId={};")
+              "OptidewOk, CapManOk FROM Observation WHERE TestId={};")
 
 get_info_df = ("SELECT Temperature, Pressure, Duty, IsMass, Reservoir, "
                "TimeStep, Test.DateTime, Author, Description, TubeId, TestId, "
