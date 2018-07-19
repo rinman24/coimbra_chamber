@@ -123,5 +123,13 @@ table_name_list = [table[0] for table in reversed(tables)]
 
 
 # Default tube
-tube_data = dict(DiameterIn=0.03, DiameterOut=0.04, Length=0.06,
-                 Material='Delrin', Mass=0.0873832)
+tube_data = dict(
+    DiameterIn=0.03, DiameterOut=0.04, Length=0.06, Material='Delrin',
+    Mass=0.0873832
+    )
+
+# Default units
+units = dict(
+    Duty='Percent', Length='Meter', Mass='Kilogram', Power='Watt',
+    Pressure='Pascal', Temperature='Kelvin', Time='Second'
+    )

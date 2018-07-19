@@ -38,7 +38,6 @@ def add_tube(database):
                     attributes['Length'], attributes['Material'],
                     attributes['Mass'])
         cur.execute(add_row, row_data)
-        # sqldb.table_insert(CUR, add_row, row_data)
         print("Committing changes to Unit table...")
         cnx.commit()
         print("All done, closing connection to server...")

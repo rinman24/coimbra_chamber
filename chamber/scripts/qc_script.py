@@ -1,3 +1,15 @@
+"""
+Script for quality chcking before inserting into a database.
+
+This script should be called as follows:
+
+   $ python -m chamber.scripts.qc_script <filepath> <database>
+
+Where the filepath is the tdms file to be quality checkd and database is the
+name of the schema to insert the results into.
+
+"""
+
 import sys
 
 import matplotlib.pyplot as plt
@@ -131,7 +143,7 @@ def add_to_database(tdms_obj, database):
         print('Adding test...')
         cnx = sqldb.connect(database)
         sqldb.add_tdms_file(cnx, tdms_obj)
-        print('Test added.')
+        print('Done.')
     elif add_test == 'n':
         print('Test not added.')
     else:
