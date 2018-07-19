@@ -161,6 +161,21 @@ TEMP_OBS_4 = [
     291.83
     ]
 
+TEST_1_INFO_DICT = {
+    'Temperature': [290.0], 'Pressure': [100000], 'Duty': [0.0],
+    'IsMass': [0], 'Reservoir': [0], 'TimeStep': [1.0],
+    'DateTime': [pd.Timestamp(datetime(2018, 6, 28, 17, 29, 39))],
+    'Author': 'author_1', 'Description': 'Duty 0; Resevoir Off; IsMass No',
+    'TubeId': [1], 'TestId': [1], 'SettingId': [1]
+}
+
+
+TEST_1_INFO_DF = pd.DataFrame(TEST_1_INFO_DICT)
+TEST_1_INFO_DF = TEST_1_INFO_DF[['Temperature', 'Pressure', 'Duty', 'IsMass',
+                                 'Reservoir', 'TimeStep', 'DateTime', 'Author',
+                                 'Description', 'TubeId', 'TestId',
+                                 'SettingId']]
+
 # ----------------------------------------------------------------------------
 # Indexes
 TEST_INDEX = 7
@@ -710,13 +725,7 @@ def test_get_test_df(cnx):
     Test resultant `DataFrame` accuracy and structure.
     """
     test_dict = sqldb.get_test_df(1, cnx)
-    settings_df = pd.DataFrame(TDMS_01_SETTING, index=[0])
-    test_info_df = pd.DataFrame(TDMS_01_TEST, index=[0])
-    info_results_df = settings_df.join(test_info_df)
-    info_results_df['TestId'] = 1
-    info_results_df['SettingId'] = 1
-    assert test_dict['info']['Duty'].iloc[0] == Decimal(info_results_df['Duty'].iloc[0])
-    assert test_dict['info']['Author'].iloc[0] == info_results_df['Author'].iloc[0]
+    assert pd.testing.assert_frame_equal(test_dict['info'], TEST_1_INFO_DF) is None
 
 
 def drop_tables(cursor, bol):
