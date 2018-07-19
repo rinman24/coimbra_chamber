@@ -41,5 +41,5 @@ def grashof_comparison():
     df = range_analysis()
     df_to_csv(df, file_path)
 
-
-grashof_comparison()
+if __name__ == '__main__':
+    grashof_comparison()
