@@ -125,25 +125,26 @@ def make_plots(tdms_obj):
     plot_t_p(t_data, p_data)
 
 
-def add_to_database(tdms_obj):
+def add_to_database(tdms_obj, schema):
     # Adds the test to the database from a nptdms.TdmsFile if user input is 'y'
     add_test = input('Add test to database? [y/n]')
     if add_test == 'y':
         print('Adding test...')
-        cnx = sqldb.connect('test_results')
+        cnx = sqldb.connect(schema)
         sqldb.add_tdms_file(cnx, tdms_obj)
         print('Test added.')
-    elif add_tets == 'n':
+    elif add_test == 'n':
         print('Test not added.')
     else:
-        add_to_database(tdms_obj)
+        add_to_database(tdms_obj, schema)
 
 
 def qc_check():
     # Creates a nptdms.TdmsFile object and calls the plot and adding functions
     tdms_obj = get_tdms_obj(argv[1])
+    schema = argv[2]
     make_plots(tdms_obj)
-    add_to_database(tdms_obj)
+    add_to_database(tdms_obj, schema)
 
 
 print('Starting QC check...')
