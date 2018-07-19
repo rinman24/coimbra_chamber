@@ -59,9 +59,9 @@ def results_from_csv(
         object with a read() method
         The filepath to a csv file.
     purge : bool
-        If `True` the original (raw) data is removed from the
-        preprocessed `DataFrame`. If `False` the raw data remains in
-        the resulting 'DataFrame'. Defaults to `False`.
+        If `True` the original, unpreprocessed data is removed from the
+        preprocessed `DataFrame`. If `False` the unpreprocessed data remains in
+        the preprocessed 'DataFrame'. Defaults to `False`.
     param_list : list(str)
         List of parameters to use to calculate the relative humidity using the
         CoolProp API, see `_get_coolprop_rh` docstring for more detail.
@@ -101,19 +101,6 @@ def preprocess(
     This function takes in a `DataFrame` and calls all of the module helper
     functions to produce a `DataFrame` that is ready for analysis.
 
-    The following steps are included in 'preprocess':
-        '_zero_time'
-        '_format_temp'
-        '_format_dew_point'
-        '_format_pressure'
-        '_add_avg_te'
-        '_add_smooth_avg_te'
-        '_add_smooth_dew_point'
-        '_add_smooth_pressure'
-        '_add_rh'
-
-        See respective docstrings for more details.
-
     Parameters
     ----------
     dataframe: DataFrame
@@ -123,8 +110,8 @@ def preprocess(
         CoolProp API, see `_get_coolprop_rh` docstring for more detail.
         Defaults to: `['PressureSmooth', 'TeSmooth', 'DewPointSmooth']`.
     purge: bool
-        If `True` the original raw data is removed from the
-        returned `DataFrame`. If `False` the raw data remains in the
+        If `True` the original, unpreprocessed data is removed from the
+        returned `DataFrame`. If `False` the unpreprocessed data remains in the
         'DataFrame'. Defaults to `False`.
 
     Returns
@@ -552,6 +539,8 @@ def _get_target_idx(dataframe, target_rh):
 
     """
     rh = dataframe.RH.copy()
+    # performing rh manipulation in place
+    # This is no longer rh
     rh = target_rh - rh
     target_idx = rh[rh > 0].idxmin()
     return target_idx
