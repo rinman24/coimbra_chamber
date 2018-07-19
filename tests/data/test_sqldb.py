@@ -725,7 +725,8 @@ def test_get_test_df(cnx):
     Test resultant `DataFrame` accuracy and structure.
     """
     test_dict = sqldb.get_test_df(1, cnx)
-    assert pd.testing.assert_frame_equal(test_dict['info'], TEST_1_INFO_DF) is None
+    assert pd.testing.assert_frame_equal(test_dict['info'],
+                                         TEST_1_INFO_DF) is None
 
 
 def drop_tables(cursor, bol):
