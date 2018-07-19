@@ -62,6 +62,7 @@ def fix_tdms(directory):
             append_file(file_path, channel_obj)
 
 
-# Get the directory from command line argument
-directory = argv[1]
-fix_tdms(directory)
+if __name__ == '__main__':
+    # Get the directory from command line argument
+    directory = argv[1]
+    fix_tdms(directory)

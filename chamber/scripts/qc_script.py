@@ -146,7 +146,7 @@ def qc_check():
     make_plots(tdms_obj)
     add_to_database(tdms_obj, schema)
 
-
-print('Starting QC check...')
-qc_check()
-print('QC check complete.')
+if __name__ == '__main__':
+    print('Starting QC check...')
+    qc_check()
+    print('QC check complete.')

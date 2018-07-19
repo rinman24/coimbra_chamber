@@ -41,4 +41,5 @@ def prandtl_comparison():
     df_to_csv(df, file_path)
 
 
-prandtl_comparison()
+if __name__ == '__main__':
+    prandtl_comparison()

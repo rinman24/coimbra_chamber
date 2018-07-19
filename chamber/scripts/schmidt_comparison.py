@@ -44,4 +44,5 @@ def schmidt_comparison():
     df_to_csv(df, file_path)
 
 
-schmidt_comparison()
+if __name__ == '__main__':
+    schmidt_comparison()
