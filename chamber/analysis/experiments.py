@@ -85,7 +85,7 @@ def results_from_csv(
     """
     dataframe = pd.read_csv(filepath)
     dataframe = preprocess(dataframe, param_list=param_list, purge=purge)
-    results = analysis(dataframe, sigma=sigma, steps=steps)
+    results = mass_transfer(dataframe, sigma=sigma, steps=steps)
 
     return (dataframe, results)
 
@@ -154,7 +154,7 @@ def preprocess(
     return dataframe
 
 
-def analysis(dataframe, sigma=4e-8, steps=100, plot=False):
+def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
     """
     Perform analysis of experiment.
 

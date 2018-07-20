@@ -298,7 +298,7 @@ def test__half_len_gen(df_01):
 
 
 def test__analysis(df_01):
-    df_res = expr.analysis(df_01, sigma=SIGMA, steps=1000, plot=True)
+    df_res = expr.mass_transfer(df_01, sigma=SIGMA, steps=1000, plot=True)
     assert math.isclose(df_res.a[0], 0.09929181759175223)
     assert math.isclose(df_res.sig_a[0], 1.882350488972039e-09)
     assert math.isclose(df_res.b[0], -8.48536063565115e-09)
