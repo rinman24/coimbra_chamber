@@ -53,10 +53,13 @@ select_setting = ("SELECT SettingID FROM Setting WHERE "
                   "  IsMass = %(IsMass)s AND"
                   "  Reservoir = %(Reservoir)s AND"
                   "  TimeStep = %(TimeStep)s AND"
-                  "  TubeId = %(TubeId)s;")
+                  "  TubeId = %(TubeId)s")
 
 select_test = ("SELECT TestID FROM Test WHERE "
                "    DateTime='{}'")
+
+test_from_setting = ("SELECT TestId FROM Test WHERE "
+                     "    SettingId=({})")
 
 select_tube = ("SELECT TubeID FROM Tube WHERE "
                "  DiameterIn = %(DiameterIn)s AND"
