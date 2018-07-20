@@ -8,6 +8,7 @@ Functions
 - `connect` -- Get a connection and cursor to a MySQL database.
 - `create_tables` -- Create tables in the database.
 - `get_test_df` -- Create `DataFrame` representations of the tests.
+- `get_test_from_set` -- Get a list of TestIds corresponding to setting info.
 
 .. todo:: Decouple database and tdms volatility via modulde encapsulation.
 """
@@ -933,7 +934,7 @@ def get_test_df(cnx, test_id):
 
 def get_test_from_set(cur, setting_info):
     """
-    Get a list of TestIds corresponding to the setting_info argument.
+    Get a list of TestIds corresponding to specified setting information.
 
     Uses cursor's .execute function on a MySQL querry designed to get a list
     of TestIds corresponding to the setting info provided in the setting_info
