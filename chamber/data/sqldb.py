@@ -916,8 +916,8 @@ def get_test_df(cnx, test_id):
     >>> test_dict = get_test_df(4, cnx)
     >>> print(test_dict['info']['author'].iloc[0])
     >>> author_1
-    >>> print(test_dict['data']['TC2'].iloc[4])
-    >>> 293.01
+    >>> test_dict['data']['TC2'].iloc[4]
+    '293.01'
 
     """
     # Build DataFrames
@@ -929,3 +929,48 @@ def get_test_df(cnx, test_id):
     # Make dictionary
     test_dict = {'info': info_df, 'data': data_df}
     return test_dict
+
+
+def get_test_from_set(cur, setting_info):
+    """
+    Get a list of TestIds corresponding to the setting_info argument.
+
+    Uses cursor's .execute function on a MySQL querry designed to get a list
+    of TestIds corresponding to the setting info provided in the setting_info
+    argument.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    setting_info : dict of {str: scalar}
+        Set of values to insert into the Setting table. Keys should be column
+        names and values should be the value to insert.
+
+    Returns
+    -------
+    list(int) or False
+        TestIDs for the MySQL database, which is the primary key for the Test
+        table. Returns `False` if no TestIds match the argument setting info.
+
+    Examples
+    --------
+    Get the TestIds corresponding to a setting_info dict.
+
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> setting_info = dict(
+    Duty='0.0', IsMass=0, Pressure=100000, Reservoir=0, Temperature=290,
+    TimeStep='1.00', TubeId=1)
+    >>> get_test_from_set(cur, setting_info)
+    '[1, 4]'
+
+    """
+    test_from_set = dml.test_from_setting.format(dml.select_setting)
+    cur.execute(test_from_set, setting_info)
+    result = cur.fetchall()
+    if not result:
+        return False
+    else:
+        test_ids = [test_id[0] for test_id in result]
+        return test_ids
