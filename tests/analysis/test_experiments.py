@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from scipy import stats
 
-from chamber.analysis import analysis as anlys
+import chamber.analysis.experiments as expr
 
 TARGET_RH = 0.15
 TARGET_IDX = 12770
@@ -40,11 +40,11 @@ def test__zero_time(df_01, df_bad):
     """Test _zero_time."""
     assert df_01.Idx[0] == 8000
 
-    df_01 = anlys._zero_time(df_01)
+    df_01 = expr._zero_time(df_01)
     assert df_01.Idx[0] == 0
 
     with pytest.raises(AttributeError) as err:
-        anlys._zero_time(df_bad)
+        expr._zero_time(df_bad)
     assert err.value.args[0] == "'DataFrame' object has no attribute 'Idx'"
 
 
@@ -53,14 +53,14 @@ def test__format_temp(df_01, df_bad):
     assert math.isclose(df_01.TC7[100], 290.358)
     assert math.isclose(df_01.TC11[8000], 289.975)
 
-    df_01 = anlys._format_temp(df_01)
+    df_01 = expr._format_temp(df_01)
 
     assert math.isclose(df_01.TC4[0], round(290.799, 1))
     assert math.isclose(df_01.TC7[100], round(290.358, 1))
     assert math.isclose(df_01.TC11[8000], round(289.975, 1))
 
     with pytest.raises(KeyError) as err:
-        anlys._format_temp(df_bad)
+        expr._format_temp(df_bad)
     err_msg = (
         "None of [['TC4', 'TC5', 'TC6', 'TC7', 'TC8', 'TC9', 'TC10', "
         "'TC11', 'TC12', 'TC13']] are in the [columns]"
@@ -73,14 +73,14 @@ def test__format_dew_point(df_01, df_bad):
     assert math.isclose(df_01.DewPoint[100], 259.145)
     assert math.isclose(df_01.DewPoint[8000], 263.562)
 
-    df_01 = anlys._format_dew_point(df_01)
+    df_01 = expr._format_dew_point(df_01)
 
     assert math.isclose(df_01.DewPoint[0], round(259.04, 1))
     assert math.isclose(df_01.DewPoint[100], round(259.145, 1))
     assert math.isclose(df_01.DewPoint[8000], round(263.562, 1))
 
     with pytest.raises(AttributeError) as err:
-        anlys._format_dew_point(df_bad)
+        expr._format_dew_point(df_bad)
     assert err.value.args[0] == (
         "'DataFrame' object has no attribute 'DewPoint'"
         )
@@ -91,14 +91,14 @@ def test__format_pressure(df_01, df_bad):
     assert math.isclose(df_01.Pressure[100], 100161.21800000001)
     assert math.isclose(df_01.Pressure[8000], 100266.27900000001)
 
-    df_01 = anlys._format_pressure(df_01)
+    df_01 = expr._format_pressure(df_01)
 
     assert math.isclose(df_01.Pressure[0], round(100156.841, 0))
     assert math.isclose(df_01.Pressure[100], round(100161.21800000001, 0))
     assert math.isclose(df_01.Pressure[8000], round(100266.27900000001, 0))
 
     with pytest.raises(AttributeError) as err:
-        anlys._format_pressure(df_bad)
+        expr._format_pressure(df_bad)
     assert err.value.args[0] == (
         "'DataFrame' object has no attribute 'Pressure'"
         )
@@ -107,7 +107,7 @@ def test__format_pressure(df_01, df_bad):
 def test__add_avg_te(df_01, df_bad):
     assert 'Te' not in set(df_01)
 
-    df_01 = anlys._add_avg_te(df_01)
+    df_01 = expr._add_avg_te(df_01)
     assert 'Te' in set(df_01)
 
     tc_keys = ['TC{}'.format(i) for i in range(4, 14)]
@@ -115,7 +115,7 @@ def test__add_avg_te(df_01, df_bad):
     assert math.isclose(df_01.Te[0], round(mean, 1))
 
     with pytest.raises(KeyError) as err:
-        anlys._add_avg_te(df_bad)
+        expr._add_avg_te(df_bad)
     err_msg = (
         "None of [['TC4', 'TC5', 'TC6', 'TC7', 'TC8', 'TC9', 'TC10', "
         "'TC11', 'TC12', 'TC13']] are in the [columns]"
@@ -135,11 +135,11 @@ def test__add_avg_te(df_01, df_bad):
 def test__add_smooth_avg_te(df_01, df_bad):
     assert 'TeSmooth' not in set(df_01)
 
-    df_01 = anlys._add_smooth_avg_te(df_01)
+    df_01 = expr._add_smooth_avg_te(df_01)
     assert 'TeSmooth' in set(df_01)
 
     with pytest.raises(AttributeError) as err:
-        anlys._add_smooth_avg_te(df_bad)
+        expr._add_smooth_avg_te(df_bad)
     assert err.value.args[0] == "'DataFrame' object has no attribute 'Te'"
 
     plt.plot(df_01.Te, label='before')
@@ -155,11 +155,11 @@ def test__add_smooth_avg_te(df_01, df_bad):
 def test__add_smooth_dew_point(df_01, df_bad):
     assert 'DewPointSmooth' not in set(df_01)
 
-    df_01 = anlys._add_smooth_dew_point(df_01)
+    df_01 = expr._add_smooth_dew_point(df_01)
     assert 'DewPointSmooth' in set(df_01)
 
     with pytest.raises(AttributeError) as err:
-        anlys._add_smooth_dew_point(df_bad)
+        expr._add_smooth_dew_point(df_bad)
     assert err.value.args[0] == ("'DataFrame' object has no attribute" +
                                  " 'DewPoint'")
 
@@ -176,11 +176,11 @@ def test__add_smooth_dew_point(df_01, df_bad):
 def test__add_smooth_pressure(df_01, df_bad):
     assert 'PressureSmooth' not in set(df_01)
 
-    df_01 = anlys._add_smooth_pressure(df_01)
+    df_01 = expr._add_smooth_pressure(df_01)
     assert 'PressureSmooth' in set(df_01)
 
     with pytest.raises(AttributeError) as err:
-        anlys._add_smooth_pressure(df_bad)
+        expr._add_smooth_pressure(df_bad)
     assert err.value.args[0] == (
         "'DataFrame' object has no attribute 'Pressure'"
         )
@@ -201,14 +201,14 @@ def test__add_all_smooth(df_01):
 
 
 def test__get_rh():
-    rh = anlys._get_coolprop_rh([101325, 290, 275])
+    rh = expr._get_coolprop_rh([101325, 290, 275])
     assert math.isclose(rh, 0.36377641815012024)
 
 
 def test__add_rh(df_01):
     assert 'RH' not in set(df_01)
 
-    df_01 = anlys._add_rh(df_01)
+    df_01 = expr._add_rh(df_01)
     assert 'RH' in set(df_01)
 
     plt.plot(df_01.RH, label='RH')
@@ -221,14 +221,14 @@ def test__add_rh(df_01):
 
 
 def test__get_max_half_len(df_01):
-    max_window = anlys._get_max_half_len(df_01, TARGET_IDX)
+    max_window = expr._get_max_half_len(df_01, TARGET_IDX)
     assert max_window == (len(df_01)-1) - TARGET_IDX
 
     fail_list = [0, -1, -2, len(df_01)-1, len(df_01), len(df_01)+1]
 
     for idx in fail_list:
         with pytest.raises(IndexError) as err:
-            anlys._get_max_half_len(df_01, idx)
+            expr._get_max_half_len(df_01, idx)
         err_msg = (
             "no 'half length' available for the target index: "
             "target must have at least one element to right or left"
@@ -237,7 +237,7 @@ def test__get_max_half_len(df_01):
 
 
 def test__get_rh_idx(df_01):
-    idx = anlys._get_target_idx(df_01, TARGET_RH)
+    idx = expr._get_target_idx(df_01, TARGET_RH)
     assert idx == TARGET_IDX
     rh = df_01.RH[idx]
     assert math.isclose(rh, TARGET_RH, abs_tol=0.01)
@@ -254,7 +254,7 @@ def test__get_rh_idx(df_01):
 
 
 def test__get_stat_group(df_01):
-    time, mass = anlys._get_stat_group(df_01, TARGET_IDX, HALF_LEN)
+    time, mass = expr._get_stat_group(df_01, TARGET_IDX, HALF_LEN)
 
     assert len(time) == 2*HALF_LEN + 1
     assert len(mass) == 2*HALF_LEN + 1
@@ -274,13 +274,13 @@ def test__get_stat_group(df_01):
 
 
 def test__get_valid_rh_targets(df_01):
-    rh_list = anlys._get_valid_rh_targets(df_01)
+    rh_list = expr._get_valid_rh_targets(df_01)
     assert rh_list == [0.1, 0.15]
 
 
 def test__half_len_gen(df_01):
     half_len_list = list(
-        anlys._half_len_gen(df_01, TARGET_IDX, steps=1000)
+        expr._half_len_gen(df_01, TARGET_IDX, steps=1000)
     )
 
     assert half_len_list == (
@@ -289,7 +289,7 @@ def test__half_len_gen(df_01):
 
     gen_output = []
     for _ in range(3):
-        for half_len in anlys._half_len_gen(df_01, TARGET_IDX, steps=1000):
+        for half_len in expr._half_len_gen(df_01, TARGET_IDX, steps=1000):
             gen_output.append(half_len)
 
     assert gen_output == 3*(
@@ -298,7 +298,7 @@ def test__half_len_gen(df_01):
 
 
 def test__analysis(df_01):
-    df_res = anlys.analysis(df_01, sigma=SIGMA, steps=1000, plot=True)
+    df_res = expr.mass_transfer(df_01, sigma=SIGMA, steps=1000, plot=True)
     assert math.isclose(df_res.a[0], 0.09929181759175223)
     assert math.isclose(df_res.sig_a[0], 1.882350488972039e-09)
     assert math.isclose(df_res.b[0], -8.48536063565115e-09)

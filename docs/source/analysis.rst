@@ -1,10 +1,10 @@
 analysis subpackage
 ===================
 
-analysis.analysis module
-------------------------
+analysis.experiments module
+---------------------------
 
-.. automodule:: chamber.analysis.analysis
+.. automodule:: chamber.analysis.experiments
     :members:
     :undoc-members:
     :show-inheritance:
