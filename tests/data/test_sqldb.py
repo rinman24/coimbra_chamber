@@ -64,6 +64,10 @@ TDMS_04_SETTING = dict(
     Duty='5.0', IsMass=1, Pressure=100000, Reservoir=1, Temperature=290,
     TimeStep='1.00', TubeId=1
     )
+FALSE_SETTING = dict(
+    Duty='5.0', IsMass=0, Pressure=100000, Reservoir=1, Temperature=290,
+    TimeStep='1.00', TubeId=1
+    )
 
 TDMS_01_ADD_SETTING = [
     (
@@ -760,6 +764,20 @@ def test_get_test_df(cnx):
                        TEST_1_STATS_DF.loc['max', col])
         assert isclose(test_dict['data'][col].var(),
                        TEST_1_STATS_DF.loc['var', col])
+
+
+def test_get_test_from_set(cnx):
+    """
+    Test get_test_test_from_set.
+
+    Test the accuracy of returned TestIds.
+    """
+    cur = cnx.cursor()
+    assert sqldb.get_test_from_set(cur, TDMS_01_SETTING) == [1]
+    assert sqldb.get_test_from_set(cur, TDMS_02_SETTING) == [2]
+    assert sqldb.get_test_from_set(cur, TDMS_03_SETTING) == [3]
+    assert sqldb.get_test_from_set(cur, TDMS_04_SETTING) == [4]
+    assert sqldb.get_test_from_set(cur, FALSE_SETTING) is False
 
 
 def drop_tables(cursor, bol):
