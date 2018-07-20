@@ -12,7 +12,7 @@ the following implementation will allow futher development.
 
 Functions
 ---------
-- `analysis` -- perform analysis on the experimental data.
+- `mass_transfer` -- perform analysis on the experimental data.
 - `preprocess` -- ready a `DataFrame` for analysis.
 - `results_from_csv` -- get analysis results from a .csv file.
 
