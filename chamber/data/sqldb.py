@@ -904,7 +904,7 @@ def get_test_df(cnx, test_id):
 
     Returns
     -------
-    dict of {str: DataFrame}
+    dict(DataFrame)
         A `dict` of two `DataFrame`s, one conaining joined 'Setting' and 'Test'
         tables and antoher `DataFrame` containting joined Thermocouple readings
         and `Obseravation` tables.
