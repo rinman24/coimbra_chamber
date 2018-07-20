@@ -17,8 +17,8 @@ Welcome to chamber's documentation!
    :caption: Contents:
 
    getting_started
-   mathdoc
    modules
+   mathdoc
 
 
 Indices and tables
