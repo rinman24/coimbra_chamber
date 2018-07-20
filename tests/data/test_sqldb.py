@@ -161,6 +161,8 @@ TEMP_OBS_4 = [
     291.83
     ]
 
+# ----------------------------------------------------------------------------
+# DataFrame globals
 TEST_1_INFO_DICT = {
     'Temperature': [290.0], 'Pressure': [100000], 'Duty': [0.0],
     'IsMass': [0], 'Reservoir': [0], 'TimeStep': [1.0],
@@ -168,14 +170,11 @@ TEST_1_INFO_DICT = {
     'Author': 'author_1', 'Description': 'Duty 0; Resevoir Off; IsMass No',
     'TubeId': [1], 'TestId': [1], 'SettingId': [1]
 }
-
-
 TEST_1_INFO_DF = pd.DataFrame(TEST_1_INFO_DICT)
 TEST_1_INFO_DF = TEST_1_INFO_DF[['Temperature', 'Pressure', 'Duty', 'IsMass',
                                  'Reservoir', 'TimeStep', 'DateTime', 'Author',
                                  'Description', 'TubeId', 'TestId',
                                  'SettingId']]
-
 TEST_1_STATS_DF = pd.DataFrame(dict(
     idx=['sum', 'mean', 'min', 'max', 'var'],
     TC0=[7929.21, 293.67444444444442, 293.65, 293.71, 0.00031794871794867406],
@@ -191,7 +190,6 @@ TEST_1_STATS_DF = pd.DataFrame(dict(
     DewPoint=[7737.23, 286.564074, 286.52, 286.63, 0.00073276353276327522],
     )
 ).set_index('idx')
-
 TEST_1_DATA_DF_SIZE = (27, 22)
 
 # ----------------------------------------------------------------------------
