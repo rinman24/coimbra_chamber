@@ -7,6 +7,7 @@ Functions
 - `add_tube_info` -- Add test-independant Tube information.
 - `connect` -- Get a connection and cursor to a MySQL database.
 - `create_tables` -- Create tables in the database.
+- `get_test_df` -- Create `DataFrame` representations of the tests.
 
 .. todo:: Decouple database and tdms volatility via modulde encapsulation.
 """
@@ -17,6 +18,7 @@ from CoolProp.HumidAirProp import HAPropsSI
 import mysql.connector
 import nptdms
 import numpy as np
+import pandas as pd
 from scipy import stats
 
 from chamber import const
@@ -881,3 +883,49 @@ def add_tdms_file(cnx, tdms_obj):
         # Rollback transaction if there is an issue
         cnx.rollback()
         print("MySqlError: {}".format(err))
+
+
+def get_test_df(test_id, cnx):
+    """
+    Create `DataFrame` representations of the tests.
+
+    Uses the pandas `DataFrame` object's `read_sql` method to build a
+    dictionary containing a dataframe for joined Setting and Test tables and a
+    dataframe for joined Observation and TempObservation tables.
+
+    Parameters
+    ----------
+    cnx : mysql.connector.connection.MySQLConnection
+        Connection to MySQL database.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    dict of {str: DataFrame}
+        A `dict` of two `DataFrame`s, one conaining joined 'Setting' and 'Test'
+        tables and antoher `DataFrame` containting joined Thermocouple readings
+        and `Obseravation` tables.
+
+    Examples
+    --------
+    Get the `dict` of `DataFrame`s for a test with TestId=4.
+
+    >>> cnx = connect('my-schema')
+    >>> test_dict = get_test_df(4, cnx)
+    >>> print(test_dict['info']['author'].iloc[0])
+    >>> author_1
+    >>> print(test_dict['data']['TC2'].iloc[4])
+    >>> 293.01
+
+    """
+    # Build DataFrames
+    info_df = pd.read_sql(dml.get_info_df.format(test_id), con=cnx)
+    temp_df = pd.read_sql(dml.get_temp_df.format(test_id), con=cnx)
+    obs_df = pd.read_sql(dml.get_obs_df.format(test_id), con=cnx)
+    data_df = temp_df.merge(obs_df)
+
+    # Make dictionary
+    test_dict = {'info': info_df, 'data': data_df}
+    return test_dict
