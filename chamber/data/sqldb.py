@@ -885,7 +885,7 @@ def add_tdms_file(cnx, tdms_obj):
         print("MySqlError: {}".format(err))
 
 
-def get_test_df(test_id, cnx):
+def get_test_df(cnx, test_id):
     """
     Create `DataFrame` representations of the tests.
 
