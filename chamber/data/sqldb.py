@@ -905,13 +905,13 @@ def get_test_df(cnx, test_id):
     Returns
     -------
     dict(DataFrame)
-        A `dict` of two `DataFrame`s, one conaining joined 'Setting' and 'Test'
-        tables and antoher `DataFrame` containting joined Thermocouple readings
-        and `Obseravation` tables.
+        A `dict` of two `DataFrames`, one conaining joined 'Setting' and
+        'Test' tables and antoher `DataFrame` containting joined Thermocouple
+        readings and `Obseravation` tables.
 
     Examples
     --------
-    Get the `dict` of `DataFrame`s for a test with TestId=4.
+    Get the `dict` of `DataFrames` for a test with TestId=4.
 
     >>> cnx = connect('my-schema')
     >>> test_dict = get_test_df(4, cnx)
