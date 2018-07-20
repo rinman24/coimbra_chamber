@@ -1,6 +1,10 @@
 Variables
 =========
-All the variables are described here...
+**This section is currently under construction!**
+
+**To Do: Once the first IJHMT paper is submitted, we can fill out this section.**
+
+*Some* the variables are described here...
 
 .. table:: *Table: Variables*
     

@@ -92,11 +92,9 @@ Back to `Table of Contents`_
 1. From the repo directory; i.e., chamber
 ::
 
-    $ python -m pytest tests/<your-test-name>.py -v --capture=no
+    $ python -m pytest tests -xv  --cov=chamber tests
 
-It should also be noted that the test_const.py file in the test directory
-does not acctually contain tests, but rather the constants that are
-needed for testing.
+The above line requires both `pytest` and `pytest-cov` are installed.
 
 
 Preferred Way to Run Scripts
