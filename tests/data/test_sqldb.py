@@ -192,6 +192,8 @@ TEST_1_STATS_DF = pd.DataFrame(dict(
     )
 ).set_index('idx')
 
+TEST_1_DATA_DF_SIZE = (27, 22)
+
 # ----------------------------------------------------------------------------
 # Indexes
 TEST_INDEX = 7
@@ -743,11 +745,10 @@ def test_get_test_df(cnx):
     test_dict = sqldb.get_test_df(1, cnx)
     assert pd.testing.assert_frame_equal(test_dict['info'],
                                          TEST_1_INFO_DF) is None
-
+    print('SIZE\n\n', test_dict['data'].shape, '\n\n')
+    assert test_dict['data'].shape == TEST_1_DATA_DF_SIZE
     assert test_dict['data']['Idx'].iloc[3] == 5
-
     assert test_dict['data']['OptidewOk'].iloc[3] == 1
-
     assert test_dict['data']['CapManOk'].iloc[17] == 1
 
     for col in TEST_1_STATS_DF.keys():
