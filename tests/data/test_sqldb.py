@@ -770,7 +770,7 @@ def test_get_test_from_set(cnx):
     """
     Test get_test_test_from_set.
 
-    Test the accuracy of returned TestIds.
+    Test the accuracy of returned TestId lists.
     """
     cur = cnx.cursor()
     assert sqldb.get_test_from_set(cur, TDMS_01_SETTING) == [1]
