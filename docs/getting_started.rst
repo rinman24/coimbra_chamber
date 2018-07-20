@@ -2,7 +2,7 @@ Getting Started
 ===============
 
 MySQL Dependancy
-================
+----------------
 It is important to note that many of the sub-packages and modules in the
 `chamber` package interact with a MySQL database. The remainder of the
 documentation assumes basic familiarity with MySQL dabase installation
@@ -25,7 +25,7 @@ configuration file which is explained in the following section.
 
 
 Configuration file
-==================
+------------------
 
 A configuration file is used to store credentials for the MySQL database. An
 example configuraton file named 'example_config.ini' is included in the
@@ -39,8 +39,8 @@ modifications to the `example_config.ini` file.
 
 Once this is done, you configuration file shoule be ready to go!
 
-Dependancies
-============
+Python Dependancies
+-------------------
 Several dependancies are covered in the README file, please refer to the
 README file for more information on installing dependencies. Authors recommend
 using the anaconda package manager, which is the method covered in the README.
