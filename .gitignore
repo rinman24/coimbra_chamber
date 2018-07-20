@@ -34,6 +34,7 @@
 # pytest #
 ##########
 *.pytest_cache/
+*.coverage
 
 ##########
 # config #
