@@ -61,6 +61,7 @@ Back to `Table of Contents`_
   * pytz (for datetime testing)
   * schedule (for autonomous execution)
   * tabulate.tabulate (for table formatting)
+  * tqdm (for progress bars)
 
 Setting up Initial State of MySQL Database
 ------------------------------------------

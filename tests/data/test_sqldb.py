@@ -335,7 +335,7 @@ def test_tdms_obj():
 @pytest.fixture(scope='module')
 def analysis_df(results_cnx):
     """Create an analysis `DataFrame` from a test in test_results."""
-    test_dict = sqldb.get_test_dict(results_cnx, 1)
+    test_dict = sqldb._get_test_dict(results_cnx, 1)
     processed_df = experiments.preprocess(test_dict['data'], purge=True)
     analyzed_df = experiments.mass_transfer(processed_df)
     return analyzed_df
@@ -824,13 +824,13 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     assert not cnx.in_transaction
 
 
-def test_get_test_dict(cnx):
+def test__get_test_dict(cnx):
     """
     Test get_test_df.
 
     Test resultant `DataFrame` accuracy and structure.
     """
-    test_dict = sqldb.get_test_dict(cnx, 1)
+    test_dict = sqldb._get_test_dict(cnx, 1)
     assert pd.testing.assert_frame_equal(test_dict['info'],
                                          TEST_1_INFO_DF) is None
     assert test_dict['data'].shape == TEST_1_DATA_DF_SIZE
@@ -864,13 +864,13 @@ def test_get_test_from_set(cur):
     assert sqldb.get_test_from_set(cur, FALSE_SETTING) is False
 
 
-def test_add_rh_targets(results_cur, analysis_df):
+def test__add_rh_targets(results_cur, analysis_df):
     """
     Test add_rh_targets.
 
     Test the ability to input analysis data into the RHTargets table.
     """
-    assert sqldb.add_rh_targets(results_cur, analysis_df, ANALYSIS_TEST_ID)
+    assert sqldb._add_rh_targets(results_cur, analysis_df, ANALYSIS_TEST_ID)
     results_cur.execute('SELECT * FROM RHTargets;')
     res = results_cur.fetchall()
     assert len(res) == RH_TARGET_LENGTH
@@ -879,13 +879,13 @@ def test_add_rh_targets(results_cur, analysis_df):
         assert res[idx][1] == ANALYSIS_TEST_ID
 
 
-def test_add_results(results_cur, analysis_df):
+def test__add_results(results_cur, analysis_df):
     """
     Test add_results.
 
     Test the ability to input analysis data into the Results table.
     """
-    assert sqldb.add_results(results_cur, analysis_df, ANALYSIS_TEST_ID)
+    assert sqldb._add_results(results_cur, analysis_df, ANALYSIS_TEST_ID)
 
     results_cur.execute(('SELECT * FROM Results WHERE TestId={} AND RH=0.50'
                          ' AND Nu=599').format(ANALYSIS_TEST_ID))
