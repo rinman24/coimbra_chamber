@@ -14,6 +14,7 @@ import pandas as pd
 import pytest
 
 import chamber.const as const
+from chamber.analysis import experiments
 from chamber.data import sqldb, ddl, dml
 
 config = configparser.ConfigParser()
@@ -197,6 +198,42 @@ TEST_1_STATS_DF = pd.DataFrame(dict(
 TEST_1_DATA_DF_SIZE = (27, 22)
 
 # ----------------------------------------------------------------------------
+# RHTarget globals
+RH_TARGET_LIST = [Decimal('{:.2f}'.format(rh/100)) for rh in range(10, 85, 5)]
+RH_TARGET_LENGTH = 15
+
+# ----------------------------------------------------------------------------
+# Analysis globals
+ANALYSIS_TEST_ID = 1
+RESULTS_LIST = [Decimal('0.50'), 1, 0.0988713, 1.36621e-07, -3.07061e-09,
+                9.40458e-12, 329.257, Decimal('1.00'), 599]
+RESULTS_STATS_DF = pd.DataFrame(dict(
+    idx=['count', 'sum', 'var', 'avg', 'min', 'max'],
+    RH=[1099, 563.0, 0.03056339165143929, 0.512284,
+        0.10000000000000001, 0.80000000000000004],
+    TestId=[1099, 1099, 0, 1, 1, 1],
+    A=[1099, 108.65434961020947, 2.9013655607597385e-10, 0.09886656015487667,
+       0.09882460534572601, 0.09888922423124313],
+    SigA=[1099, 2.8483969686021737e-05, 1.6791311969228083e-14,
+          2.5918079787098944e-08, 5.754197673901729e-10,
+          2.316897962373332e-06],
+    B=[1099, -3.391460006607616e-06, 1.0181455109937529e-18,
+       -3.0859508704345916e-09, -6.390378448628553e-09,
+       -1.419641071365163e-09],
+    SigB=[1099, 1.7167214310265938e-09, 3.639741584914378e-23,
+          1.5620759154018142e-12, 4.898612101351084e-14,
+          4.862525659898864e-11],
+    Chi2=[1099, 3379617267.8442154, 42744441389327.21, 3075174.9479929167,
+          97.25215148925781, 54769204.0],
+    Q=[1099, 177.95, 0.13367083617251502,
+       0.161920, 0.0, 1.00],
+    Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999],
+    )
+).set_index('idx')
+
+RESULTS_COLS = ['RH', 'TestId', 'A', 'SigA', 'B', 'SigB', 'Chi2', 'Q', 'Nu']
+
+# ----------------------------------------------------------------------------
 # Indexes
 TEST_INDEX = 7
 TC_INDEX = 7
@@ -243,6 +280,46 @@ def cur(cnx):
 
 
 @pytest.fixture(scope='module')
+def results_cnx():
+    """Connect to database with module level fixture."""
+    # ------------------------------------------------------------------------
+    # Connect
+    print("\nConnecting to MySQL Server...")
+    results_cnx = sqldb.connect("test_results")
+    print("Successfully connected to test_results.")
+    yield results_cnx
+
+    # ------------------------------------------------------------------------
+    # Cleanup with new cursor
+    print("\nClearing results...")
+    results_cur = results_cnx.cursor()
+    clear_results(results_cur, True)
+
+    print("Disconnecting from MySQL results_cnx...")
+    results_cnx.commit()
+    assert results_cur.close()
+    results_cnx.close()
+    print("Connection to MySQL results_cnx closed.")
+
+
+@pytest.fixture(scope='module')
+def results_cur(results_cnx):
+    """Obtain a cursor to use at the module level."""
+    # ------------------------------------------------------------------------
+    # Get cursor
+    print("\nObtaining a cursor for the test_results connection...")
+    results_cur = results_cnx.cursor()
+    print("test_results cursor obtained.")
+    yield results_cur
+
+    # ------------------------------------------------------------------------
+    # Close cursor
+    print("\nClosing module level test_results cursor...")
+    assert results_cur.close()
+    print("Module level test_results cursor closed.")
+
+
+@pytest.fixture(scope='module')
 def test_tdms_obj():
     """Construct list of nptdms.TdmsFile as module level fixture."""
     return (  # IsMass 1 Duty 5%
@@ -253,6 +330,15 @@ def test_tdms_obj():
             nptdms.TdmsFile(CORRECT_FILE_LIST[2]),
             # IsMass 0 Duty 0%
             nptdms.TdmsFile(CORRECT_FILE_LIST[3]))
+
+
+@pytest.fixture(scope='module')
+def analysis_df(results_cnx):
+    """Create an analysis `DataFrame` from a test in test_results."""
+    test_dict = sqldb.get_test_dict(results_cnx, 1)
+    processed_df = experiments.preprocess(test_dict['data'], purge=True)
+    analyzed_df = experiments.mass_transfer(processed_df)
+    return analyzed_df
 
 
 def test_connect(cnx):
@@ -738,16 +824,15 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     assert not cnx.in_transaction
 
 
-def test_get_test_df(cnx):
+def test_get_test_dict(cnx):
     """
     Test get_test_df.
 
     Test resultant `DataFrame` accuracy and structure.
     """
-    test_dict = sqldb.get_test_df(cnx, 1)
+    test_dict = sqldb.get_test_dict(cnx, 1)
     assert pd.testing.assert_frame_equal(test_dict['info'],
                                          TEST_1_INFO_DF) is None
-    print('SIZE\n\n', test_dict['data'].shape, '\n\n')
     assert test_dict['data'].shape == TEST_1_DATA_DF_SIZE
     assert test_dict['data']['Idx'].iloc[3] == 5
     assert test_dict['data']['OptidewOk'].iloc[3] == 1
@@ -766,18 +851,102 @@ def test_get_test_df(cnx):
                        TEST_1_STATS_DF.loc['var', col])
 
 
-def test_get_test_from_set(cnx):
+def test_get_test_from_set(cur):
     """
     Test get_test_test_from_set.
 
     Test the accuracy of returned TestId lists.
     """
-    cur = cnx.cursor()
     assert sqldb.get_test_from_set(cur, TDMS_01_SETTING) == [1]
     assert sqldb.get_test_from_set(cur, TDMS_02_SETTING) == [2]
     assert sqldb.get_test_from_set(cur, TDMS_03_SETTING) == [3]
     assert sqldb.get_test_from_set(cur, TDMS_04_SETTING) == [4]
     assert sqldb.get_test_from_set(cur, FALSE_SETTING) is False
+
+
+def test_add_rh_targets(results_cur, analysis_df):
+    """
+    Test add_rh_targets.
+
+    Test the ability to input analysis data into the RHTargets table.
+    """
+    assert sqldb.add_rh_targets(results_cur, analysis_df, ANALYSIS_TEST_ID)
+    results_cur.execute('SELECT * FROM RHTargets;')
+    res = results_cur.fetchall()
+    assert len(res) == RH_TARGET_LENGTH
+    for idx in range(RH_TARGET_LENGTH):
+        assert res[idx][0] == RH_TARGET_LIST[idx]
+        assert res[idx][1] == ANALYSIS_TEST_ID
+
+
+def test_add_results(results_cur, analysis_df):
+    """
+    Test add_results.
+
+    Test the ability to input analysis data into the Results table.
+    """
+    assert sqldb.add_results(results_cur, analysis_df, ANALYSIS_TEST_ID)
+
+    results_cur.execute(('SELECT * FROM Results WHERE TestId={} AND RH=0.50'
+                         ' AND Nu=599').format(ANALYSIS_TEST_ID))
+    res = results_cur.fetchall()
+    for idx in range(len(res)):
+        assert isclose(float(res[idx][0]), float(RESULTS_LIST[idx]))
+
+    for col in RESULTS_COLS:
+        results_cur.execute(
+            dml.get_result_stats.format(col, ANALYSIS_TEST_ID)
+            )
+        res = results_cur.fetchall()
+        assert isclose(res[0][0], RESULTS_STATS_DF.loc['count', col])
+        assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
+        assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
+        assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
+        assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
+        assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+
+
+def test_add_analysis(results_cnx, results_cur):
+    """
+    Test add_analysis.
+
+    Test the ability to pull, analyze, and insert data into the MySql database.
+    """
+    # ------------------------------------------------------------------------
+    # Clear all of the previous work we have done in the database
+    clear_results(results_cur, True)
+    assert not results_cnx.in_transaction
+
+    assert sqldb.add_analysis(results_cnx, ANALYSIS_TEST_ID)
+
+    # ------------------------------------------------------------------------
+    # Test correct RHTargets input
+    results_cur.execute('SELECT * FROM RHTargets;')
+    res = results_cur.fetchall()
+    assert len(res) == RH_TARGET_LENGTH
+    for idx in range(RH_TARGET_LENGTH):
+        assert res[idx][0] == RH_TARGET_LIST[idx]
+        assert res[idx][1] == ANALYSIS_TEST_ID
+
+    # ------------------------------------------------------------------------
+    # Test correct Results input
+    results_cur.execute(('SELECT * FROM Results WHERE TestId={} AND RH=0.50'
+                         ' AND Nu=599').format(ANALYSIS_TEST_ID))
+    res = results_cur.fetchall()
+    for idx in range(len(res)):
+        assert isclose(float(res[idx][0]), float(RESULTS_LIST[idx]))
+
+    for col in RESULTS_COLS:
+        results_cur.execute(
+            dml.get_result_stats.format(col, ANALYSIS_TEST_ID)
+            )
+        res = results_cur.fetchall()
+        assert isclose(res[0][0], RESULTS_STATS_DF.loc['count', col])
+        assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
+        assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
+        assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
+        assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
+        assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
 
 
 def drop_tables(cursor, bol):
@@ -791,12 +960,15 @@ def drop_tables(cursor, bol):
         print('Tables not dropped.')
 
 
-def drop_tables(cursor, bol):
+def clear_results(cursor, bol):
     """Drop databese tables."""
-    print("Dropping tables...")
-    cursor.execute("DROP TABLE IF EXISTS " +
-                   ", ".join(ddl.table_name_list) +
-                   ";")
+    if bol:
+        print('Clearing RHTargets and Results...')
+        truncate(cursor, 'RHTargets')
+        truncate(cursor, 'Results')
+        print('RHTargets and Results cleared.')
+    else:
+        print('RHTargests and Results not cleared.')
 
 
 def truncate(cursor, table):
