@@ -198,6 +198,16 @@ TEST_1_STATS_DF = pd.DataFrame(dict(
 TEST_1_DATA_DF_SIZE = (27, 22)
 
 # ----------------------------------------------------------------------------
+# RHTarget globals
+RH_TARGET_LIST = [Decimal('{:.2f}'.format(rh/100)) for rh in range(10, 85, 5)]
+RH_TARGET_LENGTH = 15
+
+# ----------------------------------------------------------------------------
+# Analysis globals
+ANALYSIS_TEST_ID = 1
+RESULTS_LIST = [(Decimal('0.50'), 1, 0.0988713, 1.36621e-07, -3.07061e-09,
+                9.40458e-12, 329.257, Decimal('1.00'), 599)]
+# ----------------------------------------------------------------------------
 # Indexes
 TEST_INDEX = 7
 TC_INDEX = 7
@@ -834,7 +844,13 @@ def test_add_rh_targets(results_cur, analysis_df):
 
     Test the ability to input analysis data into the RHTargets table.
     """
-    assert sqldb.add_rh_targets(results_cur, analysis_df, 1)
+    assert sqldb.add_rh_targets(results_cur, analysis_df, ANALYSIS_TEST_ID)
+    results_cur.execute('SELECT * FROM RHTargets;')
+    res = results_cur.fetchall()
+    assert len(res) == RH_TARGET_LENGTH
+    for idx in range(RH_TARGET_LENGTH):
+        assert res[idx][0] == RH_TARGET_LIST[idx]
+        assert res[idx][1] == ANALYSIS_TEST_ID
 
 
 def test_add_results(results_cur, analysis_df):
@@ -843,7 +859,17 @@ def test_add_results(results_cur, analysis_df):
 
     Test the ability to input analysis data into the Results table.
     """
-    assert sqldb.add_results(results_cur, analysis_df, 1)
+    assert sqldb.add_results(results_cur, analysis_df, ANALYSIS_TEST_ID)
+    results_cur.execute(('SELECT * FROM Results WHERE TestId={} AND RH=0.50'
+                         ' AND Nu=599').format(ANALYSIS_TEST_ID))
+    res = results_cur.fetchall()
+    print(res)
+    for idx in range(len(res)):
+        assert isclose(res[idx][0], RESULTS_LIST[idx])
+    results_cur.execute(('SELECT COUNT(*) FROM Results'
+                         ' WHERE TestId={}').format(ANALYSIS_TEST_ID))
+    res = results_cur.fetchall()
+    assert res == 1099
 
 
 def test_add_analysis(results_cnx, results_cur):
@@ -857,7 +883,25 @@ def test_add_analysis(results_cnx, results_cur):
     clear_results(results_cur, True)
     assert not results_cnx.in_transaction
 
-    assert sqldb.add_analysis(results_cnx, 1)
+    assert sqldb.add_analysis(results_cnx, ANALYSIS_TEST_ID)
+
+    # ------------------------------------------------------------------------
+    # Test correct RHTargets input
+    results_cur.execute('SELECT * FROM RHTargets;')
+    res = results_cur.fetchall()
+    assert len(res) == RH_TARGET_LENGTH
+    for idx in range(RH_TARGET_LENGTH):
+        assert res[idx][0] == RH_TARGET_LIST[idx]
+        assert res[idx][1] == ANALYSIS_TEST_ID
+
+    # ------------------------------------------------------------------------
+    # Test correct Results input
+    results_cur.execute(('SELECT * FROM Results WHERE TestId={} AND RH=0.50'
+                         ' AND Nu=599').format(ANALYSIS_TEST_ID))
+    res = results_cur.fetchall()
+    print(res)
+    for idx in range(len(res)):
+        assert isclose(res[idx][0], RESULTS_LIST[idx])
 
 
 def drop_tables(cursor, bol):
