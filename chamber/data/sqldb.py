@@ -979,20 +979,40 @@ def get_test_from_set(cur, setting_info):
         return test_ids
 
 
-def add_analysis(cnx, test_id):
-    test_dict = get_test_dict(cnx, test_id)
-    cur = cnx.cursor()
-    processed_df = experiments.preprocess(test_dict['data'], purge=True)
-    analyzed_df = experiments.mass_transfer(processed_df)
-    add_rh_targets(cur, analyzed_df, test_id)
-    add_results(cur, analyzed_df, test_id)
-    cnx.commit()
-    cur.close()
-
-    return True
-
-
 def add_rh_targets(cur, analyzed_df, test_id):
+    """
+    Insert Chi2 RH results into MySql database RHTargets table.
+
+    Uses cursor's .executemany function on a MySQL insert query and list
+    of RH data built by looping through an analyzed `DataFrame` built by
+    the `experiments.mass_transfer` function.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    analyzed_df: DataFrame
+        Results of the analysis of the test.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    `True` or `None`
+        `True` if successful. Else `None`.
+
+    Examples
+    --------
+    Add RH data for an existing TestId.
+
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> test_id = 1
+    >>> add_rh_targets(cur, test_id)
+    True
+
+    """
     rh_trgt_list = [
         (test_id, '{:.2f}'.format(rh)) for rh in analyzed_df.RH.unique()
     ]
@@ -1002,6 +1022,39 @@ def add_rh_targets(cur, analyzed_df, test_id):
 
 
 def add_results(cur, analyzed_df, test_id):
+    """
+    Insert Chi2 results into MySql database Results table.
+
+    Uses cursor's .executemany function on a MySQL insert query and list
+    of results data built by looping through an analyzed `DataFrame` built by
+    the `experiments.mass_transfer` function.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    analyzed_df: DataFrame
+        Results of the analysis of the test.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    `True` or `None`
+        `True` if successful. Else `None`.
+
+    Examples
+    --------
+    Add results data for existing RHTargets.
+
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> test_id = 1
+    >>> add_results(cur, test_id)
+    True
+
+    """
     results_list = [
         (
             test_id,
@@ -1018,3 +1071,68 @@ def add_results(cur, analyzed_df, test_id):
     cur.executemany(dml.add_results, results_list)
 
     return True
+
+
+def add_analysis(cnx, test_id):
+    """
+    Pull, analyze, and insert analysis results into MySQL database.
+
+    Uses `experiments` module to analyze a `DataFrame` of data stored in MySQL
+    database. Uses `add_rh_targets` and `add_results` to populate MySQL
+    databse RHTargest and Results tables.
+
+    Parameters
+    ----------
+    cnx : mysql.connector.connection.MySQLConnection
+        Connection to MySQL database.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    `True` or `None`
+        `True` if sucessful, else `None`.
+
+    Examples
+    --------
+    Add analysis results for an existing TestId.
+
+    >>> cnx = connect('my-schema')
+    >>> test_id = 1
+    >>> add_abalysis(cnx, test_id)
+    True
+
+    """
+    # --------------------------------------------------------------------
+    # Create a DataFrame of analyzed data
+    test_dict = get_test_dict(cnx, test_id)
+    processed_df = experiments.preprocess(test_dict['data'], purge=True)
+    analyzed_df = experiments.mass_transfer(processed_df)
+    try:
+        # --------------------------------------------------------------------
+        # Create a cursor and start the transaction
+        cur = cnx.cursor()
+        assert cnx.in_transaction
+
+        # --------------------------------------------------------------------
+        # RHTargets: call add_rh_targets
+        add_rh_targets(cur, analyzed_df, test_id)
+        assert cnx.in_transaction
+        cnx.commit()
+        assert not cnx.in_transaction
+
+        # --------------------------------------------------------------------
+        # Results: call add_results
+        add_results(cur, analyzed_df, test_id)
+        assert cnx.in_transaction
+        cnx.commit()
+        assert not cnx.in_transaction
+        assert cur.close()
+
+        return True
+    except mysql.connector.Error as err:
+        # --------------------------------------------------------------------
+        # Rollback transaction if there is an issue
+        cnx.rollback()
+        print("MySqlError: {}".format(err))

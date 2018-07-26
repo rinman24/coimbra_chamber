@@ -854,8 +854,9 @@ def test_add_analysis(results_cnx, results_cur):
     """
     # ------------------------------------------------------------------------
     # Clear all of the previous work we have done in the database
-    truncate(results_cur, 'RHTargets')
-    truncate(results_cur, 'Results')
+    clear_results(results_cur, True)
+    assert not results_cnx.in_transaction
+
     assert sqldb.add_analysis(results_cnx, 1)
 
 
