@@ -7,7 +7,7 @@ Functions
 - `add_tube_info` -- Add test-independant Tube information.
 - `connect` -- Get a connection and cursor to a MySQL database.
 - `create_tables` -- Create tables in the database.
-- `get_test_df` -- Create `DataFrame` representations of the tests.
+- `get_test_dict` -- Create `DataFrame` representations of the tests.
 - `get_test_from_set` -- Get a list of TestIds corresponding to setting info.
 
 .. todo:: Decouple database and tdms volatility via modulde encapsulation.
@@ -21,8 +21,10 @@ import nptdms
 import numpy as np
 import pandas as pd
 from scipy import stats
+from tqdm import tqdm
 
 from chamber import const
+from chamber.analysis import experiments
 from chamber.data import ddl, dml
 
 
@@ -98,7 +100,7 @@ def create_tables(cur, tables):
         List of tuples of table names and DDL query language. For example:
         [('UnitTest',
         "CREATE TABLE `UnitTest` ("
-        "    `UnitTestID` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+        "    `UnitTestID` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
         "    `Number` DECIMAL(5,2) NULL,"
         "    `String` VARCHAR(30) NULL,"
         "  PRIMARY KEY (`UnitTestID`)"
@@ -869,7 +871,7 @@ def add_tdms_file(cnx, tdms_obj):
         # Observation and TempObservations: call add_obs_info and
         # add_temp_info in a loop which will add all of the observations from
         # the file.
-        for tdms_idx in range(len(tdms_obj.object("Data", "Idx").data)):
+        for tdms_idx in tqdm(range(len(tdms_obj.object("Data", "Idx").data))):
             assert _add_obs_info(cur, tdms_obj, test_id, tdms_idx)
             idx = int(tdms_obj.object("Data", "Idx").data[tdms_idx])
             assert _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx)
@@ -886,7 +888,7 @@ def add_tdms_file(cnx, tdms_obj):
         print("MySqlError: {}".format(err))
 
 
-def get_test_df(cnx, test_id):
+def get_test_dict(cnx, test_id):
     """
     Create `DataFrame` representations of the tests.
 
@@ -914,7 +916,7 @@ def get_test_df(cnx, test_id):
     Get the `dict` of `DataFrames` for a test with TestId=4.
 
     >>> cnx = connect('my-schema')
-    >>> test_dict = get_test_df(4, cnx)
+    >>> test_dict = get_test_dict(4, cnx)
     >>> print(test_dict['info']['author'].iloc[0])
     >>> author_1
     >>> test_dict['data']['TC2'].iloc[4]
@@ -975,3 +977,44 @@ def get_test_from_set(cur, setting_info):
     else:
         test_ids = [test_id[0] for test_id in result]
         return test_ids
+
+
+def add_analysis(cnx, test_id):
+    test_dict = get_test_dict(cnx, test_id)
+    cur = cnx.cursor()
+    processed_df = experiments.preprocess(test_dict['data'], purge=True)
+    analyzed_df = experiments.mass_transfer(processed_df)
+    add_rh_targets(cur, analyzed_df, test_id)
+    add_results(cur, analyzed_df, test_id)
+    cnx.commit()
+    cur.close()
+
+    return True
+
+
+def add_rh_targets(cur, analyzed_df, test_id):
+    rh_trgt_list = [
+        (test_id, '{:.2f}'.format(rh)) for rh in analyzed_df.RH.unique()
+    ]
+    cur.executemany(dml.add_rh_targets, rh_trgt_list)
+
+    return True
+
+
+def add_results(cur, analyzed_df, test_id):
+    results_list = [
+        (
+            test_id,
+            float(analyzed_df.iloc[idx]['RH']),
+            float(analyzed_df.iloc[idx]['a']),
+            float(analyzed_df.iloc[idx]['sig_a']),
+            float(analyzed_df.iloc[idx]['b']),
+            float(analyzed_df.iloc[idx]['sig_b']),
+            float(analyzed_df.iloc[idx]['chi2']),
+            float(analyzed_df.iloc[idx]['Q']),
+            float(analyzed_df.iloc[idx]['nu'])
+        ) for idx in analyzed_df.index
+    ]
+    cur.executemany(dml.add_results, results_list)
+
+    return True

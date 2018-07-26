@@ -34,11 +34,29 @@ add_temp = ("INSERT INTO TempObservation "
             " VALUES "
             "(%s, %s, %s, %s)")
 
+add_rh = ("INSERT INTO RHTarget "
+          "(TestId, RH)"
+          " VALUES "
+          "(%(TestId)s, %(RH)s)")
+
+add_result = ("INSERT INTO Results "
+              "(TestId, RH, A, SigA, B, SigB, Chi2, Q,"
+              " Nu)"
+              " VALUES "
+              "(%(TestId)s, %(RH)s, %(A)s, %(SigA)s, %(B)s, "
+              "%(SigB)s, %(Chi2)s, %(Q)s, %(Nu)s)")
+
 add_tube = ("INSERT INTO Tube "
             "(DiameterIn, DiameterOut, Length, Material, Mass)"
             " VALUES "
             "(%(DiameterIn)s, %(DiameterOut)s, %(Length)s,"
             " %(Material)s, %(Mass)s)")
+
+add_rh_targets = "INSERT INTO RHTargets (TestId, RH) VALUES (%s, %s)"
+
+add_results = ("INSERT INTO Results"
+               "  (TestId, RH, A, SigA, B, SigB, Chi2, Q, Nu)"
+               "  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
 
 add_unit = ("INSERT INTO Unit "
             "(Duty, Length, Mass, Power, Pressure, Temperature, Time)"

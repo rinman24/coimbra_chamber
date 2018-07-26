@@ -14,6 +14,7 @@ import pandas as pd
 import pytest
 
 import chamber.const as const
+from chamber.analysis import experiments
 from chamber.data import sqldb, ddl, dml
 
 config = configparser.ConfigParser()
@@ -243,6 +244,46 @@ def cur(cnx):
 
 
 @pytest.fixture(scope='module')
+def results_cnx():
+    """Connect to database with module level fixture."""
+    # ------------------------------------------------------------------------
+    # Connect
+    print("\nConnecting to MySQL Server...")
+    results_cnx = sqldb.connect("test_results")
+    print("Successfully connected to test_results.")
+    yield results_cnx
+
+    # ------------------------------------------------------------------------
+    # Cleanup with new cursor
+    print("\nClearing results...")
+    results_cur = results_cnx.cursor()
+    clear_results(results_cur, True)
+
+    print("Disconnecting from MySQL results_cnx...")
+    results_cnx.commit()
+    assert results_cur.close()
+    results_cnx.close()
+    print("Connection to MySQL results_cnx closed.")
+
+
+@pytest.fixture(scope='module')
+def results_cur(results_cnx):
+    """Obtain a cursor to use at the module level."""
+    # ------------------------------------------------------------------------
+    # Get cursor
+    print("\nObtaining a cursor for the test_results connection...")
+    results_cur = results_cnx.cursor()
+    print("test_results cursor obtained.")
+    yield results_cur
+
+    # ------------------------------------------------------------------------
+    # Close cursor
+    print("\nClosing module level test_results cursor...")
+    assert results_cur.close()
+    print("Module level test_results cursor closed.")
+
+
+@pytest.fixture(scope='module')
 def test_tdms_obj():
     """Construct list of nptdms.TdmsFile as module level fixture."""
     return (  # IsMass 1 Duty 5%
@@ -253,6 +294,15 @@ def test_tdms_obj():
             nptdms.TdmsFile(CORRECT_FILE_LIST[2]),
             # IsMass 0 Duty 0%
             nptdms.TdmsFile(CORRECT_FILE_LIST[3]))
+
+
+@pytest.fixture(scope='module')
+def analysis_df(results_cnx):
+    """Create an analysis `DataFrame` from a test in test_results."""
+    test_dict = sqldb.get_test_dict(results_cnx, 1)
+    processed_df = experiments.preprocess(test_dict['data'], purge=True)
+    analyzed_df = experiments.mass_transfer(processed_df)
+    return analyzed_df
 
 
 def test_connect(cnx):
@@ -738,16 +788,15 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     assert not cnx.in_transaction
 
 
-def test_get_test_df(cnx):
+def test_get_test_dict(cnx):
     """
     Test get_test_df.
 
     Test resultant `DataFrame` accuracy and structure.
     """
-    test_dict = sqldb.get_test_df(cnx, 1)
+    test_dict = sqldb.get_test_dict(cnx, 1)
     assert pd.testing.assert_frame_equal(test_dict['info'],
                                          TEST_1_INFO_DF) is None
-    print('SIZE\n\n', test_dict['data'].shape, '\n\n')
     assert test_dict['data'].shape == TEST_1_DATA_DF_SIZE
     assert test_dict['data']['Idx'].iloc[3] == 5
     assert test_dict['data']['OptidewOk'].iloc[3] == 1
@@ -766,18 +815,48 @@ def test_get_test_df(cnx):
                        TEST_1_STATS_DF.loc['var', col])
 
 
-def test_get_test_from_set(cnx):
+def test_get_test_from_set(cur):
     """
     Test get_test_test_from_set.
 
     Test the accuracy of returned TestId lists.
     """
-    cur = cnx.cursor()
     assert sqldb.get_test_from_set(cur, TDMS_01_SETTING) == [1]
     assert sqldb.get_test_from_set(cur, TDMS_02_SETTING) == [2]
     assert sqldb.get_test_from_set(cur, TDMS_03_SETTING) == [3]
     assert sqldb.get_test_from_set(cur, TDMS_04_SETTING) == [4]
     assert sqldb.get_test_from_set(cur, FALSE_SETTING) is False
+
+
+def test_add_rh_targets(results_cur, analysis_df):
+    """
+    Test add_rh_targets.
+
+    Test the ability to input analysis data into the RHTargets table.
+    """
+    assert sqldb.add_rh_targets(results_cur, analysis_df, 1)
+
+
+def test_add_results(results_cur, analysis_df):
+    """
+    Test add_results.
+
+    Test the ability to input analysis data into the Results table.
+    """
+    assert sqldb.add_results(results_cur, analysis_df, 1)
+
+
+def test_add_analysis(results_cnx, results_cur):
+    """
+    Test add_analysis.
+
+    Test the ability to pull, analyze, and insert data into the MySql database.
+    """
+    # ------------------------------------------------------------------------
+    # Clear all of the previous work we have done in the database
+    truncate(results_cur, 'RHTargets')
+    truncate(results_cur, 'Results')
+    assert sqldb.add_analysis(results_cnx, 1)
 
 
 def drop_tables(cursor, bol):
@@ -791,12 +870,15 @@ def drop_tables(cursor, bol):
         print('Tables not dropped.')
 
 
-def drop_tables(cursor, bol):
+def clear_results(cursor, bol):
     """Drop databese tables."""
-    print("Dropping tables...")
-    cursor.execute("DROP TABLE IF EXISTS " +
-                   ", ".join(ddl.table_name_list) +
-                   ";")
+    if bol:
+        print('Clearing RHTargets and Results...')
+        truncate(cursor, 'RHTargets')
+        truncate(cursor, 'Results')
+        print('RHTargets and Results cleared.')
+    else:
+        print('RHTargests and Results not cleared.')
 
 
 def truncate(cursor, table):

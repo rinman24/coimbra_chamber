@@ -23,6 +23,7 @@ from CoolProp.HumidAirProp import HAPropsSI
 import pandas as pd
 import numpy as np
 import scipy.signal as signal
+from tqdm import tqdm
 
 from chamber.analysis import chi2
 
@@ -192,17 +193,17 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
     .. todo:: Examples.
 
     """
+    print('Starting analysis...')
     rh_targets = _get_valid_rh_targets(dataframe)
     res = []
-    for rh in rh_targets:
-        print('target={0}'.format(rh))
+    for rh in tqdm(rh_targets):
         idx = _get_target_idx(dataframe, rh)
         for len_ in _half_len_gen(dataframe, idx, steps=steps):
-            print('{0}: \thalf_length={1}'.format(rh, len_))
             time, mass = _get_stat_group(dataframe, idx, len_)
             stats = chi2.chi2(time, mass, sigma, plot=plot)
             stats.append(rh)
             res.append(stats)
+    print('Analysis complete.')
     return pd.DataFrame(
         res, columns=['a', 'sig_a', 'b', 'sig_b', 'chi2', 'Q', 'nu', 'RH']
         )
