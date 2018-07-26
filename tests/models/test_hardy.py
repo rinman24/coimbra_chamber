@@ -4,18 +4,11 @@ import pytest
 
 from chamber.models import hardy
 
-# YOU NEED TO TEST THAT THESE RAISE EXCEPTIONS!!!!
-# YOU NEED TO TEST THAT THESE RAISE EXCEPTIONS!!!!
-# YOU NEED TO TEST THAT THESE RAISE EXCEPTIONS!!!!
-# YOU NEED TO TEST THAT THESE RAISE EXCEPTIONS!!!!
-# YOU NEED TO TEST THAT THESE RAISE EXCEPTIONS!!!!
-# YOU NEED TO TEST THAT THESE RAISE EXCEPTIONS!!!!
-# YOU NEED TO TEST THAT THESE RAISE EXCEPTIONS!!!!
-
 
 def test__get_p_sat_water_ideal():
     """173 to 473"""
-    assert math.isclose(hardy._get_p_sat_water_ideal(173), 0.0035124168637203535)
+    assert math.isclose(hardy._get_p_sat_water_ideal(173),
+                        0.0035124168637203535)
     assert math.isclose(hardy._get_p_sat_water_ideal(223), 6.3289928031397835)
     assert math.isclose(hardy._get_p_sat_water_ideal(273), 604.5834971866927)
     assert math.isclose(hardy._get_p_sat_water_ideal(323), 12261.037776936948)
@@ -53,7 +46,7 @@ def test__get_enh_alpha():
     assert math.isclose(
         hardy._get_enh_alpha(300), 0.0014958583000000136
         )
-    
+
     # 273 K
     assert math.isclose(
         hardy._get_enh_alpha(273), 0.0003569331704569856
@@ -66,6 +59,7 @@ def test__get_enh_alpha():
     with pytest.raises(ValueError) as err:
         hardy._get_enh_alpha(200)
     assert err.value.args[0] == "`t_in` must be between 223.15 K and 373.15 K."
+
 
 def test__get_enh_beta():
     # Ice
@@ -87,12 +81,13 @@ def test__get_enh_beta():
         hardy._get_enh_beta(400)
     assert err.value.args[0] == "`t_in` must be between 223.15 K and 373.15 K."
 
+
 def test__get_enh_fact():
     # ----------------------------------------------------------------------- #
     # 1 atm
     # ----------------------------------------------------------------------- #
     p = 101325
-    
+
     # Ice
     assert math.isclose(hardy._get_enh_fact(p, 235), 1.004911524525183)
     assert math.isclose(hardy._get_enh_fact(p, 250), 1.0043558345725534)
@@ -112,7 +107,7 @@ def test__get_enh_fact():
     # 0.67 atm
     # ----------------------------------------------------------------------- #
     p = 101325*0.67
-    
+
     # Ice
     assert math.isclose(hardy._get_enh_fact(p, 235), 1.0031944344175807)
     assert math.isclose(hardy._get_enh_fact(p, 250), 1.002881021342391)
@@ -132,7 +127,7 @@ def test__get_enh_fact():
     # 0.33 atm
     # ----------------------------------------------------------------------- #
     p = 101325*0.33
-    
+
     # Ice
     assert math.isclose(hardy._get_enh_fact(p, 235), 1.0014284253099317)
     assert math.isclose(hardy._get_enh_fact(p, 250), 1.001363861938361)
@@ -148,13 +143,18 @@ def test__get_enh_fact():
     assert math.isclose(hardy._get_enh_fact(p, 273), 1.001516749541024)
     assert math.isclose(hardy._get_enh_fact(p, 273.15), 1.0014899358177423)
 
+    # Raise error
+    with pytest.raises(ValueError) as err:
+        hardy._get_enh_fact(p, 200)
+    assert err.value.args[0] == "`t_in` must be between 223.15 K and 373.15 K."
+
 
 def test_get_p_sat():
     # ----------------------------------------------------------------------- #
     # 1 atm
     # ----------------------------------------------------------------------- #
     p = 101325
-    
+
     # Ice
     assert math.isclose(hardy.get_p_sat(p, 235), 15.87813860915064)
     assert math.isclose(hardy.get_p_sat(p, 250), 76.33674778018978)
@@ -174,7 +174,7 @@ def test_get_p_sat():
     # 0.67 atm
     # ----------------------------------------------------------------------- #
     p = 101325*0.67
-    
+
     # Ice
     assert math.isclose(hardy.get_p_sat(p, 235), 15.851007668697159,)
     assert math.isclose(hardy.get_p_sat(p, 250), 76.22465359832873)
@@ -194,7 +194,7 @@ def test_get_p_sat():
     # 0.33 atm
     # ----------------------------------------------------------------------- #
     p = 101325*0.33
-    
+
     # Ice
     assert math.isclose(hardy.get_p_sat(p, 235), 15.823103781925115)
     assert math.isclose(hardy.get_p_sat(p, 250), 76.10934086674382)
