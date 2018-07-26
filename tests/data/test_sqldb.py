@@ -205,8 +205,34 @@ RH_TARGET_LENGTH = 15
 # ----------------------------------------------------------------------------
 # Analysis globals
 ANALYSIS_TEST_ID = 1
-RESULTS_LIST = [(Decimal('0.50'), 1, 0.0988713, 1.36621e-07, -3.07061e-09,
-                9.40458e-12, 329.257, Decimal('1.00'), 599)]
+RESULTS_LIST = [Decimal('0.50'), 1, 0.0988713, 1.36621e-07, -3.07061e-09,
+                9.40458e-12, 329.257, Decimal('1.00'), 599]
+RESULTS_STATS_DF = pd.DataFrame(dict(
+    idx=['count', 'sum', 'var', 'avg', 'min', 'max'],
+    RH=[1099, 563.0, 0.03056339165143929, 0.512284,
+        0.10000000000000001, 0.80000000000000004],
+    TestId=[1099, 1099, 0, 1, 1, 1],
+    A=[1099, 108.65434961020947, 2.9013655607597385e-10, 0.09886656015487667,
+       0.09882460534572601, 0.09888922423124313],
+    SigA=[1099, 2.8483969686021737e-05, 1.6791311969228083e-14,
+          2.5918079787098944e-08, 5.754197673901729e-10,
+          2.316897962373332e-06],
+    B=[1099, -3.391460006607616e-06, 1.0181455109937529e-18,
+       -3.0859508704345916e-09, -6.390378448628553e-09,
+       -1.419641071365163e-09],
+    SigB=[1099, 1.7167214310265938e-09, 3.639741584914378e-23,
+          1.5620759154018142e-12, 4.898612101351084e-14,
+          4.862525659898864e-11],
+    Chi2=[1099, 3379617267.8442154, 42744441389327.21, 3075174.9479929167,
+          97.25215148925781, 54769204.0],
+    Q=[1099, 177.95, 0.13367083617251502,
+       0.161920, 0.0, 1.00],
+    Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999],
+    )
+).set_index('idx')
+
+RESULTS_COLS = ['RH', 'TestId', 'A', 'SigA', 'B', 'SigB', 'Chi2', 'Q', 'Nu']
+
 # ----------------------------------------------------------------------------
 # Indexes
 TEST_INDEX = 7
@@ -860,16 +886,24 @@ def test_add_results(results_cur, analysis_df):
     Test the ability to input analysis data into the Results table.
     """
     assert sqldb.add_results(results_cur, analysis_df, ANALYSIS_TEST_ID)
+
     results_cur.execute(('SELECT * FROM Results WHERE TestId={} AND RH=0.50'
                          ' AND Nu=599').format(ANALYSIS_TEST_ID))
     res = results_cur.fetchall()
-    print(res)
     for idx in range(len(res)):
-        assert isclose(res[idx][0], RESULTS_LIST[idx])
-    results_cur.execute(('SELECT COUNT(*) FROM Results'
-                         ' WHERE TestId={}').format(ANALYSIS_TEST_ID))
-    res = results_cur.fetchall()
-    assert res == 1099
+        assert isclose(float(res[idx][0]), float(RESULTS_LIST[idx]))
+
+    for col in RESULTS_COLS:
+        results_cur.execute(
+            dml.get_result_stats.format(col, ANALYSIS_TEST_ID)
+            )
+        res = results_cur.fetchall()
+        assert isclose(res[0][0], RESULTS_STATS_DF.loc['count', col])
+        assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
+        assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
+        assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
+        assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
+        assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
 
 
 def test_add_analysis(results_cnx, results_cur):
@@ -899,9 +933,20 @@ def test_add_analysis(results_cnx, results_cur):
     results_cur.execute(('SELECT * FROM Results WHERE TestId={} AND RH=0.50'
                          ' AND Nu=599').format(ANALYSIS_TEST_ID))
     res = results_cur.fetchall()
-    print(res)
     for idx in range(len(res)):
-        assert isclose(res[idx][0], RESULTS_LIST[idx])
+        assert isclose(float(res[idx][0]), float(RESULTS_LIST[idx]))
+
+    for col in RESULTS_COLS:
+        results_cur.execute(
+            dml.get_result_stats.format(col, ANALYSIS_TEST_ID)
+            )
+        res = results_cur.fetchall()
+        assert isclose(res[0][0], RESULTS_STATS_DF.loc['count', col])
+        assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
+        assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
+        assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
+        assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
+        assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
 
 
 def drop_tables(cursor, bol):
