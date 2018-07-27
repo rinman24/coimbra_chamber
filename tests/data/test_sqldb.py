@@ -823,6 +823,10 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     cnx.commit()
     assert not cnx.in_transaction
 
+    # ------------------------------------------------------------------------
+    # Test adding file 4 again
+    assert sqldb.add_tdms_file(cnx, test_tdms_obj[3]) is None
+
 
 def test__get_test_dict(cnx):
     """
@@ -947,6 +951,10 @@ def test_add_analysis(results_cnx, results_cur):
         assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
         assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
         assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+
+    # ------------------------------------------------------------------------
+    # Test adding the same analysis again
+    assert sqldb.add_analysis(results_cnx, ANALYSIS_TEST_ID) is None
 
 
 def drop_tables(cursor, bol):
