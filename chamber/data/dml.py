@@ -164,5 +164,5 @@ get_info_df = ("SELECT Temperature, Pressure, Duty, IsMass, Reservoir, "
                "Setting.SettingId FROM Test INNER JOIN Setting ON "
                "Setting.SettingId=Test.SettingId WHERE TestId={};")
 
-get_result_stats = ('SELECT COUNT({0}), SUM({0}), VARIANCE({0}), AVG({0}),'
-                    ' MIN({0}), MAX({0}) FROM Results WHERE TestId={1}')
+get_table_stats = ('SELECT COUNT({0}), SUM({0}), VARIANCE({0}), AVG({0}),'
+                   ' MIN({0}), MAX({0}) FROM {2} WHERE TestId={1}')

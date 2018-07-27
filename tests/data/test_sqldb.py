@@ -208,7 +208,7 @@ ANALYSIS_TEST_ID = 1
 RESULTS_LIST = [Decimal('0.50'), 1, 0.0988713, 1.36621e-07, -3.07061e-09,
                 9.40458e-12, 329.257, Decimal('1.00'), 599]
 RESULTS_STATS_DF = pd.DataFrame(dict(
-    idx=['count', 'sum', 'var', 'avg', 'min', 'max'],
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     RH=[1099, 563.0, 0.03056339165143929, 0.512284,
         0.10000000000000001, 0.80000000000000004],
     TestId=[1099, 1099, 0, 1, 1, 1],
@@ -230,7 +230,6 @@ RESULTS_STATS_DF = pd.DataFrame(dict(
     Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999],
     )
 ).set_index('idx')
-
 RESULTS_COLS = ['RH', 'TestId', 'A', 'SigA', 'B', 'SigB', 'Chi2', 'Q', 'Nu']
 
 # ----------------------------------------------------------------------------
@@ -335,7 +334,7 @@ def test_tdms_obj():
 @pytest.fixture(scope='module')
 def analysis_df(results_cnx):
     """Create an analysis `DataFrame` from a test in test_results."""
-    test_dict = sqldb.get_test_dict(results_cnx, 1)
+    test_dict = sqldb._get_test_dict(results_cnx, 1)
     processed_df = experiments.preprocess(test_dict['data'], purge=True)
     analyzed_df = experiments.mass_transfer(processed_df)
     return analyzed_df
@@ -823,14 +822,18 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     cnx.commit()
     assert not cnx.in_transaction
 
+    # ------------------------------------------------------------------------
+    # Test adding file 4 again
+    assert sqldb.add_tdms_file(cnx, test_tdms_obj[3]) is None
 
-def test_get_test_dict(cnx):
+
+def test__get_test_dict(cnx):
     """
     Test get_test_df.
 
     Test resultant `DataFrame` accuracy and structure.
     """
-    test_dict = sqldb.get_test_dict(cnx, 1)
+    test_dict = sqldb._get_test_dict(cnx, 1)
     assert pd.testing.assert_frame_equal(test_dict['info'],
                                          TEST_1_INFO_DF) is None
     assert test_dict['data'].shape == TEST_1_DATA_DF_SIZE
@@ -864,13 +867,13 @@ def test_get_test_from_set(cur):
     assert sqldb.get_test_from_set(cur, FALSE_SETTING) is False
 
 
-def test_add_rh_targets(results_cur, analysis_df):
+def test__add_rh_targets(results_cur, analysis_df):
     """
     Test add_rh_targets.
 
     Test the ability to input analysis data into the RHTargets table.
     """
-    assert sqldb.add_rh_targets(results_cur, analysis_df, ANALYSIS_TEST_ID)
+    assert sqldb._add_rh_targets(results_cur, analysis_df, ANALYSIS_TEST_ID)
     results_cur.execute('SELECT * FROM RHTargets;')
     res = results_cur.fetchall()
     assert len(res) == RH_TARGET_LENGTH
@@ -879,13 +882,13 @@ def test_add_rh_targets(results_cur, analysis_df):
         assert res[idx][1] == ANALYSIS_TEST_ID
 
 
-def test_add_results(results_cur, analysis_df):
+def test__add_results(results_cur, analysis_df):
     """
     Test add_results.
 
     Test the ability to input analysis data into the Results table.
     """
-    assert sqldb.add_results(results_cur, analysis_df, ANALYSIS_TEST_ID)
+    assert sqldb._add_results(results_cur, analysis_df, ANALYSIS_TEST_ID)
 
     results_cur.execute(('SELECT * FROM Results WHERE TestId={} AND RH=0.50'
                          ' AND Nu=599').format(ANALYSIS_TEST_ID))
@@ -895,10 +898,10 @@ def test_add_results(results_cur, analysis_df):
 
     for col in RESULTS_COLS:
         results_cur.execute(
-            dml.get_result_stats.format(col, ANALYSIS_TEST_ID)
+            dml.get_table_stats.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()
-        assert isclose(res[0][0], RESULTS_STATS_DF.loc['count', col])
+        assert isclose(res[0][0], RESULTS_STATS_DF.loc['cnt', col])
         assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
         assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
         assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
@@ -938,15 +941,19 @@ def test_add_analysis(results_cnx, results_cur):
 
     for col in RESULTS_COLS:
         results_cur.execute(
-            dml.get_result_stats.format(col, ANALYSIS_TEST_ID)
+            dml.get_table_stats.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()
-        assert isclose(res[0][0], RESULTS_STATS_DF.loc['count', col])
+        assert isclose(res[0][0], RESULTS_STATS_DF.loc['cnt', col])
         assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
         assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
         assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
         assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
         assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+
+    # ------------------------------------------------------------------------
+    # Test adding the same analysis again
+    assert sqldb.add_analysis(results_cnx, ANALYSIS_TEST_ID) is None
 
 
 def drop_tables(cursor, bol):

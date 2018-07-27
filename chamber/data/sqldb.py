@@ -9,6 +9,8 @@ Functions
 - `create_tables` -- Create tables in the database.
 - `get_test_dict` -- Create `DataFrame` representations of the tests.
 - `get_test_from_set` -- Get a list of TestIds corresponding to setting info.
+- `add_analysis` -- Pull, analyze, and insert analysis results into database.
+
 
 .. todo:: Decouple database and tdms volatility via modulde encapsulation.
 """
@@ -888,7 +890,7 @@ def add_tdms_file(cnx, tdms_obj):
         print("MySqlError: {}".format(err))
 
 
-def get_test_dict(cnx, test_id):
+def _get_test_dict(cnx, test_id):
     """
     Create `DataFrame` representations of the tests.
 
@@ -979,7 +981,7 @@ def get_test_from_set(cur, setting_info):
         return test_ids
 
 
-def add_rh_targets(cur, analyzed_df, test_id):
+def _add_rh_targets(cur, analyzed_df, test_id):
     """
     Insert Chi2 RH results into MySql database RHTargets table.
 
@@ -1009,7 +1011,7 @@ def add_rh_targets(cur, analyzed_df, test_id):
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
     >>> test_id = 1
-    >>> add_rh_targets(cur, test_id)
+    >>> _add_rh_targets(cur, test_id)
     True
 
     """
@@ -1021,7 +1023,7 @@ def add_rh_targets(cur, analyzed_df, test_id):
     return True
 
 
-def add_results(cur, analyzed_df, test_id):
+def _add_results(cur, analyzed_df, test_id):
     """
     Insert Chi2 results into MySql database Results table.
 
@@ -1051,7 +1053,7 @@ def add_results(cur, analyzed_df, test_id):
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
     >>> test_id = 1
-    >>> add_results(cur, test_id)
+    >>> _add_results(cur, test_id)
     True
 
     """
@@ -1100,13 +1102,13 @@ def add_analysis(cnx, test_id):
 
     >>> cnx = connect('my-schema')
     >>> test_id = 1
-    >>> add_abalysis(cnx, test_id)
+    >>> add_analysis(cnx, test_id)
     True
 
     """
     # --------------------------------------------------------------------
     # Create a DataFrame of analyzed data
-    test_dict = get_test_dict(cnx, test_id)
+    test_dict = _get_test_dict(cnx, test_id)
     processed_df = experiments.preprocess(test_dict['data'], purge=True)
     analyzed_df = experiments.mass_transfer(processed_df)
     try:
@@ -1117,14 +1119,14 @@ def add_analysis(cnx, test_id):
 
         # --------------------------------------------------------------------
         # RHTargets: call add_rh_targets
-        add_rh_targets(cur, analyzed_df, test_id)
+        _add_rh_targets(cur, analyzed_df, test_id)
         assert cnx.in_transaction
         cnx.commit()
         assert not cnx.in_transaction
 
         # --------------------------------------------------------------------
         # Results: call add_results
-        add_results(cur, analyzed_df, test_id)
+        _add_results(cur, analyzed_df, test_id)
         assert cnx.in_transaction
         cnx.commit()
         assert not cnx.in_transaction
