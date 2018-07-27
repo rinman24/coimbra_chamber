@@ -111,6 +111,7 @@ tables.append(("RHTargets",
                "  CONSTRAINT `fk_RHTargets_Test`"
                "    FOREIGN KEY (`TestId`)"
                "    REFERENCES `Test` (`TestId`)"
+               "    ON DELETE RESTRICT"
                "    ON UPDATE CASCADE)"
                " ENGINE = InnoDB;"))
 
