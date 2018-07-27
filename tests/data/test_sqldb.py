@@ -237,6 +237,14 @@ RESULTS_COLS = ['RH', 'TestId', 'A', 'SigA', 'B', 'SigB', 'Chi2', 'Q', 'Nu']
 TEST_INDEX = 7
 TC_INDEX = 7
 
+# ----------------------------------------------------------------------------
+# Analyzed `DataFrame`
+RESULTS_CNX = sqldb.connect('test_results')
+_ = sqldb._get_test_dict(RESULTS_CNX, 1)
+RESULTS_CNX.close()
+_ = experiments.preprocess(_['data'], purge=True)
+ANALYSIS_DF = experiments.mass_transfer(_)
+
 
 @pytest.fixture(scope='module')
 def cnx():
@@ -302,23 +310,6 @@ def results_cnx():
 
 
 @pytest.fixture(scope='module')
-def results_cur(results_cnx):
-    """Obtain a cursor to use at the module level."""
-    # ------------------------------------------------------------------------
-    # Get cursor
-    print("\nObtaining a cursor for the test_results connection...")
-    results_cur = results_cnx.cursor()
-    print("test_results cursor obtained.")
-    yield results_cur
-
-    # ------------------------------------------------------------------------
-    # Close cursor
-    print("\nClosing module level test_results cursor...")
-    assert results_cur.close()
-    print("Module level test_results cursor closed.")
-
-
-@pytest.fixture(scope='module')
 def test_tdms_obj():
     """Construct list of nptdms.TdmsFile as module level fixture."""
     return (  # IsMass 1 Duty 5%
@@ -329,15 +320,6 @@ def test_tdms_obj():
             nptdms.TdmsFile(CORRECT_FILE_LIST[2]),
             # IsMass 0 Duty 0%
             nptdms.TdmsFile(CORRECT_FILE_LIST[3]))
-
-
-@pytest.fixture(scope='module')
-def analysis_df(results_cnx):
-    """Create an analysis `DataFrame` from a test in test_results."""
-    test_dict = sqldb._get_test_dict(results_cnx, 1)
-    processed_df = experiments.preprocess(test_dict['data'], purge=True)
-    analyzed_df = experiments.mass_transfer(processed_df)
-    return analyzed_df
 
 
 def test_connect(cnx):
@@ -867,28 +849,31 @@ def test_get_test_from_set(cur):
     assert sqldb.get_test_from_set(cur, FALSE_SETTING) is False
 
 
-def test__add_rh_targets(results_cur, analysis_df):
+def test__add_rh_targets(results_cnx):
     """
     Test add_rh_targets.
 
     Test the ability to input analysis data into the RHTargets table.
     """
-    assert sqldb._add_rh_targets(results_cur, analysis_df, ANALYSIS_TEST_ID)
+    results_cur = results_cnx.cursor()
+    assert sqldb._add_rh_targets(results_cur, ANALYSIS_DF, ANALYSIS_TEST_ID)
     results_cur.execute('SELECT * FROM RHTargets;')
     res = results_cur.fetchall()
     assert len(res) == RH_TARGET_LENGTH
     for idx in range(RH_TARGET_LENGTH):
         assert res[idx][0] == RH_TARGET_LIST[idx]
         assert res[idx][1] == ANALYSIS_TEST_ID
+    results_cur.close()
 
 
-def test__add_results(results_cur, analysis_df):
+def test__add_results(results_cnx):
     """
     Test add_results.
 
     Test the ability to input analysis data into the Results table.
     """
-    assert sqldb._add_results(results_cur, analysis_df, ANALYSIS_TEST_ID)
+    results_cur = results_cnx.cursor()
+    assert sqldb._add_results(results_cur, ANALYSIS_DF, ANALYSIS_TEST_ID)
 
     results_cur.execute(('SELECT * FROM Results WHERE TestId={} AND RH=0.50'
                          ' AND Nu=599').format(ANALYSIS_TEST_ID))
@@ -907,9 +892,10 @@ def test__add_results(results_cur, analysis_df):
         assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
         assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
         assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+    results_cur.close()
 
 
-def test_add_analysis(results_cnx, results_cur):
+def test_add_analysis(results_cnx):
     """
     Test add_analysis.
 
@@ -917,6 +903,7 @@ def test_add_analysis(results_cnx, results_cur):
     """
     # ------------------------------------------------------------------------
     # Clear all of the previous work we have done in the database
+    results_cur = results_cnx.cursor()
     clear_results(results_cur, True)
     assert not results_cnx.in_transaction
 
@@ -968,6 +955,7 @@ def test_add_analysis(results_cnx, results_cur):
         assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
         assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
         assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+    results_cur.close()
 
 
 def drop_tables(cursor, bol):
