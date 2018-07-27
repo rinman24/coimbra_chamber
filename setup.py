@@ -13,12 +13,14 @@ setup(
                  'Coimbra Chamber at UCSD. '),
     # long_description=open('README.rst').read(),
     install_requires=[
-        "CoolProp",
-        "matplotlib",
-        "mysql.connector",
-        "nptdms",
-        "pandas",
-        "numpy",
-        "scipy"
+        'npTDMS==0.11.3',
+        'matplotlib==2.1.0',
+        'tabulate==0.8.1',
+        'scipy==0.19.1',
+        'numpy==1.13.3',
+        'pandas==0.22.0',
+        'CoolProp==6.1.0',
+        'mysql-connector=2.1.6',
+        'schedule==0.5.0',
     ],
 )

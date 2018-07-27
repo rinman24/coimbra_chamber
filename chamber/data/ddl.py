@@ -100,6 +100,42 @@ tables.append(("TempObservation",
                "  ENGINE = InnoDB"
                "  DEFAULT CHARACTER SET = latin1;"))
 
+# -- -----------------------------------------------------
+# -- Table `RHTargets`
+tables.append(("RHTargets",
+               "  CREATE TABLE IF NOT EXISTS `RHTargets` ("
+               "  `RH` DECIMAL(3,2) UNSIGNED NOT NULL,"
+               "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`RH`, `TestId`),"
+               "  INDEX `fk_RHTargets_Test_idx` (`TestId` ASC),"
+               "  CONSTRAINT `fk_RHTargets_Test`"
+               "    FOREIGN KEY (`TestId`)"
+               "    REFERENCES `Test` (`TestId`)"
+               "    ON DELETE RESTRICT"
+               "    ON UPDATE CASCADE)"
+               " ENGINE = InnoDB;"))
+
+# -- -----------------------------------------------------
+# -- Table `Results`
+tables.append(("Results",
+               "  CREATE TABLE IF NOT EXISTS `Results` ("
+               "  `RH` DECIMAL(3,2) UNSIGNED NOT NULL,"
+               "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  `A` FLOAT NOT NULL,"
+               "  `SigA` FLOAT UNSIGNED NOT NULL,"
+               "  `B` FLOAT NOT NULL,"
+               "  `SigB` FLOAT UNSIGNED NOT NULL,"
+               "  `Chi2` FLOAT UNSIGNED NOT NULL,"
+               "  `Q` DECIMAL(3,2) UNSIGNED NOT NULL,"
+               "  `Nu` SMALLINT UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`Nu`, `RH`, `TestId`),"
+               "  CONSTRAINT `fk_Results_RHTargets1`"
+               "    FOREIGN KEY (`RH` , `TestId`)"
+               "    REFERENCES `RHTargets` (`RH` , `TestId`)"
+               "    ON DELETE RESTRICT"
+               "    ON UPDATE CASCADE)"
+               "ENGINE = InnoDB;"))
+
 
 # ----------------------------------------------------------------------------
 # Table `Unit`

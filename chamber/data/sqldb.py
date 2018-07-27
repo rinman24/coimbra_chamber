@@ -7,6 +7,10 @@ Functions
 - `add_tube_info` -- Add test-independant Tube information.
 - `connect` -- Get a connection and cursor to a MySQL database.
 - `create_tables` -- Create tables in the database.
+- `get_test_dict` -- Create `DataFrame` representations of the tests.
+- `get_test_from_set` -- Get a list of TestIds corresponding to setting info.
+- `add_analysis` -- Pull, analyze, and insert analysis results into database.
+
 
 .. todo:: Decouple database and tdms volatility via modulde encapsulation.
 """
@@ -17,9 +21,12 @@ from CoolProp.HumidAirProp import HAPropsSI
 import mysql.connector
 import nptdms
 import numpy as np
+import pandas as pd
 from scipy import stats
+from tqdm import tqdm
 
 from chamber import const
+from chamber.analysis import experiments
 from chamber.data import ddl, dml
 
 
@@ -866,7 +873,7 @@ def add_tdms_file(cnx, tdms_obj):
         # Observation and TempObservations: call add_obs_info and
         # add_temp_info in a loop which will add all of the observations from
         # the file.
-        for tdms_idx in range(len(tdms_obj.object("Data", "Idx").data)):
+        for tdms_idx in tqdm(range(len(tdms_obj.object("Data", "Idx").data))):
             assert _add_obs_info(cur, tdms_obj, test_id, tdms_idx)
             idx = int(tdms_obj.object("Data", "Idx").data[tdms_idx])
             assert _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx)
@@ -875,6 +882,256 @@ def add_tdms_file(cnx, tdms_obj):
         cnx.commit()
         assert not cnx.in_transaction
         assert cur.close()
+        return True
+    except mysql.connector.Error as err:
+        # --------------------------------------------------------------------
+        # Rollback transaction if there is an issue
+        cnx.rollback()
+        print("MySqlError: {}".format(err))
+
+
+def _get_test_dict(cnx, test_id):
+    """
+    Create `DataFrame` representations of the tests.
+
+    Uses the pandas `DataFrame` object's `read_sql` method to build a
+    dictionary containing a dataframe for joined Setting and Test tables and a
+    dataframe for joined Observation and TempObservation tables.
+
+    Parameters
+    ----------
+    cnx : mysql.connector.connection.MySQLConnection
+        Connection to MySQL database.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    dict(DataFrame)
+        A `dict` of two `DataFrames`, one conaining joined 'Setting' and
+        'Test' tables and antoher `DataFrame` containting joined Thermocouple
+        readings and `Obseravation` tables.
+
+    Examples
+    --------
+    Get the `dict` of `DataFrames` for a test with TestId=4.
+
+    >>> cnx = connect('my-schema')
+    >>> test_dict = get_test_dict(4, cnx)
+    >>> print(test_dict['info']['author'].iloc[0])
+    >>> author_1
+    >>> test_dict['data']['TC2'].iloc[4]
+    '293.01'
+
+    """
+    # Build DataFrames
+    info_df = pd.read_sql(dml.get_info_df.format(test_id), con=cnx)
+    temp_df = pd.read_sql(dml.get_temp_df.format(test_id), con=cnx)
+    obs_df = pd.read_sql(dml.get_obs_df.format(test_id), con=cnx)
+    data_df = temp_df.merge(obs_df)
+
+    # Make dictionary
+    test_dict = {'info': info_df, 'data': data_df}
+    return test_dict
+
+
+def get_test_from_set(cur, setting_info):
+    """
+    Get a list of TestIds corresponding to specified setting information.
+
+    Uses cursor's .execute function on a MySQL querry designed to get a list
+    of TestIds corresponding to the setting info provided in the setting_info
+    argument.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    setting_info : dict of {str: scalar}
+        Set of values to insert into the Setting table. Keys should be column
+        names and values should be the value to insert.
+
+    Returns
+    -------
+    list(int) or False
+        TestIDs for the MySQL database, which is the primary key for the Test
+        table. Returns `False` if no TestIds match the argument setting info.
+
+    Examples
+    --------
+    Get the TestIds corresponding to a setting_info dict.
+
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> setting_info = dict(
+    Duty='0.0', IsMass=0, Pressure=100000, Reservoir=0, Temperature=290,
+    TimeStep='1.00', TubeId=1)
+    >>> get_test_from_set(cur, setting_info)
+    '[1, 4]'
+
+    """
+    test_from_set = dml.test_from_setting.format(dml.select_setting)
+    cur.execute(test_from_set, setting_info)
+    result = cur.fetchall()
+    if not result:
+        return False
+    else:
+        test_ids = [test_id[0] for test_id in result]
+        return test_ids
+
+
+def _add_rh_targets(cur, analyzed_df, test_id):
+    """
+    Insert Chi2 RH results into MySql database RHTargets table.
+
+    Uses cursor's .executemany function on a MySQL insert query and list
+    of RH data built by looping through an analyzed `DataFrame` built by
+    the `experiments.mass_transfer` function.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    analyzed_df: DataFrame
+        Results of the analysis of the test.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    `True` or `None`
+        `True` if successful. Else `None`.
+
+    Examples
+    --------
+    Add RH data for an existing TestId.
+
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> test_id = 1
+    >>> _add_rh_targets(cur, test_id)
+    True
+
+    """
+    rh_trgt_list = [
+        (test_id, '{:.2f}'.format(rh)) for rh in analyzed_df.RH.unique()
+    ]
+    cur.executemany(dml.add_rh_targets, rh_trgt_list)
+
+    return True
+
+
+def _add_results(cur, analyzed_df, test_id):
+    """
+    Insert Chi2 results into MySql database Results table.
+
+    Uses cursor's .executemany function on a MySQL insert query and list
+    of results data built by looping through an analyzed `DataFrame` built by
+    the `experiments.mass_transfer` function.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    analyzed_df: DataFrame
+        Results of the analysis of the test.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    `True` or `None`
+        `True` if successful. Else `None`.
+
+    Examples
+    --------
+    Add results data for existing RHTargets.
+
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> test_id = 1
+    >>> _add_results(cur, test_id)
+    True
+
+    """
+    results_list = [
+        (
+            test_id,
+            float(analyzed_df.iloc[idx]['RH']),
+            float(analyzed_df.iloc[idx]['a']),
+            float(analyzed_df.iloc[idx]['sig_a']),
+            float(analyzed_df.iloc[idx]['b']),
+            float(analyzed_df.iloc[idx]['sig_b']),
+            float(analyzed_df.iloc[idx]['chi2']),
+            float(analyzed_df.iloc[idx]['Q']),
+            float(analyzed_df.iloc[idx]['nu'])
+        ) for idx in analyzed_df.index
+    ]
+    cur.executemany(dml.add_results, results_list)
+
+    return True
+
+
+def add_analysis(cnx, test_id):
+    """
+    Pull, analyze, and insert analysis results into MySQL database.
+
+    Uses `experiments` module to analyze a `DataFrame` of data stored in MySQL
+    database. Uses `add_rh_targets` and `add_results` to populate MySQL
+    databse RHTargest and Results tables.
+
+    Parameters
+    ----------
+    cnx : mysql.connector.connection.MySQLConnection
+        Connection to MySQL database.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    `True` or `None`
+        `True` if sucessful, else `None`.
+
+    Examples
+    --------
+    Add analysis results for an existing TestId.
+
+    >>> cnx = connect('my-schema')
+    >>> test_id = 1
+    >>> add_analysis(cnx, test_id)
+    True
+
+    """
+    # --------------------------------------------------------------------
+    # Create a DataFrame of analyzed data
+    test_dict = _get_test_dict(cnx, test_id)
+    processed_df = experiments.preprocess(test_dict['data'], purge=True)
+    analyzed_df = experiments.mass_transfer(processed_df)
+    try:
+        # --------------------------------------------------------------------
+        # Create a cursor and start the transaction
+        cur = cnx.cursor()
+        assert cnx.in_transaction
+
+        # --------------------------------------------------------------------
+        # RHTargets: call add_rh_targets
+        _add_rh_targets(cur, analyzed_df, test_id)
+        assert cnx.in_transaction
+        cnx.commit()
+        assert not cnx.in_transaction
+
+        # --------------------------------------------------------------------
+        # Results: call add_results
+        _add_results(cur, analyzed_df, test_id)
+        assert cnx.in_transaction
+        cnx.commit()
+        assert not cnx.in_transaction
+        assert cur.close()
+
         return True
     except mysql.connector.Error as err:
         # --------------------------------------------------------------------

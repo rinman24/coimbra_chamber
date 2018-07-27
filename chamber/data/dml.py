@@ -34,11 +34,29 @@ add_temp = ("INSERT INTO TempObservation "
             " VALUES "
             "(%s, %s, %s, %s)")
 
+add_rh = ("INSERT INTO RHTarget "
+          "(TestId, RH)"
+          " VALUES "
+          "(%(TestId)s, %(RH)s)")
+
+add_result = ("INSERT INTO Results "
+              "(TestId, RH, A, SigA, B, SigB, Chi2, Q,"
+              " Nu)"
+              " VALUES "
+              "(%(TestId)s, %(RH)s, %(A)s, %(SigA)s, %(B)s, "
+              "%(SigB)s, %(Chi2)s, %(Q)s, %(Nu)s)")
+
 add_tube = ("INSERT INTO Tube "
             "(DiameterIn, DiameterOut, Length, Material, Mass)"
             " VALUES "
             "(%(DiameterIn)s, %(DiameterOut)s, %(Length)s,"
             " %(Material)s, %(Mass)s)")
+
+add_rh_targets = "INSERT INTO RHTargets (TestId, RH) VALUES (%s, %s)"
+
+add_results = ("INSERT INTO Results"
+               "  (TestId, RH, A, SigA, B, SigB, Chi2, Q, Nu)"
+               "  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
 
 add_unit = ("INSERT INTO Unit "
             "(Duty, Length, Mass, Power, Pressure, Temperature, Time)"
@@ -53,10 +71,13 @@ select_setting = ("SELECT SettingID FROM Setting WHERE "
                   "  IsMass = %(IsMass)s AND"
                   "  Reservoir = %(Reservoir)s AND"
                   "  TimeStep = %(TimeStep)s AND"
-                  "  TubeId = %(TubeId)s;")
+                  "  TubeId = %(TubeId)s")
 
 select_test = ("SELECT TestID FROM Test WHERE "
                "    DateTime='{}'")
+
+test_from_setting = ("SELECT TestId FROM Test WHERE "
+                     "    SettingId=({})")
 
 select_tube = ("SELECT TubeID FROM Tube WHERE "
                "  DiameterIn = %(DiameterIn)s AND"
@@ -114,3 +135,34 @@ get_temp_obs_data = ("SELECT"
                      "    Idx = {} "
                      "AND"
                      "    ThermocoupleNum = {};")
+
+get_temp_df = ("SELECT Idx,"
+               "MAX(CASE WHEN ThermocoupleNum=0 THEN VALUE ELSE 0 END) TC0, "
+               "MAX(CASE WHEN ThermocoupleNum=1 THEN VALUE ELSE 0 END) TC1, "
+               "MAX(CASE WHEN ThermocoupleNum=2 THEN VALUE ELSE 0 END) TC2, "
+               "MAX(CASE WHEN ThermocoupleNum=3 THEN VALUE ELSE 0 END) TC3, "
+               "MAX(CASE WHEN ThermocoupleNum=4 THEN VALUE ELSE 0 END) TC4, "
+               "MAX(CASE WHEN ThermocoupleNum=5 THEN VALUE ELSE 0 END) TC5, "
+               "MAX(CASE WHEN ThermocoupleNum=6 THEN VALUE ELSE 0 END) TC6, "
+               "MAX(CASE WHEN ThermocoupleNum=7 THEN VALUE ELSE 0 END) TC7, "
+               "MAX(CASE WHEN ThermocoupleNum=8 THEN VALUE ELSE 0 END) TC8, "
+               "MAX(CASE WHEN ThermocoupleNum=9 THEN VALUE ELSE 0 END) TC9, "
+               "MAX(CASE WHEN ThermocoupleNum=10 THEN VALUE ELSE 0 END) TC10, "
+               "MAX(CASE WHEN ThermocoupleNum=11 THEN VALUE ELSE 0 END) TC11, "
+               "MAX(CASE WHEN ThermocoupleNum=12 THEN VALUE ELSE 0 END) TC12, "
+               "MAX(CASE WHEN ThermocoupleNum=13 THEN VALUE ELSE 0 END) TC13 "
+               "FROM("
+               "SELECT Idx, ThermocoupleNum, Temperature VALUE FROM "
+               "TempObservation WHERE TestId={}) "
+               "src GROUP BY Idx;")
+
+get_obs_df = ("SELECT Idx, DewPoint, Mass, Pressure, PowOut, PowRef, "
+              "OptidewOk, CapManOk FROM Observation WHERE TestId={};")
+
+get_info_df = ("SELECT Temperature, Pressure, Duty, IsMass, Reservoir, "
+               "TimeStep, Test.DateTime, Author, Description, TubeId, TestId, "
+               "Setting.SettingId FROM Test INNER JOIN Setting ON "
+               "Setting.SettingId=Test.SettingId WHERE TestId={};")
+
+get_table_stats = ('SELECT COUNT({0}), SUM({0}), VARIANCE({0}), AVG({0}),'
+                   ' MIN({0}), MAX({0}) FROM {2} WHERE TestId={1}')
