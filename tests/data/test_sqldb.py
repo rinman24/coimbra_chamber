@@ -955,6 +955,20 @@ def test_add_analysis(results_cnx, results_cur):
     # Test adding the same analysis again
     assert sqldb.add_analysis(results_cnx, ANALYSIS_TEST_ID) is None
 
+    # ------------------------------------------------------------------------
+    # Check that the database is unaffected
+    for col in RESULTS_COLS:
+        results_cur.execute(
+            dml.get_table_stats.format(col, ANALYSIS_TEST_ID, 'Results')
+            )
+        res = results_cur.fetchall()
+        assert isclose(res[0][0], RESULTS_STATS_DF.loc['cnt', col])
+        assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
+        assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
+        assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
+        assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
+        assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+
 
 def drop_tables(cursor, bol):
     """Drop databese tables."""
