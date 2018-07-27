@@ -208,7 +208,7 @@ ANALYSIS_TEST_ID = 1
 RESULTS_LIST = [Decimal('0.50'), 1, 0.0988713, 1.36621e-07, -3.07061e-09,
                 9.40458e-12, 329.257, Decimal('1.00'), 599]
 RESULTS_STATS_DF = pd.DataFrame(dict(
-    idx=['count', 'sum', 'var', 'avg', 'min', 'max'],
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     RH=[1099, 563.0, 0.03056339165143929, 0.512284,
         0.10000000000000001, 0.80000000000000004],
     TestId=[1099, 1099, 0, 1, 1, 1],
@@ -230,7 +230,6 @@ RESULTS_STATS_DF = pd.DataFrame(dict(
     Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999],
     )
 ).set_index('idx')
-
 RESULTS_COLS = ['RH', 'TestId', 'A', 'SigA', 'B', 'SigB', 'Chi2', 'Q', 'Nu']
 
 # ----------------------------------------------------------------------------
@@ -902,7 +901,7 @@ def test__add_results(results_cur, analysis_df):
             dml.get_table_stats.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()
-        assert isclose(res[0][0], RESULTS_STATS_DF.loc['count', col])
+        assert isclose(res[0][0], RESULTS_STATS_DF.loc['cnt', col])
         assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
         assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
         assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
@@ -945,7 +944,7 @@ def test_add_analysis(results_cnx, results_cur):
             dml.get_table_stats.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()
-        assert isclose(res[0][0], RESULTS_STATS_DF.loc['count', col])
+        assert isclose(res[0][0], RESULTS_STATS_DF.loc['cnt', col])
         assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
         assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
         assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
