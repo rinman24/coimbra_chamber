@@ -1011,7 +1011,7 @@ def _add_rh_targets(cur, analyzed_df, test_id):
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
     >>> test_id = 1
-    >>> add_rh_targets(cur, test_id)
+    >>> _add_rh_targets(cur, test_id)
     True
 
     """
@@ -1053,7 +1053,7 @@ def _add_results(cur, analyzed_df, test_id):
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
     >>> test_id = 1
-    >>> add_results(cur, test_id)
+    >>> _add_results(cur, test_id)
     True
 
     """
@@ -1102,7 +1102,7 @@ def add_analysis(cnx, test_id):
 
     >>> cnx = connect('my-schema')
     >>> test_id = 1
-    >>> add_abalysis(cnx, test_id)
+    >>> add_analysis(cnx, test_id)
     True
 
     """
