@@ -899,7 +899,7 @@ def test__add_results(results_cur, analysis_df):
 
     for col in RESULTS_COLS:
         results_cur.execute(
-            dml.get_result_stats.format(col, ANALYSIS_TEST_ID)
+            dml.get_result_stats.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()
         assert isclose(res[0][0], RESULTS_STATS_DF.loc['count', col])
@@ -942,7 +942,7 @@ def test_add_analysis(results_cnx, results_cur):
 
     for col in RESULTS_COLS:
         results_cur.execute(
-            dml.get_result_stats.format(col, ANALYSIS_TEST_ID)
+            dml.get_result_stats.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()
         assert isclose(res[0][0], RESULTS_STATS_DF.loc['count', col])
