@@ -102,7 +102,7 @@ def create_tables(cur, tables):
         List of tuples of table names and DDL query language. For example:
         [('UnitTest',
         "CREATE TABLE `UnitTest` ("
-        "    `UnitTestID` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        "    `UnitTestID` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,"
         "    `Number` DECIMAL(5,2) NULL,"
         "    `String` VARCHAR(30) NULL,"
         "  PRIMARY KEY (`UnitTestID`)"
