@@ -38,10 +38,11 @@ def get_is_mass(tdms_obj):
 def get_m_data(tdms_obj):
     """Get the mass data from a nptdms.TdmsFile object if IsMass = 1."""
     m_data = tdms_obj.object('Data', 'Mass').data
-    regex = re.compile(r'\d.(\d){8}$')
+    regex = re.compile(r'\d.(\d){7}[1-9]$')
     print('Checking mass measurement resolution...')
     for mass in m_data:
-        if regex.search(str(mass)):
+        print('{:.8f}'.format(mass))
+        if regex.search('{:.8f}'.format(mass)):
                 print('Mass measurement resolution correct.')
                 return m_data
     raise ValueError('Incorrect mass measurement resolution.')
