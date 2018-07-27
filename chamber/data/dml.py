@@ -152,9 +152,9 @@ get_temp_df = ("SELECT Idx,"
                "MAX(CASE WHEN ThermocoupleNum=12 THEN VALUE ELSE 0 END) TC12, "
                "MAX(CASE WHEN ThermocoupleNum=13 THEN VALUE ELSE 0 END) TC13 "
                "FROM("
-               "SELECT Idx, ThermocoupleNum, Temperature VALUE, 'Temperature'"
-               " descrip FROM TempObservation WHERE TestId={})"
-               " src GROUP BY Idx;")
+               "SELECT Idx, ThermocoupleNum, Temperature VALUE FROM "
+               "TempObservation WHERE TestId={}) "
+               "src GROUP BY Idx;")
 
 get_obs_df = ("SELECT Idx, DewPoint, Mass, Pressure, PowOut, PowRef, "
               "OptidewOk, CapManOk FROM Observation WHERE TestId={};")
