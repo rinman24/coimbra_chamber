@@ -40,8 +40,7 @@ def get_m_data(tdms_obj):
     m_data = tdms_obj.object('Data', 'Mass').data
     regex = re.compile(r'\d.(\d){7}[1-9]$')
     print('Checking mass measurement resolution...')
-    for mass in m_data:
-        print('{:.8f}'.format(mass))
+    for mass in m_data[:10000]:
         if regex.search('{:.8f}'.format(mass)):
                 print('Mass measurement resolution correct.')
                 return m_data
