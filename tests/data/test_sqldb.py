@@ -39,7 +39,7 @@ SETTINGS_TEST_2 = dict(
     )
 
 # ----------------------------------------------------------------------------
-# Test `_get_temp_info` global variables
+# Test `_get_temp_info` and `_add_temp_info` global variables
 TEST_INDEX = 7
 TC_INDEX = 7
 
@@ -181,6 +181,17 @@ OBS_STATS_4 = pd.DataFrame(dict(
     TestId=[14, 56, 0, 4.0000, 4, 4],
     )
 ).set_index('idx')
+
+# ----------------------------------------------------------------------------
+# Test `_add_temp_info` global variables
+TEMP_OBS_1 = [293.68, 293.03, 293.94, 292.68, 292.02, 291.79, 291.67, 291.96,
+              292.07, 291.62, 291.55, 291.6, 291.53, 291.81]
+TEMP_OBS_2 = [292.36, 291.85, 291.72, 292.1, 292.34, 291.67, 291.62, 291.64,
+              291.58, 291.85]
+TEMP_OBS_3 = [293.06, 292.73, 293.02, 292.62, 291.85, 291.78, 291.67, 291.74,
+              291.83, 291.61, 291.5, 291.58, 291.49, 291.83]
+TEMP_OBS_4 = [292.06, 291.83, 291.7, 291.94, 292.1, 291.64, 291.56, 291.61,
+              291.53, 291.83]
 
 # ----------------------------------------------------------------------------
 # Global test variables
@@ -778,46 +789,34 @@ def test__add_temp_info(cur, test_tdms_obj):
     # File 1
 
     # Add temps with tdms_idx 7 and Idx 8
-    assert sqldb._add_temp_info(
-        cur, test_tdms_obj[0], 1, TEST_INDEX, TEST_INDEX+1
-        )
+    assert sqldb._add_temp_info(cur, test_tdms_obj[0], 1,
+                                TEST_INDEX, TEST_INDEX+1)
+    cur.execute(dml.get_temp_obs.format(1, TEST_INDEX+1))
     # Now query these with the TestId and Idx
-    cur.execute(
-        dml.get_temp_obs.format(1, TEST_INDEX+1)
-        )
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_1
 
     # ------------------------------------------------------------------------
     # File 2
-    assert sqldb._add_temp_info(
-        cur, test_tdms_obj[1], 2, TEST_INDEX, TEST_INDEX
-        )
-    cur.execute(
-        dml.get_temp_obs.format(2, TEST_INDEX)
-        )
+    assert sqldb._add_temp_info(cur, test_tdms_obj[1], 2,
+                                TEST_INDEX, TEST_INDEX)
+    cur.execute(dml.get_temp_obs.format(2, TEST_INDEX))
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_2
 
     # ------------------------------------------------------------------------
     # File 3
-    assert sqldb._add_temp_info(
-        cur, test_tdms_obj[2], 3, TEST_INDEX, TEST_INDEX+1
-        )
-    cur.execute(
-        dml.get_temp_obs.format(3, TEST_INDEX+1)
-        )
+    assert sqldb._add_temp_info(cur, test_tdms_obj[2], 3,
+                                TEST_INDEX, TEST_INDEX+1)
+    cur.execute(dml.get_temp_obs.format(3, TEST_INDEX+1))
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_3
 
     # ------------------------------------------------------------------------
     # File 4
-    assert sqldb._add_temp_info(
-        cur, test_tdms_obj[3], 4, TEST_INDEX, TEST_INDEX+1
-        )
-    cur.execute(
-        dml.get_temp_obs.format(4, TEST_INDEX+1)
-        )
+    assert sqldb._add_temp_info(cur, test_tdms_obj[3], 4,
+                                TEST_INDEX, TEST_INDEX+1)
+    cur.execute(dml.get_temp_obs.format(4, TEST_INDEX+1))
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_4
 
