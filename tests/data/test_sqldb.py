@@ -120,7 +120,7 @@ TDMS_04_ADD_TEST = [(4, 'author_4', datetime(2018, 6, 28, 17, 42, 32),
 # Test `_add_obs_info` global variables
 OBS_COLS = ['Idx', 'PowOut', 'PowRef', 'Pressure', 'TestId', 'Mass']
 OBS_BIT_COLS = ['CapManOk', 'OptidewOk']
-OBS_STATS_DF_1 = pd.DataFrame(dict(
+OBS_STATS_1 = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     CapManOk=[27, 27, 0, 1.0000, 1, 1],
     DewPoint=[27, 7737.23, 0.000705624142660792, 286.564074, 286.52, 286.63],
@@ -135,7 +135,7 @@ OBS_STATS_DF_1 = pd.DataFrame(dict(
     TestId=[27, 27, 0, 1.0000, 1, 1],
     )
 ).set_index('idx')
-OBS_STATS_DF_2 = pd.DataFrame(dict(
+OBS_STATS_2 = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     CapManOk=[15, 15, 0, 1.0000, 1, 1],
     DewPoint=[15, 4303.06, 0.00045955555555561106, 286.870667, 286.83, 286.91],
@@ -151,7 +151,7 @@ OBS_STATS_DF_2 = pd.DataFrame(dict(
     TestId=[15, 30, 0, 2.0000, 2, 2],
     )
 ).set_index('idx')
-OBS_STATS_DF_3 = pd.DataFrame(dict(
+OBS_STATS_3 = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     CapManOk=[13, 13, 0, 1.0000, 1, 1],
     DewPoint=[13, 3726.87, 0.0007408284023666399, 286.682308, 286.63, 286.72],
@@ -166,7 +166,7 @@ OBS_STATS_DF_3 = pd.DataFrame(dict(
     TestId=[13, 39, 0, 3.0000, 3, 3],
     )
 ).set_index('idx')
-OBS_STATS_DF_4 = pd.DataFrame(dict(
+OBS_STATS_4 = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     CapManOk=[14, 14, 0, 1.0000, 1, 1],
     DewPoint=[14, 4017.18, 0.0005408163265310136, 286.941429, 286.91, 286.98],
@@ -683,24 +683,18 @@ def test__add_obs_info(cur, test_tdms_obj):
             dml_test.get_stats_test_id.format(col, 1, 'Observation')
             )
         res = cur.fetchall()[0]
-        assert isclose(res[0], OBS_STATS_DF_1.loc['cnt', col])
-        assert isclose(res[1], OBS_STATS_DF_1.loc['sum', col])
-        assert isclose(res[2], OBS_STATS_DF_1.loc['var', col])
-        assert isclose(res[3], OBS_STATS_DF_1.loc['avg', col])
-        assert isclose(res[4], OBS_STATS_DF_1.loc['min', col])
-        assert isclose(res[5], OBS_STATS_DF_1.loc['max', col])
+        for idx in range(len(OBS_STATS_1)):
+            assert isclose(res[idx],
+                           OBS_STATS_1.loc[OBS_STATS_1.index.values[idx], col])
 
     for col in OBS_BIT_COLS:
         cur.execute(
             dml_test.get_bit_stats.format(col, 1, 'Observation')
             )
         res = cur.fetchall()[0]
-        assert isclose(res[0], OBS_STATS_DF_1.loc['cnt', col])
-        assert isclose(res[1], OBS_STATS_DF_1.loc['sum', col])
-        assert isclose(res[2], OBS_STATS_DF_1.loc['var', col])
-        assert isclose(res[3], OBS_STATS_DF_1.loc['avg', col])
-        assert isclose(res[4], OBS_STATS_DF_1.loc['min', col])
-        assert isclose(res[5], OBS_STATS_DF_1.loc['max', col])
+        for idx in range(len(OBS_STATS_1)):
+            assert isclose(res[idx],
+                           OBS_STATS_1.loc[OBS_STATS_1.index.values[idx], col])
 
     # ------------------------------------------------------------------------
     # File 2
@@ -714,24 +708,18 @@ def test__add_obs_info(cur, test_tdms_obj):
             dml_test.get_stats_test_id.format(col, 2, 'Observation')
             )
         res = cur.fetchall()[0]
-        assert isclose(res[0], OBS_STATS_DF_2.loc['cnt', col])
-        assert isclose(res[1], OBS_STATS_DF_2.loc['sum', col])
-        assert isclose(res[2], OBS_STATS_DF_2.loc['var', col])
-        assert isclose(res[3], OBS_STATS_DF_2.loc['avg', col])
-        assert isclose(res[4], OBS_STATS_DF_2.loc['min', col])
-        assert isclose(res[5], OBS_STATS_DF_2.loc['max', col])
+        for idx in range(len(OBS_STATS_2)):
+            assert isclose(res[idx],
+                           OBS_STATS_2.loc[OBS_STATS_2.index.values[idx], col])
 
     for col in OBS_BIT_COLS:
         cur.execute(
             dml_test.get_bit_stats.format(col, 2, 'Observation')
             )
         res = cur.fetchall()[0]
-        assert isclose(res[0], OBS_STATS_DF_2.loc['cnt', col])
-        assert isclose(res[1], OBS_STATS_DF_2.loc['sum', col])
-        assert isclose(res[2], OBS_STATS_DF_2.loc['var', col])
-        assert isclose(res[3], OBS_STATS_DF_2.loc['avg', col])
-        assert isclose(res[4], OBS_STATS_DF_2.loc['min', col])
-        assert isclose(res[5], OBS_STATS_DF_2.loc['max', col])
+        for idx in range(len(OBS_STATS_2)):
+            assert isclose(res[idx],
+                           OBS_STATS_2.loc[OBS_STATS_2.index.values[idx], col])
 
     # ------------------------------------------------------------------------
     # File 3
@@ -745,24 +733,18 @@ def test__add_obs_info(cur, test_tdms_obj):
             dml_test.get_stats_test_id.format(col, 3, 'Observation')
             )
         res = cur.fetchall()[0]
-        assert isclose(res[0], OBS_STATS_DF_3.loc['cnt', col])
-        assert isclose(res[1], OBS_STATS_DF_3.loc['sum', col])
-        assert isclose(res[2], OBS_STATS_DF_3.loc['var', col])
-        assert isclose(res[3], OBS_STATS_DF_3.loc['avg', col])
-        assert isclose(res[4], OBS_STATS_DF_3.loc['min', col])
-        assert isclose(res[5], OBS_STATS_DF_3.loc['max', col])
+        for idx in range(len(OBS_STATS_3)):
+            assert isclose(res[idx],
+                           OBS_STATS_3.loc[OBS_STATS_3.index.values[idx], col])
 
     for col in OBS_BIT_COLS:
         cur.execute(
             dml_test.get_bit_stats.format(col, 3, 'Observation')
             )
         res = cur.fetchall()[0]
-        assert isclose(res[0], OBS_STATS_DF_3.loc['cnt', col])
-        assert isclose(res[1], OBS_STATS_DF_3.loc['sum', col])
-        assert isclose(res[2], OBS_STATS_DF_3.loc['var', col])
-        assert isclose(res[3], OBS_STATS_DF_3.loc['avg', col])
-        assert isclose(res[4], OBS_STATS_DF_3.loc['min', col])
-        assert isclose(res[5], OBS_STATS_DF_3.loc['max', col])
+        for idx in range(len(OBS_STATS_3)):
+            assert isclose(res[idx],
+                           OBS_STATS_3.loc[OBS_STATS_3.index.values[idx], col])
 
     # ------------------------------------------------------------------------
     # File 4
@@ -776,24 +758,18 @@ def test__add_obs_info(cur, test_tdms_obj):
             dml_test.get_stats_test_id.format(col, 4, 'Observation')
             )
         res = cur.fetchall()[0]
-        assert isclose(res[0], OBS_STATS_DF_4.loc['cnt', col])
-        assert isclose(res[1], OBS_STATS_DF_4.loc['sum', col])
-        assert isclose(res[2], OBS_STATS_DF_4.loc['var', col])
-        assert isclose(res[3], OBS_STATS_DF_4.loc['avg', col])
-        assert isclose(res[4], OBS_STATS_DF_4.loc['min', col])
-        assert isclose(res[5], OBS_STATS_DF_4.loc['max', col])
+        for idx in range(len(OBS_STATS_4)):
+            assert isclose(res[idx],
+                           OBS_STATS_4.loc[OBS_STATS_4.index.values[idx], col])
 
     for col in OBS_BIT_COLS:
         cur.execute(
             dml_test.get_bit_stats.format(col, 4, 'Observation')
             )
         res = cur.fetchall()[0]
-        assert isclose(res[0], OBS_STATS_DF_4.loc['cnt', col])
-        assert isclose(res[1], OBS_STATS_DF_4.loc['sum', col])
-        assert isclose(res[2], OBS_STATS_DF_4.loc['var', col])
-        assert isclose(res[3], OBS_STATS_DF_4.loc['avg', col])
-        assert isclose(res[4], OBS_STATS_DF_4.loc['min', col])
-        assert isclose(res[5], OBS_STATS_DF_4.loc['max', col])
+        for idx in range(len(OBS_STATS_4)):
+            assert isclose(res[idx],
+                           OBS_STATS_4.loc[OBS_STATS_4.index.values[idx], col])
 
 
 def test__add_temp_info(cur, test_tdms_obj):
