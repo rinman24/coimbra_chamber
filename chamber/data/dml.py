@@ -164,5 +164,11 @@ get_info_df = ("SELECT Temperature, Pressure, Duty, IsMass, Reservoir, "
                "Setting.SettingId FROM Test INNER JOIN Setting ON "
                "Setting.SettingId=Test.SettingId WHERE TestId={};")
 
-get_table_stats = ('SELECT COUNT({0}), SUM({0}), VARIANCE({0}), AVG({0}),'
-                   ' MIN({0}), MAX({0}) FROM {2} WHERE TestId={1}')
+add_best_fit = ("UPDATE RHTargets INNER JOIN ((SELECT * FROM Results WHERE "
+                "TestId={} AND (RH, ABS(0.5-Q)) IN (SELECT RH, "
+                "MIN(ABS(0.5-Q)) FROM Results GROUP BY RH))) AS BestFit SET "
+                "RHTargets.A=BestFit.A, RHTargets.SigA=BestFit.SigA, "
+                "RHTargets.B=BestFit.B, RHTargets.SigB=BestFit.SigB, "
+                "RHTargets.Chi2=BestFit.Chi2, RHTargets.Q=BestFit.Q, "
+                "RHTargets.Nu=BestFit.Nu WHERE RHTargets.RH=BestFit.RH AND "
+                "RHTargets.TestId=BestFit.TestId;")

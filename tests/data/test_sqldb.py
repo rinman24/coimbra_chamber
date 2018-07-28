@@ -4,6 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 import os
 from pathlib import Path
+import pickle as pkl
 from shutil import move
 
 from math import isclose
@@ -16,30 +17,18 @@ import pytest
 import chamber.const as const
 from chamber.analysis import experiments
 from chamber.data import sqldb, ddl, dml
+import dml_test
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 
 # ----------------------------------------------------------------------------
-# Global test variables
-CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'test_01.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'tdms_test_folder',
-                                               'test_02.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'test_03.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'tdms_test_folder',
-                                               'tdms_test_folder_full',
-                                               'test_04.tdms')]
+# Test `add_tube_info` global variables
+TUBE_TABLE = [(1, Decimal('0.0300000'), Decimal('0.0400000'),
+               Decimal('0.0600000'), 'Delrin', Decimal('0.0873832'))]
 
 # ----------------------------------------------------------------------------
-# Settings global
+# Test `_setting_exists` global variables
 SETTINGS_TEST_1 = dict(
     Duty=10, IsMass=1, Pressure=100000, Reservoir=1, Temperature=300,
     TimeStep='1.00', TubeId=1
@@ -49,6 +38,13 @@ SETTINGS_TEST_2 = dict(
     TimeStep='5.00', TubeId=2
     )
 
+# ----------------------------------------------------------------------------
+# Test `_get_temp_info` global variables
+TEST_INDEX = 7
+TC_INDEX = 7
+
+# ----------------------------------------------------------------------------
+# Test `_get_setting_info` global variables
 TDMS_01_SETTING = dict(
     Duty='0.0', IsMass=0, Pressure=100000, Reservoir=0, Temperature=290,
     TimeStep='1.00', TubeId=1
@@ -65,38 +61,9 @@ TDMS_04_SETTING = dict(
     Duty='5.0', IsMass=1, Pressure=100000, Reservoir=1, Temperature=290,
     TimeStep='1.00', TubeId=1
     )
-FALSE_SETTING = dict(
-    Duty='5.0', IsMass=0, Pressure=100000, Reservoir=1, Temperature=290,
-    TimeStep='1.00', TubeId=1
-    )
-
-TDMS_01_ADD_SETTING = [
-    (
-        1, Decimal('0.0'), 0, 100000, Decimal('290.0'),
-        Decimal('1.00'), 0, 1
-        )
-    ]
-TDMS_02_ADD_SETTING = [
-        (
-            2, Decimal('5.0'), 1, 100000, Decimal('290.0'), Decimal('1.00'),
-            0, 1
-        )
-    ]
-TDMS_03_ADD_SETTING = [
-        (
-            3, Decimal('0.0'), 0, 100000, Decimal('290.0'), Decimal('1.00'),
-            1, 1
-        )
-    ]
-TDMS_04_ADD_SETTING = [
-        (
-            4, Decimal('5.0'), 1, 100000, Decimal('290.0'), Decimal('1.00'),
-            1, 1
-        )
-    ]
 
 # ----------------------------------------------------------------------------
-# Test globals
+# Test `_get_test_info` and `_test_exists` global variables
 TDMS_01_TEST = dict(Author='author_1',
                     DateTime=datetime(2018, 6, 28, 17, 29, 39),
                     Description='Duty 0; Resevoir Off; IsMass No')
@@ -110,6 +77,36 @@ TDMS_04_TEST = dict(Author='author_4',
                     DateTime=datetime(2018, 6, 28, 17, 42, 32),
                     Description='Duty 5; Resevoir On; IsMass Yes')
 
+# ----------------------------------------------------------------------------
+# Test `_get_obs_info` global variables
+TDMS_01_OBS_07 = dict(CapManOk=1, DewPoint='286.57', Idx=9, OptidewOk=1,
+                      PowOut='0.0002', PowRef='-0.0001', Pressure=99942)
+TDMS_02_OBS_07 = dict(CapManOk=1, DewPoint='286.84', Idx=11, OptidewOk=1,
+                      PowOut='0.0002', PowRef='0.0000', Pressure=99929,
+                      Mass='0.0994313')
+TDMS_03_OBS_07 = dict(CapManOk=1, DewPoint='286.69', Idx=9, OptidewOk=1,
+                      PowOut='0.0001', PowRef='0.0001', Pressure=99933)
+TDMS_04_OBS_07 = dict(CapManOk=1, DewPoint='286.94', Idx=9, OptidewOk=1,
+                      PowOut='0.0003', PowRef='0.0000', Pressure=99924,
+                      Mass='0.0994310')
+
+# ----------------------------------------------------------------------------
+# Test `_add_setting_info` global variables
+TDMS_01_ADD_SETTING = [(
+    1, Decimal('0.0'), 0, 100000, Decimal('290.0'), Decimal('1.00'), 0, 1
+    )]
+TDMS_02_ADD_SETTING = [(
+    2, Decimal('5.0'), 1, 100000, Decimal('290.0'), Decimal('1.00'), 0, 1
+    )]
+TDMS_03_ADD_SETTING = [(
+    3, Decimal('0.0'), 0, 100000, Decimal('290.0'), Decimal('1.00'), 1, 1
+    )]
+TDMS_04_ADD_SETTING = [(
+    4, Decimal('5.0'), 1, 100000, Decimal('290.0'), Decimal('1.00'), 1, 1
+    )]
+
+# ----------------------------------------------------------------------------
+# Test `_add_test_info` global variables
 TDMS_01_ADD_TEST = [(1, 'author_1', datetime(2018, 6, 28, 17, 29, 39),
                      'Duty 0; Resevoir Off; IsMass No', 1)]
 TDMS_02_ADD_TEST = [(2, 'author_2', datetime(2018, 6, 28, 17, 41, 18),
@@ -118,6 +115,95 @@ TDMS_03_ADD_TEST = [(3, 'author_3', datetime(2018, 6, 28, 17, 38, 23),
                      'Duty 0; Resevoir On; IsMass No', 3)]
 TDMS_04_ADD_TEST = [(4, 'author_4', datetime(2018, 6, 28, 17, 42, 32),
                      'Duty 5; Resevoir On; IsMass Yes', 4)]
+
+# ----------------------------------------------------------------------------
+# Test `_add_obs_info` global variables
+OBS_COLS = ['Idx', 'PowOut', 'PowRef', 'Pressure', 'TestId', 'Mass']
+OBS_BIT_COLS = ['CapManOk', 'OptidewOk']
+OBS_STATS_DF_1 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    CapManOk=[27, 27, 0, 1.0000, 1, 1],
+    DewPoint=[27, 7737.23, 0.000705624142660792, 286.564074, 286.52, 286.63],
+    Idx=[27, 405, 60.666666666666664, 15.0000, 2, 28],
+    Mass=[0, None, None, None, None, None],
+    OptidewOk=[27, 27, 0, 1.0000, 1, 1],
+    PowOut=[27, 0.0051, 0.000000012839506172839506,
+            0.00018889, -0.0001, 0.0004],
+    PowRef=[27, -0.0009, 0.00000000888888888888889,
+            -0.00003333, -0.0003, 0.0002],
+    Pressure=[27, 2698644, 239.28395061728366, 99949.7778, 99929, 99986],
+    TestId=[27, 27, 0, 1.0000, 1, 1],
+    )
+).set_index('idx')
+OBS_STATS_DF_2 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    CapManOk=[15, 15, 0, 1.0000, 1, 1],
+    DewPoint=[15, 4303.06, 0.00045955555555561106, 286.870667, 286.83, 286.91],
+    Idx=[15, 165, 18.666666666666668, 11.0000, 4, 18],
+    Mass=[15, 1.4914701, 0.0000000000000024000000004137717, 0.09943134000,
+          0.0994313, 0.0994314],
+    OptidewOk=[15, 15, 0, 1.0000, 1, 1],
+    PowOut=[15, 0.0014, 0.000000009955555555555556, 0.00009333,
+            -0.0001, 0.0002],
+    PowRef=[15, 0.0002, 0.000000003822222222222223, 0.00001333,
+            -0.0001, 0.0001],
+    Pressure=[15, 1498947, 439.6266666666366, 99929.8000, 99907, 99981],
+    TestId=[15, 30, 0, 2.0000, 2, 2],
+    )
+).set_index('idx')
+OBS_STATS_DF_3 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    CapManOk=[13, 13, 0, 1.0000, 1, 1],
+    DewPoint=[13, 3726.87, 0.0007408284023666399, 286.682308, 286.63, 286.72],
+    Idx=[13, 104, 14, 8.0000, 2, 14],
+    Mass=[0, None, None, None, None, None],
+    OptidewOk=[13, 13, 0, 1.0000, 1, 1],
+    PowOut=[13, 0.0026, 0.000000009230769230769232, 0.00020000,
+            0.0001, 0.0004],
+    PowRef=[13, 0.0003, 0.000000004852071005917161, 0.00002308,
+            -0.0001, 0.0001],
+    Pressure=[13, 1299252, 95.47928994086436, 99942.4615, 99929, 99964],
+    TestId=[13, 39, 0, 3.0000, 3, 3],
+    )
+).set_index('idx')
+OBS_STATS_DF_4 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    CapManOk=[14, 14, 0, 1.0000, 1, 1],
+    DewPoint=[14, 4017.18, 0.0005408163265310136, 286.941429, 286.91, 286.98],
+    Idx=[14, 119, 16.25, 8.5000, 2, 15],
+    Mass=[14, 1.3920334, 0.0000000000000024489795920957832, 0.09943095714,
+          0.0994309, 0.0994310],
+    OptidewOk=[14, 14, 0, 1.0000, 1, 1],
+    PowOut=[14, 0.0027, 0.00000000923469387755102, 0.00019286, 0.0000, 0.0003],
+    PowRef=[14, 0.0006, 0.00000000816326530612245, 0.00004286,
+            -0.0001, 0.0002],
+    Pressure=[14, 1398995, 67.02551020410793, 99928.2143, 99911, 99942],
+    TestId=[14, 56, 0, 4.0000, 4, 4],
+    )
+).set_index('idx')
+
+# ----------------------------------------------------------------------------
+# Global test variables
+CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'test_01.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'tdms_test_folder',
+                                               'test_02.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'test_03.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'tdms_test_folder',
+                                               'tdms_test_folder_full',
+                                               'test_04.tdms')]
+
+FALSE_SETTING = dict(
+    Duty='5.0', IsMass=0, Pressure=100000, Reservoir=1, Temperature=290,
+    TimeStep='1.00', TubeId=1
+    )
 
 # ----------------------------------------------------------------------------
 # Observation globals
@@ -205,6 +291,7 @@ RH_TARGET_LENGTH = 15
 # ----------------------------------------------------------------------------
 # Analysis globals
 ANALYSIS_TEST_ID = 1
+RESULTS_COLS = ['RH', 'TestId', 'A', 'SigA', 'B', 'SigB', 'Chi2', 'Q', 'Nu']
 RESULTS_LIST = [Decimal('0.50'), 1, 0.0988713, 1.36621e-07, -3.07061e-09,
                 9.40458e-12, 329.257, Decimal('1.00'), 599]
 RESULTS_STATS_DF = pd.DataFrame(dict(
@@ -230,20 +317,12 @@ RESULTS_STATS_DF = pd.DataFrame(dict(
     Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999],
     )
 ).set_index('idx')
-RESULTS_COLS = ['RH', 'TestId', 'A', 'SigA', 'B', 'SigB', 'Chi2', 'Q', 'Nu']
-
-# ----------------------------------------------------------------------------
-# Indexes
-TEST_INDEX = 7
-TC_INDEX = 7
 
 # ----------------------------------------------------------------------------
 # Analyzed `DataFrame`
-RESULTS_CNX = sqldb.connect('test_results')
-_ = sqldb._get_test_dict(RESULTS_CNX, 1)
-RESULTS_CNX.close()
-_ = experiments.preprocess(_['data'], purge=True)
-ANALYSIS_DF = experiments.mass_transfer(_)
+ANALYSIS_DF = pkl.load(open(os.path.join(os.getcwd(), 'tests',
+                                                      'data_test_files',
+                                                      'analysis_df'), 'rb'))
 
 
 @pytest.fixture(scope='module')
@@ -336,7 +415,7 @@ def test_create_tables(cur):
 
     # Now check that all tables exist
     table_names_set = set(ddl.table_name_list)
-    cur.execute("SHOW TABLES;")
+    cur.execute('SHOW TABLES;')
     for row in cur:
         assert row[0] in table_names_set
 
@@ -346,30 +425,17 @@ def test_add_tube_info(cur):
     # Add the tube the first time and we should get true
     assert sqldb.add_tube_info(cur)
 
-    # Check that there is one and only one tube with this id
-    cur.execute("SELECT TubeID FROM Tube;")
-    assert cur.fetchone()[0] == 1
-    cur.execute("SELECT TubeID FROM Tube;")
-    assert len(cur.fetchall()) == 1
+    cur.execute(dml_test.get_tube)
+    res = cur.fetchall()
+    assert res == TUBE_TABLE
 
-    cur.execute("SELECT DiameterIn FROM Tube WHERE TubeID=1;")
-    assert cur.fetchone()[0] == Decimal('0.0300000')
-
-    cur.execute("SELECT DiameterOut FROM Tube WHERE TubeID=1;")
-    assert cur.fetchone()[0] == Decimal('0.0400000')
-
-    cur.execute("SELECT Length FROM Tube WHERE TubeID=1;")
-    assert cur.fetchone()[0] == Decimal('0.0600000')
-
-    cur.execute("SELECT Material FROM Tube WHERE TubeID=1;")
-    assert cur.fetchone()[0] == 'Delrin'
-
-    cur.execute("SELECT Mass FROM Tube WHERE TubeID=1;")
-    assert cur.fetchone()[0] == Decimal('0.0873832')
-
-    # Now that it is added, we should get a False indicating that it could not
-    # be added
+    # Check duplicate entry error
     assert not sqldb.add_tube_info(cur)
+
+    # Check that Tube table is unaffected
+    cur.execute(dml_test.get_tube)
+    res = cur.fetchall()
+    assert res == TUBE_TABLE
 
 
 def test__setting_exists(cur):
@@ -542,32 +608,28 @@ def test__add_test_info(cur, test_tdms_obj):
     test_id = sqldb._add_test_info(cur, test_tdms_obj[0], 1)
     assert test_id == 1
     # Query the new test and check the results
-    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                   test_id))
+    cur.execute(dml_test.get_test.format(test_id))
     assert cur.fetchall() == TDMS_01_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 2
     test_id = sqldb._add_test_info(cur, test_tdms_obj[1], 2)
     assert test_id == 2
-    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                   test_id))
+    cur.execute(dml_test.get_test.format(test_id))
     assert cur.fetchall() == TDMS_02_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 3
     test_id = sqldb._add_test_info(cur, test_tdms_obj[2], 3)
     assert test_id == 3
-    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                   test_id))
+    cur.execute(dml_test.get_test.format(test_id))
     assert cur.fetchall() == TDMS_03_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 4
     test_id = sqldb._add_test_info(cur, test_tdms_obj[3], 4)
     assert test_id == 4
-    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                   test_id))
+    cur.execute(dml_test.get_test.format(test_id))
     assert cur.fetchall() == TDMS_04_ADD_TEST
 
 
@@ -614,9 +676,31 @@ def test__add_obs_info(cur, test_tdms_obj):
             len(test_tdms_obj[0].object("Data", "Idx").data)
             ):
         assert sqldb._add_obs_info(cur, test_tdms_obj[0], 1, tdms_idx)
-    # Then check that you can get the last dew point correct
-    cur.execute(dml.get_last_dew_point.format(1))
-    assert cur.fetchall()[0][0] == Decimal('286.53')
+
+    # Check column statistics for the TestId
+    for col in OBS_COLS[:-1]:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 1, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        assert isclose(res[0], OBS_STATS_DF_1.loc['cnt', col])
+        assert isclose(res[1], OBS_STATS_DF_1.loc['sum', col])
+        assert isclose(res[2], OBS_STATS_DF_1.loc['var', col])
+        assert isclose(res[3], OBS_STATS_DF_1.loc['avg', col])
+        assert isclose(res[4], OBS_STATS_DF_1.loc['min', col])
+        assert isclose(res[5], OBS_STATS_DF_1.loc['max', col])
+
+    for col in OBS_BIT_COLS:
+        cur.execute(
+            dml_test.get_bit_stats.format(col, 1, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        assert isclose(res[0], OBS_STATS_DF_1.loc['cnt', col])
+        assert isclose(res[1], OBS_STATS_DF_1.loc['sum', col])
+        assert isclose(res[2], OBS_STATS_DF_1.loc['var', col])
+        assert isclose(res[3], OBS_STATS_DF_1.loc['avg', col])
+        assert isclose(res[4], OBS_STATS_DF_1.loc['min', col])
+        assert isclose(res[5], OBS_STATS_DF_1.loc['max', col])
 
     # ------------------------------------------------------------------------
     # File 2
@@ -624,8 +708,30 @@ def test__add_obs_info(cur, test_tdms_obj):
             len(test_tdms_obj[1].object("Data", "Idx").data)
             ):
         assert sqldb._add_obs_info(cur, test_tdms_obj[1], 2, tdms_idx)
-    cur.execute(dml.get_last_dew_point.format(2))
-    assert cur.fetchall()[0][0] == Decimal('286.91')
+
+    for col in OBS_COLS:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 2, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        assert isclose(res[0], OBS_STATS_DF_2.loc['cnt', col])
+        assert isclose(res[1], OBS_STATS_DF_2.loc['sum', col])
+        assert isclose(res[2], OBS_STATS_DF_2.loc['var', col])
+        assert isclose(res[3], OBS_STATS_DF_2.loc['avg', col])
+        assert isclose(res[4], OBS_STATS_DF_2.loc['min', col])
+        assert isclose(res[5], OBS_STATS_DF_2.loc['max', col])
+
+    for col in OBS_BIT_COLS:
+        cur.execute(
+            dml_test.get_bit_stats.format(col, 2, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        assert isclose(res[0], OBS_STATS_DF_2.loc['cnt', col])
+        assert isclose(res[1], OBS_STATS_DF_2.loc['sum', col])
+        assert isclose(res[2], OBS_STATS_DF_2.loc['var', col])
+        assert isclose(res[3], OBS_STATS_DF_2.loc['avg', col])
+        assert isclose(res[4], OBS_STATS_DF_2.loc['min', col])
+        assert isclose(res[5], OBS_STATS_DF_2.loc['max', col])
 
     # ------------------------------------------------------------------------
     # File 3
@@ -633,8 +739,30 @@ def test__add_obs_info(cur, test_tdms_obj):
             len(test_tdms_obj[2].object("Data", "Idx").data)
             ):
         assert sqldb._add_obs_info(cur, test_tdms_obj[2], 3, tdms_idx)
-    cur.execute(dml.get_last_dew_point.format(3))
-    assert cur.fetchall()[0][0] == Decimal('286.70')
+
+    for col in OBS_COLS[:-1]:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 3, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        assert isclose(res[0], OBS_STATS_DF_3.loc['cnt', col])
+        assert isclose(res[1], OBS_STATS_DF_3.loc['sum', col])
+        assert isclose(res[2], OBS_STATS_DF_3.loc['var', col])
+        assert isclose(res[3], OBS_STATS_DF_3.loc['avg', col])
+        assert isclose(res[4], OBS_STATS_DF_3.loc['min', col])
+        assert isclose(res[5], OBS_STATS_DF_3.loc['max', col])
+
+    for col in OBS_BIT_COLS:
+        cur.execute(
+            dml_test.get_bit_stats.format(col, 3, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        assert isclose(res[0], OBS_STATS_DF_3.loc['cnt', col])
+        assert isclose(res[1], OBS_STATS_DF_3.loc['sum', col])
+        assert isclose(res[2], OBS_STATS_DF_3.loc['var', col])
+        assert isclose(res[3], OBS_STATS_DF_3.loc['avg', col])
+        assert isclose(res[4], OBS_STATS_DF_3.loc['min', col])
+        assert isclose(res[5], OBS_STATS_DF_3.loc['max', col])
 
     # ------------------------------------------------------------------------
     # File 4
@@ -642,8 +770,30 @@ def test__add_obs_info(cur, test_tdms_obj):
             len(test_tdms_obj[3].object("Data", "Idx").data)
             ):
         assert sqldb._add_obs_info(cur, test_tdms_obj[3], 4, tdms_idx)
-    cur.execute(dml.get_last_dew_point.format(4))
-    assert cur.fetchall()[0][0] == Decimal('286.91')
+
+    for col in OBS_COLS:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 4, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        assert isclose(res[0], OBS_STATS_DF_4.loc['cnt', col])
+        assert isclose(res[1], OBS_STATS_DF_4.loc['sum', col])
+        assert isclose(res[2], OBS_STATS_DF_4.loc['var', col])
+        assert isclose(res[3], OBS_STATS_DF_4.loc['avg', col])
+        assert isclose(res[4], OBS_STATS_DF_4.loc['min', col])
+        assert isclose(res[5], OBS_STATS_DF_4.loc['max', col])
+
+    for col in OBS_BIT_COLS:
+        cur.execute(
+            dml_test.get_bit_stats.format(col, 4, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        assert isclose(res[0], OBS_STATS_DF_4.loc['cnt', col])
+        assert isclose(res[1], OBS_STATS_DF_4.loc['sum', col])
+        assert isclose(res[2], OBS_STATS_DF_4.loc['var', col])
+        assert isclose(res[3], OBS_STATS_DF_4.loc['avg', col])
+        assert isclose(res[4], OBS_STATS_DF_4.loc['min', col])
+        assert isclose(res[5], OBS_STATS_DF_4.loc['max', col])
 
 
 def test__add_temp_info(cur, test_tdms_obj):
@@ -883,16 +1033,21 @@ def test__add_results(results_cnx):
 
     for col in RESULTS_COLS:
         results_cur.execute(
-            dml.get_table_stats.format(col, ANALYSIS_TEST_ID, 'Results')
+            dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
             )
-        res = results_cur.fetchall()
-        assert isclose(res[0][0], RESULTS_STATS_DF.loc['cnt', col])
-        assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
-        assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
-        assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
-        assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
-        assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+        res = results_cur.fetchall()[0]
+        assert isclose(res[0], RESULTS_STATS_DF.loc['cnt', col])
+        assert isclose(res[1], RESULTS_STATS_DF.loc['sum', col])
+        assert isclose(res[2], RESULTS_STATS_DF.loc['var', col])
+        assert isclose(res[3], RESULTS_STATS_DF.loc['avg', col])
+        assert isclose(res[4], RESULTS_STATS_DF.loc['min', col])
+        assert isclose(res[5], RESULTS_STATS_DF.loc['max', col])
     results_cur.close()
+
+
+def test__add_best_fit(results_cnx):
+    """Test _add_best_fit."""
+    return
 
 
 def test_add_analysis(results_cnx):
@@ -928,33 +1083,33 @@ def test_add_analysis(results_cnx):
 
     for col in RESULTS_COLS:
         results_cur.execute(
-            dml.get_table_stats.format(col, ANALYSIS_TEST_ID, 'Results')
+            dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
             )
-        res = results_cur.fetchall()
-        assert isclose(res[0][0], RESULTS_STATS_DF.loc['cnt', col])
-        assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
-        assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
-        assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
-        assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
-        assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+        res = results_cur.fetchall()[0]
+        assert isclose(res[0], RESULTS_STATS_DF.loc['cnt', col])
+        assert isclose(res[1], RESULTS_STATS_DF.loc['sum', col])
+        assert isclose(res[2], RESULTS_STATS_DF.loc['var', col])
+        assert isclose(res[3], RESULTS_STATS_DF.loc['avg', col])
+        assert isclose(res[4], RESULTS_STATS_DF.loc['min', col])
+        assert isclose(res[5], RESULTS_STATS_DF.loc['max', col])
 
     # ------------------------------------------------------------------------
     # Test adding the same analysis again
     assert sqldb.add_analysis(results_cnx, ANALYSIS_TEST_ID) is None
 
     # ------------------------------------------------------------------------
-    # Check that the database is unaffected
+    # Check that the database is uneffected
     for col in RESULTS_COLS:
         results_cur.execute(
-            dml.get_table_stats.format(col, ANALYSIS_TEST_ID, 'Results')
+            dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
             )
-        res = results_cur.fetchall()
-        assert isclose(res[0][0], RESULTS_STATS_DF.loc['cnt', col])
-        assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
-        assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
-        assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
-        assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
-        assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+        res = results_cur.fetchall()[0]
+        assert isclose(res[0], RESULTS_STATS_DF.loc['cnt', col])
+        assert isclose(res[1], RESULTS_STATS_DF.loc['sum', col])
+        assert isclose(res[2], RESULTS_STATS_DF.loc['var', col])
+        assert isclose(res[3], RESULTS_STATS_DF.loc['avg', col])
+        assert isclose(res[4], RESULTS_STATS_DF.loc['min', col])
+        assert isclose(res[5], RESULTS_STATS_DF.loc['max', col])
     results_cur.close()
 
 
@@ -972,10 +1127,10 @@ def drop_tables(cursor, bol):
 def clear_results(cursor, bol):
     """Drop databese tables."""
     if bol:
-        print('Clearing RHTargets and Results...')
+        print('Clearing analysis tables...')
         truncate(cursor, 'RHTargets')
         truncate(cursor, 'Results')
-        print('RHTargets and Results cleared.')
+        print('Analysis tables cleared.')
     else:
         print('RHTargests and Results not cleared.')
 
