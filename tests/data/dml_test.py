@@ -16,4 +16,6 @@ get_stats_gen = ('SELECT COUNT({0}), SUM({0}), VARIANCE({0}), AVG({0}),'
 # Test add_tube_info ddl
 get_tube = 'SELECT * FROM Tube'
 
+get_setting = 'SELECT * FROM Setting WHERE SettingID={}'
+
 get_test = 'SELECT * FROM Test WHERE TestID={}'

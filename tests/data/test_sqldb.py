@@ -192,7 +192,42 @@ TEMP_OBS_3 = [293.06, 292.73, 293.02, 292.62, 291.85, 291.78, 291.67, 291.74,
               291.83, 291.61, 291.5, 291.58, 291.49, 291.83]
 TEMP_OBS_4 = [292.06, 291.83, 291.7, 291.94, 292.1, 291.64, 291.56, 291.61,
               291.53, 291.83]
-
+TEMP_OBS_STATS_1 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    ThermocoupleNum=[378, 2457, 16.25000000000001, 6.5000, 0, 13],
+    Temperature=[378, 110454.30, 0.5940934240362769,
+                 292.207143, 291.51, 293.96],
+    Idx=[378, 5670, 60.666666666666664, 15.0000, 2, 28],
+    TestId=[378, 378, 0, 1.0000, 1, 1],
+    )
+).set_index('idx')
+TEMP_OBS_STATS_2 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    ThermocoupleNum=[150, 1275, 8.25, 8.5000, 4, 13],
+    Temperature=[150, 43780.54, 0.0793492622222213,
+                 291.870267, 291.56, 292.43],
+    Idx=[150, 1650, 18.666666666666675, 11.0000, 4, 18],
+    TestId=[150, 300, 0, 2.0000, 2, 2],
+    )
+).set_index('idx')
+TEMP_OBS_STATS_3 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    ThermocoupleNum=[182, 1183, 16.250000000000007, 6.5000, 0, 13],
+    Temperature=[182, 53149.04, 0.30165401521555363,
+                 292.027692, 291.49, 293.09],
+    Idx=[182, 1456, 13.999999999999982, 8.0000, 2, 14],
+    TestId=[182, 546, 0, 3.0000, 3, 3],
+    )
+).set_index('idx')
+TEMP_OBS_STATS_4 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    ThermocoupleNum=[140, 1190, 8.25, 8.5000, 4, 13],
+    Temperature=[140, 40850.05, 0.03764956632653166,
+                 291.786071, 291.53, 292.14],
+    Idx=[140, 1190, 16.250000000000007, 8.5000, 2, 15],
+    TestId=[140, 560, 0, 4.0000, 4, 4],
+    )
+).set_index('idx')
 # ----------------------------------------------------------------------------
 # Global test variables
 CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
@@ -216,19 +251,6 @@ FALSE_SETTING = dict(
     TimeStep='1.00', TubeId=1
     )
 
-# ----------------------------------------------------------------------------
-# Observation globals
-TDMS_01_OBS_07 = dict(CapManOk=1, DewPoint='286.57', Idx=9, OptidewOk=1,
-                      PowOut='0.0002', PowRef='-0.0001', Pressure=99942)
-TDMS_02_OBS_07 = dict(CapManOk=1, DewPoint='286.84', Idx=11, OptidewOk=1,
-                      PowOut='0.0002', PowRef='0.0000', Pressure=99929,
-                      Mass='0.0994313')
-TDMS_03_OBS_07 = dict(CapManOk=1, DewPoint='286.69', Idx=9, OptidewOk=1,
-                      PowOut='0.0001', PowRef='0.0001', Pressure=99933)
-TDMS_04_OBS_07 = dict(CapManOk=1, DewPoint='286.94', Idx=9, OptidewOk=1,
-                      PowOut='0.0003', PowRef='0.0000', Pressure=99924,
-                      Mass='0.0994310')
-
 OBS_DATA_1 = (
     1, Decimal('286.54'), 1, Decimal('0.0000'), Decimal('0.0000'), 99933
     )
@@ -243,25 +265,6 @@ OBS_DATA_4 = (
     1, Decimal('286.98'), Decimal('0.0994310'), 1, Decimal('0.0001'),
     Decimal('0.0001'), 99937
     )
-
-# ----------------------------------------------------------------------------
-# TempObservation globals
-TEMP_OBS_1 = [
-    293.68, 293.03, 293.94, 292.68, 292.02, 291.79, 291.67, 291.96, 292.07,
-    291.62, 291.55, 291.6, 291.53, 291.81
-    ]
-TEMP_OBS_2 = [
-    292.36, 291.85, 291.72, 292.1, 292.34, 291.67, 291.62, 291.64, 291.58,
-    291.85
-    ]
-TEMP_OBS_3 = [
-    293.06, 292.73, 293.02, 292.62, 291.85, 291.78, 291.67, 291.74, 291.83,
-    291.61, 291.5, 291.58, 291.49, 291.83
-    ]
-TEMP_OBS_4 = [
-    292.06, 291.83, 291.7, 291.94, 292.1, 291.64, 291.56, 291.61, 291.53,
-    291.83
-    ]
 
 # ----------------------------------------------------------------------------
 # DataFrame globals
@@ -578,7 +581,7 @@ def test__add_setting_info(cur, test_tdms_obj):
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[0])
     assert setting_id == 1
     # Query the new setting and check the results
-    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
+    cur.execute(dml_test.get_setting.format(
                    cur.lastrowid))
     assert cur.fetchall() == TDMS_01_ADD_SETTING
 
@@ -586,7 +589,7 @@ def test__add_setting_info(cur, test_tdms_obj):
     # File 2
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[1])
     assert setting_id == 2
-    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
+    cur.execute(dml_test.get_setting.format(
                    cur.lastrowid))
     assert cur.fetchall() == TDMS_02_ADD_SETTING
 
@@ -594,7 +597,7 @@ def test__add_setting_info(cur, test_tdms_obj):
     # File 3
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[2])
     assert setting_id == 3
-    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
+    cur.execute(dml_test.get_setting.format(
                    cur.lastrowid))
     assert cur.fetchall() == TDMS_03_ADD_SETTING
 
@@ -602,7 +605,7 @@ def test__add_setting_info(cur, test_tdms_obj):
     # File 4
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[3])
     assert setting_id == 4
-    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(4))
+    cur.execute(dml_test.get_setting.format(4))
     assert cur.fetchall() == TDMS_04_ADD_SETTING
 
 
@@ -833,28 +836,50 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     truncate(cur, 'Observation')
     truncate(cur, 'Test')
     truncate(cur, 'Setting')
-    # assert cnx.in_transaction
-    # cnx.commit()
     assert not cnx.in_transaction
 
     # ------------------------------------------------------------------------
     # File 1
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[0])
+
     # Verify the data in the 'Setting' table:
-    cur.execute('SELECT * FROM Setting WHERE SettingID=1;')
+    cur.execute(dml_test.get_setting.format(1))
     assert cur.fetchall() == TDMS_01_ADD_SETTING
+
     # Verify the data in the 'Test' table:
-    cur.execute('SELECT * FROM Test WHERE TestID=1;')
+    cur.execute(dml_test.get_test.format(1))
     assert cur.fetchall() == TDMS_01_ADD_TEST
-    # Verify the data in the `Observation` table:
-    cur.execute(dml.get_obs_data_t.format(1, TEST_INDEX))
-    res = cur.fetchall()[0]
-    for i in range(len(res)):
-        assert isclose(res[i], OBS_DATA_1[i])
-    # Verify the data in the 'TempObservation` table:
-    cur.execute(dml.get_temp_obs_data.format(1, TEST_INDEX, TEST_INDEX))
-    res = cur.fetchall()[0][0]
-    assert isclose(res, Decimal('291.97'))
+
+    # Verify the data in the 'Observation' table
+    for col in OBS_COLS[:-1]:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 1, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_1)):
+            assert isclose(res[idx],
+                           OBS_STATS_1.loc[OBS_STATS_1.index.values[idx], col])
+    for col in OBS_BIT_COLS:
+        cur.execute(
+            dml_test.get_bit_stats.format(col, 1, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_1)):
+            assert isclose(res[idx],
+                           OBS_STATS_1.loc[OBS_STATS_1.index.values[idx], col])
+
+    # Verify the data in the 'TempObservation' table
+    for col in TEMP_OBS_STATS_1.columns.values:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 1, 'TempObservation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(TEMP_OBS_STATS_1)):
+            assert isclose(
+                res[idx],
+                TEMP_OBS_STATS_1.loc[TEMP_OBS_STATS_1.index.values[idx], col]
+                )
+
     # Commit transaction before next test
     assert cnx.in_transaction
     cnx.commit()
@@ -863,21 +888,45 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     # ------------------------------------------------------------------------
     # File 2
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[1])
+
     # Verify the data in the 'Setting' table:
-    cur.execute('SELECT * FROM Setting WHERE SettingID=2;')
+    cur.execute(dml_test.get_setting.format(2))
     assert cur.fetchall() == TDMS_02_ADD_SETTING
+
     # Verify the data in the 'Test' table:
-    cur.execute('SELECT * FROM Test WHERE TestID=2;')
+    cur.execute(dml_test.get_test.format(2))
     assert cur.fetchall() == TDMS_02_ADD_TEST
-    # Verify the data in the `Observation` table:
-    cur.execute(dml.get_obs_data_m.format(2, TEST_INDEX))
-    res = cur.fetchall()[0]
-    for i in range(len(res)):
-        assert isclose(res[i], OBS_DATA_2[i])
-    # Verify the data in the 'TempObservation` table:
-    cur.execute(dml.get_temp_obs_data.format(2, TEST_INDEX, TEST_INDEX))
-    res = cur.fetchall()[0][0]
-    assert isclose(res, Decimal('292.12'))
+
+    # Verify the data in the 'Observation' table
+    for col in OBS_COLS:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 2, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_2)):
+            assert isclose(res[idx],
+                           OBS_STATS_2.loc[OBS_STATS_2.index.values[idx], col])
+    for col in OBS_BIT_COLS:
+        cur.execute(
+            dml_test.get_bit_stats.format(col, 2, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_2)):
+            assert isclose(res[idx],
+                           OBS_STATS_2.loc[OBS_STATS_2.index.values[idx], col])
+
+    # Verify the data in the 'TempObservation' table
+    for col in TEMP_OBS_STATS_2.columns.values:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 2, 'TempObservation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(TEMP_OBS_STATS_2)):
+            assert isclose(
+                res[idx],
+                TEMP_OBS_STATS_2.loc[TEMP_OBS_STATS_2.index.values[idx], col]
+                )
+
     # Commit transaction before next test
     assert cnx.in_transaction
     cnx.commit()
@@ -886,21 +935,45 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     # ------------------------------------------------------------------------
     # File 3
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[2])
+
     # Verify the data in the 'Setting' table:
-    cur.execute('SELECT * FROM Setting WHERE SettingID=3;')
+    cur.execute(dml_test.get_setting.format(3))
     assert cur.fetchall() == TDMS_03_ADD_SETTING
+
     # Verify the data in the 'Test' table:
-    cur.execute('SELECT * FROM Test WHERE TestID=3;')
+    cur.execute(dml_test.get_test.format(3))
     assert cur.fetchall() == TDMS_03_ADD_TEST
+
     # Verify the data in the `Observation` table:
-    cur.execute(dml.get_obs_data_t.format(3, TEST_INDEX))
-    res = cur.fetchall()[0]
-    for i in range(len(res)):
-        assert isclose(res[i], OBS_DATA_3[i])
-    # Verify the data in the 'TempObservation` table:
-    cur.execute(dml.get_temp_obs_data.format(3, TEST_INDEX, TEST_INDEX))
-    res = cur.fetchall()[0][0]
-    assert isclose(res, Decimal('291.75'))
+    for col in OBS_COLS[:-1]:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 3, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_3)):
+            assert isclose(res[idx],
+                           OBS_STATS_3.loc[OBS_STATS_3.index.values[idx], col])
+    for col in OBS_BIT_COLS:
+        cur.execute(
+            dml_test.get_bit_stats.format(col, 3, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_3)):
+            assert isclose(res[idx],
+                           OBS_STATS_3.loc[OBS_STATS_3.index.values[idx], col])
+
+    # Verify the data in the 'TempObservation' table
+    for col in TEMP_OBS_STATS_3.columns.values:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 3, 'TempObservation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(TEMP_OBS_STATS_3)):
+            assert isclose(
+                res[idx],
+                TEMP_OBS_STATS_3.loc[TEMP_OBS_STATS_3.index.values[idx], col]
+                )
+
     # Commit transaction before next test
     assert cnx.in_transaction
     cnx.commit()
@@ -909,21 +982,45 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     # ------------------------------------------------------------------------
     # File 4
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[3])
+
     # Verify the data in the 'Setting' table:
-    cur.execute('SELECT * FROM Setting WHERE SettingID=2;')
-    assert cur.fetchall() == TDMS_02_ADD_SETTING
+    cur.execute(dml_test.get_setting.format(4))
+    assert cur.fetchall() == TDMS_04_ADD_SETTING
+
     # Verify the data in the 'Test' table:
-    cur.execute('SELECT * FROM Test WHERE TestID=4;')
+    cur.execute(dml_test.get_test.format(4))
     assert cur.fetchall() == TDMS_04_ADD_TEST
+
     # Verify the data in the `Observation` table:
-    cur.execute(dml.get_obs_data_m.format(4, TEST_INDEX))
-    res = cur.fetchall()[0]
-    for i in range(len(res)):
-        assert isclose(res[i], OBS_DATA_4[i])
-    # Verify the data in the 'TempObservation` table:
-    cur.execute(dml.get_temp_obs_data.format(4, TEST_INDEX, TEST_INDEX))
-    res = cur.fetchall()[0][0]
-    assert isclose(res, Decimal('291.95'))
+    for col in OBS_COLS[:-1]:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 4, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_4)):
+            assert isclose(res[idx],
+                           OBS_STATS_4.loc[OBS_STATS_4.index.values[idx], col])
+    for col in OBS_BIT_COLS:
+        cur.execute(
+            dml_test.get_bit_stats.format(col, 4, 'Observation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_4)):
+            assert isclose(res[idx],
+                           OBS_STATS_4.loc[OBS_STATS_4.index.values[idx], col])
+
+    # Verify the data in the 'TempObservation' table
+    for col in TEMP_OBS_STATS_4.columns.values:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 4, 'TempObservation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(TEMP_OBS_STATS_4)):
+            assert isclose(
+                res[idx],
+                TEMP_OBS_STATS_4.loc[TEMP_OBS_STATS_4.index.values[idx], col]
+                )
+
     # Commit transaction before next test
     assert cnx.in_transaction
     cnx.commit()
