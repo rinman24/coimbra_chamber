@@ -581,24 +581,21 @@ def test__add_setting_info(cur, test_tdms_obj):
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[0])
     assert setting_id == 1
     # Query the new setting and check the results
-    cur.execute(dml_test.get_setting.format(
-                   cur.lastrowid))
+    cur.execute(dml_test.get_setting.format(cur.lastrowid))
     assert cur.fetchall() == TDMS_01_ADD_SETTING
 
     # ------------------------------------------------------------------------
     # File 2
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[1])
     assert setting_id == 2
-    cur.execute(dml_test.get_setting.format(
-                   cur.lastrowid))
+    cur.execute(dml_test.get_setting.format(cur.lastrowid))
     assert cur.fetchall() == TDMS_02_ADD_SETTING
 
     # ------------------------------------------------------------------------
     # File 3
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[2])
     assert setting_id == 3
-    cur.execute(dml_test.get_setting.format(
-                   cur.lastrowid))
+    cur.execute(dml_test.get_setting.format(cur.lastrowid))
     assert cur.fetchall() == TDMS_03_ADD_SETTING
 
     # ------------------------------------------------------------------------
@@ -686,104 +683,80 @@ def test__add_obs_info(cur, test_tdms_obj):
     # ------------------------------------------------------------------------
     # File 1
     # For every index in the data enter all of the data
-    for tdms_idx in range(
-            len(test_tdms_obj[0].object("Data", "Idx").data)
-            ):
+    for tdms_idx in range(len(test_tdms_obj[0].object("Data", "Idx").data)):
         assert sqldb._add_obs_info(cur, test_tdms_obj[0], 1, tdms_idx)
 
     # Check column statistics for the TestId
     for col in OBS_COLS[:-1]:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 1, 'Observation')
-            )
+        cur.execute(dml_test.get_stats_test_id.format(col, 1, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_1)):
-            assert isclose(res[idx],
-                           OBS_STATS_1.loc[OBS_STATS_1.index.values[idx], col])
+            val = OBS_STATS_1.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_1.loc[val, col])
 
     for col in OBS_BIT_COLS:
-        cur.execute(
-            dml_test.get_bit_stats.format(col, 1, 'Observation')
-            )
+        cur.execute(dml_test.get_bit_stats.format(col, 1, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_1)):
-            assert isclose(res[idx],
-                           OBS_STATS_1.loc[OBS_STATS_1.index.values[idx], col])
+            val = OBS_STATS_1.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_1.loc[val, col])
 
     # ------------------------------------------------------------------------
     # File 2
-    for tdms_idx in range(
-            len(test_tdms_obj[1].object("Data", "Idx").data)
-            ):
+    for tdms_idx in range(len(test_tdms_obj[1].object("Data", "Idx").data)):
         assert sqldb._add_obs_info(cur, test_tdms_obj[1], 2, tdms_idx)
 
     for col in OBS_COLS:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 2, 'Observation')
-            )
+        cur.execute(dml_test.get_stats_test_id.format(col, 2, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_2)):
-            assert isclose(res[idx],
-                           OBS_STATS_2.loc[OBS_STATS_2.index.values[idx], col])
+            val = OBS_STATS_2.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_2.loc[val, col])
 
     for col in OBS_BIT_COLS:
-        cur.execute(
-            dml_test.get_bit_stats.format(col, 2, 'Observation')
-            )
+        cur.execute(dml_test.get_bit_stats.format(col, 2, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_2)):
-            assert isclose(res[idx],
-                           OBS_STATS_2.loc[OBS_STATS_2.index.values[idx], col])
+            val = OBS_STATS_2.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_2.loc[val, col])
 
     # ------------------------------------------------------------------------
     # File 3
-    for tdms_idx in range(
-            len(test_tdms_obj[2].object("Data", "Idx").data)
-            ):
+    for tdms_idx in range(len(test_tdms_obj[2].object("Data", "Idx").data)):
         assert sqldb._add_obs_info(cur, test_tdms_obj[2], 3, tdms_idx)
 
     for col in OBS_COLS[:-1]:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 3, 'Observation')
-            )
+        cur.execute(dml_test.get_stats_test_id.format(col, 3, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_3)):
-            assert isclose(res[idx],
-                           OBS_STATS_3.loc[OBS_STATS_3.index.values[idx], col])
+            val = OBS_STATS_3.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_3.loc[val, col])
 
     for col in OBS_BIT_COLS:
-        cur.execute(
-            dml_test.get_bit_stats.format(col, 3, 'Observation')
-            )
+        cur.execute(dml_test.get_bit_stats.format(col, 3, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_3)):
-            assert isclose(res[idx],
-                           OBS_STATS_3.loc[OBS_STATS_3.index.values[idx], col])
+            val = OBS_STATS_3.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_3.loc[val, col])
 
     # ------------------------------------------------------------------------
     # File 4
-    for tdms_idx in range(
-            len(test_tdms_obj[3].object("Data", "Idx").data)
-            ):
+    for tdms_idx in range(len(test_tdms_obj[3].object("Data", "Idx").data)):
         assert sqldb._add_obs_info(cur, test_tdms_obj[3], 4, tdms_idx)
 
     for col in OBS_COLS:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 4, 'Observation')
-            )
+        cur.execute(dml_test.get_stats_test_id.format(col, 4, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_4)):
-            assert isclose(res[idx],
-                           OBS_STATS_4.loc[OBS_STATS_4.index.values[idx], col])
+            val = OBS_STATS_4.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_4.loc[val, col])
 
     for col in OBS_BIT_COLS:
-        cur.execute(
-            dml_test.get_bit_stats.format(col, 4, 'Observation')
-            )
+        cur.execute(dml_test.get_bit_stats.format(col, 4, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_4)):
-            assert isclose(res[idx],
-                           OBS_STATS_4.loc[OBS_STATS_4.index.values[idx], col])
+            val = OBS_STATS_4.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_4.loc[val, col])
 
 
 def test__add_temp_info(cur, test_tdms_obj):
@@ -852,21 +825,17 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
 
     # Verify the data in the 'Observation' table
     for col in OBS_COLS[:-1]:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 1, 'Observation')
-            )
+        cur.execute(dml_test.get_stats_test_id.format(col, 1, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_1)):
-            assert isclose(res[idx],
-                           OBS_STATS_1.loc[OBS_STATS_1.index.values[idx], col])
+            val = OBS_STATS_1.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_1.loc[val, col])
     for col in OBS_BIT_COLS:
-        cur.execute(
-            dml_test.get_bit_stats.format(col, 1, 'Observation')
-            )
+        cur.execute(dml_test.get_bit_stats.format(col, 1, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_1)):
-            assert isclose(res[idx],
-                           OBS_STATS_1.loc[OBS_STATS_1.index.values[idx], col])
+            val = OBS_STATS_1.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_1.loc[val, col])
 
     # Verify the data in the 'TempObservation' table
     for col in TEMP_OBS_STATS_1.columns.values:
@@ -875,10 +844,8 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
             )
         res = cur.fetchall()[0]
         for idx in range(len(TEMP_OBS_STATS_1)):
-            assert isclose(
-                res[idx],
-                TEMP_OBS_STATS_1.loc[TEMP_OBS_STATS_1.index.values[idx], col]
-                )
+            val = TEMP_OBS_STATS_1.index.values[idx]
+            assert isclose(res[idx], TEMP_OBS_STATS_1.loc[val, col])
 
     # Commit transaction before next test
     assert cnx.in_transaction
@@ -899,21 +866,17 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
 
     # Verify the data in the 'Observation' table
     for col in OBS_COLS:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 2, 'Observation')
-            )
+        cur.execute(dml_test.get_stats_test_id.format(col, 2, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_2)):
-            assert isclose(res[idx],
-                           OBS_STATS_2.loc[OBS_STATS_2.index.values[idx], col])
+            val = OBS_STATS_2.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_2.loc[val, col])
     for col in OBS_BIT_COLS:
-        cur.execute(
-            dml_test.get_bit_stats.format(col, 2, 'Observation')
-            )
+        cur.execute(dml_test.get_bit_stats.format(col, 2, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_2)):
-            assert isclose(res[idx],
-                           OBS_STATS_2.loc[OBS_STATS_2.index.values[idx], col])
+            val = OBS_STATS_2.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_2.loc[val, col])
 
     # Verify the data in the 'TempObservation' table
     for col in TEMP_OBS_STATS_2.columns.values:
@@ -922,10 +885,8 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
             )
         res = cur.fetchall()[0]
         for idx in range(len(TEMP_OBS_STATS_2)):
-            assert isclose(
-                res[idx],
-                TEMP_OBS_STATS_2.loc[TEMP_OBS_STATS_2.index.values[idx], col]
-                )
+            val = TEMP_OBS_STATS_2.index.values[idx]
+            assert isclose(res[idx], TEMP_OBS_STATS_2.loc[val, col])
 
     # Commit transaction before next test
     assert cnx.in_transaction
@@ -946,21 +907,17 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
 
     # Verify the data in the `Observation` table:
     for col in OBS_COLS[:-1]:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 3, 'Observation')
-            )
+        cur.execute(dml_test.get_stats_test_id.format(col, 3, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_3)):
-            assert isclose(res[idx],
-                           OBS_STATS_3.loc[OBS_STATS_3.index.values[idx], col])
+            val = OBS_STATS_3.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_3.loc[val, col])
     for col in OBS_BIT_COLS:
-        cur.execute(
-            dml_test.get_bit_stats.format(col, 3, 'Observation')
-            )
+        cur.execute(dml_test.get_bit_stats.format(col, 3, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_3)):
-            assert isclose(res[idx],
-                           OBS_STATS_3.loc[OBS_STATS_3.index.values[idx], col])
+            val = OBS_STATS_3.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_3.loc[val, col])
 
     # Verify the data in the 'TempObservation' table
     for col in TEMP_OBS_STATS_3.columns.values:
@@ -969,10 +926,8 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
             )
         res = cur.fetchall()[0]
         for idx in range(len(TEMP_OBS_STATS_3)):
-            assert isclose(
-                res[idx],
-                TEMP_OBS_STATS_3.loc[TEMP_OBS_STATS_3.index.values[idx], col]
-                )
+            val = TEMP_OBS_STATS_3.index.values[idx]
+            assert isclose(res[idx], TEMP_OBS_STATS_3.loc[val, col])
 
     # Commit transaction before next test
     assert cnx.in_transaction
@@ -993,21 +948,17 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
 
     # Verify the data in the `Observation` table:
     for col in OBS_COLS[:-1]:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 4, 'Observation')
-            )
+        cur.execute(dml_test.get_stats_test_id.format(col, 4, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_4)):
-            assert isclose(res[idx],
-                           OBS_STATS_4.loc[OBS_STATS_4.index.values[idx], col])
+            val = OBS_STATS_4.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_4.loc[val, col])
     for col in OBS_BIT_COLS:
-        cur.execute(
-            dml_test.get_bit_stats.format(col, 4, 'Observation')
-            )
+        cur.execute(dml_test.get_bit_stats.format(col, 4, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_4)):
-            assert isclose(res[idx],
-                           OBS_STATS_4.loc[OBS_STATS_4.index.values[idx], col])
+            val = OBS_STATS_4.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_4.loc[val, col])
 
     # Verify the data in the 'TempObservation' table
     for col in TEMP_OBS_STATS_4.columns.values:
@@ -1016,10 +967,8 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
             )
         res = cur.fetchall()[0]
         for idx in range(len(TEMP_OBS_STATS_4)):
-            assert isclose(
-                res[idx],
-                TEMP_OBS_STATS_4.loc[TEMP_OBS_STATS_4.index.values[idx], col]
-                )
+            val = TEMP_OBS_STATS_4.index.values[idx]
+            assert isclose(res[idx], TEMP_OBS_STATS_4.loc[val, col])
 
     # Commit transaction before next test
     assert cnx.in_transaction
@@ -1103,17 +1052,14 @@ def test__add_results(results_cnx):
     for idx in range(len(res)):
         assert isclose(float(res[idx][0]), float(RESULTS_LIST[idx]))
 
-    for col in RESULTS_COLS:
+    for col in RESULTS_STATS_DF.columns.values:
         results_cur.execute(
             dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()[0]
-        assert isclose(res[0], RESULTS_STATS_DF.loc['cnt', col])
-        assert isclose(res[1], RESULTS_STATS_DF.loc['sum', col])
-        assert isclose(res[2], RESULTS_STATS_DF.loc['var', col])
-        assert isclose(res[3], RESULTS_STATS_DF.loc['avg', col])
-        assert isclose(res[4], RESULTS_STATS_DF.loc['min', col])
-        assert isclose(res[5], RESULTS_STATS_DF.loc['max', col])
+        for idx in range(len(RESULTS_STATS_DF)):
+            val = RESULTS_STATS_DF.index.values[idx]
+            assert isclose(res[idx], RESULTS_STATS_DF.loc[val, col])
     results_cur.close()
 
 
