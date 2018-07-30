@@ -228,58 +228,20 @@ TEMP_OBS_STATS_4 = pd.DataFrame(dict(
     TestId=[140, 560, 0, 4.0000, 4, 4],
     )
 ).set_index('idx')
-# ----------------------------------------------------------------------------
-# Global test variables
-CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
-                                               'data_test_files',
-                                               'test_01.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_test_files',
-                                               'tdms_test_folder',
-                                               'test_02.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_test_files',
-                                               'test_03.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_test_files',
-                                               'tdms_test_folder',
-                                               'tdms_test_folder_full',
-                                               'test_04.tdms')]
-
-FALSE_SETTING = dict(
-    Duty='5.0', IsMass=0, Pressure=100000, Reservoir=1, Temperature=290,
-    TimeStep='1.00', TubeId=1
-    )
-
-OBS_DATA_1 = (
-    1, Decimal('286.54'), 1, Decimal('0.0000'), Decimal('0.0000'), 99933
-    )
-OBS_DATA_2 = (
-    1, Decimal('286.90'), Decimal('0.0994314'), 1, Decimal('0.0002'),
-    Decimal('0.0000'), 99946
-    )
-OBS_DATA_3 = (
-    1, Decimal('286.71'), 1, Decimal('0.0001'), Decimal('0.0001'), 99964
-    )
-OBS_DATA_4 = (
-    1, Decimal('286.98'), Decimal('0.0994310'), 1, Decimal('0.0001'),
-    Decimal('0.0001'), 99937
-    )
 
 # ----------------------------------------------------------------------------
-# DataFrame globals
-TEST_1_INFO_DICT = {
+# Test `_get_test_dict global variables`
+_ = {
     'Temperature': [290.0], 'Pressure': [100000], 'Duty': [0.0],
     'IsMass': [0], 'Reservoir': [0], 'TimeStep': [1.0],
     'DateTime': [pd.Timestamp(datetime(2018, 6, 28, 17, 29, 39))],
     'Author': 'author_1', 'Description': 'Duty 0; Resevoir Off; IsMass No',
     'TubeId': [1], 'TestId': [1], 'SettingId': [1]
 }
-TEST_1_INFO_DF = pd.DataFrame(TEST_1_INFO_DICT)
-TEST_1_INFO_DF = TEST_1_INFO_DF[['Temperature', 'Pressure', 'Duty', 'IsMass',
-                                 'Reservoir', 'TimeStep', 'DateTime', 'Author',
-                                 'Description', 'TubeId', 'TestId',
-                                 'SettingId']]
+_ = pd.DataFrame(_)
+TEST_1_INFO_DF = _[['Temperature', 'Pressure', 'Duty', 'IsMass', 'Reservoir',
+                    'TimeStep', 'DateTime', 'Author', 'Description', 'TubeId',
+                    'TestId', 'SettingId']]
 TEST_1_STATS_DF = pd.DataFrame(dict(
     idx=['sum', 'mean', 'min', 'max', 'var'],
     TC0=[7929.21, 293.67444444444442, 293.65, 293.71, 0.00031794871794867406],
@@ -298,12 +260,21 @@ TEST_1_STATS_DF = pd.DataFrame(dict(
 TEST_1_DATA_DF_SIZE = (27, 22)
 
 # ----------------------------------------------------------------------------
-# RHTarget globals
-RH_TARGET_LIST = [Decimal('{:.2f}'.format(rh/100)) for rh in range(10, 85, 5)]
-RH_TARGET_LENGTH = 15
+# Test get_test_from_set global variables
+FALSE_SETTING = dict(
+    Duty='5.0', IsMass=0, Pressure=100000, Reservoir=1, Temperature=290,
+    TimeStep='1.00', TubeId=1
+    )
 
 # ----------------------------------------------------------------------------
-# Analysis globals
+# Test _add_rh_targets global variables
+RH_TARGET_LIST = [Decimal('{:.2f}'.format(rh/100)) for rh in range(10, 85, 5)]
+RH_TARGET_LENGTH = 15
+ANALYSIS_DF = pkl.load(open(os.path.join(
+    os.getcwd(), 'tests', 'data_test_files', 'analysis_df'), 'rb'))
+
+# ----------------------------------------------------------------------------
+# Test `_add_results global variables`
 ANALYSIS_TEST_ID = 1
 RESULTS_COLS = ['RH', 'TestId', 'A', 'SigA', 'B', 'SigB', 'Chi2', 'Q', 'Nu']
 RESULTS_LIST = [Decimal('0.50'), 1, 0.0988713, 1.36621e-07, -3.07061e-09,
@@ -333,10 +304,22 @@ RESULTS_STATS_DF = pd.DataFrame(dict(
 ).set_index('idx')
 
 # ----------------------------------------------------------------------------
-# Analyzed `DataFrame`
-ANALYSIS_DF = pkl.load(open(os.path.join(os.getcwd(), 'tests',
-                                                      'data_test_files',
-                                                      'analysis_df'), 'rb'))
+# `test_tdms_obj` fixture global variables
+CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'test_01.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'tdms_test_folder',
+                                               'test_02.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'test_03.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'tdms_test_folder',
+                                               'tdms_test_folder_full',
+                                               'test_04.tdms')]
 
 
 @pytest.fixture(scope='module')
@@ -393,7 +376,7 @@ def results_cnx():
     # Cleanup with new cursor
     print("\nClearing results...")
     results_cur = results_cnx.cursor()
-    clear_results(results_cur, True)
+    clear_results(results_cur, False)
 
     print("Disconnecting from MySQL results_cnx...")
     results_cnx.commit()
@@ -1099,17 +1082,14 @@ def test_add_analysis(results_cnx):
     for idx in range(len(res)):
         assert isclose(float(res[idx][0]), float(RESULTS_LIST[idx]))
 
-    for col in RESULTS_COLS:
+    for col in RESULTS_STATS_DF.columns.values:
         results_cur.execute(
             dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()[0]
-        assert isclose(res[0], RESULTS_STATS_DF.loc['cnt', col])
-        assert isclose(res[1], RESULTS_STATS_DF.loc['sum', col])
-        assert isclose(res[2], RESULTS_STATS_DF.loc['var', col])
-        assert isclose(res[3], RESULTS_STATS_DF.loc['avg', col])
-        assert isclose(res[4], RESULTS_STATS_DF.loc['min', col])
-        assert isclose(res[5], RESULTS_STATS_DF.loc['max', col])
+        for idx in range(len(RESULTS_STATS_DF)):
+            val = RESULTS_STATS_DF.index.values[idx]
+            assert isclose(res[idx], RESULTS_STATS_DF.loc[val, col])
 
     # ------------------------------------------------------------------------
     # Test adding the same analysis again
@@ -1117,17 +1097,14 @@ def test_add_analysis(results_cnx):
 
     # ------------------------------------------------------------------------
     # Check that the database is uneffected
-    for col in RESULTS_COLS:
+    for col in RESULTS_STATS_DF.columns.values:
         results_cur.execute(
             dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()[0]
-        assert isclose(res[0], RESULTS_STATS_DF.loc['cnt', col])
-        assert isclose(res[1], RESULTS_STATS_DF.loc['sum', col])
-        assert isclose(res[2], RESULTS_STATS_DF.loc['var', col])
-        assert isclose(res[3], RESULTS_STATS_DF.loc['avg', col])
-        assert isclose(res[4], RESULTS_STATS_DF.loc['min', col])
-        assert isclose(res[5], RESULTS_STATS_DF.loc['max', col])
+        for idx in range(len(RESULTS_STATS_DF)):
+            val = RESULTS_STATS_DF.index.values[idx]
+            assert isclose(res[idx], RESULTS_STATS_DF.loc[val, col])
     results_cur.close()
 
 
