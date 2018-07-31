@@ -1081,7 +1081,7 @@ def _add_best_fit(cur, test_id):
     return True
 
 
-def add_analysis(cnx, test_id):
+def add_analysis(cnx, test_id, steps=100):
     """
     Pull, analyze, and insert analysis results into MySQL database.
 
@@ -1116,7 +1116,7 @@ def add_analysis(cnx, test_id):
     # Create a DataFrame of analyzed data
     test_dict = _get_test_dict(cnx, test_id)
     processed_df = experiments.preprocess(test_dict['data'], purge=True)
-    analyzed_df = experiments.mass_transfer(processed_df)
+    analyzed_df = experiments.mass_transfer(processed_df, steps=steps)
     try:
         # --------------------------------------------------------------------
         # Create a cursor and start the transaction
