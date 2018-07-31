@@ -106,6 +106,13 @@ tables.append(("RHTargets",
                "  CREATE TABLE IF NOT EXISTS `RHTargets` ("
                "  `RH` DECIMAL(3,2) UNSIGNED NOT NULL,"
                "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  `A` FLOAT,"
+               "  `SigA` FLOAT UNSIGNED,"
+               "  `B` FLOAT,"
+               "  `SigB` FLOAT UNSIGNED,"
+               "  `Chi2` FLOAT UNSIGNED,"
+               "  `Q` DECIMAL(3,2) UNSIGNED,"
+               "  `Nu` SMALLINT UNSIGNED,"
                "  PRIMARY KEY (`RH`, `TestId`),"
                "  INDEX `fk_RHTargets_Test_idx` (`TestId` ASC),"
                "  CONSTRAINT `fk_RHTargets_Test`"
@@ -135,7 +142,6 @@ tables.append(("Results",
                "    ON DELETE RESTRICT"
                "    ON UPDATE CASCADE)"
                "ENGINE = InnoDB;"))
-
 
 # ----------------------------------------------------------------------------
 # Table `Unit`

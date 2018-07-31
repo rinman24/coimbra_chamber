@@ -4,6 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 import os
 from pathlib import Path
+import pickle as pkl
 from shutil import move
 
 from math import isclose
@@ -16,30 +17,18 @@ import pytest
 import chamber.const as const
 from chamber.analysis import experiments
 from chamber.data import sqldb, ddl, dml
+import dml_test
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 
 # ----------------------------------------------------------------------------
-# Global test variables
-CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'test_01.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'tdms_test_folder',
-                                               'test_02.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'test_03.tdms'),
-                     os.path.join(os.getcwd(), 'tests',
-                                               'data_transfer_test_files',
-                                               'tdms_test_folder',
-                                               'tdms_test_folder_full',
-                                               'test_04.tdms')]
+# Test `add_tube_info` global variables
+TUBE_TABLE = [(1, Decimal('0.0300000'), Decimal('0.0400000'),
+               Decimal('0.0600000'), 'Delrin', Decimal('0.0873832'))]
 
 # ----------------------------------------------------------------------------
-# Settings global
+# Test `_setting_exists` global variables
 SETTINGS_TEST_1 = dict(
     Duty=10, IsMass=1, Pressure=100000, Reservoir=1, Temperature=300,
     TimeStep='1.00', TubeId=1
@@ -49,6 +38,13 @@ SETTINGS_TEST_2 = dict(
     TimeStep='5.00', TubeId=2
     )
 
+# ----------------------------------------------------------------------------
+# Test `_get_temp_info` and `_add_temp_info` global variables
+TEST_INDEX = 7
+TC_INDEX = 7
+
+# ----------------------------------------------------------------------------
+# Test `_get_setting_info` global variables
 TDMS_01_SETTING = dict(
     Duty='0.0', IsMass=0, Pressure=100000, Reservoir=0, Temperature=290,
     TimeStep='1.00', TubeId=1
@@ -65,38 +61,9 @@ TDMS_04_SETTING = dict(
     Duty='5.0', IsMass=1, Pressure=100000, Reservoir=1, Temperature=290,
     TimeStep='1.00', TubeId=1
     )
-FALSE_SETTING = dict(
-    Duty='5.0', IsMass=0, Pressure=100000, Reservoir=1, Temperature=290,
-    TimeStep='1.00', TubeId=1
-    )
-
-TDMS_01_ADD_SETTING = [
-    (
-        1, Decimal('0.0'), 0, 100000, Decimal('290.0'),
-        Decimal('1.00'), 0, 1
-        )
-    ]
-TDMS_02_ADD_SETTING = [
-        (
-            2, Decimal('5.0'), 1, 100000, Decimal('290.0'), Decimal('1.00'),
-            0, 1
-        )
-    ]
-TDMS_03_ADD_SETTING = [
-        (
-            3, Decimal('0.0'), 0, 100000, Decimal('290.0'), Decimal('1.00'),
-            1, 1
-        )
-    ]
-TDMS_04_ADD_SETTING = [
-        (
-            4, Decimal('5.0'), 1, 100000, Decimal('290.0'), Decimal('1.00'),
-            1, 1
-        )
-    ]
 
 # ----------------------------------------------------------------------------
-# Test globals
+# Test `_get_test_info` and `_test_exists` global variables
 TDMS_01_TEST = dict(Author='author_1',
                     DateTime=datetime(2018, 6, 28, 17, 29, 39),
                     Description='Duty 0; Resevoir Off; IsMass No')
@@ -110,17 +77,8 @@ TDMS_04_TEST = dict(Author='author_4',
                     DateTime=datetime(2018, 6, 28, 17, 42, 32),
                     Description='Duty 5; Resevoir On; IsMass Yes')
 
-TDMS_01_ADD_TEST = [(1, 'author_1', datetime(2018, 6, 28, 17, 29, 39),
-                     'Duty 0; Resevoir Off; IsMass No', 1)]
-TDMS_02_ADD_TEST = [(2, 'author_2', datetime(2018, 6, 28, 17, 41, 18),
-                     'Duty 5; Resevoir Off; IsMass Yes', 2)]
-TDMS_03_ADD_TEST = [(3, 'author_3', datetime(2018, 6, 28, 17, 38, 23),
-                     'Duty 0; Resevoir On; IsMass No', 3)]
-TDMS_04_ADD_TEST = [(4, 'author_4', datetime(2018, 6, 28, 17, 42, 32),
-                     'Duty 5; Resevoir On; IsMass Yes', 4)]
-
 # ----------------------------------------------------------------------------
-# Observation globals
+# Test `_get_obs_info` global variables
 TDMS_01_OBS_07 = dict(CapManOk=1, DewPoint='286.57', Idx=9, OptidewOk=1,
                       PowOut='0.0002', PowRef='-0.0001', Pressure=99942)
 TDMS_02_OBS_07 = dict(CapManOk=1, DewPoint='286.84', Idx=11, OptidewOk=1,
@@ -132,54 +90,158 @@ TDMS_04_OBS_07 = dict(CapManOk=1, DewPoint='286.94', Idx=9, OptidewOk=1,
                       PowOut='0.0003', PowRef='0.0000', Pressure=99924,
                       Mass='0.0994310')
 
-OBS_DATA_1 = (
-    1, Decimal('286.54'), 1, Decimal('0.0000'), Decimal('0.0000'), 99933
-    )
-OBS_DATA_2 = (
-    1, Decimal('286.90'), Decimal('0.0994314'), 1, Decimal('0.0002'),
-    Decimal('0.0000'), 99946
-    )
-OBS_DATA_3 = (
-    1, Decimal('286.71'), 1, Decimal('0.0001'), Decimal('0.0001'), 99964
-    )
-OBS_DATA_4 = (
-    1, Decimal('286.98'), Decimal('0.0994310'), 1, Decimal('0.0001'),
-    Decimal('0.0001'), 99937
-    )
+# ----------------------------------------------------------------------------
+# Test `_add_setting_info` global variables
+TDMS_01_ADD_SETTING = [(
+    1, Decimal('0.0'), 0, 100000, Decimal('290.0'), Decimal('1.00'), 0, 1
+    )]
+TDMS_02_ADD_SETTING = [(
+    2, Decimal('5.0'), 1, 100000, Decimal('290.0'), Decimal('1.00'), 0, 1
+    )]
+TDMS_03_ADD_SETTING = [(
+    3, Decimal('0.0'), 0, 100000, Decimal('290.0'), Decimal('1.00'), 1, 1
+    )]
+TDMS_04_ADD_SETTING = [(
+    4, Decimal('5.0'), 1, 100000, Decimal('290.0'), Decimal('1.00'), 1, 1
+    )]
 
 # ----------------------------------------------------------------------------
-# TempObservation globals
-TEMP_OBS_1 = [
-    293.68, 293.03, 293.94, 292.68, 292.02, 291.79, 291.67, 291.96, 292.07,
-    291.62, 291.55, 291.6, 291.53, 291.81
-    ]
-TEMP_OBS_2 = [
-    292.36, 291.85, 291.72, 292.1, 292.34, 291.67, 291.62, 291.64, 291.58,
-    291.85
-    ]
-TEMP_OBS_3 = [
-    293.06, 292.73, 293.02, 292.62, 291.85, 291.78, 291.67, 291.74, 291.83,
-    291.61, 291.5, 291.58, 291.49, 291.83
-    ]
-TEMP_OBS_4 = [
-    292.06, 291.83, 291.7, 291.94, 292.1, 291.64, 291.56, 291.61, 291.53,
-    291.83
-    ]
+# Test `_add_test_info` global variables
+TDMS_01_ADD_TEST = [(1, 'author_1', datetime(2018, 6, 28, 17, 29, 39),
+                     'Duty 0; Resevoir Off; IsMass No', 1)]
+TDMS_02_ADD_TEST = [(2, 'author_2', datetime(2018, 6, 28, 17, 41, 18),
+                     'Duty 5; Resevoir Off; IsMass Yes', 2)]
+TDMS_03_ADD_TEST = [(3, 'author_3', datetime(2018, 6, 28, 17, 38, 23),
+                     'Duty 0; Resevoir On; IsMass No', 3)]
+TDMS_04_ADD_TEST = [(4, 'author_4', datetime(2018, 6, 28, 17, 42, 32),
+                     'Duty 5; Resevoir On; IsMass Yes', 4)]
 
 # ----------------------------------------------------------------------------
-# DataFrame globals
-TEST_1_INFO_DICT = {
+# Test `_add_obs_info` global variables
+OBS_COLS = ['Idx', 'PowOut', 'PowRef', 'Pressure', 'TestId', 'Mass']
+OBS_BIT_COLS = ['CapManOk', 'OptidewOk']
+OBS_STATS_1 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    CapManOk=[27, 27, 0, 1.0000, 1, 1],
+    DewPoint=[27, 7737.23, 0.000705624142660792, 286.564074, 286.52, 286.63],
+    Idx=[27, 405, 60.666666666666664, 15.0000, 2, 28],
+    Mass=[0, None, None, None, None, None],
+    OptidewOk=[27, 27, 0, 1.0000, 1, 1],
+    PowOut=[27, 0.0051, 0.000000012839506172839506,
+            0.00018889, -0.0001, 0.0004],
+    PowRef=[27, -0.0009, 0.00000000888888888888889,
+            -0.00003333, -0.0003, 0.0002],
+    Pressure=[27, 2698644, 239.28395061728366, 99949.7778, 99929, 99986],
+    TestId=[27, 27, 0, 1.0000, 1, 1],
+    )
+).set_index('idx')
+OBS_STATS_2 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    CapManOk=[15, 15, 0, 1.0000, 1, 1],
+    DewPoint=[15, 4303.06, 0.00045955555555561106, 286.870667, 286.83, 286.91],
+    Idx=[15, 165, 18.666666666666668, 11.0000, 4, 18],
+    Mass=[15, 1.4914701, 0.0000000000000024000000004137717, 0.09943134000,
+          0.0994313, 0.0994314],
+    OptidewOk=[15, 15, 0, 1.0000, 1, 1],
+    PowOut=[15, 0.0014, 0.000000009955555555555556, 0.00009333,
+            -0.0001, 0.0002],
+    PowRef=[15, 0.0002, 0.000000003822222222222223, 0.00001333,
+            -0.0001, 0.0001],
+    Pressure=[15, 1498947, 439.6266666666366, 99929.8000, 99907, 99981],
+    TestId=[15, 30, 0, 2.0000, 2, 2],
+    )
+).set_index('idx')
+OBS_STATS_3 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    CapManOk=[13, 13, 0, 1.0000, 1, 1],
+    DewPoint=[13, 3726.87, 0.0007408284023666399, 286.682308, 286.63, 286.72],
+    Idx=[13, 104, 14, 8.0000, 2, 14],
+    Mass=[0, None, None, None, None, None],
+    OptidewOk=[13, 13, 0, 1.0000, 1, 1],
+    PowOut=[13, 0.0026, 0.000000009230769230769232, 0.00020000,
+            0.0001, 0.0004],
+    PowRef=[13, 0.0003, 0.000000004852071005917161, 0.00002308,
+            -0.0001, 0.0001],
+    Pressure=[13, 1299252, 95.47928994086436, 99942.4615, 99929, 99964],
+    TestId=[13, 39, 0, 3.0000, 3, 3],
+    )
+).set_index('idx')
+OBS_STATS_4 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    CapManOk=[14, 14, 0, 1.0000, 1, 1],
+    DewPoint=[14, 4017.18, 0.0005408163265310136, 286.941429, 286.91, 286.98],
+    Idx=[14, 119, 16.25, 8.5000, 2, 15],
+    Mass=[14, 1.3920334, 0.0000000000000024489795920957832, 0.09943095714,
+          0.0994309, 0.0994310],
+    OptidewOk=[14, 14, 0, 1.0000, 1, 1],
+    PowOut=[14, 0.0027, 0.00000000923469387755102, 0.00019286, 0.0000, 0.0003],
+    PowRef=[14, 0.0006, 0.00000000816326530612245, 0.00004286,
+            -0.0001, 0.0002],
+    Pressure=[14, 1398995, 67.02551020410793, 99928.2143, 99911, 99942],
+    TestId=[14, 56, 0, 4.0000, 4, 4],
+    )
+).set_index('idx')
+
+# ----------------------------------------------------------------------------
+# Test `_add_temp_info` global variables
+TEMP_OBS_1 = [293.68, 293.03, 293.94, 292.68, 292.02, 291.79, 291.67, 291.96,
+              292.07, 291.62, 291.55, 291.6, 291.53, 291.81]
+TEMP_OBS_2 = [292.36, 291.85, 291.72, 292.1, 292.34, 291.67, 291.62, 291.64,
+              291.58, 291.85]
+TEMP_OBS_3 = [293.06, 292.73, 293.02, 292.62, 291.85, 291.78, 291.67, 291.74,
+              291.83, 291.61, 291.5, 291.58, 291.49, 291.83]
+TEMP_OBS_4 = [292.06, 291.83, 291.7, 291.94, 292.1, 291.64, 291.56, 291.61,
+              291.53, 291.83]
+TEMP_OBS_STATS_1 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    ThermocoupleNum=[378, 2457, 16.25000000000001, 6.5000, 0, 13],
+    Temperature=[378, 110454.30, 0.5940934240362769,
+                 292.207143, 291.51, 293.96],
+    Idx=[378, 5670, 60.666666666666664, 15.0000, 2, 28],
+    TestId=[378, 378, 0, 1.0000, 1, 1],
+    )
+).set_index('idx')
+TEMP_OBS_STATS_2 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    ThermocoupleNum=[150, 1275, 8.25, 8.5000, 4, 13],
+    Temperature=[150, 43780.54, 0.0793492622222213,
+                 291.870267, 291.56, 292.43],
+    Idx=[150, 1650, 18.666666666666675, 11.0000, 4, 18],
+    TestId=[150, 300, 0, 2.0000, 2, 2],
+    )
+).set_index('idx')
+TEMP_OBS_STATS_3 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    ThermocoupleNum=[182, 1183, 16.250000000000007, 6.5000, 0, 13],
+    Temperature=[182, 53149.04, 0.30165401521555363,
+                 292.027692, 291.49, 293.09],
+    Idx=[182, 1456, 13.999999999999982, 8.0000, 2, 14],
+    TestId=[182, 546, 0, 3.0000, 3, 3],
+    )
+).set_index('idx')
+TEMP_OBS_STATS_4 = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    ThermocoupleNum=[140, 1190, 8.25, 8.5000, 4, 13],
+    Temperature=[140, 40850.05, 0.03764956632653166,
+                 291.786071, 291.53, 292.14],
+    Idx=[140, 1190, 16.250000000000007, 8.5000, 2, 15],
+    TestId=[140, 560, 0, 4.0000, 4, 4],
+    )
+).set_index('idx')
+
+# ----------------------------------------------------------------------------
+# Test `_get_test_dict` global variables`
+_ = {
     'Temperature': [290.0], 'Pressure': [100000], 'Duty': [0.0],
     'IsMass': [0], 'Reservoir': [0], 'TimeStep': [1.0],
     'DateTime': [pd.Timestamp(datetime(2018, 6, 28, 17, 29, 39))],
     'Author': 'author_1', 'Description': 'Duty 0; Resevoir Off; IsMass No',
     'TubeId': [1], 'TestId': [1], 'SettingId': [1]
 }
-TEST_1_INFO_DF = pd.DataFrame(TEST_1_INFO_DICT)
-TEST_1_INFO_DF = TEST_1_INFO_DF[['Temperature', 'Pressure', 'Duty', 'IsMass',
-                                 'Reservoir', 'TimeStep', 'DateTime', 'Author',
-                                 'Description', 'TubeId', 'TestId',
-                                 'SettingId']]
+_ = pd.DataFrame(_)
+TEST_1_INFO_DF = _[['Temperature', 'Pressure', 'Duty', 'IsMass', 'Reservoir',
+                    'TimeStep', 'DateTime', 'Author', 'Description', 'TubeId',
+                    'TestId', 'SettingId']]
 TEST_1_STATS_DF = pd.DataFrame(dict(
     idx=['sum', 'mean', 'min', 'max', 'var'],
     TC0=[7929.21, 293.67444444444442, 293.65, 293.71, 0.00031794871794867406],
@@ -198,12 +260,21 @@ TEST_1_STATS_DF = pd.DataFrame(dict(
 TEST_1_DATA_DF_SIZE = (27, 22)
 
 # ----------------------------------------------------------------------------
-# RHTarget globals
-RH_TARGET_LIST = [Decimal('{:.2f}'.format(rh/100)) for rh in range(10, 85, 5)]
-RH_TARGET_LENGTH = 15
+# Test `get_test_from_set` global variables
+FALSE_SETTING = dict(
+    Duty='5.0', IsMass=0, Pressure=100000, Reservoir=1, Temperature=290,
+    TimeStep='1.00', TubeId=1
+    )
 
 # ----------------------------------------------------------------------------
-# Analysis globals
+# Test `_add_rh_targets` global variables
+RH_TARGET_LIST = [Decimal('{:.2f}'.format(rh/100)) for rh in range(10, 85, 5)]
+RH_TARGET_LENGTH = 15
+ANALYSIS_DF = pkl.load(open(os.path.join(
+    os.getcwd(), 'tests', 'data_test_files', 'analysis_df'), 'rb'))
+
+# ----------------------------------------------------------------------------
+# Test `_add_results` global variables`
 ANALYSIS_TEST_ID = 1
 RESULTS_LIST = [Decimal('0.50'), 1, 0.0988713, 1.36621e-07, -3.07061e-09,
                 9.40458e-12, 329.257, Decimal('1.00'), 599]
@@ -230,20 +301,48 @@ RESULTS_STATS_DF = pd.DataFrame(dict(
     Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999],
     )
 ).set_index('idx')
-RESULTS_COLS = ['RH', 'TestId', 'A', 'SigA', 'B', 'SigB', 'Chi2', 'Q', 'Nu']
 
 # ----------------------------------------------------------------------------
-# Indexes
-TEST_INDEX = 7
-TC_INDEX = 7
+# Test `_add_best_fit` global variables
+BEST_FIT_STATS_DF = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    RH=[15, 6.75, 0.04666666666666666, 0.450000, 0.10, 0.80],
+    TestId=[15, 15, 0, 1, 1, 1],
+    A=[15, 1.4830344766378403, 0.00000000035494037980339546,
+       0.09886896510918936, 0.09882579743862152, 0.09888850897550583],
+    SigA=[15, 0.00000030841792586500105, 1.5618777152474202e-16,
+          0.000000020561195057666738, 0.000000009489180108346318,
+          0.00000005870989028267104],
+    B=[15, -0.000000051737129136419924, 1.668681139975639e-18,
+       -0.000000003449141942427995, -0.000000006108319627884384,
+       -0.000000001443885566665415],
+    SigB=[15, 0.00000000008363979308949852, 1.4866605904948242e-22,
+          0.000000000005575986205966568, 0.0000000000003694199351804428,
+          0.00000000004862525659898864],
+    Chi2=[15, 36005.467849731445, 2003517.8946579965, 2400.36452331543,
+          171.7764129638672, 5152.66845703125],
+    Q=[15, 10.01, 0.1026862222222222, 0.667333, 0.03, 0.98],
+    Nu=[15, 36585, 2049066.666666667, 2439.0000, 199, 5199],
+    )
+).set_index('idx')
 
 # ----------------------------------------------------------------------------
-# Analyzed `DataFrame`
-RESULTS_CNX = sqldb.connect('test_results')
-_ = sqldb._get_test_dict(RESULTS_CNX, 1)
-RESULTS_CNX.close()
-_ = experiments.preprocess(_['data'], purge=True)
-ANALYSIS_DF = experiments.mass_transfer(_)
+# `test_tdms_obj` fixture global variables
+CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'test_01.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'tdms_test_folder',
+                                               'test_02.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'test_03.tdms'),
+                     os.path.join(os.getcwd(), 'tests',
+                                               'data_test_files',
+                                               'tdms_test_folder',
+                                               'tdms_test_folder_full',
+                                               'test_04.tdms')]
 
 
 @pytest.fixture(scope='module')
@@ -336,7 +435,7 @@ def test_create_tables(cur):
 
     # Now check that all tables exist
     table_names_set = set(ddl.table_name_list)
-    cur.execute("SHOW TABLES;")
+    cur.execute('SHOW TABLES;')
     for row in cur:
         assert row[0] in table_names_set
 
@@ -346,30 +445,17 @@ def test_add_tube_info(cur):
     # Add the tube the first time and we should get true
     assert sqldb.add_tube_info(cur)
 
-    # Check that there is one and only one tube with this id
-    cur.execute("SELECT TubeID FROM Tube;")
-    assert cur.fetchone()[0] == 1
-    cur.execute("SELECT TubeID FROM Tube;")
-    assert len(cur.fetchall()) == 1
+    cur.execute(dml_test.get_tube)
+    res = cur.fetchall()
+    assert res == TUBE_TABLE
 
-    cur.execute("SELECT DiameterIn FROM Tube WHERE TubeID=1;")
-    assert cur.fetchone()[0] == Decimal('0.0300000')
-
-    cur.execute("SELECT DiameterOut FROM Tube WHERE TubeID=1;")
-    assert cur.fetchone()[0] == Decimal('0.0400000')
-
-    cur.execute("SELECT Length FROM Tube WHERE TubeID=1;")
-    assert cur.fetchone()[0] == Decimal('0.0600000')
-
-    cur.execute("SELECT Material FROM Tube WHERE TubeID=1;")
-    assert cur.fetchone()[0] == 'Delrin'
-
-    cur.execute("SELECT Mass FROM Tube WHERE TubeID=1;")
-    assert cur.fetchone()[0] == Decimal('0.0873832')
-
-    # Now that it is added, we should get a False indicating that it could not
-    # be added
+    # Check duplicate entry error
     assert not sqldb.add_tube_info(cur)
+
+    # Check that Tube table is unaffected
+    cur.execute(dml_test.get_tube)
+    res = cur.fetchall()
+    assert res == TUBE_TABLE
 
 
 def test__setting_exists(cur):
@@ -501,31 +587,28 @@ def test__add_setting_info(cur, test_tdms_obj):
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[0])
     assert setting_id == 1
     # Query the new setting and check the results
-    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
-                   cur.lastrowid))
+    cur.execute(dml_test.get_setting.format(cur.lastrowid))
     assert cur.fetchall() == TDMS_01_ADD_SETTING
 
     # ------------------------------------------------------------------------
     # File 2
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[1])
     assert setting_id == 2
-    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
-                   cur.lastrowid))
+    cur.execute(dml_test.get_setting.format(cur.lastrowid))
     assert cur.fetchall() == TDMS_02_ADD_SETTING
 
     # ------------------------------------------------------------------------
     # File 3
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[2])
     assert setting_id == 3
-    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(
-                   cur.lastrowid))
+    cur.execute(dml_test.get_setting.format(cur.lastrowid))
     assert cur.fetchall() == TDMS_03_ADD_SETTING
 
     # ------------------------------------------------------------------------
     # File 4
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[3])
     assert setting_id == 4
-    cur.execute('SELECT * FROM Setting WHERE SettingID={}'.format(4))
+    cur.execute(dml_test.get_setting.format(4))
     assert cur.fetchall() == TDMS_04_ADD_SETTING
 
 
@@ -542,32 +625,28 @@ def test__add_test_info(cur, test_tdms_obj):
     test_id = sqldb._add_test_info(cur, test_tdms_obj[0], 1)
     assert test_id == 1
     # Query the new test and check the results
-    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                   test_id))
+    cur.execute(dml_test.get_test.format(test_id))
     assert cur.fetchall() == TDMS_01_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 2
     test_id = sqldb._add_test_info(cur, test_tdms_obj[1], 2)
     assert test_id == 2
-    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                   test_id))
+    cur.execute(dml_test.get_test.format(test_id))
     assert cur.fetchall() == TDMS_02_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 3
     test_id = sqldb._add_test_info(cur, test_tdms_obj[2], 3)
     assert test_id == 3
-    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                   test_id))
+    cur.execute(dml_test.get_test.format(test_id))
     assert cur.fetchall() == TDMS_03_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 4
     test_id = sqldb._add_test_info(cur, test_tdms_obj[3], 4)
     assert test_id == 4
-    cur.execute('SELECT * FROM Test WHERE TestID={}'.format(
-                   test_id))
+    cur.execute(dml_test.get_test.format(test_id))
     assert cur.fetchall() == TDMS_04_ADD_TEST
 
 
@@ -610,40 +689,84 @@ def test__add_obs_info(cur, test_tdms_obj):
     # ------------------------------------------------------------------------
     # File 1
     # For every index in the data enter all of the data
-    for tdms_idx in range(
-            len(test_tdms_obj[0].object("Data", "Idx").data)
-            ):
+    for tdms_idx in range(len(test_tdms_obj[0].object("Data", "Idx").data)):
         assert sqldb._add_obs_info(cur, test_tdms_obj[0], 1, tdms_idx)
-    # Then check that you can get the last dew point correct
-    cur.execute(dml.get_last_dew_point.format(1))
-    assert cur.fetchall()[0][0] == Decimal('286.53')
+
+    # Check column statistics for the TestId
+    for col in OBS_COLS[:-1]:
+        # First loop through the coloumn names eg. 'Mass', 'DewPoint', etc...
+        cur.execute(dml_test.get_stats_test_id.format(col, 1, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_1)):
+            # Loop through the length of the dataframe
+            # This allows us to loop through the index values, 'min', 'max', etc...
+            val = OBS_STATS_1.index.values[idx]
+            # This idx also is used to loop through the querry results
+            assert isclose(res[idx], OBS_STATS_1.loc[val, col])
+
+    for col in OBS_BIT_COLS:
+        cur.execute(dml_test.get_bit_stats.format(col, 1, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_1)):
+            val = OBS_STATS_1.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_1.loc[val, col])
 
     # ------------------------------------------------------------------------
     # File 2
-    for tdms_idx in range(
-            len(test_tdms_obj[1].object("Data", "Idx").data)
-            ):
+    for tdms_idx in range(len(test_tdms_obj[1].object("Data", "Idx").data)):
         assert sqldb._add_obs_info(cur, test_tdms_obj[1], 2, tdms_idx)
-    cur.execute(dml.get_last_dew_point.format(2))
-    assert cur.fetchall()[0][0] == Decimal('286.91')
+
+    for col in OBS_COLS:
+        cur.execute(dml_test.get_stats_test_id.format(col, 2, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_2)):
+            val = OBS_STATS_2.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_2.loc[val, col])
+
+    for col in OBS_BIT_COLS:
+        cur.execute(dml_test.get_bit_stats.format(col, 2, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_2)):
+            val = OBS_STATS_2.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_2.loc[val, col])
 
     # ------------------------------------------------------------------------
     # File 3
-    for tdms_idx in range(
-            len(test_tdms_obj[2].object("Data", "Idx").data)
-            ):
+    for tdms_idx in range(len(test_tdms_obj[2].object("Data", "Idx").data)):
         assert sqldb._add_obs_info(cur, test_tdms_obj[2], 3, tdms_idx)
-    cur.execute(dml.get_last_dew_point.format(3))
-    assert cur.fetchall()[0][0] == Decimal('286.70')
+
+    for col in OBS_COLS[:-1]:
+        cur.execute(dml_test.get_stats_test_id.format(col, 3, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_3)):
+            val = OBS_STATS_3.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_3.loc[val, col])
+
+    for col in OBS_BIT_COLS:
+        cur.execute(dml_test.get_bit_stats.format(col, 3, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_3)):
+            val = OBS_STATS_3.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_3.loc[val, col])
 
     # ------------------------------------------------------------------------
     # File 4
-    for tdms_idx in range(
-            len(test_tdms_obj[3].object("Data", "Idx").data)
-            ):
+    for tdms_idx in range(len(test_tdms_obj[3].object("Data", "Idx").data)):
         assert sqldb._add_obs_info(cur, test_tdms_obj[3], 4, tdms_idx)
-    cur.execute(dml.get_last_dew_point.format(4))
-    assert cur.fetchall()[0][0] == Decimal('286.91')
+
+    for col in OBS_COLS:
+        cur.execute(dml_test.get_stats_test_id.format(col, 4, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_4)):
+            val = OBS_STATS_4.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_4.loc[val, col])
+
+    for col in OBS_BIT_COLS:
+        cur.execute(dml_test.get_bit_stats.format(col, 4, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_4)):
+            val = OBS_STATS_4.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_4.loc[val, col])
 
 
 def test__add_temp_info(cur, test_tdms_obj):
@@ -652,46 +775,34 @@ def test__add_temp_info(cur, test_tdms_obj):
     # File 1
 
     # Add temps with tdms_idx 7 and Idx 8
-    assert sqldb._add_temp_info(
-        cur, test_tdms_obj[0], 1, TEST_INDEX, TEST_INDEX+1
-        )
+    assert sqldb._add_temp_info(cur, test_tdms_obj[0], 1,
+                                TEST_INDEX, TEST_INDEX+1)
+    cur.execute(dml.get_temp_obs.format(1, TEST_INDEX+1))
     # Now query these with the TestId and Idx
-    cur.execute(
-        dml.get_temp_obs.format(1, TEST_INDEX+1)
-        )
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_1
 
     # ------------------------------------------------------------------------
     # File 2
-    assert sqldb._add_temp_info(
-        cur, test_tdms_obj[1], 2, TEST_INDEX, TEST_INDEX
-        )
-    cur.execute(
-        dml.get_temp_obs.format(2, TEST_INDEX)
-        )
+    assert sqldb._add_temp_info(cur, test_tdms_obj[1], 2,
+                                TEST_INDEX, TEST_INDEX)
+    cur.execute(dml.get_temp_obs.format(2, TEST_INDEX))
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_2
 
     # ------------------------------------------------------------------------
     # File 3
-    assert sqldb._add_temp_info(
-        cur, test_tdms_obj[2], 3, TEST_INDEX, TEST_INDEX+1
-        )
-    cur.execute(
-        dml.get_temp_obs.format(3, TEST_INDEX+1)
-        )
+    assert sqldb._add_temp_info(cur, test_tdms_obj[2], 3,
+                                TEST_INDEX, TEST_INDEX+1)
+    cur.execute(dml.get_temp_obs.format(3, TEST_INDEX+1))
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_3
 
     # ------------------------------------------------------------------------
     # File 4
-    assert sqldb._add_temp_info(
-        cur, test_tdms_obj[3], 4, TEST_INDEX, TEST_INDEX+1
-        )
-    cur.execute(
-        dml.get_temp_obs.format(4, TEST_INDEX+1)
-        )
+    assert sqldb._add_temp_info(cur, test_tdms_obj[3], 4,
+                                TEST_INDEX, TEST_INDEX+1)
+    cur.execute(dml.get_temp_obs.format(4, TEST_INDEX+1))
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_4
 
@@ -708,28 +819,44 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     truncate(cur, 'Observation')
     truncate(cur, 'Test')
     truncate(cur, 'Setting')
-    # assert cnx.in_transaction
-    # cnx.commit()
     assert not cnx.in_transaction
 
     # ------------------------------------------------------------------------
     # File 1
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[0])
+
     # Verify the data in the 'Setting' table:
-    cur.execute('SELECT * FROM Setting WHERE SettingID=1;')
+    cur.execute(dml_test.get_setting.format(1))
     assert cur.fetchall() == TDMS_01_ADD_SETTING
+
     # Verify the data in the 'Test' table:
-    cur.execute('SELECT * FROM Test WHERE TestID=1;')
+    cur.execute(dml_test.get_test.format(1))
     assert cur.fetchall() == TDMS_01_ADD_TEST
-    # Verify the data in the `Observation` table:
-    cur.execute(dml.get_obs_data_t.format(1, TEST_INDEX))
-    res = cur.fetchall()[0]
-    for i in range(len(res)):
-        assert isclose(res[i], OBS_DATA_1[i])
-    # Verify the data in the 'TempObservation` table:
-    cur.execute(dml.get_temp_obs_data.format(1, TEST_INDEX, TEST_INDEX))
-    res = cur.fetchall()[0][0]
-    assert isclose(res, Decimal('291.97'))
+
+    # Verify the data in the 'Observation' table
+    for col in OBS_COLS[:-1]:
+        cur.execute(dml_test.get_stats_test_id.format(col, 1, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_1)):
+            val = OBS_STATS_1.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_1.loc[val, col])
+    for col in OBS_BIT_COLS:
+        cur.execute(dml_test.get_bit_stats.format(col, 1, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_1)):
+            val = OBS_STATS_1.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_1.loc[val, col])
+
+    # Verify the data in the 'TempObservation' table
+    for col in TEMP_OBS_STATS_1.columns.values:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 1, 'TempObservation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(TEMP_OBS_STATS_1)):
+            val = TEMP_OBS_STATS_1.index.values[idx]
+            assert isclose(res[idx], TEMP_OBS_STATS_1.loc[val, col])
+
     # Commit transaction before next test
     assert cnx.in_transaction
     cnx.commit()
@@ -738,21 +865,39 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     # ------------------------------------------------------------------------
     # File 2
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[1])
+
     # Verify the data in the 'Setting' table:
-    cur.execute('SELECT * FROM Setting WHERE SettingID=2;')
+    cur.execute(dml_test.get_setting.format(2))
     assert cur.fetchall() == TDMS_02_ADD_SETTING
+
     # Verify the data in the 'Test' table:
-    cur.execute('SELECT * FROM Test WHERE TestID=2;')
+    cur.execute(dml_test.get_test.format(2))
     assert cur.fetchall() == TDMS_02_ADD_TEST
-    # Verify the data in the `Observation` table:
-    cur.execute(dml.get_obs_data_m.format(2, TEST_INDEX))
-    res = cur.fetchall()[0]
-    for i in range(len(res)):
-        assert isclose(res[i], OBS_DATA_2[i])
-    # Verify the data in the 'TempObservation` table:
-    cur.execute(dml.get_temp_obs_data.format(2, TEST_INDEX, TEST_INDEX))
-    res = cur.fetchall()[0][0]
-    assert isclose(res, Decimal('292.12'))
+
+    # Verify the data in the 'Observation' table
+    for col in OBS_COLS:
+        cur.execute(dml_test.get_stats_test_id.format(col, 2, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_2)):
+            val = OBS_STATS_2.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_2.loc[val, col])
+    for col in OBS_BIT_COLS:
+        cur.execute(dml_test.get_bit_stats.format(col, 2, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_2)):
+            val = OBS_STATS_2.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_2.loc[val, col])
+
+    # Verify the data in the 'TempObservation' table
+    for col in TEMP_OBS_STATS_2.columns.values:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 2, 'TempObservation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(TEMP_OBS_STATS_2)):
+            val = TEMP_OBS_STATS_2.index.values[idx]
+            assert isclose(res[idx], TEMP_OBS_STATS_2.loc[val, col])
+
     # Commit transaction before next test
     assert cnx.in_transaction
     cnx.commit()
@@ -761,21 +906,39 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     # ------------------------------------------------------------------------
     # File 3
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[2])
+
     # Verify the data in the 'Setting' table:
-    cur.execute('SELECT * FROM Setting WHERE SettingID=3;')
+    cur.execute(dml_test.get_setting.format(3))
     assert cur.fetchall() == TDMS_03_ADD_SETTING
+
     # Verify the data in the 'Test' table:
-    cur.execute('SELECT * FROM Test WHERE TestID=3;')
+    cur.execute(dml_test.get_test.format(3))
     assert cur.fetchall() == TDMS_03_ADD_TEST
+
     # Verify the data in the `Observation` table:
-    cur.execute(dml.get_obs_data_t.format(3, TEST_INDEX))
-    res = cur.fetchall()[0]
-    for i in range(len(res)):
-        assert isclose(res[i], OBS_DATA_3[i])
-    # Verify the data in the 'TempObservation` table:
-    cur.execute(dml.get_temp_obs_data.format(3, TEST_INDEX, TEST_INDEX))
-    res = cur.fetchall()[0][0]
-    assert isclose(res, Decimal('291.75'))
+    for col in OBS_COLS[:-1]:
+        cur.execute(dml_test.get_stats_test_id.format(col, 3, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_3)):
+            val = OBS_STATS_3.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_3.loc[val, col])
+    for col in OBS_BIT_COLS:
+        cur.execute(dml_test.get_bit_stats.format(col, 3, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_3)):
+            val = OBS_STATS_3.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_3.loc[val, col])
+
+    # Verify the data in the 'TempObservation' table
+    for col in TEMP_OBS_STATS_3.columns.values:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 3, 'TempObservation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(TEMP_OBS_STATS_3)):
+            val = TEMP_OBS_STATS_3.index.values[idx]
+            assert isclose(res[idx], TEMP_OBS_STATS_3.loc[val, col])
+
     # Commit transaction before next test
     assert cnx.in_transaction
     cnx.commit()
@@ -784,21 +947,39 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     # ------------------------------------------------------------------------
     # File 4
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[3])
+
     # Verify the data in the 'Setting' table:
-    cur.execute('SELECT * FROM Setting WHERE SettingID=2;')
-    assert cur.fetchall() == TDMS_02_ADD_SETTING
+    cur.execute(dml_test.get_setting.format(4))
+    assert cur.fetchall() == TDMS_04_ADD_SETTING
+
     # Verify the data in the 'Test' table:
-    cur.execute('SELECT * FROM Test WHERE TestID=4;')
+    cur.execute(dml_test.get_test.format(4))
     assert cur.fetchall() == TDMS_04_ADD_TEST
+
     # Verify the data in the `Observation` table:
-    cur.execute(dml.get_obs_data_m.format(4, TEST_INDEX))
-    res = cur.fetchall()[0]
-    for i in range(len(res)):
-        assert isclose(res[i], OBS_DATA_4[i])
-    # Verify the data in the 'TempObservation` table:
-    cur.execute(dml.get_temp_obs_data.format(4, TEST_INDEX, TEST_INDEX))
-    res = cur.fetchall()[0][0]
-    assert isclose(res, Decimal('291.95'))
+    for col in OBS_COLS[:-1]:
+        cur.execute(dml_test.get_stats_test_id.format(col, 4, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_4)):
+            val = OBS_STATS_4.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_4.loc[val, col])
+    for col in OBS_BIT_COLS:
+        cur.execute(dml_test.get_bit_stats.format(col, 4, 'Observation'))
+        res = cur.fetchall()[0]
+        for idx in range(len(OBS_STATS_4)):
+            val = OBS_STATS_4.index.values[idx]
+            assert isclose(res[idx], OBS_STATS_4.loc[val, col])
+
+    # Verify the data in the 'TempObservation' table
+    for col in TEMP_OBS_STATS_4.columns.values:
+        cur.execute(
+            dml_test.get_stats_test_id.format(col, 4, 'TempObservation')
+            )
+        res = cur.fetchall()[0]
+        for idx in range(len(TEMP_OBS_STATS_4)):
+            val = TEMP_OBS_STATS_4.index.values[idx]
+            assert isclose(res[idx], TEMP_OBS_STATS_4.loc[val, col])
+
     # Commit transaction before next test
     assert cnx.in_transaction
     cnx.commit()
@@ -881,17 +1062,31 @@ def test__add_results(results_cnx):
     for idx in range(len(res)):
         assert isclose(float(res[idx][0]), float(RESULTS_LIST[idx]))
 
-    for col in RESULTS_COLS:
+    for col in RESULTS_STATS_DF.columns.values:
         results_cur.execute(
-            dml.get_table_stats.format(col, ANALYSIS_TEST_ID, 'Results')
+            dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
             )
-        res = results_cur.fetchall()
-        assert isclose(res[0][0], RESULTS_STATS_DF.loc['cnt', col])
-        assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
-        assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
-        assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
-        assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
-        assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+        res = results_cur.fetchall()[0]
+        for idx in range(len(RESULTS_STATS_DF)):
+            val = RESULTS_STATS_DF.index.values[idx]
+            assert isclose(res[idx], RESULTS_STATS_DF.loc[val, col])
+    results_cur.close()
+
+
+def test__add_best_fit(results_cnx):
+    """Test _add_best_fit."""
+    results_cur = results_cnx.cursor()
+    # Add best Chi2 results to RHTargets
+    assert sqldb._add_best_fit(results_cur, ANALYSIS_TEST_ID)
+
+    # Check accuracy of added data
+    for col in BEST_FIT_STATS_DF.columns.values:
+        res = results_cur.execute(dml_test.get_stats_test_id.format(
+            col, ANALYSIS_TEST_ID, 'RHTargets'))
+        res = results_cur.fetchall()[0]
+        for idx in range(len(BEST_FIT_STATS_DF)):
+            val = BEST_FIT_STATS_DF.index.values[idx]
+            assert isclose(res[idx], BEST_FIT_STATS_DF.loc[val, col])
     results_cur.close()
 
 
@@ -926,35 +1121,29 @@ def test_add_analysis(results_cnx):
     for idx in range(len(res)):
         assert isclose(float(res[idx][0]), float(RESULTS_LIST[idx]))
 
-    for col in RESULTS_COLS:
+    for col in RESULTS_STATS_DF.columns.values:
         results_cur.execute(
-            dml.get_table_stats.format(col, ANALYSIS_TEST_ID, 'Results')
+            dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
             )
-        res = results_cur.fetchall()
-        assert isclose(res[0][0], RESULTS_STATS_DF.loc['cnt', col])
-        assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
-        assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
-        assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
-        assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
-        assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+        res = results_cur.fetchall()[0]
+        for idx in range(len(RESULTS_STATS_DF)):
+            val = RESULTS_STATS_DF.index.values[idx]
+            assert isclose(res[idx], RESULTS_STATS_DF.loc[val, col])
 
     # ------------------------------------------------------------------------
     # Test adding the same analysis again
     assert sqldb.add_analysis(results_cnx, ANALYSIS_TEST_ID) is None
 
     # ------------------------------------------------------------------------
-    # Check that the database is unaffected
-    for col in RESULTS_COLS:
+    # Check that the database is uneffected
+    for col in RESULTS_STATS_DF.columns.values:
         results_cur.execute(
-            dml.get_table_stats.format(col, ANALYSIS_TEST_ID, 'Results')
+            dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
             )
-        res = results_cur.fetchall()
-        assert isclose(res[0][0], RESULTS_STATS_DF.loc['cnt', col])
-        assert isclose(res[0][1], RESULTS_STATS_DF.loc['sum', col])
-        assert isclose(res[0][2], RESULTS_STATS_DF.loc['var', col])
-        assert isclose(res[0][3], RESULTS_STATS_DF.loc['avg', col])
-        assert isclose(res[0][4], RESULTS_STATS_DF.loc['min', col])
-        assert isclose(res[0][5], RESULTS_STATS_DF.loc['max', col])
+        res = results_cur.fetchall()[0]
+        for idx in range(len(RESULTS_STATS_DF)):
+            val = RESULTS_STATS_DF.index.values[idx]
+            assert isclose(res[idx], RESULTS_STATS_DF.loc[val, col])
     results_cur.close()
 
 
@@ -972,10 +1161,10 @@ def drop_tables(cursor, bol):
 def clear_results(cursor, bol):
     """Drop databese tables."""
     if bol:
-        print('Clearing RHTargets and Results...')
+        print('Clearing analysis tables...')
         truncate(cursor, 'RHTargets')
         truncate(cursor, 'Results')
-        print('RHTargets and Results cleared.')
+        print('Analysis tables cleared.')
     else:
         print('RHTargests and Results not cleared.')
 

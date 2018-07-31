@@ -1075,6 +1075,12 @@ def _add_results(cur, analyzed_df, test_id):
     return True
 
 
+def _add_best_fit(cur, test_id):
+    """Docstring."""
+    cur.execute(dml.add_best_fit.format(test_id))
+    return True
+
+
 def add_analysis(cnx, test_id):
     """
     Pull, analyze, and insert analysis results into MySQL database.
@@ -1130,6 +1136,12 @@ def add_analysis(cnx, test_id):
         assert cnx.in_transaction
         cnx.commit()
         assert not cnx.in_transaction
+
+        _add_best_fit(cur, test_id)
+        assert cnx.in_transaction
+        cnx.commit()
+        assert not cnx.in_transaction
+
         assert cur.close()
 
         return True
