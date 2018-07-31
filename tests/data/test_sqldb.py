@@ -694,10 +694,14 @@ def test__add_obs_info(cur, test_tdms_obj):
 
     # Check column statistics for the TestId
     for col in OBS_COLS[:-1]:
+        # First loop through the coloumn names eg. 'Mass', 'DewPoint', etc...
         cur.execute(dml_test.get_stats_test_id.format(col, 1, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_1)):
+            # Loop through the length of the dataframe
+            # This allows us to loop through the index values, 'min', 'max', etc...
             val = OBS_STATS_1.index.values[idx]
+            # This idx also is used to loop through the querry results
             assert isclose(res[idx], OBS_STATS_1.loc[val, col])
 
     for col in OBS_BIT_COLS:
