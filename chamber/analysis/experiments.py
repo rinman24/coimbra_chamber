@@ -203,8 +203,6 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
             stats = chi2.chi2(time, mass, sigma, plot=plot)
             stats.append(rh)
             res.append(stats)
-            if res[-1][5] < 0.01:
-                break
     print('Analysis complete.')
     return pd.DataFrame(
         res, columns=['a', 'sig_a', 'b', 'sig_b', 'chi2', 'Q', 'nu', 'RH']
