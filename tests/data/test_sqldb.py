@@ -298,7 +298,7 @@ RESULTS_STATS_DF = pd.DataFrame(dict(
           97.25215148925781, 54769204.0],
     Q=[1099, 177.95, 0.13367083617251502,
        0.161920, 0.0, 1.00],
-    Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999],
+    Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999]
     )
 ).set_index('idx')
 
@@ -308,21 +308,7 @@ BEST_FIT_STATS_DF = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     RH=[15, 6.75, 0.04666666666666666, 0.450000, 0.10, 0.80],
     TestId=[15, 15, 0, 1, 1, 1],
-    A=[15, 1.4830344766378403, 0.00000000035494037980339546,
-       0.09886896510918936, 0.09882579743862152, 0.09888850897550583],
-    SigA=[15, 0.00000030841792586500105, 1.5618777152474202e-16,
-          0.000000020561195057666738, 0.000000009489180108346318,
-          0.00000005870989028267104],
-    B=[15, -0.000000051737129136419924, 1.668681139975639e-18,
-       -0.000000003449141942427995, -0.000000006108319627884384,
-       -0.000000001443885566665415],
-    SigB=[15, 0.00000000008363979308949852, 1.4866605904948242e-22,
-          0.000000000005575986205966568, 0.0000000000003694199351804428,
-          0.00000000004862525659898864],
-    Chi2=[15, 36005.467849731445, 2003517.8946579965, 2400.36452331543,
-          171.7764129638672, 5152.66845703125],
-    Q=[15, 10.01, 0.1026862222222222, 0.667333, 0.03, 0.98],
-    Nu=[15, 36585, 2049066.666666667, 2439.0000, 199, 5199],
+    Nu=[15, 37785, 1998933.3333333333, 2519.0000, 399, 5399],
     )
 ).set_index('idx')
 
@@ -1077,7 +1063,7 @@ def test__add_best_fit(results_cnx):
     """Test _add_best_fit."""
     results_cur = results_cnx.cursor()
     # Add best Chi2 results to RHTargets
-    assert sqldb._add_best_fit(results_cur, ANALYSIS_TEST_ID)
+    assert sqldb._add_best_fit(results_cur, ANALYSIS_TEST_ID, q_max=0.5)
 
     # Check accuracy of added data
     for col in BEST_FIT_STATS_DF.columns.values:
@@ -1102,7 +1088,8 @@ def test_add_analysis(results_cnx):
     clear_results(results_cur, True)
     assert not results_cnx.in_transaction
 
-    assert sqldb.add_analysis(results_cnx, ANALYSIS_TEST_ID)
+    assert sqldb.add_analysis(
+        results_cnx, ANALYSIS_TEST_ID, steps=100, q_max=0.5)
 
     # ------------------------------------------------------------------------
     # Test correct RHTargets input
@@ -1132,7 +1119,8 @@ def test_add_analysis(results_cnx):
 
     # ------------------------------------------------------------------------
     # Test adding the same analysis again
-    assert sqldb.add_analysis(results_cnx, ANALYSIS_TEST_ID) is None
+    assert sqldb.add_analysis(
+        results_cnx, ANALYSIS_TEST_ID, steps=100, q_max=0.5) is None
 
     # ------------------------------------------------------------------------
     # Check that the database is uneffected
