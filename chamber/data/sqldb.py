@@ -1075,13 +1075,44 @@ def _add_results(cur, analyzed_df, test_id):
     return True
 
 
-def _add_best_fit(cur, test_id):
-    """Docstring."""
-    cur.execute(dml.add_best_fit.format(test_id))
+def _add_best_fit(cur, test_id, rh_max=0.05):
+    """
+    Add the best Chi2 fit to the 'RHTargets' Table.
+
+    Use a MySQL Querry to update the 'RHTargets' Table and add the Chi2 results
+    with the lowest error and Q ~ 0.5.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+    rh_max : float
+        The cutoff value for ABS(Q-0.5) for determining best fit.
+        Defaults to 0.05.
+
+    Returns
+    -------
+    `True` or `None`
+        `True` if sucessful, else `None`.
+
+    Examples
+    --------
+    Add bestfit results for an existing TestId.
+
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> test_id = 1
+    >>> _add_best_fit(cnx, test_id, rh_max=0.1)
+    True
+    """
+    cur.execute(dml.add_best_fit.format(test_id, rh_max))
     return True
 
 
-def add_analysis(cnx, test_id, steps=100):
+def add_analysis(cnx, test_id, steps=1, rh_max=0.05):
     """
     Pull, analyze, and insert analysis results into MySQL database.
 
@@ -1096,6 +1127,11 @@ def add_analysis(cnx, test_id, steps=100):
     test_id : int
         TestID for the MySQL database, which is the primary key for the Test
         table.
+    steps : int
+        The step size for Chi2 analysis. Defaults to 1.
+    rh_max : float
+        The cutoff value for ABS(Q-0.5) for determining best fit.
+        Defaults to 0.05.
 
     Returns
     -------
@@ -1137,10 +1173,10 @@ def add_analysis(cnx, test_id, steps=100):
         cnx.commit()
         assert not cnx.in_transaction
 
-        # _add_best_fit(cur, test_id)
-        # assert cnx.in_transaction
-        # cnx.commit()
-        # assert not cnx.in_transaction
+        _add_best_fit(cur, test_id, rh_max=rh_max)
+        assert cnx.in_transaction
+        cnx.commit()
+        assert not cnx.in_transaction
 
         assert cur.close()
 
