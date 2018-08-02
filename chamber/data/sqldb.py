@@ -1075,7 +1075,7 @@ def _add_results(cur, analyzed_df, test_id):
     return True
 
 
-def _add_best_fit(cur, test_id, rh_max=0.05):
+def _add_best_fit(cur, test_id, q_max=0.05):
     """
     Add the best Chi2 fit to the 'RHTargets' Table.
 
@@ -1089,7 +1089,7 @@ def _add_best_fit(cur, test_id, rh_max=0.05):
     test_id : int
         TestID for the MySQL database, which is the primary key for the Test
         table.
-    rh_max : float
+    q_max : float
         The cutoff value for ABS(Q-0.5) for determining best fit.
         Defaults to 0.05.
 
@@ -1105,14 +1105,14 @@ def _add_best_fit(cur, test_id, rh_max=0.05):
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
     >>> test_id = 1
-    >>> _add_best_fit(cnx, test_id, rh_max=0.1)
+    >>> _add_best_fit(cnx, test_id, q_max=0.1)
     True
     """
-    cur.execute(dml.add_best_fit.format(test_id, rh_max))
+    cur.execute(dml.add_best_fit.format(test_id, q_max))
     return True
 
 
-def add_analysis(cnx, test_id, steps=1, rh_max=0.05):
+def add_analysis(cnx, test_id, steps=1, q_max=0.05):
     """
     Pull, analyze, and insert analysis results into MySQL database.
 
@@ -1129,7 +1129,7 @@ def add_analysis(cnx, test_id, steps=1, rh_max=0.05):
         table.
     steps : int
         The step size for Chi2 analysis. Defaults to 1.
-    rh_max : float
+    q_max : float
         The cutoff value for ABS(Q-0.5) for determining best fit.
         Defaults to 0.05.
 
@@ -1173,7 +1173,7 @@ def add_analysis(cnx, test_id, steps=1, rh_max=0.05):
         cnx.commit()
         assert not cnx.in_transaction
 
-        _add_best_fit(cur, test_id, rh_max=rh_max)
+        _add_best_fit(cur, test_id, q_max=q_max)
         assert cnx.in_transaction
         cnx.commit()
         assert not cnx.in_transaction

@@ -1063,7 +1063,7 @@ def test__add_best_fit(results_cnx):
     """Test _add_best_fit."""
     results_cur = results_cnx.cursor()
     # Add best Chi2 results to RHTargets
-    assert sqldb._add_best_fit(results_cur, ANALYSIS_TEST_ID, rh_max=0.5)
+    assert sqldb._add_best_fit(results_cur, ANALYSIS_TEST_ID, q_max=0.5)
 
     # Check accuracy of added data
     for col in BEST_FIT_STATS_DF.columns.values:
@@ -1089,7 +1089,7 @@ def test_add_analysis(results_cnx):
     assert not results_cnx.in_transaction
 
     assert sqldb.add_analysis(
-        results_cnx, ANALYSIS_TEST_ID, steps=100, rh_max=0.5)
+        results_cnx, ANALYSIS_TEST_ID, steps=100, q_max=0.5)
 
     # ------------------------------------------------------------------------
     # Test correct RHTargets input
@@ -1120,7 +1120,7 @@ def test_add_analysis(results_cnx):
     # ------------------------------------------------------------------------
     # Test adding the same analysis again
     assert sqldb.add_analysis(
-        results_cnx, ANALYSIS_TEST_ID, steps=100, rh_max=0.5) is None
+        results_cnx, ANALYSIS_TEST_ID, steps=100, q_max=0.5) is None
 
     # ------------------------------------------------------------------------
     # Check that the database is uneffected
