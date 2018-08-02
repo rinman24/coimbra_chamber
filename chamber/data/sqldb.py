@@ -1137,10 +1137,10 @@ def add_analysis(cnx, test_id, steps=100):
         cnx.commit()
         assert not cnx.in_transaction
 
-        _add_best_fit(cur, test_id)
-        assert cnx.in_transaction
-        cnx.commit()
-        assert not cnx.in_transaction
+        # _add_best_fit(cur, test_id)
+        # assert cnx.in_transaction
+        # cnx.commit()
+        # assert not cnx.in_transaction
 
         assert cur.close()
 

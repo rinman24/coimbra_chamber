@@ -3,7 +3,7 @@ Script for quality chcking before inserting into a database.
 
 This script should be called as follows:
 
-   $ python -m chamber.scripts.qc_script <filepath> <database>
+   $ python -m chamber.scripts.qc_check <filepath> <database>
 
 Where the filepath is the tdms file to be quality checkd and database is the
 name of the schema to insert the results into.
