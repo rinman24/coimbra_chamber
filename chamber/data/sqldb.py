@@ -1212,7 +1212,7 @@ def exp_plot(cnx):
     plt.xlim(273, 312)
     plt.grid()
     plt.ylim(20000, 102000)
-    settings = get_setting_df(cnx)
+    settings = _get_setting_df(cnx)
     for pnt in PT_LIST:
         plt.plot(pnt[0], pnt[1], c='grey', marker='.')
     plt.scatter(settings.loc[settings['Reservoir'] == 1, 'Temperature'],
