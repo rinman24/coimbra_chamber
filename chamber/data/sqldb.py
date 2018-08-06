@@ -18,6 +18,7 @@ import configparser
 import re
 
 from CoolProp.HumidAirProp import HAPropsSI
+import matplotlib.pyplot as plt
 import mysql.connector
 import nptdms
 import numpy as np
@@ -29,6 +30,11 @@ from chamber import const
 from chamber.analysis import experiments
 from chamber.data import ddl, dml
 
+
+PT_LIST = [(275, 30000), (275, 50000), (275, 70000), (275, 90000),
+           (280, 40000), (280, 60000), (280, 80000), (280, 100000),
+           (290, 60000), (290, 80000), (290, 100000), (300, 80000),
+           (300, 100000), (310, 100000)]
 
 # ----------------------------------------------------------------------------
 # Connect and setup
@@ -1107,6 +1113,7 @@ def _add_best_fit(cur, test_id, q_max=0.05):
     >>> test_id = 1
     >>> _add_best_fit(cnx, test_id, q_max=0.1)
     True
+
     """
     cur.execute(dml.add_best_fit.format(test_id, q_max))
     return True
@@ -1186,3 +1193,34 @@ def add_analysis(cnx, test_id, steps=1, q_max=0.05):
         # Rollback transaction if there is an issue
         cnx.rollback()
         print("MySqlError: {}".format(err))
+
+
+def _get_setting_df(cnx):
+    """Get dataframe of settings if MySQL database."""
+    settings = pd.read_sql('SELECT * FROM Setting', cnx)
+    return settings
+
+
+def exp_plot(cnx):
+    """Plot the P vs. T settings for the tests in the MySQL database."""
+    t_max = 313.15
+    gamma = 11.4
+    p_not = 101325.0
+    t = np.linspace(273, 312, 100)
+    p = p_not*(t/t_max)**gamma
+    plt.plot(t, p)
+    plt.xlim(273, 312)
+    plt.grid()
+    plt.ylim(20000, 102000)
+    settings = _get_setting_df(cnx)
+    for pnt in PT_LIST:
+        plt.plot(pnt[0], pnt[1], c='grey', marker='.')
+    plt.scatter(settings.loc[settings['Reservoir'] == 1, 'Temperature'],
+                settings.loc[settings['Reservoir'] == 1, 'Pressure'],
+                c='blue', marker='+', s=300, label='HighRH')
+    plt.scatter(settings.loc[settings['Reservoir'] == 0, 'Temperature'],
+                settings.loc[settings['Reservoir'] == 0, 'Pressure'],
+                c='orange', marker='x', s=250, label='LowRH')
+    plt.legend()
+    plt.show()
+    return True
