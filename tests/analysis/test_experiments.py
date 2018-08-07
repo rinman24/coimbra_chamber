@@ -205,6 +205,13 @@ def test__get_rh():
     assert math.isclose(rh, 0.36377641815012024)
 
 
+def test__get_coolprop_rh_err():
+    rh = expr._get_coolprop_rh_err([101325, 290, 275])
+    assert math.isclose(rh, 0.005239925265924594)
+    rh = expr._get_coolprop_rh_err([70000, 290, 273])
+    assert math.isclose(rh, 0.005145568640554932)
+
+
 def test__add_rh(df_01):
     assert 'RH' not in set(df_01)
 
