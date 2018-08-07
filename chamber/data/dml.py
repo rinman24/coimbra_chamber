@@ -52,7 +52,7 @@ add_tube = ("INSERT INTO Tube "
             "(%(DiameterIn)s, %(DiameterOut)s, %(Length)s,"
             " %(Material)s, %(Mass)s)")
 
-add_rh_targets = "INSERT INTO RHTargets (TestId, RH) VALUES (%s, %s)"
+add_rh_targets = "INSERT INTO RHTargets (TestId, RH, SigRH) VALUES (%s, %s, %s)"
 
 add_results = ("INSERT INTO Results"
                "  (TestId, RH, A, SigA, B, SigB, Chi2, Q, Nu)"

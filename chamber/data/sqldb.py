@@ -989,7 +989,7 @@ def get_test_from_set(cur, setting_info):
 
 def _add_rh_targets(cur, analyzed_df, test_id):
     """
-    Insert Chi2 RH results into MySql database RHTargets table.
+    Insert Chi2 RH results and error into MySql database RHTargets table.
 
     Uses cursor's .executemany function on a MySQL insert query and list
     of RH data built by looping through an analyzed `DataFrame` built by
@@ -1022,7 +1022,10 @@ def _add_rh_targets(cur, analyzed_df, test_id):
 
     """
     rh_trgt_list = [
-        (test_id, '{:.2f}'.format(rh)) for rh in analyzed_df.RH.unique()
+        (test_id,
+         '{:.2f}'.format(rh),
+         float(analyzed_df.loc[analyzed_df['RH'] == rh].SigRH.iloc[0])
+         ) for rh in analyzed_df.RH.unique()
     ]
     cur.executemany(dml.add_rh_targets, rh_trgt_list)
 

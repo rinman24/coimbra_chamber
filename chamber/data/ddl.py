@@ -105,6 +105,7 @@ tables.append(("TempObservation",
 tables.append(("RHTargets",
                "  CREATE TABLE IF NOT EXISTS `RHTargets` ("
                "  `RH` DECIMAL(3,2) UNSIGNED NOT NULL,"
+               "  `SigRH` FLOAT UNSIGNED NOT NULL,"
                "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
                "  `Nu` SMALLINT UNSIGNED,"
                "  PRIMARY KEY (`RH`, `TestId`),"
