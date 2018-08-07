@@ -989,7 +989,7 @@ def get_test_from_set(cur, setting_info):
 
 def _add_rh_targets(cur, analyzed_df, test_id):
     """
-    Insert Chi2 RH results and error into MySql database RHTargets table.
+    Insert Chi2 RH results and uncertainty into MySql database RHTargets table.
 
     Uses cursor's .executemany function on a MySQL insert query and list
     of RH data built by looping through an analyzed `DataFrame` built by
