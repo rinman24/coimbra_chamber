@@ -462,10 +462,8 @@ def _get_coolprop_rh_err(params):
     upper_err = abs(high_rh - rh)
     lower_err = abs(rh - low_rh)
     if upper_err > lower_err:
-        print('up')
         return upper_err
     else:
-        print('low')
         return lower_err
 
 
