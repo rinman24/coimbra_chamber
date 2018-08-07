@@ -170,3 +170,8 @@ add_best_fit = ("UPDATE RHTargets INNER JOIN (SELECT * FROM Results WHERE "
                 "AS BestFit SET RHTargets.Nu=BestFit.Nu WHERE "
                 "RHTargets.RH=BestFit.RH AND "
                 "RHTargets.TestId=BestFit.TestId")
+
+settings_df = ('SELECT Pressure, Temperature, Reservoir, TestId FROM Setting '
+               'INNER JOIN Test ON Test.SettingId=Setting.SettingId')
+
+analysis_tid = 'SELECT DISTINCT TestId FROM RHTargets'

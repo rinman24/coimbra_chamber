@@ -314,7 +314,8 @@ BEST_FIT_STATS_DF = pd.DataFrame(dict(
 
 # ----------------------------------------------------------------------------
 # Test `_get_settings_df` global variables
-SETTINGS_1 = [1, 0, 1, 40000, 280, 1, 1, 1]
+SETTINGS_1 = [4e+04,   2.8e+02,   1, 1]
+TESTID_1 = [1]
 
 # ----------------------------------------------------------------------------
 # `test_tdms_obj` fixture global variables
@@ -689,7 +690,7 @@ def test__add_obs_info(cur, test_tdms_obj):
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_1)):
             # Loop through the length of the dataframe
-            # This allows us to loop through the index values, 'min', 'max', etc...
+            # This allows us to loop through the index values, 'min', 'max'...
             val = OBS_STATS_1.index.values[idx]
             # This idx also is used to loop through the querry results
             assert isclose(res[idx], OBS_STATS_1.loc[val, col])
@@ -1097,7 +1098,7 @@ def test_add_analysis(results_cnx):
 
     # ------------------------------------------------------------------------
     # Test correct RHTargets input
-    results_cur.execute('SELECT * FROM RHTargets;')
+    results_cur.execute('SELECT * FROM RHTargets WHERE TestId=1;')
     res = results_cur.fetchall()
     assert len(res) == RH_TARGET_LENGTH
     for idx in range(RH_TARGET_LENGTH):
@@ -1143,6 +1144,12 @@ def test__get_setting_df(results_cnx):
     """Test _get_setting_df."""
     settings = sqldb._get_setting_df(results_cnx)
     assert (settings.iloc[0] == SETTINGS_1).all()
+
+
+def test__get_analysis_tid_df(results_cnx):
+    """Test _get_analysis_tid_df."""
+    tid_df = sqldb._get_analysis_tid_df(results_cnx)
+    assert (tid_df.iloc[0] == TESTID_1).all()
 
 
 def test_exp_plot(results_cnx):
