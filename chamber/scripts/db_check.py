@@ -1,4 +1,12 @@
-"""Plot the P vs. T settings for the tests in the MySQL database."""
+"""
+Plot the P vs. T settings for the tests in the MySQL database.
+
+This script should be called as follows:
+
+   $ python -m chamber.scripts.db_check <database>
+
+Where database is the name of the schema to insert the results into.
+"""
 import sys
 
 import matplotlib.pyplot as plt
