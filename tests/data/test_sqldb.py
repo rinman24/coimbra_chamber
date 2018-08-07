@@ -313,11 +313,6 @@ BEST_FIT_STATS_DF = pd.DataFrame(dict(
 ).set_index('idx')
 
 # ----------------------------------------------------------------------------
-# Test `_get_settings_df` global variables
-SETTINGS_1 = [4e+04,   2.8e+02,   1, 1]
-TESTID_1 = [1]
-
-# ----------------------------------------------------------------------------
 # `test_tdms_obj` fixture global variables
 CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
                                                'data_test_files',
@@ -1138,23 +1133,6 @@ def test_add_analysis(results_cnx):
             val = RESULTS_STATS_DF.index.values[idx]
             assert isclose(res[idx], RESULTS_STATS_DF.loc[val, col])
     results_cur.close()
-
-
-def test__get_setting_df(results_cnx):
-    """Test _get_setting_df."""
-    settings = sqldb._get_setting_df(results_cnx)
-    assert (settings.iloc[0] == SETTINGS_1).all()
-
-
-def test__get_analysis_tid_df(results_cnx):
-    """Test _get_analysis_tid_df."""
-    tid_df = sqldb._get_analysis_tid_df(results_cnx)
-    assert (tid_df.iloc[0] == TESTID_1).all()
-
-
-def test_exp_plot(results_cnx):
-    """Test exp_plot."""
-    assert sqldb.exp_plot(results_cnx)
 
 
 def drop_tables(cursor, bol):
