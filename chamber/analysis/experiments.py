@@ -206,6 +206,8 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
                             _half_len_gen(dataframe, idx, steps=steps),
                             repeat(idx), repeat(steps),
                             repeat(sigma), repeat(plot)))
+    pool.close()
+    pool.join()
     print('Analysis complete.')
     return pd.DataFrame(
         res, columns=['a', 'sig_a', 'b', 'sig_b',
