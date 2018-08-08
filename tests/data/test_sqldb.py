@@ -269,6 +269,9 @@ FALSE_SETTING = dict(
 # ----------------------------------------------------------------------------
 # Test `_add_rh_targets` global variables
 RH_TARGET_LIST = [Decimal('{:.2f}'.format(rh/100)) for rh in range(10, 85, 5)]
+RH_ERR_LIST = [0.00192007,  0.0028022,  0.00362771,  0.00445247,  0.00527192,
+               0.00607349,  0.00682977,  0.00761089,  0.00840709,  0.00913833,
+               0.00894471,  0.00937274,  0.00998618,  0.0106339,  0.0112474]
 RH_TARGET_LENGTH = 15
 ANALYSIS_DF = pkl.load(open(os.path.join(
     os.getcwd(), 'tests', 'data_test_files', 'analysis_df'), 'rb'))
@@ -1029,7 +1032,8 @@ def test__add_rh_targets(results_cnx):
     assert len(res) == RH_TARGET_LENGTH
     for idx in range(RH_TARGET_LENGTH):
         assert res[idx][0] == RH_TARGET_LIST[idx]
-        assert res[idx][1] == ANALYSIS_TEST_ID
+        assert res[idx][1] == RH_ERR_LIST[idx]
+        assert res[idx][2] == ANALYSIS_TEST_ID
     results_cur.close()
 
 
@@ -1098,7 +1102,8 @@ def test_add_analysis(results_cnx):
     assert len(res) == RH_TARGET_LENGTH
     for idx in range(RH_TARGET_LENGTH):
         assert res[idx][0] == RH_TARGET_LIST[idx]
-        assert res[idx][1] == ANALYSIS_TEST_ID
+        assert res[idx][1] == RH_ERR_LIST[idx]
+        assert res[idx][2] == ANALYSIS_TEST_ID
 
     # ------------------------------------------------------------------------
     # Test correct Results input

@@ -187,6 +187,7 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
         - `Q`: goodness of fit score (survival function)
         - `nu`: degrees of freedom
         - `RH`: target relative humidity
+        - `SigRH`: target relative humidity
 
     Examples
     --------
@@ -202,10 +203,13 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
             time, mass = _get_stat_group(dataframe, idx, len_)
             stats = chi2.chi2(time, mass, sigma, plot=plot)
             stats.append(rh)
+            stats.append(
+                dataframe.loc[dataframe['Idx'] == idx]['SigRH'].iloc[0])
             res.append(stats)
     print('Analysis complete.')
     return pd.DataFrame(
-        res, columns=['a', 'sig_a', 'b', 'sig_b', 'chi2', 'Q', 'nu', 'RH']
+        res, columns=['a', 'sig_a', 'b', 'sig_b',
+                      'chi2', 'Q', 'nu', 'RH', 'SigRH']
         )
 
 
@@ -424,6 +428,45 @@ def _get_coolprop_rh(params):
     return HAPropsSI('RH', 'P', pressure, 'T', temp, 'Tdp', dew_point)
 
 
+def _get_coolprop_rh_err(params):
+    """
+    Get relative humidity error.
+
+    This is a wrapper for the CoolProp.HumidAirProp.HAPropsSI API in Python.
+    It accepts a list of pressure (Pa), temperature (K), and dew-point (K)
+    and converts it to the required API.
+
+    This allows the use of pandas.DataFrame.apply(_get_rh, axis=1) which is
+    more readable.
+
+    Parameters
+    ----------
+    params: list(float)
+        A list of at least three elements where the first, second, and third
+        elements are the values of pressure (Pa), temperature (K),
+        and dew-point (K) respectively.
+
+    Returns
+    -------
+    float
+        Dimensionless relative humidity error as specified by the `param` input
+        list.
+
+    """
+    pressure = params[0]
+    temp = params[1]
+    dew_point = params[2]
+    high_rh = HAPropsSI('RH', 'P', pressure, 'T', temp, 'Tdp', dew_point + 0.2)
+    low_rh = HAPropsSI('RH', 'P', pressure, 'T', temp, 'Tdp', dew_point - 0.2)
+    rh = HAPropsSI('RH', 'P', pressure, 'T', temp, 'Tdp', dew_point)
+    upper_err = abs(high_rh - rh)
+    lower_err = abs(rh - low_rh)
+    if upper_err > lower_err:
+        return upper_err
+    else:
+        return lower_err
+
+
 def _add_rh(
         dataframe,
         param_list=['PressureSmooth', 'TeSmooth', 'DewPointSmooth'],
@@ -460,6 +503,9 @@ def _add_rh(
     """
     dataframe['RH'] = (
         dataframe.loc[:, param_list].apply(_get_coolprop_rh, axis=1)
+        )
+    dataframe['SigRH'] = (
+        dataframe.loc[:, param_list].apply(_get_coolprop_rh_err, axis=1)
         )
     if purge:
         dataframe.drop(columns=param_list[2], inplace=True)
