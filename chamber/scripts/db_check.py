@@ -139,7 +139,6 @@ def exp_plot(cnx):
                 label='LowRH A' if 'LowRH A' not in label_list else '')
             if 'HighRH A' not in label_list:
                 label_list = label_list + ['HighRH A', 'LowRH A']
-            print(label_list)
         else:
             plt.scatter(
                 sdf.loc[(sdf['TestId'] == tid) & (sdf['Reservoir'] == 1),
