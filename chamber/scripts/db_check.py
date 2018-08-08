@@ -171,7 +171,28 @@ def exp_plot(cnx):
     return True
 
 
+def add_analysis(cnx):
+    """docstring."""
+    add_analysis = input('Add analysis to database? [y/n]')
+    if add_analysis == 'y':
+        test_id = input('Which TestId would you like to analyze [ex. "3"]')
+        print('Adding TestId ', test_id, '...')
+        sqldb.add_analysis(cnx, test_id)
+        print('Done.')
+        return True
+    elif add_analysis == 'n':
+        print('No analysis added.')
+        return False
+    else:
+        print('Incorrect input, analysis aborted.')
+        return False
+
+
 if __name__ == '__main__':
     schema = sys.argv[1]
     cnx = sqldb.connect(schema)
     exp_plot(cnx)
+    add = True
+    while add is True:
+        add = add_analysis(cnx)
+        exp_plot(cnx)

@@ -17,7 +17,9 @@ Functions
 - `results_from_csv` -- get analysis results from a .csv file.
 
 """
+from itertools import repeat
 import math
+from multiprocessing import cpu_count, Pool
 
 from CoolProp.HumidAirProp import HAPropsSI
 import pandas as pd
@@ -197,20 +199,28 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
     print('Starting analysis...')
     rh_targets = _get_valid_rh_targets(dataframe)
     res = []
+    pool = Pool(cpu_count())
     for rh in tqdm(rh_targets):
         idx = _get_target_idx(dataframe, rh)
-        for len_ in _half_len_gen(dataframe, idx, steps=steps):
-            time, mass = _get_stat_group(dataframe, idx, len_)
-            stats = chi2.chi2(time, mass, sigma, plot=plot)
-            stats.append(rh)
-            stats.append(
-                dataframe.loc[dataframe['Idx'] == idx]['SigRH'].iloc[0])
-            res.append(stats)
+        res += pool.starmap(_multi, zip(repeat(dataframe), repeat(rh),
+                            _half_len_gen(dataframe, idx, steps=steps),
+                            repeat(idx), repeat(steps),
+                            repeat(sigma), repeat(plot)))
     print('Analysis complete.')
     return pd.DataFrame(
         res, columns=['a', 'sig_a', 'b', 'sig_b',
                       'chi2', 'Q', 'nu', 'RH', 'SigRH']
         )
+
+
+def _multi(dataframe, rh, len_, idx, steps, sigma, plot):
+    """Calculate the Chi2 statistics for a single row of data."""
+    time, mass = _get_stat_group(dataframe, idx, len_)
+    stats = chi2.chi2(time, mass, sigma, plot=plot)
+    stats.append(rh)
+    stats.append(
+        dataframe.loc[dataframe['Idx'] == idx]['SigRH'].iloc[0])
+    return stats
 
 
 # --------------------------------------------------------------------------- #
