@@ -122,7 +122,7 @@ def exp_plot(cnx):
     tid_df = _get_analysis_tid_df(cnx)
     label_list = []
     for tid in sdf.TestId:
-        if tid in sdf[sdf.TestId.isin(tid_df.TestId)].TestId:
+        if tid in sdf[sdf.TestId.isin(tid_df.TestId)].TestId.data:
             plt.scatter(
                 sdf.loc[(sdf['TestId'] == tid) & (sdf['Reservoir'] == 1),
                         'Temperature'],
