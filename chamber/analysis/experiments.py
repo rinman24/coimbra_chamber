@@ -38,6 +38,8 @@ RH_STEP_PCT = 5
 R_TUBE = 1.5e-2
 A_TUBE = math.pi * pow(R_TUBE, 2)
 
+CPU_COUNT = cpu_count()
+
 
 # --------------------------------------------------------------------------- #
 # Public Functions
@@ -199,7 +201,7 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
     print('Starting analysis...')
     rh_targets = _get_valid_rh_targets(dataframe)
     res = []
-    pool = Pool(cpu_count())
+    pool = Pool(CPU_COUNT)
     for rh in tqdm(rh_targets):
         idx = _get_target_idx(dataframe, rh)
         res += pool.starmap(_multi_mass, zip(repeat(dataframe), repeat(rh),
@@ -305,10 +307,20 @@ def _add_avg_te(dataframe, purge=False):
         If `purge == True` then TC4-TC13 will have been dropped.
 
     """
-    dataframe['Te'] = dataframe.loc[:, TC_LIST].apply(np.mean, axis=1).round(1)
+    pool = Pool(CPU_COUNT)
+    df_stack = np.array_split(dataframe, CPU_COUNT)
+    dataframe['Te'] = pd.concat(pool.map(_multi_te, df_stack))
+    pool.close()
+    pool.join()
     if purge:
         dataframe.drop(columns=TC_LIST, inplace=True)
     return dataframe
+
+
+def _multi_te(dataframe):
+    """Add average temperature to the `DataFrame`."""
+    df_te = dataframe.loc[:, TC_LIST].apply(np.mean, axis=1).round(1)
+    return df_te
 
 
 # --------------------------------------------------------------------------- #
@@ -513,9 +525,8 @@ def _add_rh(
         was dropped.
 
     """
-    num_part = cpu_count()
-    pool = Pool(num_part)
-    df_stack = np.array_split(dataframe, num_part)
+    pool = Pool(CPU_COUNT)
+    df_stack = np.array_split(dataframe, CPU_COUNT)
     dataframe['RH'] = pd.concat(
         pool.starmap(_multi_rh, zip(df_stack, repeat(param_list)))
         )
