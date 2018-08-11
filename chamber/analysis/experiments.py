@@ -202,7 +202,7 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
     pool = Pool(cpu_count())
     for rh in tqdm(rh_targets):
         idx = _get_target_idx(dataframe, rh)
-        res += pool.starmap(_multi, zip(repeat(dataframe), repeat(rh),
+        res += pool.starmap(_multi_mass, zip(repeat(dataframe), repeat(rh),
                             _half_len_gen(dataframe, idx, steps=steps),
                             repeat(idx), repeat(steps),
                             repeat(sigma), repeat(plot)))
@@ -215,7 +215,7 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
         )
 
 
-def _multi(dataframe, rh, len_, idx, steps, sigma, plot):
+def _multi_mass(dataframe, rh, len_, idx, steps, sigma, plot):
     """Calculate the Chi2 statistics for a single row of data."""
     time, mass = _get_stat_group(dataframe, idx, len_)
     stats = chi2.chi2(time, mass, sigma, plot=plot)
@@ -513,15 +513,30 @@ def _add_rh(
         was dropped.
 
     """
-    dataframe['RH'] = (
-        dataframe.loc[:, param_list].apply(_get_coolprop_rh, axis=1)
+    num_part = cpu_count()
+    pool = Pool(num_part)
+    df_stack = np.array_split(dataframe, num_part)
+    dataframe['RH'] = pd.concat(
+        pool.starmap(_multi_rh, zip(df_stack, repeat(param_list)))
         )
-    dataframe['SigRH'] = (
-        dataframe.loc[:, param_list].apply(_get_coolprop_rh_err, axis=1)
+    dataframe['SigRH'] = pd.concat(
+        pool.starmap(_multi_rh_err, zip(df_stack, repeat(param_list)))
         )
+    pool.close()
+    pool.join()
     if purge:
         dataframe.drop(columns=param_list[2], inplace=True)
     return dataframe
+
+
+def _multi_rh(dataframe, param_list):
+    df = dataframe.loc[:, param_list].apply(_get_coolprop_rh, axis=1)
+    return df
+
+
+def _multi_rh_err(dataframe, param_list):
+    df = dataframe.loc[:, param_list].apply(_get_coolprop_rh_err, axis=1)
+    return df
 
 
 # --------------------------------------------------------------------------- #

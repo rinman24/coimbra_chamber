@@ -15,6 +15,7 @@ TARGET_RH = 0.15
 TARGET_IDX = 12770
 HALF_LEN = 7000
 SIGMA = 4e-8
+PARAM_LIST = ['PressureSmooth', 'TeSmooth', 'DewPointSmooth']
 
 
 @pytest.fixture(scope='module')
@@ -195,11 +196,6 @@ def test__add_smooth_pressure(df_01, df_bad):
     plt.show()
 
 
-def test__add_all_smooth(df_01):
-    # df_01.drop()
-    pass
-
-
 def test__get_rh():
     rh = expr._get_coolprop_rh([101325, 290, 275])
     assert math.isclose(rh, 0.36377641815012024)
@@ -212,13 +208,35 @@ def test__get_coolprop_rh_err():
     assert math.isclose(rh, 0.005145568640554932)
 
 
+def test__multi_rh(df_01):
+    rh = expr._multi_rh(df_01, param_list=PARAM_LIST)
+    plt.plot(rh, label='RH')
+
+    plt.legend()
+    plt.xlabel('time/s')
+    plt.ylabel('RH')
+    plt.title('Relative Humidity')
+    plt.show()
+
+
+def test__multi_rh_err(df_01):
+    rh_err = expr._multi_rh_err(df_01, param_list=PARAM_LIST)
+    plt.plot(rh_err, label='SigRH Function')
+
+    plt.legend()
+    plt.xlabel('time/s')
+    plt.ylabel('SigRH')
+    plt.title('Relative Humidity Error')
+    plt.show()
+
+
 def test__add_rh(df_01):
     assert 'RH' not in set(df_01)
 
     df_01 = expr._add_rh(df_01)
     assert 'RH' in set(df_01)
 
-    plt.plot(df_01.RH, label='RH')
+    plt.errorbar(df_01.Idx, df_01.RH, yerr=df_01.SigRH, label='RH')
 
     plt.legend()
     plt.xlabel('time/s')
