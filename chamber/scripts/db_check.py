@@ -171,7 +171,7 @@ def exp_plot(cnx):
 
 
 def add_analysis(cnx):
-    """docstring."""
+    """Propmt user for a TestId to apply and insert analysis into database."""
     add_analysis = input('Add analysis to database? [y/n]')
     if add_analysis == 'y':
         test_id = input('Which TestId would you like to analyze [ex. "3"]')
