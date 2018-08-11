@@ -530,11 +530,13 @@ def _add_rh(
 
 
 def _multi_rh(dataframe, param_list):
+    """Apply `_get_coolprop_rh` to the argument dataframe."""
     df = dataframe.loc[:, param_list].apply(_get_coolprop_rh, axis=1)
     return df
 
 
 def _multi_rh_err(dataframe, param_list):
+    """Apply `_get_coolprop_rh_err` to the argument dataframe."""
     df = dataframe.loc[:, param_list].apply(_get_coolprop_rh_err, axis=1)
     return df
 
