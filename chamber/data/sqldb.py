@@ -1163,25 +1163,20 @@ def add_analysis(cnx, test_id, steps=1, nu_min=100):
 
         # --------------------------------------------------------------------
         # RHTargets: call add_rh_targets
-        _add_rh_targets(cur, analyzed_df, test_id)
+        assert _add_rh_targets(cur, analyzed_df, test_id)
         assert cnx.in_transaction
-        cnx.commit()
-        assert not cnx.in_transaction
 
         # --------------------------------------------------------------------
         # Results: call add_results
-        _add_results(cur, analyzed_df, test_id)
+        assert _add_results(cur, analyzed_df, test_id)
+        assert cnx.in_transaction
+
+        assert _add_best_fit(cur, test_id, nu_min=nu_min)
+
         assert cnx.in_transaction
         cnx.commit()
         assert not cnx.in_transaction
-
-        _add_best_fit(cur, test_id, nu_min=nu_min)
-        assert cnx.in_transaction
-        cnx.commit()
-        assert not cnx.in_transaction
-
         assert cur.close()
-
         return True
     except mysql.connector.Error as err:
         # --------------------------------------------------------------------
