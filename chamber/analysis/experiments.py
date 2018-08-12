@@ -44,57 +44,6 @@ CPU_COUNT = cpu_count()
 # --------------------------------------------------------------------------- #
 # Public Functions
 # --------------------------------------------------------------------------- #
-def results_from_csv(
-        filepath,
-        purge=False,
-        param_list=['PressureSmooth', 'TeSmooth', 'DewPointSmooth'],
-        sigma=4e-8,
-        steps=100,
-        ):
-    """
-    Get results from csv.
-
-    This function opens a csv file, preprocesses the data, performs the
-    chi-square regression, and returns the data and results in separate
-    `DataFrames`.
-
-    Parameters
-    ----------
-    filepath : str, pathlib.Path, py._path.local.LocalPath or any \
-        object with a read() method
-        The filepath to a csv file.
-    purge : bool
-        If `True` the original (raw) data is removed from the
-        preprocessed `DataFrame`. If `False` the raw data remains in
-        the resulting 'DataFrame'. Defaults to `False`.
-    param_list : list(str)
-        List of parameters to use to calculate the relative humidity using the
-        CoolProp API, see `_get_coolprop_rh` docstring for more detail.
-        Defaults to: `['PressureSmooth', 'TeSmooth', 'DewPointSmooth']`.
-    sigma : float
-        Standard deviation of mass measurement. Defaults to 4e-8 accoriding to
-        the spec sheet.
-    steps : int
-        Steps to increase the `half_length`.
-
-    Returns
-    -------
-    (DataFrame, DataFrame)
-        A tuple of a `DataFrame` containing the preprocessed experimental data
-        and a second `DataFrame` containing the chi-square analysis results.
-
-    Examples
-    --------
-    .. todo:: Examples.
-
-    """
-    dataframe = pd.read_csv(filepath)
-    dataframe = preprocess(dataframe, param_list=param_list, purge=purge)
-    results = mass_transfer(dataframe, sigma=sigma, steps=steps)
-
-    return (dataframe, results)
-
-
 def preprocess(
         dataframe,
         param_list=['PressureSmooth', 'TeSmooth', 'DewPointSmooth'],
