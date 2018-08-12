@@ -737,13 +737,9 @@ def _get_temp_info(tdms_obj, tdms_idx, couple_idx):
 
     """
     # ------------------------------------------------------------------------
-    # Compile a regular expression to use when obtaining TC obervations
-    regex = re.compile(r'^(\d){3}.(\d){2}$')
     # Get and format the temperature observation
     temp_info = '{:.2f}'.format(
         tdms_obj.object("Data", "TC{}".format(couple_idx)).data[tdms_idx])
-    if not regex.search(temp_info):
-        return
     return temp_info
 
 
