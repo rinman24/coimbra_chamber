@@ -19,7 +19,7 @@ Functions
 """
 from itertools import repeat
 import math
-from multiprocessing import cpu_count, Pool
+import multiprocessing as multi
 
 from CoolProp.HumidAirProp import HAPropsSI
 import pandas as pd
@@ -38,7 +38,7 @@ RH_STEP_PCT = 5
 R_TUBE = 1.5e-2
 A_TUBE = math.pi * pow(R_TUBE, 2)
 
-CPU_COUNT = cpu_count()
+CPU_COUNT = multi.cpu_count()
 
 
 # --------------------------------------------------------------------------- #
@@ -150,7 +150,7 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
     print('Starting analysis...')
     rh_targets = _get_valid_rh_targets(dataframe)
     res = []
-    pool = Pool(CPU_COUNT)
+    pool = multi.Pool(CPU_COUNT)
     for rh in tqdm(rh_targets):
         idx = _get_target_idx(dataframe, rh)
         res += pool.starmap(_multi_mass, zip(repeat(dataframe), repeat(rh),
@@ -256,7 +256,7 @@ def _add_avg_te(dataframe, purge=False):
         If `purge == True` then TC4-TC13 will have been dropped.
 
     """
-    pool = Pool(CPU_COUNT)
+    pool = multi.Pool(CPU_COUNT)
     df_stack = np.array_split(dataframe, CPU_COUNT)
     dataframe['Te'] = pd.concat(pool.map(_multi_te, df_stack))
     pool.close()
@@ -474,7 +474,7 @@ def _add_rh(
         was dropped.
 
     """
-    pool = Pool(CPU_COUNT)
+    pool = multi.Pool(CPU_COUNT)
     df_stack = np.array_split(dataframe, CPU_COUNT)
     dataframe['RH'] = pd.concat(
         pool.starmap(_multi_rh, zip(df_stack, repeat(param_list)))
