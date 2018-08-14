@@ -93,7 +93,7 @@ Back to `Table of Contents`_
 1. From the repo directory; i.e., chamber
 ::
 
-    $ python -m pytest tests -xv  --cov=chamber tests
+    $ python -m pytest tests -xv  --cov=chamber --cov-report html tests
 
 The above line requires both `pytest` and `pytest-cov` are installed.
 
