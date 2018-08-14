@@ -122,7 +122,7 @@ def exp_plot(cnx):
     tid_df = _get_analysis_tid_df(cnx)
     label_list = []
     for tid in sdf.TestId:
-        if tid in sdf[sdf.TestId.isin(tid_df.TestId)].TestId:
+        if tid in sdf[sdf.TestId.isin(tid_df.TestId)].TestId.data:
             plt.scatter(
                 sdf.loc[(sdf['TestId'] == tid) & (sdf['Reservoir'] == 1),
                         'Temperature'],
@@ -139,7 +139,6 @@ def exp_plot(cnx):
                 label='LowRH A' if 'LowRH A' not in label_list else '')
             if 'HighRH A' not in label_list:
                 label_list = label_list + ['HighRH A', 'LowRH A']
-            print(label_list)
         else:
             plt.scatter(
                 sdf.loc[(sdf['TestId'] == tid) & (sdf['Reservoir'] == 1),
@@ -171,7 +170,28 @@ def exp_plot(cnx):
     return True
 
 
+def add_analysis(cnx):
+    """Propmt user for a TestId to apply and insert analysis into database."""
+    add_analysis = input('Add analysis to database? [y/n]')
+    if add_analysis == 'y':
+        test_id = input('Which TestId would you like to analyze [ex. "3"]')
+        print('Adding TestId ', test_id, '...')
+        sqldb.add_analysis(cnx, test_id)
+        print('Done.')
+        return True
+    elif add_analysis == 'n':
+        print('No analysis added.')
+        return False
+    else:
+        print('Incorrect input, analysis aborted.')
+        return False
+
+
 if __name__ == '__main__':
     schema = sys.argv[1]
     cnx = sqldb.connect(schema)
     exp_plot(cnx)
+    add = True
+    while add is True:
+        add = add_analysis(cnx)
+        exp_plot(cnx)

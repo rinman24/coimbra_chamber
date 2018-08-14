@@ -17,7 +17,9 @@ Functions
 - `results_from_csv` -- get analysis results from a .csv file.
 
 """
+from itertools import repeat
 import math
+import multiprocessing as multi
 
 from CoolProp.HumidAirProp import HAPropsSI
 import pandas as pd
@@ -36,61 +38,12 @@ RH_STEP_PCT = 5
 R_TUBE = 1.5e-2
 A_TUBE = math.pi * pow(R_TUBE, 2)
 
+CPU_COUNT = multi.cpu_count()
+
 
 # --------------------------------------------------------------------------- #
 # Public Functions
 # --------------------------------------------------------------------------- #
-def results_from_csv(
-        filepath,
-        purge=False,
-        param_list=['PressureSmooth', 'TeSmooth', 'DewPointSmooth'],
-        sigma=4e-8,
-        steps=100,
-        ):
-    """
-    Get results from csv.
-
-    This function opens a csv file, preprocesses the data, performs the
-    chi-square regression, and returns the data and results in separate
-    `DataFrames`.
-
-    Parameters
-    ----------
-    filepath : str, pathlib.Path, py._path.local.LocalPath or any \
-        object with a read() method
-        The filepath to a csv file.
-    purge : bool
-        If `True` the original (raw) data is removed from the
-        preprocessed `DataFrame`. If `False` the raw data remains in
-        the resulting 'DataFrame'. Defaults to `False`.
-    param_list : list(str)
-        List of parameters to use to calculate the relative humidity using the
-        CoolProp API, see `_get_coolprop_rh` docstring for more detail.
-        Defaults to: `['PressureSmooth', 'TeSmooth', 'DewPointSmooth']`.
-    sigma : float
-        Standard deviation of mass measurement. Defaults to 4e-8 accoriding to
-        the spec sheet.
-    steps : int
-        Steps to increase the `half_length`.
-
-    Returns
-    -------
-    (DataFrame, DataFrame)
-        A tuple of a `DataFrame` containing the preprocessed experimental data
-        and a second `DataFrame` containing the chi-square analysis results.
-
-    Examples
-    --------
-    .. todo:: Examples.
-
-    """
-    dataframe = pd.read_csv(filepath)
-    dataframe = preprocess(dataframe, param_list=param_list, purge=purge)
-    results = mass_transfer(dataframe, sigma=sigma, steps=steps)
-
-    return (dataframe, results)
-
-
 def preprocess(
         dataframe,
         param_list=['PressureSmooth', 'TeSmooth', 'DewPointSmooth'],
@@ -197,20 +150,30 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
     print('Starting analysis...')
     rh_targets = _get_valid_rh_targets(dataframe)
     res = []
+    pool = multi.Pool(CPU_COUNT)
     for rh in tqdm(rh_targets):
         idx = _get_target_idx(dataframe, rh)
-        for len_ in _half_len_gen(dataframe, idx, steps=steps):
-            time, mass = _get_stat_group(dataframe, idx, len_)
-            stats = chi2.chi2(time, mass, sigma, plot=plot)
-            stats.append(rh)
-            stats.append(
-                dataframe.loc[dataframe['Idx'] == idx]['SigRH'].iloc[0])
-            res.append(stats)
+        res += pool.starmap(_multi_mass, zip(repeat(dataframe), repeat(rh),
+                            _half_len_gen(dataframe, idx, steps=steps),
+                            repeat(idx), repeat(steps),
+                            repeat(sigma), repeat(plot)))
+    pool.close()
+    pool.join()
     print('Analysis complete.')
     return pd.DataFrame(
         res, columns=['a', 'sig_a', 'b', 'sig_b',
                       'chi2', 'Q', 'nu', 'RH', 'SigRH']
         )
+
+
+def _multi_mass(dataframe, rh, len_, idx, steps, sigma, plot):
+    """Calculate the Chi2 statistics for a single row of data."""
+    time, mass = _get_stat_group(dataframe, idx, len_)
+    stats = chi2.chi2(time, mass, sigma, plot=plot)
+    stats.append(rh)
+    stats.append(
+        dataframe.loc[dataframe['Idx'] == idx]['SigRH'].iloc[0])
+    return stats
 
 
 # --------------------------------------------------------------------------- #
@@ -293,10 +256,20 @@ def _add_avg_te(dataframe, purge=False):
         If `purge == True` then TC4-TC13 will have been dropped.
 
     """
-    dataframe['Te'] = dataframe.loc[:, TC_LIST].apply(np.mean, axis=1).round(1)
+    pool = multi.Pool(CPU_COUNT)
+    df_stack = np.array_split(dataframe, CPU_COUNT)
+    dataframe['Te'] = pd.concat(pool.map(_multi_te, df_stack))
+    pool.close()
+    pool.join()
     if purge:
         dataframe.drop(columns=TC_LIST, inplace=True)
     return dataframe
+
+
+def _multi_te(dataframe):
+    """Add average temperature to the `DataFrame`."""
+    df_te = dataframe.loc[:, TC_LIST].apply(np.mean, axis=1).round(1)
+    return df_te
 
 
 # --------------------------------------------------------------------------- #
@@ -501,15 +474,31 @@ def _add_rh(
         was dropped.
 
     """
-    dataframe['RH'] = (
-        dataframe.loc[:, param_list].apply(_get_coolprop_rh, axis=1)
+    pool = multi.Pool(CPU_COUNT)
+    df_stack = np.array_split(dataframe, CPU_COUNT)
+    dataframe['RH'] = pd.concat(
+        pool.starmap(_multi_rh, zip(df_stack, repeat(param_list)))
         )
-    dataframe['SigRH'] = (
-        dataframe.loc[:, param_list].apply(_get_coolprop_rh_err, axis=1)
+    dataframe['SigRH'] = pd.concat(
+        pool.starmap(_multi_rh_err, zip(df_stack, repeat(param_list)))
         )
+    pool.close()
+    pool.join()
     if purge:
         dataframe.drop(columns=param_list[2], inplace=True)
     return dataframe
+
+
+def _multi_rh(dataframe, param_list):
+    """Apply `_get_coolprop_rh` to the argument dataframe."""
+    df = dataframe.loc[:, param_list].apply(_get_coolprop_rh, axis=1)
+    return df
+
+
+def _multi_rh_err(dataframe, param_list):
+    """Apply `_get_coolprop_rh_err` to the argument dataframe."""
+    df = dataframe.loc[:, param_list].apply(_get_coolprop_rh_err, axis=1)
+    return df
 
 
 # --------------------------------------------------------------------------- #

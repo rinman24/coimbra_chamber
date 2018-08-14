@@ -311,7 +311,7 @@ BEST_FIT_STATS_DF = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     RH=[15, 6.75, 0.04666666666666666, 0.450000, 0.10, 0.80],
     TestId=[15, 15, 0, 1, 1, 1],
-    Nu=[15, 37785, 1998933.3333333333, 2519.0000, 399, 5399],
+    Nu=[15, 36585, 2049066.666666667, 2439.0000, 199, 5199],
     )
 ).set_index('idx')
 
@@ -1067,7 +1067,7 @@ def test__add_best_fit(results_cnx):
     """Test _add_best_fit."""
     results_cur = results_cnx.cursor()
     # Add best Chi2 results to RHTargets
-    assert sqldb._add_best_fit(results_cur, ANALYSIS_TEST_ID, q_max=0.5)
+    assert sqldb._add_best_fit(results_cur, ANALYSIS_TEST_ID)
 
     # Check accuracy of added data
     for col in BEST_FIT_STATS_DF.columns.values:
@@ -1093,7 +1093,7 @@ def test_add_analysis(results_cnx):
     assert not results_cnx.in_transaction
 
     assert sqldb.add_analysis(
-        results_cnx, ANALYSIS_TEST_ID, steps=100, q_max=0.5)
+        results_cnx, ANALYSIS_TEST_ID, steps=100)
 
     # ------------------------------------------------------------------------
     # Test correct RHTargets input
@@ -1125,7 +1125,7 @@ def test_add_analysis(results_cnx):
     # ------------------------------------------------------------------------
     # Test adding the same analysis again
     assert sqldb.add_analysis(
-        results_cnx, ANALYSIS_TEST_ID, steps=100, q_max=0.5) is None
+        results_cnx, ANALYSIS_TEST_ID, steps=100) is None
 
     # ------------------------------------------------------------------------
     # Check that the database is uneffected

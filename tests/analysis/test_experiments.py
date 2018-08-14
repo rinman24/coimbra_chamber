@@ -15,10 +15,107 @@ TARGET_RH = 0.15
 TARGET_IDX = 12770
 HALF_LEN = 7000
 SIGMA = 4e-8
+PARAM_LIST = ['PressureSmooth', 'TeSmooth', 'DewPointSmooth']
+TC_LIST = ['TC{0}'.format(i) for i in range(4, 14)]
+
+# ----------------------------------------------------------------------------
+# Test _zero_time global variables
+ZERO_TIME_STATS = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    Idx=[20001, 20001e4, 33338333.5, 1e4, 0, 2e4]
+    )
+).set_index('idx')
+
+# ----------------------------------------------------------------------------
+# Test _format_temp global variables
+FORMAT_TEMP_STATS = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    TC4=[20001, 5811389.8000000007, 0.011664499825010125, 290.55496225188745,
+         290.30000000000001, 291.0],
+    TC5=[20001, 5802036.4999999991, 0.0011072256387185673, 290.08732063396826,
+         290.0, 290.10000000000002],
+    TC6=[20001, 5802257.0999999996, 0.00016227763611826785, 290.09835008249587,
+         290.0, 290.10000000000002],
+    TC7=[20001, 5805846.3000000007, 0.0020231846407686763, 290.27780110994456,
+         290.19999999999999, 290.39999999999998],
+    TC8=[20001, 5806176.5, 0.001810625518724122, 290.29431028448579,
+         290.19999999999999, 290.39999999999998],
+    TC9=[20001, 5800010.8000000007, 0.0012011281435933669, 289.98604069796517,
+         289.89999999999998, 290.0],
+    TC10=[20001, 5797574.1000000015, 0.0022981399430012824, 289.8642117894106,
+          289.80000000000001, 289.89999999999998],
+    TC11=[20001, 5799775.1000000006, 0.0019117281135951898, 289.97425628718565,
+          289.89999999999998, 290.0],
+    TC12=[20001, 5796716.9000000013, 0.0016794867756600713, 289.82135393230345,
+          289.80000000000001, 289.89999999999998],
+    TC13=[20001, 5797926.2000000011, 0.0014878223088835407, 289.88181590920459,
+          289.80000000000001, 289.89999999999998]
+    )
+).set_index('idx')
+
+
+# ----------------------------------------------------------------------------
+# Test _format_dew_point global variables
+FORMAT_DP_STATS = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    DewPoint=[20001, 5269690.5000000009, 3.5677552185390735,
+              263.47135143242843, 259.0, 266.39999999999998]
+    )
+).set_index('idx')
+
+# ----------------------------------------------------------------------------
+# Test _format_presssure global variables
+FORMAT_P_STATS = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    Pressure=[20001, 2005196296.0, 1723.9397677566121, 100254.802059897,
+              100078.0, 100358.0]
+    )
+).set_index('idx')
+
+# ----------------------------------------------------------------------------
+# Test _add_avg_te global variables
+AVG_T_STATS = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    Te=[20001, 5801992.4000000004, 0.0014759478526079042, 290.08511574421283,
+        290.0, 290.19999999999999]
+    )
+).set_index('idx')
+
+# ----------------------------------------------------------------------------
+# Test _multi_rh global variables
+RH_STATS = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    RH=[20001, 2803.8464972706283, 0.00051402847579061852, 0.14018531559775152,
+        0.093374396753349437, 0.1784676778434911]
+    )
+).set_index('idx')
+
+# ----------------------------------------------------------------------------
+# Test _multi_rh_err global variables
+SIGRH_STATS = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    SigRH=[20001, 49.954031383018787, 1.3734073708436497e-07,
+           0.0024975766903164234, 0.0017245551439777212, 0.0031181436063756618]
+    )
+).set_index('idx')
+
+# ----------------------------------------------------------------------------
+# Test _add_rh global variables
+RH_STATS_JOIN = RH_STATS.join(SIGRH_STATS)
 
 
 @pytest.fixture(scope='module')
 def df_01():
+    """Fixture to instantiate only one pd.DataFrame object for testing."""
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    filename = '1atm_290K_0duty_44mm_Mass_FanOff_LowRH_Sample.csv'
+    filepath = os.path.join(dir_path, 'csv_test_files', filename)
+    dataframe = pd.read_csv(filepath)
+    return dataframe
+
+
+@pytest.fixture(scope='module')
+def df_01_original():
     """Fixture to instantiate only one pd.DataFrame object for testing."""
     dir_path = os.path.dirname(os.path.realpath(__file__))
     filename = '1atm_290K_0duty_44mm_Mass_FanOff_LowRH_Sample.csv'
@@ -38,10 +135,20 @@ def df_bad():
 
 def test__zero_time(df_01, df_bad):
     """Test _zero_time."""
-    assert df_01.Idx[0] == 8000
+    assert df_01.Idx.data[0] == 8000
+    assert df_01.Idx.data[-1] == 28000
 
     df_01 = expr._zero_time(df_01)
-    assert df_01.Idx[0] == 0
+    for col in ZERO_TIME_STATS:
+        assert df_01[col].count() == ZERO_TIME_STATS.loc['cnt', col]
+        assert df_01[col].sum() == ZERO_TIME_STATS.loc['sum', col]
+        assert df_01[col].var() == ZERO_TIME_STATS.loc['var', col]
+        assert df_01[col].mean() == ZERO_TIME_STATS.loc['avg', col]
+        assert df_01[col].min() == ZERO_TIME_STATS.loc['min', col]
+        assert df_01[col].max() == ZERO_TIME_STATS.loc['max', col]
+
+    assert df_01.Idx.data[0] == 0
+    assert df_01.Idx.data[-1] == 20000
 
     with pytest.raises(AttributeError) as err:
         expr._zero_time(df_bad)
@@ -49,11 +156,19 @@ def test__zero_time(df_01, df_bad):
 
 
 def test__format_temp(df_01, df_bad):
+    """Test _format_temp."""
     assert math.isclose(df_01.TC4[0], 290.799)
     assert math.isclose(df_01.TC7[100], 290.358)
     assert math.isclose(df_01.TC11[8000], 289.975)
 
     df_01 = expr._format_temp(df_01)
+    for col in FORMAT_TEMP_STATS:
+        assert df_01[col].count() == FORMAT_TEMP_STATS.loc['cnt', col]
+        assert df_01[col].sum() == FORMAT_TEMP_STATS.loc['sum', col]
+        assert df_01[col].var() == FORMAT_TEMP_STATS.loc['var', col]
+        assert df_01[col].mean() == FORMAT_TEMP_STATS.loc['avg', col]
+        assert df_01[col].min() == FORMAT_TEMP_STATS.loc['min', col]
+        assert df_01[col].max() == FORMAT_TEMP_STATS.loc['max', col]
 
     assert math.isclose(df_01.TC4[0], round(290.799, 1))
     assert math.isclose(df_01.TC7[100], round(290.358, 1))
@@ -69,11 +184,19 @@ def test__format_temp(df_01, df_bad):
 
 
 def test__format_dew_point(df_01, df_bad):
+    """Test _format_dew_point."""
     assert math.isclose(df_01.DewPoint[0], 259.04)
     assert math.isclose(df_01.DewPoint[100], 259.145)
     assert math.isclose(df_01.DewPoint[8000], 263.562)
 
     df_01 = expr._format_dew_point(df_01)
+    for col in FORMAT_DP_STATS:
+        assert df_01[col].count() == FORMAT_DP_STATS.loc['cnt', col]
+        assert df_01[col].sum() == FORMAT_DP_STATS.loc['sum', col]
+        assert df_01[col].var() == FORMAT_DP_STATS.loc['var', col]
+        assert df_01[col].mean() == FORMAT_DP_STATS.loc['avg', col]
+        assert df_01[col].min() == FORMAT_DP_STATS.loc['min', col]
+        assert df_01[col].max() == FORMAT_DP_STATS.loc['max', col]
 
     assert math.isclose(df_01.DewPoint[0], round(259.04, 1))
     assert math.isclose(df_01.DewPoint[100], round(259.145, 1))
@@ -87,11 +210,19 @@ def test__format_dew_point(df_01, df_bad):
 
 
 def test__format_pressure(df_01, df_bad):
+    """Test _format_pressure."""
     assert math.isclose(df_01.Pressure[0], 100156.841)
     assert math.isclose(df_01.Pressure[100], 100161.21800000001)
     assert math.isclose(df_01.Pressure[8000], 100266.27900000001)
 
     df_01 = expr._format_pressure(df_01)
+    for col in FORMAT_P_STATS:
+        assert df_01[col].count() == FORMAT_P_STATS.loc['cnt', col]
+        assert df_01[col].sum() == FORMAT_P_STATS.loc['sum', col]
+        assert df_01[col].var() == FORMAT_P_STATS.loc['var', col]
+        assert df_01[col].mean() == FORMAT_P_STATS.loc['avg', col]
+        assert df_01[col].min() == FORMAT_P_STATS.loc['min', col]
+        assert df_01[col].max() == FORMAT_P_STATS.loc['max', col]
 
     assert math.isclose(df_01.Pressure[0], round(100156.841, 0))
     assert math.isclose(df_01.Pressure[100], round(100161.21800000001, 0))
@@ -105,10 +236,22 @@ def test__format_pressure(df_01, df_bad):
 
 
 def test__add_avg_te(df_01, df_bad):
+    """Test add_avg_te."""
     assert 'Te' not in set(df_01)
-
+    purged = expr._add_avg_te(df_01.copy(), purge=True)
+    for tc in TC_LIST:
+        assert tc not in set(purged)
+    assert 'Te' in set(purged)
     df_01 = expr._add_avg_te(df_01)
     assert 'Te' in set(df_01)
+
+    for col in AVG_T_STATS:
+        assert df_01[col].count() == AVG_T_STATS.loc['cnt', col]
+        assert df_01[col].sum() == AVG_T_STATS.loc['sum', col]
+        assert df_01[col].var() == AVG_T_STATS.loc['var', col]
+        assert df_01[col].mean() == AVG_T_STATS.loc['avg', col]
+        assert df_01[col].min() == AVG_T_STATS.loc['min', col]
+        assert df_01[col].max() == AVG_T_STATS.loc['max', col]
 
     tc_keys = ['TC{}'.format(i) for i in range(4, 14)]
     mean = np.mean(df_01.loc[0, tc_keys])
@@ -133,8 +276,11 @@ def test__add_avg_te(df_01, df_bad):
 
 
 def test__add_smooth_avg_te(df_01, df_bad):
+    """Test _add_smooth_avg_te."""
     assert 'TeSmooth' not in set(df_01)
-
+    purged = expr._add_smooth_avg_te(df_01.copy(), purge=True)
+    assert 'Te' not in set(purged)
+    assert 'TeSmooth' in set(purged)
     df_01 = expr._add_smooth_avg_te(df_01)
     assert 'TeSmooth' in set(df_01)
 
@@ -153,8 +299,11 @@ def test__add_smooth_avg_te(df_01, df_bad):
 
 
 def test__add_smooth_dew_point(df_01, df_bad):
+    """Test _add_smooth_dew_point."""
     assert 'DewPointSmooth' not in set(df_01)
-
+    purged = expr._add_smooth_dew_point(df_01.copy(), purge=True)
+    assert 'DewPoint' not in set(purged)
+    assert 'DewPointSmooth' in set(purged)
     df_01 = expr._add_smooth_dew_point(df_01)
     assert 'DewPointSmooth' in set(df_01)
 
@@ -174,8 +323,11 @@ def test__add_smooth_dew_point(df_01, df_bad):
 
 
 def test__add_smooth_pressure(df_01, df_bad):
+    """Test _add_smooth_pressure."""
     assert 'PressureSmooth' not in set(df_01)
-
+    purged = expr._add_smooth_pressure(df_01.copy(), purge=True)
+    assert 'Pressure' not in set(purged)
+    assert 'PressureSmooth' in set(purged)
     df_01 = expr._add_smooth_pressure(df_01)
     assert 'PressureSmooth' in set(df_01)
 
@@ -195,30 +347,78 @@ def test__add_smooth_pressure(df_01, df_bad):
     plt.show()
 
 
-def test__add_all_smooth(df_01):
-    # df_01.drop()
-    pass
-
-
-def test__get_rh():
+def test__get_coolprop_rh():
+    """Test _get_rh."""
     rh = expr._get_coolprop_rh([101325, 290, 275])
     assert math.isclose(rh, 0.36377641815012024)
 
 
 def test__get_coolprop_rh_err():
+    """Test _get_coolprop_rh_err."""
     rh = expr._get_coolprop_rh_err([101325, 290, 275])
     assert math.isclose(rh, 0.005239925265924594)
     rh = expr._get_coolprop_rh_err([70000, 290, 273])
     assert math.isclose(rh, 0.005145568640554932)
 
 
-def test__add_rh(df_01):
-    assert 'RH' not in set(df_01)
+def test__multi_rh(df_01):
+    """Test _multi_rh."""
+    rh = expr._multi_rh(df_01, param_list=PARAM_LIST)
+    for col in RH_STATS:
+        assert rh.count() == RH_STATS.loc['cnt', col]
+        assert rh.sum() == RH_STATS.loc['sum', col]
+        assert rh.var() == RH_STATS.loc['var', col]
+        assert rh.mean() == RH_STATS.loc['avg', col]
+        assert rh.min() == RH_STATS.loc['min', col]
+        assert rh.max() == RH_STATS.loc['max', col]
 
+    plt.plot(rh, label='RH')
+
+    plt.legend()
+    plt.xlabel('time/s')
+    plt.ylabel('RH')
+    plt.title('Relative Humidity')
+    plt.show()
+
+
+def test__multi_rh_err(df_01):
+    """Test _multi_rh_err."""
+    rh_err = expr._multi_rh_err(df_01, param_list=PARAM_LIST)
+    for col in SIGRH_STATS:
+        assert rh_err.count() == SIGRH_STATS.loc['cnt', col]
+        assert rh_err.sum() == SIGRH_STATS.loc['sum', col]
+        assert rh_err.var() == SIGRH_STATS.loc['var', col]
+        assert rh_err.mean() == SIGRH_STATS.loc['avg', col]
+        assert rh_err.min() == SIGRH_STATS.loc['min', col]
+        assert rh_err.max() == SIGRH_STATS.loc['max', col]
+
+    plt.plot(rh_err, label='SigRH Function')
+
+    plt.legend()
+    plt.xlabel('time/s')
+    plt.ylabel('SigRH')
+    plt.title('Relative Humidity Error')
+    plt.show()
+
+
+def test__add_rh(df_01):
+    """Test _add_rh."""
+    assert 'RH' not in set(df_01)
+    purged = expr._add_rh(df_01.copy(), purge=True)
+    assert 'DewPointSmooth' not in set(purged)
+    assert 'RH' in set(purged)
     df_01 = expr._add_rh(df_01)
     assert 'RH' in set(df_01)
 
-    plt.plot(df_01.RH, label='RH')
+    for col in RH_STATS_JOIN:
+        assert df_01[col].count() == RH_STATS_JOIN.loc['cnt', col]
+        assert df_01[col].sum() == RH_STATS_JOIN.loc['sum', col]
+        assert df_01[col].var() == RH_STATS_JOIN.loc['var', col]
+        assert df_01[col].mean() == RH_STATS_JOIN.loc['avg', col]
+        assert df_01[col].min() == RH_STATS_JOIN.loc['min', col]
+        assert df_01[col].max() == RH_STATS_JOIN.loc['max', col]
+
+    plt.errorbar(df_01.Idx, df_01.RH, yerr=df_01.SigRH, label='RH')
 
     plt.legend()
     plt.xlabel('time/s')
@@ -228,8 +428,11 @@ def test__add_rh(df_01):
 
 
 def test__get_max_half_len(df_01):
+    """Test _get_max_half_length."""
     max_window = expr._get_max_half_len(df_01, TARGET_IDX)
     assert max_window == (len(df_01)-1) - TARGET_IDX
+    max_limit = expr._get_max_half_len(df_01, TARGET_IDX, max_=10)
+    assert max_limit == 10
 
     fail_list = [0, -1, -2, len(df_01)-1, len(df_01), len(df_01)+1]
 
@@ -244,6 +447,7 @@ def test__get_max_half_len(df_01):
 
 
 def test__get_rh_idx(df_01):
+    """Test _get_rh_idx."""
     idx = expr._get_target_idx(df_01, TARGET_RH)
     assert idx == TARGET_IDX
     rh = df_01.RH[idx]
@@ -261,6 +465,7 @@ def test__get_rh_idx(df_01):
 
 
 def test__get_stat_group(df_01):
+    """Test _get_stat_group."""
     time, mass = expr._get_stat_group(df_01, TARGET_IDX, HALF_LEN)
 
     assert len(time) == 2*HALF_LEN + 1
@@ -281,11 +486,13 @@ def test__get_stat_group(df_01):
 
 
 def test__get_valid_rh_targets(df_01):
+    """Test _get_valid_rh_targets."""
     rh_list = expr._get_valid_rh_targets(df_01)
     assert rh_list == [0.1, 0.15]
 
 
 def test__half_len_gen(df_01):
+    """Test _half_len_gen."""
     half_len_list = list(
         expr._half_len_gen(df_01, TARGET_IDX, steps=1000)
     )
@@ -304,7 +511,13 @@ def test__half_len_gen(df_01):
         )
 
 
-def test__analysis(df_01):
+def test_preprocess(df_01, df_01_original):
+    """Test preprocess."""
+    pd.testing.assert_frame_equal(expr.preprocess(df_01_original), df_01)
+
+
+def test_mass_transfer(df_01):
+    """Test _analysis."""
     df_res = expr.mass_transfer(df_01, sigma=SIGMA, steps=1000, plot=True)
     assert math.isclose(df_res.a[0], 0.09929181759175223)
     assert math.isclose(df_res.sig_a[0], 1.882350488972039e-09)

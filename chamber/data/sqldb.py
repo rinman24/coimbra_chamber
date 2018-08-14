@@ -737,13 +737,9 @@ def _get_temp_info(tdms_obj, tdms_idx, couple_idx):
 
     """
     # ------------------------------------------------------------------------
-    # Compile a regular expression to use when obtaining TC obervations
-    regex = re.compile(r'^(\d){3}.(\d){2}$')
     # Get and format the temperature observation
     temp_info = '{:.2f}'.format(
         tdms_obj.object("Data", "TC{}".format(couple_idx)).data[tdms_idx])
-    if not regex.search(temp_info):
-        return
     return temp_info
 
 
@@ -1078,7 +1074,7 @@ def _add_results(cur, analyzed_df, test_id):
     return True
 
 
-def _add_best_fit(cur, test_id, q_max=0.05):
+def _add_best_fit(cur, test_id, nu_min=100):
     """
     Add the best Chi2 fit to the 'RHTargets' Table.
 
@@ -1092,9 +1088,8 @@ def _add_best_fit(cur, test_id, q_max=0.05):
     test_id : int
         TestID for the MySQL database, which is the primary key for the Test
         table.
-    q_max : float
-        The cutoff value for ABS(Q-0.5) for determining best fit.
-        Defaults to 0.05.
+    nu_min : int
+        The minimum degrees of freedom for an accepted Chi2 fit.
 
     Returns
     -------
@@ -1108,15 +1103,15 @@ def _add_best_fit(cur, test_id, q_max=0.05):
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
     >>> test_id = 1
-    >>> _add_best_fit(cnx, test_id, q_max=0.1)
+    >>> _add_best_fit(cnx, test_id, nu_min=150)
     True
 
     """
-    cur.execute(dml.add_best_fit.format(test_id, q_max))
+    cur.execute(dml.add_best_fit.format(test_id, nu_min))
     return True
 
 
-def add_analysis(cnx, test_id, steps=1, q_max=0.05):
+def add_analysis(cnx, test_id, steps=1, nu_min=100):
     """
     Pull, analyze, and insert analysis results into MySQL database.
 
@@ -1133,9 +1128,8 @@ def add_analysis(cnx, test_id, steps=1, q_max=0.05):
         table.
     steps : int
         The step size for Chi2 analysis. Defaults to 1.
-    q_max : float
-        The cutoff value for ABS(Q-0.5) for determining best fit.
-        Defaults to 0.05.
+    nu_min : float
+        The minimum degrees of freedom for an accepted Chi2 fit.
 
     Returns
     -------
@@ -1148,7 +1142,7 @@ def add_analysis(cnx, test_id, steps=1, q_max=0.05):
 
     >>> cnx = connect('my-schema')
     >>> test_id = 1
-    >>> add_analysis(cnx, test_id)
+    >>> add_analysis(cnx, test_id, steps=2, nu_min=150)
     True
 
     """
@@ -1165,25 +1159,20 @@ def add_analysis(cnx, test_id, steps=1, q_max=0.05):
 
         # --------------------------------------------------------------------
         # RHTargets: call add_rh_targets
-        _add_rh_targets(cur, analyzed_df, test_id)
+        assert _add_rh_targets(cur, analyzed_df, test_id)
         assert cnx.in_transaction
-        cnx.commit()
-        assert not cnx.in_transaction
 
         # --------------------------------------------------------------------
         # Results: call add_results
-        _add_results(cur, analyzed_df, test_id)
+        assert _add_results(cur, analyzed_df, test_id)
+        assert cnx.in_transaction
+
+        assert _add_best_fit(cur, test_id, nu_min=nu_min)
+
         assert cnx.in_transaction
         cnx.commit()
         assert not cnx.in_transaction
-
-        _add_best_fit(cur, test_id, q_max=q_max)
-        assert cnx.in_transaction
-        cnx.commit()
-        assert not cnx.in_transaction
-
         assert cur.close()
-
         return True
     except mysql.connector.Error as err:
         # --------------------------------------------------------------------
