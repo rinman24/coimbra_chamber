@@ -7,6 +7,7 @@ Functions
 - `add_tube_info` -- Add test-independant Tube information.
 - `connect` -- Get a connection and cursor to a MySQL database.
 - `create_tables` -- Create tables in the database.
+- `get_high_low_testids` -- Get Low and High RH TestIds for a p and t setting.
 - `get_test_dict` -- Create `DataFrame` representations of the tests.
 - `get_test_from_set` -- Get a list of TestIds corresponding to setting info.
 - `add_analysis` -- Pull, analyze, and insert analysis results into database.
@@ -933,10 +934,10 @@ def _get_test_dict(cnx, test_id):
 
 
 def get_high_low_testids(cur, p, t):
-    """Get the Low RH and High RH TestIds for a specific t and p setting.
+    """Get the Low and High RH TestIds for a specific p and t setting.
 
-    Get the TestIds that correspond to the Low and High Relative Humiditys as a
-    specified temperature and pressure setting.
+    Get the TestIds that correspond to the Low and High Relative Humiditys at a
+    specified pressure (Pa) and temperature (K) setting.
 
     Parameters
     ----------
@@ -954,6 +955,12 @@ def get_high_low_testids(cur, p, t):
 
     Examples
     --------
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> p = 40000
+    >>> t = 280
+    >>> get_high_low_testids(cur, p, t)
+    [1, 4]
 
     """
     cur.execute(dml.get_high_low_testids.format(t, p))
