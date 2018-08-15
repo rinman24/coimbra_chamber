@@ -937,7 +937,9 @@ def get_high_low_testids(cur, p, t):
     """Get the Low and High RH TestIds for a specific p and t setting.
 
     Get the TestIds that correspond to the Low and High Relative Humiditys at a
-    specified pressure (Pa) and temperature (K) setting.
+    specified pressure (Pa) and temperature (K) setting. Only returns TestIds
+    that have been analyzed by checking the TestIds present in the RHTargets
+    table.
 
     Parameters
     ----------
@@ -951,7 +953,7 @@ def get_high_low_testids(cur, p, t):
     Returns
     -------
     list(int)
-        A list of TestIds with the specified t and p settings.
+        A list of TestIds in RHTargets with the specified t and p settings.
 
     Examples
     --------
