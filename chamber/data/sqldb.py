@@ -932,6 +932,36 @@ def _get_test_dict(cnx, test_id):
     return test_dict
 
 
+def get_high_low_testids(cur, p, t):
+    """Get the Low RH and High RH TestIds for a specific t and p setting.
+
+    Get the TestIds that correspond to the Low and High Relative Humiditys as a
+    specified temperature and pressure setting.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+
+    Returns
+    -------
+    list(int)
+        A list of TestIds with the specified t and p settings.
+
+    Examples
+    --------
+
+    """
+    cur.execute(dml.get_high_low_testids.format(t, p))
+    res = cur.fetchall()
+    tid_list = [tid[0] for tid in res]
+    return tid_list
+
+
 def get_test_from_set(cur, setting_info):
     """
     Get a list of TestIds corresponding to specified setting information.

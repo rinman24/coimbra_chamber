@@ -1140,6 +1140,16 @@ def test_add_analysis(results_cnx):
     results_cur.close()
 
 
+def test_get_high_low_testids(results_cnx):
+    """Test get_high_low_testids."""
+    cur = results_cnx.cursor()
+    assert sqldb.get_high_low_testids(cur, 40000, 280) == [1]
+    cur.execute(dml.add_rh_targets, [4, 0.30, 0.0001])
+    assert sqldb.get_high_low_testids(cur, 40000, 280) == [1, 4]
+    clear_results(cur, True)
+    assert sqldb.get_high_low_testids(cur, 40000, 280) == []
+
+
 def drop_tables(cursor, bol):
     """Drop databese tables."""
     if bol:
