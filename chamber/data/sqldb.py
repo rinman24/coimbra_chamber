@@ -971,6 +971,43 @@ def get_high_low_testids(cur, p, t):
     return tid_list
 
 
+def get_rht_results(cnx, test_id):
+    """
+    Get a `DataFrame` of evaporation rate and RH results for a TestId.
+
+    Use Pandas read_sql functionality and a `MySQLConnection` object to
+    pull the RH, SigRh, B, SigB results stored in the RHTargets and Resutls
+    tables in the MySql database.
+
+    Parameters
+    ----------
+    cnx : mysql.connector.connection.MySQLConnection
+        Connection to MySQL database.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    DataFrame
+        DataFrame with columns ['RH', 'SigRH', 'B', 'SigB']
+
+    Examples
+    --------
+    >>> cnx = connect('my-schema')
+    >>> test_id = 1
+    >>> get_rht_resuts(cnx, test_id)
+        RH     SigRH             B          SigB
+    0   0.10  0.001920 -6.108320e-09  4.862530e-11
+    1   0.15  0.002802 -5.184070e-09  1.725580e-11
+    2   0.20  0.003628 -4.707150e-09  3.329170e-12
+    3   0.25  0.004452 -4.396130e-09  2.163040e-12
+
+    """
+    res_df = pd.read_sql(dml.get_rhtargets_results.format(test_id), con=cnx)
+    return res_df
+
+
 def get_test_from_set(cur, setting_info):
     """
     Get a list of TestIds corresponding to specified setting information.

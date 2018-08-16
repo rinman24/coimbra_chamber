@@ -184,3 +184,8 @@ get_high_low_testids = ('SELECT TestId FROM Test Inner Join Setting ON '
                         'Test.SettingId=Setting.SettingId WHERE '
                         'Setting.Temperature={0} AND Setting.Pressure={1} AND '
                         'TestId IN (SELECT TestId FROM RHTargets)')
+
+get_rhtargets_results = ('SELECT RHT.RH, SigRH, B, SigB FROM RHTargets AS RHT '
+                         'INNER JOIN Results AS Res ON RHT.RH=Res.RH AND '
+                         'RHT.TestId=Res.TestId AND RHT.Nu=Res.Nu WHERE '
+                         'RHT.TestId={}')
