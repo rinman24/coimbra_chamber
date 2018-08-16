@@ -8,6 +8,7 @@ Functions
 - `connect` -- Get a connection and cursor to a MySQL database.
 - `create_tables` -- Create tables in the database.
 - `get_high_low_testids` -- Get Low and High RH TestIds for a p and t setting.
+- `get_rht_results` Get `DataFrame` of evap reate and RH results for a TestId.
 - `get_test_dict` -- Create `DataFrame` representations of the tests.
 - `get_test_from_set` -- Get a list of TestIds corresponding to setting info.
 - `add_analysis` -- Pull, analyze, and insert analysis results into database.
