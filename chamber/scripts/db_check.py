@@ -22,7 +22,8 @@ PT_LIST = [(275, 30000), (275, 50000), (275, 70000), (275, 90000),
 
 
 def _get_setting_df(cnx):
-    """Get dataframe of settings if MySQL database.
+    """
+    Get dataframe of settings if MySQL database.
 
     Use Pandas read_sql function to read a MySQL querry and return a
     `DataFrame` of settings information in the MySQL database.
@@ -54,7 +55,8 @@ def _get_setting_df(cnx):
 
 
 def _get_analysis_tid_df(cnx):
-    """Get a dataframe of TestIds that have been analyzed.
+    """
+    Get a dataframe of TestIds that have been analyzed.
 
     Use Pandas read_sql function to read a MySQL querry and return a
     `DataFrame` of TestIds that have been analyzed.
@@ -85,7 +87,8 @@ def _get_analysis_tid_df(cnx):
 
 
 def exp_plot(cnx):
-    """Plot the P vs. T settings for the tests in the MySQL database.
+    """
+    Plot the P vs. T settings for the tests in the MySQL database.
 
     Plot the Pressure vs. Temperature settings for the tests currently in the
     MySQL database. Also provides visual feedback denoting which tests are
