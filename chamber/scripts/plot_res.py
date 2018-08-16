@@ -81,11 +81,17 @@ def plot_evap(cnx, res_dict, p, t):
 
 
 if __name__ == '__main__':
+    print('Starting results plotting script...')
     format_plot()
     cnx = sqldb.connect('chamber')
     cur = cnx.cursor()
-    p = input('Specify a pressure setting in Pa: ')
-    t = input('Specify a temperature setting in K: ')
-    tid_list = get_tid_list(cur, p, t)
-    res_dict = get_res_dict(cnx, tid_list)
-    plot_evap(cnx, res_dict, p, t)
+    plot = True
+    while plot is True:
+        p = input('Specify a pressure setting in Pa: ')
+        t = input('Specify a temperature setting in K: ')
+        tid_list = get_tid_list(cur, p, t)
+        res_dict = get_res_dict(cnx, tid_list)
+        plot_evap(cnx, res_dict, p, t)
+        if input('Plot another setting? [y/n]') != 'y':
+            plot = False
+    print('End.')
