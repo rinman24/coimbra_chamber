@@ -38,19 +38,19 @@ def format_plot():
     rcParams['errorbar.capsize'] = 2
 
 
-def get_tid_list(cur, p, t):
+def _get_tid_list(cur, p, t):
     """Prompt the user to get p and t setting."""
     tid_list = sqldb.get_high_low_testids(cur, p, t)
     return tid_list
 
 
-def check_reservoir(cur, tid):
+def _check_reservoir(cur, tid):
     """Check if the reservoir was open for a TestId."""
     cur.execute(dml.get_reservoir.format(tid))
     return cur.fetchall()[0][0]
 
 
-def get_res_dict(cnx, tid_list):
+def _get_res_dict(cnx, tid_list):
     """Get a `dict` of result where each TestId is a key."""
     res_dict = dict()
     for tid in tid_list:
@@ -58,11 +58,11 @@ def get_res_dict(cnx, tid_list):
     return res_dict
 
 
-def plot_evap(cnx, res_dict, p, t):
+def _plot_evap(cnx, res_dict, p, t):
     """Plot the evaporation rate as a function of RH."""
     cur = cnx.cursor()
     for tid in res_dict.keys():
-        rh_val = check_reservoir(cur, tid)
+        rh_val = _check_reservoir(cur, tid)
         res_df = res_dict[tid]
         rh = res_df['RH']
         sig_rh = res_df['SigRH']
@@ -158,9 +158,9 @@ if __name__ == '__main__':
         _db_status_plot(cnx)
         p = input('Specify a pressure setting in Pa: ')
         t = input('Specify a temperature setting in K: ')
-        tid_list = get_tid_list(cur, p, t)
-        res_dict = get_res_dict(cnx, tid_list)
-        plot_evap(cnx, res_dict, p, t)
+        tid_list = _get_tid_list(cur, p, t)
+        res_dict = _get_res_dict(cnx, tid_list)
+        _plot_evap(cnx, res_dict, p, t)
         if input('Plot another setting? [y/n]') != 'y':
             plot = False
     print('End.')
