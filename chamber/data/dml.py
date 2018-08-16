@@ -189,3 +189,6 @@ get_rhtargets_results = ('SELECT RHT.RH, SigRH, B, SigB FROM RHTargets AS RHT '
                          'INNER JOIN Results AS Res ON RHT.RH=Res.RH AND '
                          'RHT.TestId=Res.TestId AND RHT.Nu=Res.Nu WHERE '
                          'RHT.TestId={}')
+
+get_reservoir = ('SELECT Reservoir FROM Setting INNER JOIN Test ON '
+                 'Test.SettingId=Setting.SettingId WHERE TestId={}')
