@@ -268,7 +268,7 @@ FALSE_SETTING = dict(
 
 # ----------------------------------------------------------------------------
 # Test `_add_rh_targets` global variables
-RH_TARGET_LIST = [Decimal('{:.2f}'.format(rh/100)) for rh in range(10, 85, 5)]
+RH_TARGET_LIST = [Decimal('{:g}'.format(rh/100)) for rh in range(10, 85, 5)]
 RH_ERR_LIST = [0.00192007,  0.0028022,  0.00362771,  0.00445247,  0.00527192,
                0.00607349,  0.00682977,  0.00761089,  0.00840709,  0.00913833,
                0.00894471,  0.00937274,  0.00998618,  0.0106339,  0.0112474]
@@ -317,6 +317,17 @@ BEST_FIT_STATS_DF = pd.DataFrame(dict(
 
 # ----------------------------------------------------------------------------
 # `test_tdms_obj` fixture global variables
+EVAP_DF = pd.DataFrame(dict(
+  RH=[float(rh) for rh in RH_TARGET_LIST],
+  SigRH=RH_ERR_LIST,
+  B=[-6.10832e-9, -5.18407e-9, -4.70715e-9, -3.69006e-9, -4.39613e-9,
+     -4.15584e-9, -3.69006e-9, -3.45441e-9, -3.17164e-9, -2.85822e-9,
+     -2.58906e-9, -2.29717e-9, -1.99432e-9, -1.71475e-9, -1.44389e-9],
+  SigB=[4.86253e-11, 1.72558e-11, 3.32917e-12, 2.64237e-12, 2.16304e-12,
+        1.81293e-12, 1.54803e-12, 1.3419e-12, 1.17778e-12, 9.34719e-13,
+        7.65107e-13, 6.41233e-13, 6.41233e-13, 3.91801e-13, 3.6942e-13]
+  )
+)[['RH', 'SigRH', 'B', 'SigB']]
 CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
                                                'data_test_files',
                                                'test_01.tdms'),
@@ -332,6 +343,9 @@ CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
                                                'tdms_test_folder',
                                                'tdms_test_folder_full',
                                                'test_04.tdms')]
+
+# ----------------------------------------------------------------------------
+# `test_get_rht_results` global variables
 
 
 @pytest.fixture(scope='module')
@@ -1080,6 +1094,18 @@ def test__add_best_fit(results_cnx):
     results_cur.close()
 
 
+def test_get_high_low_testids(results_cnx):
+    """Test get_high_low_testids."""
+    results_cur = results_cnx.cursor()
+    clear_results(results_cur, True)
+    results_cur.execute(dml.add_rh_targets, [1, 0.35, 0.0002])
+    assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1]
+    results_cur.execute(dml.add_rh_targets, [4, 0.30, 0.0001])
+    assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1, 4]
+    clear_results(results_cur, True)
+    assert sqldb.get_high_low_testids(results_cur, 40000, 280) == []
+
+
 def test_add_analysis(results_cnx):
     """
     Test add_analysis.
@@ -1138,6 +1164,13 @@ def test_add_analysis(results_cnx):
             val = RESULTS_STATS_DF.index.values[idx]
             assert isclose(res[idx], RESULTS_STATS_DF.loc[val, col])
     results_cur.close()
+
+
+def test_get_rht_results(results_cnx):
+    """Test get_rht_results."""
+    res_df = sqldb.get_rht_results(results_cnx, 1)
+    assert pd.testing.assert_frame_equal(
+      res_df, EVAP_DF,  check_dtype=False) is None
 
 
 def drop_tables(cursor, bol):

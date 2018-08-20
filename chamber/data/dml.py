@@ -52,7 +52,8 @@ add_tube = ("INSERT INTO Tube "
             "(%(DiameterIn)s, %(DiameterOut)s, %(Length)s,"
             " %(Material)s, %(Mass)s)")
 
-add_rh_targets = "INSERT INTO RHTargets (TestId, RH, SigRH) VALUES (%s, %s, %s)"
+add_rh_targets = ("INSERT INTO RHTargets (TestId, RH, SigRH) VALUES "
+                  "(%s, %s, %s)")
 
 add_results = ("INSERT INTO Results"
                "  (TestId, RH, A, SigA, B, SigB, Chi2, Q, Nu)"
@@ -178,3 +179,13 @@ settings_df = ('SELECT Pressure, Temperature, Reservoir, TestId FROM Setting '
                'INNER JOIN Test ON Test.SettingId=Setting.SettingId')
 
 analysis_tid = 'SELECT DISTINCT TestId FROM RHTargets'
+
+get_high_low_testids = ('SELECT TestId FROM Test Inner Join Setting ON '
+                        'Test.SettingId=Setting.SettingId WHERE '
+                        'Setting.Temperature={0} AND Setting.Pressure={1} AND '
+                        'TestId IN (SELECT TestId FROM RHTargets)')
+
+get_rhtargets_results = ('SELECT RHT.RH, SigRH, B, SigB FROM RHTargets AS RHT '
+                         'INNER JOIN Results AS Res ON RHT.RH=Res.RH AND '
+                         'RHT.TestId=Res.TestId AND RHT.Nu=Res.Nu WHERE '
+                         'RHT.TestId={}')

@@ -7,6 +7,8 @@ Functions
 - `add_tube_info` -- Add test-independant Tube information.
 - `connect` -- Get a connection and cursor to a MySQL database.
 - `create_tables` -- Create tables in the database.
+- `get_high_low_testids` -- Get Low and High RH TestIds for a p and t setting.
+- `get_rht_results` Get `DataFrame` of evap reate and RH results for a TestId.
 - `get_test_dict` -- Create `DataFrame` representations of the tests.
 - `get_test_from_set` -- Get a list of TestIds corresponding to setting info.
 - `add_analysis` -- Pull, analyze, and insert analysis results into database.
@@ -930,6 +932,81 @@ def _get_test_dict(cnx, test_id):
     # Make dictionary
     test_dict = {'info': info_df, 'data': data_df}
     return test_dict
+
+
+def get_high_low_testids(cur, p, t):
+    """Get the Low and High RH TestIds for a specific p and t setting.
+
+    Get the TestIds that correspond to the Low and High Relative Humiditys at a
+    specified pressure (Pa) and temperature (K) setting. Only returns TestIds
+    that have been analyzed by checking the TestIds present in the RHTargets
+    table.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    p : int or float
+        Pressure in Pa.
+    t : int or float
+        Dry bulb temperature in K.
+
+    Returns
+    -------
+    list(int)
+        A list of TestIds in RHTargets with the specified t and p settings.
+
+    Examples
+    --------
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> p = 40000
+    >>> t = 280
+    >>> get_high_low_testids(cur, p, t)
+    [1, 4]
+
+    """
+    cur.execute(dml.get_high_low_testids.format(t, p))
+    res = cur.fetchall()
+    tid_list = [tid[0] for tid in res]
+    return tid_list
+
+
+def get_rht_results(cnx, test_id):
+    """
+    Get a `DataFrame` of evaporation rate and RH results for a TestId.
+
+    Use Pandas read_sql functionality and a `MySQLConnection` object to
+    pull the RH, SigRh, B, SigB results stored in the RHTargets and Resutls
+    tables in the MySql database.
+
+    Parameters
+    ----------
+    cnx : mysql.connector.connection.MySQLConnection
+        Connection to MySQL database.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    DataFrame
+        DataFrame with columns ['RH', 'SigRH', 'B', 'SigB']
+
+    Examples
+    --------
+    >>> cnx = connect('my-schema')
+    >>> test_id = 1
+    >>> get_rht_resuts(cnx, test_id)
+        RH     SigRH             B          SigB
+    0   0.10  0.001920 -6.108320e-09  4.862530e-11
+    1   0.15  0.002802 -5.184070e-09  1.725580e-11
+    2   0.20  0.003628 -4.707150e-09  3.329170e-12
+    3   0.25  0.004452 -4.396130e-09  2.163040e-12
+
+    """
+    res_df = pd.read_sql(dml.get_rhtargets_results.format(test_id), con=cnx)
+    return res_df
 
 
 def get_test_from_set(cur, setting_info):
