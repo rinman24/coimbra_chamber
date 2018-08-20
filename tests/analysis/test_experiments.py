@@ -6,6 +6,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pickle as pkl
 import pytest
 from scipy import stats
 
@@ -102,6 +103,13 @@ SIGRH_STATS = pd.DataFrame(dict(
 # ----------------------------------------------------------------------------
 # Test _add_rh global variables
 RH_STATS_JOIN = RH_STATS.join(SIGRH_STATS)
+
+# ----------------------------------------------------------------------------
+# Test best fit analysis global variables
+ANALYSIS_DF = pkl.load(open(os.path.join(
+    os.getcwd(), 'tests', 'data_test_files', 'analysis_df'), 'rb'))
+RH_SET_DF = ANALYSIS_DF[ANALYSIS_DF['RH'] == 0.3].reset_index()
+Q_IDX = 8
 
 
 @pytest.fixture(scope='module')
@@ -364,13 +372,12 @@ def test__get_coolprop_rh_err():
 def test__multi_rh(df_01):
     """Test _multi_rh."""
     rh = expr._multi_rh(df_01, param_list=PARAM_LIST)
-    for col in RH_STATS:
-        assert rh.count() == RH_STATS.loc['cnt', col]
-        assert rh.sum() == RH_STATS.loc['sum', col]
-        assert rh.var() == RH_STATS.loc['var', col]
-        assert rh.mean() == RH_STATS.loc['avg', col]
-        assert rh.min() == RH_STATS.loc['min', col]
-        assert rh.max() == RH_STATS.loc['max', col]
+    assert rh.count() == RH_STATS.loc['cnt', 'RH']
+    assert rh.sum() == RH_STATS.loc['sum', 'RH']
+    assert rh.var() == RH_STATS.loc['var', 'RH']
+    assert rh.mean() == RH_STATS.loc['avg', 'RH']
+    assert rh.min() == RH_STATS.loc['min', 'RH']
+    assert rh.max() == RH_STATS.loc['max', 'RH']
 
     plt.plot(rh, label='RH')
 
@@ -384,13 +391,12 @@ def test__multi_rh(df_01):
 def test__multi_rh_err(df_01):
     """Test _multi_rh_err."""
     rh_err = expr._multi_rh_err(df_01, param_list=PARAM_LIST)
-    for col in SIGRH_STATS:
-        assert rh_err.count() == SIGRH_STATS.loc['cnt', col]
-        assert rh_err.sum() == SIGRH_STATS.loc['sum', col]
-        assert rh_err.var() == SIGRH_STATS.loc['var', col]
-        assert rh_err.mean() == SIGRH_STATS.loc['avg', col]
-        assert rh_err.min() == SIGRH_STATS.loc['min', col]
-        assert rh_err.max() == SIGRH_STATS.loc['max', col]
+    assert rh_err.count() == SIGRH_STATS.loc['cnt', 'SigRH']
+    assert rh_err.sum() == SIGRH_STATS.loc['sum', 'SigRH']
+    assert rh_err.var() == SIGRH_STATS.loc['var', 'SigRH']
+    assert rh_err.mean() == SIGRH_STATS.loc['avg', 'SigRH']
+    assert rh_err.min() == SIGRH_STATS.loc['min', 'SigRH']
+    assert rh_err.max() == SIGRH_STATS.loc['max', 'SigRH']
 
     plt.plot(rh_err, label='SigRH Function')
 
@@ -590,3 +596,16 @@ def test_mass_transfer(df_01):
     assert math.isclose(df_res.Q[7], 0)
     assert math.isclose(df_res.nu[7], 13999)
     assert math.isclose(df_res.RH[7], 0.15)
+
+
+def test__get_q_idx():
+    """Test _get_q_idx."""
+    q_idx = expr._get_q_idx(RH_SET_DF)
+    assert q_idx == Q_IDX
+
+
+def test__get_df_row():
+    """Test _get_df_row."""
+    df_row = expr._get_df_row(RH_SET_DF, Q_IDX)
+    rh_row = RH_SET_DF[RH_SET_DF.index == Q_IDX]
+    assert pd.testing.assert_frame_equal(df_row, rh_row) is None

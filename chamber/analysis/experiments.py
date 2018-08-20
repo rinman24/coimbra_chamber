@@ -695,3 +695,77 @@ def _half_len_gen(dataframe, target_idx, steps=100):
     while half_len <= max_half_len:
         yield half_len
         half_len += steps
+
+
+def _get_q_idx(res_df):
+    """
+    Get the index of the last occurence of Q >= 0.49 in the `DataFrame`.
+
+    Step through the 'Results' data backwards and select the index of the first
+    occurence of Q >= 0.49. This uses the assumption that a Chi2 fit is
+    appropreate for the data and that the Q values have dropped from 1, through
+    0.5 to 0.
+
+    Parameters
+    ----------
+    res_df: DataFrame
+        DataFrame of the 'Results' table from the MySQL database.
+        All that is needed is the 'Q' column.
+
+    Returns
+    -------
+    int or None
+        The index of the first occurence of Q >= 0.49 or None if this condition
+        is never satisfied.
+
+    Examples
+    --------
+    >>> res_df = DataFrame('Results Table')
+    >>> _get_q_idx(res_df)
+    7
+
+    """
+    q = 0
+    for i in range(len(res_df)-1, -1, -1):
+        print(i)
+        if q < res_df.iloc[i].Q:
+            q = res_df.iloc[i].Q
+        if q >= 0.49:
+            return i
+
+
+def _get_df_row(df, idx):
+    """
+    Get the `DataFrame` row with the argument index value.
+
+    Get the row of data from a `DataFrame` corresponding to the argument index.
+
+    Parameters
+    ----------
+    df: DataFrame
+        `DataFrame` object.
+    idx: int
+        Row index of data to return.
+
+    Returns
+    -------
+    DataFrame
+        The one row `DataFrame` with the specified index.
+
+    Examples
+    --------
+    >>> df_dict = dict(A=[0, 1, 2, 3, 4],
+                       B=[a, b, c, d, e])
+    >>> df = pd.DataFrame(df_dict)
+    >>> idx = 2
+    >>> _get_df_row(df, idx)
+        A    B
+    2   2    c
+    >>> idx = 4
+    >>> _ get _df_row(df, idx)
+        A    B
+    4   4    e
+
+    """
+    df_row = df[df.index == idx]
+    return df_row

@@ -1151,40 +1151,86 @@ def _add_results(cur, analyzed_df, test_id):
     return True
 
 
-def _add_best_fit(cur, test_id, nu_min=100):
+def _get_res_df(cnx, test_id):
     """
-    Add the best Chi2 fit to the 'RHTargets' Table.
+    Get a `DataFrame` of the Results table.
 
-    Use a MySQL Querry to update the 'RHTargets' Table and add the Chi2 results
-    with the lowest error and Q ~ 0.5.
+    Use Pandas read_sql functionality and a `MySQLConnection` object to execute
+    a querry which returns a representation of the 'Results' table in the MySQL
+    database.
 
     Parameters
     ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
+    cnx : mysql.connector.connection.MySQLConnection
+        Connection to MySQL database.
     test_id : int
         TestID for the MySQL database, which is the primary key for the Test
         table.
-    nu_min : int
-        The minimum degrees of freedom for an accepted Chi2 fit.
 
     Returns
     -------
-    `True` or `None`
-        `True` if sucessful, else `None`.
+    DataFrame
+        `DataFrame` containing the column data stored in the 'Results' table
+        in the MySQL database.
 
     Examples
     --------
-    Add bestfit results for an existing TestId.
-
     >>> cnx = connect('my-schema')
-    >>> cur = cnx.cursor()
     >>> test_id = 1
-    >>> _add_best_fit(cnx, test_id, nu_min=150)
-    True
+    >>> _get_res_df(cnx, test_id)
+    ..todo: Add output.
 
     """
-    cur.execute(dml.add_best_fit.format(test_id, nu_min))
+    res_df = pd.read_sql(dml.get_res_df.format(test_id), con=cnx)
+    return res_df
+
+
+def _add_best_fit(cnx, test_id):
+    """
+    Add the .Nu' value of the best Chi2 fit to the 'RHTargets' Table.
+
+    Update the RHTargets table by using a 'MySQLConnection.cursor' object
+    to insert the degrees of freeom, 'Nu' corresponding to the most appropreate
+    Chi2 linear fit for each Relative Humidity, 'RH'.
+
+    Parameters
+    ----------
+    cnx : mysql.connector.connection.MySQLConnection
+        Connection to MySQL database.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    True or None
+        `True` if sucessful, `None` if not.
+
+    Examples
+    --------
+    Add best fit data for Testid 4.
+
+    >>> cnx = connect('my-schema')
+    >>> test_id = 4
+    True
+
+    Try adding best fit data for a invalid TestId.
+    >>> cnx = connect('my-schema')
+    >>> test_id = 4
+    None
+    ..todo: Check `None` result.
+
+    """
+    cur = cnx.cursor()
+    res_df = _get_res_df(cnx, test_id)
+    for rh in res_df.RH.unique():
+        rh_set_df = res_df[res_df['RH'] == rh].reset_index()
+        idx = experiments._get_q_idx(rh_set_df)
+        if idx is not False:
+            print(rh)
+            rh_row = experiments._get_df_row(rh_set_df, idx)
+            cur.execute(dml.update_rh_targets.format(
+                rh_row.TestId.iloc[0], rh_row.RH.iloc[0], rh_row.Nu.iloc[0]))
     return True
 
 
@@ -1244,7 +1290,7 @@ def add_analysis(cnx, test_id, steps=1, nu_min=100):
         assert _add_results(cur, analyzed_df, test_id)
         assert cnx.in_transaction
 
-        assert _add_best_fit(cur, test_id, nu_min=nu_min)
+        assert _add_best_fit(cnx, test_id)
 
         assert cnx.in_transaction
         cnx.commit()
