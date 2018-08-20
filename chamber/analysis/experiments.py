@@ -727,7 +727,6 @@ def _get_q_idx(res_df):
     """
     q = 0
     for i in range(len(res_df)-1, -1, -1):
-        print(i)
         if q < res_df.iloc[i].Q:
             q = res_df.iloc[i].Q
         if q >= 0.49:
