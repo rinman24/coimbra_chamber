@@ -79,7 +79,7 @@ def _gen_plot(cnx, res_dict, p, t):
     plt.title(r"$\dot m$'' vs. RH at {0} kPa {1} K".format(int(p)//1000, t))
     plt.legend()
     plt.xlabel('RH')
-    plt.ylabel(r"$\dot m''$")
+    plt.ylabel(r"$\dot m''[kg/m^2s]$")
     plt.grid()
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     plt.show()
@@ -124,7 +124,7 @@ def _db_status_plot(cnx):
     tid_df = db_check._get_analysis_tid_df(cnx)
     label_list = []
     for tid in sdf.TestId:
-        if tid in sdf[sdf.TestId.isin(tid_df.TestId)].TestId.data:
+        if tid in sdf[sdf.TestId.isin(tid_df.TestId)].TestId.values:
             plt.scatter(
                 sdf.loc[(sdf['TestId'] == tid) & (sdf['Reservoir'] == 1),
                         'Temperature'],
@@ -168,7 +168,7 @@ if __name__ == '__main__':
     plot = True
     while plot is True:
         _db_status_plot(cnx)
-        p = input('Specify a pressure setting in Pa, "a" if all: ')
+        p = input('Specify a pressure setting in kPa, "a" if all: ')
         t = input('Specify a temperature setting in K, "a" if all: ')
         if p == 'a' or t == 'a':
             cur.execute(ALL_P_T)
@@ -176,7 +176,7 @@ if __name__ == '__main__':
             for p_t in p_t_list:
                 _plot_evap(cnx, p_t[0], p_t[1])
         else:
-            _plot_evap(cnx, p, t)
+            _plot_evap(cnx, int(p)*1000, t)
         if input('Plot another setting? [y/n]') != 'y':
             plot = False
     print('End.')
