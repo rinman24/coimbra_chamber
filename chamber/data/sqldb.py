@@ -1217,18 +1217,15 @@ def _add_best_fit(cnx, test_id):
     Try adding best fit data for a invalid TestId.
     >>> cnx = connect('my-schema')
     >>> test_id = 4
-    None
-    ..todo: Check `None` result.
+    True
 
     """
     cur = cnx.cursor()
     res_df = _get_res_df(cnx, test_id)
     for rh in res_df.RH.unique():
         rh_set_df = res_df[res_df['RH'] == rh].reset_index()
-        idx = experiments._get_q_idx(rh_set_df)
-        if idx is not False:
-            print(rh)
-            rh_row = experiments._get_df_row(rh_set_df, idx)
+        rh_row = experiments._get_df_row(rh_set_df)
+        if rh_row is not None:
             cur.execute(dml.update_rh_targets.format(
                 rh_row.TestId.iloc[0], rh_row.RH.iloc[0], rh_row.Nu.iloc[0]))
     return True
