@@ -1214,11 +1214,6 @@ def _add_best_fit(cnx, test_id):
     >>> test_id = 4
     True
 
-    Try adding best fit data for a invalid TestId.
-    >>> cnx = connect('my-schema')
-    >>> test_id = 4
-    True
-
     """
     cur = cnx.cursor()
     res_df = _get_res_df(cnx, test_id)
