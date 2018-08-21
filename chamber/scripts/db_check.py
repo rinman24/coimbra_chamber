@@ -122,7 +122,7 @@ def exp_plot(cnx):
     tid_df = _get_analysis_tid_df(cnx)
     label_list = []
     for tid in sdf.TestId:
-        if tid in sdf[sdf.TestId.isin(tid_df.TestId)].TestId.data:
+        if tid in sdf[sdf.TestId.isin(tid_df.TestId)].TestId.values:
             plt.scatter(
                 sdf.loc[(sdf['TestId'] == tid) & (sdf['Reservoir'] == 1),
                         'Temperature'],
@@ -158,7 +158,7 @@ def exp_plot(cnx):
                 label_list = label_list + ['HighRH No A', 'LowRH No A']
     print(
         'No Analysis TestId:',
-        list(sdf[~sdf.TestId.isin(tid_df.TestId)].TestId))
+        sdf[~sdf.TestId.isin(tid_df.TestId)].TestId.values)
     plt.xlim(273, 312)
     plt.ylim(20000, 102000)
     plt.xlabel('T/K')
