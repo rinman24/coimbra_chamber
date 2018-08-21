@@ -1214,11 +1214,6 @@ def _add_best_fit(cnx, test_id):
     >>> test_id = 4
     True
 
-    Try adding best fit data for a invalid TestId.
-    >>> cnx = connect('my-schema')
-    >>> test_id = 4
-    True
-
     """
     cur = cnx.cursor()
     res_df = _get_res_df(cnx, test_id)
@@ -1231,7 +1226,7 @@ def _add_best_fit(cnx, test_id):
     return True
 
 
-def add_analysis(cnx, test_id, steps=1, nu_min=100):
+def add_analysis(cnx, test_id, steps=1):
     """
     Pull, analyze, and insert analysis results into MySQL database.
 
@@ -1248,8 +1243,6 @@ def add_analysis(cnx, test_id, steps=1, nu_min=100):
         table.
     steps : int
         The step size for Chi2 analysis. Defaults to 1.
-    nu_min : float
-        The minimum degrees of freedom for an accepted Chi2 fit.
 
     Returns
     -------
