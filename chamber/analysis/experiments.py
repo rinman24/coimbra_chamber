@@ -695,3 +695,43 @@ def _half_len_gen(dataframe, target_idx, steps=100):
     while half_len <= max_half_len:
         yield half_len
         half_len += steps
+
+
+def _get_df_row(res_df):
+    """
+    Get the `DataFrame` row with the index of the last occurence of Q >= 0.49.
+
+    Get the row of data from a `DataFrame` corresponding to the index found by
+    stepping through the 'Results' data backwards and selecting the index of
+    the first occurence  of Q >= 0.49 from the reversed data. This is assuming
+    that a Chi2 fit is appropreate for the data and that the Q values drop fro
+    1, through 0.5, to 0.
+
+    Parameters
+    ----------
+    res_df: DataFrame
+        `DataFrame` object with a 'Q' value column.
+
+    Returns
+    -------
+    DataFrame
+        The one row `DataFrame` with the specified index.
+
+    Examples
+    --------
+    >>> df_dict = dict(A=[0, 1, 2, 3, 4],
+                       B=[a, b, c, d, e]
+                       Q=[1, 0.6, 0.51, 0.1, 0])
+    >>> df = pd.DataFrame(df_dict)
+    >>> _get_df_row(df)
+        A    B    Q
+    3   3    d    0.51
+
+    """
+    q = 0
+    for i in range(len(res_df)-1, -1, -1):
+        if q < res_df.iloc[i].Q:
+            q = res_df.iloc[i].Q
+        if q >= 0.49:
+            df_row = res_df[res_df.index == i]
+            return df_row

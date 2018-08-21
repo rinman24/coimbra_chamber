@@ -306,12 +306,33 @@ RESULTS_STATS_DF = pd.DataFrame(dict(
 ).set_index('idx')
 
 # ----------------------------------------------------------------------------
+# Test `_get_res_df` global variables
+RES_DF_STATS = pd.DataFrame(dict(
+    idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
+    RH=[1099, 563.0, 0.030591227163, 0.512283894449, 0.1, 0.8],
+    TestId=[1099, 1099, 0, 1, 1, 1],
+    A=[1099, 108.654349, 2.90428639548e-10, 0.0988665595996, 0.0988246,
+       0.0988892],
+    SigA=[1099, 2.8483974018e-05, 1.68066219103e-14, 2.59180837288e-08,
+          5.7542e-10, 2.3169e-06],
+    B=[1099, -3.39146005e-06, 1.01907242991e-18, -3.08595090992e-09,
+       -6.39038e-09, -1.41964e-09],
+    SigB=[1099, 1.7167221368e-09, 3.64306158289e-23, 1.5620765576e-12,
+          4.89861e-14, 4.86253e-11],
+    Chi2=[1099, 3379617400.1, 4.278336427e+13, 3075175.06833, 97.2522,
+          54769200.0],
+    Q=[1099, 177.95, 0.13379257646, 0.161919927207, 0, 1],
+    Nu=[1099, 9691301, 32457551.0441, 8818.29026388, 199, 19999]
+    )
+).set_index('idx')
+
+# ----------------------------------------------------------------------------
 # Test `_add_best_fit` global variables
 BEST_FIT_STATS_DF = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     RH=[15, 6.75, 0.04666666666666666, 0.450000, 0.10, 0.80],
     TestId=[15, 15, 0, 1, 1, 1],
-    Nu=[15, 36585, 2049066.666666667, 2439.0000, 199, 5199],
+    Nu=[15, 35585, 2111288.888888889, 2372.3333, 199, 5199],
     )
 ).set_index('idx')
 
@@ -1077,11 +1098,24 @@ def test__add_results(results_cnx):
     results_cur.close()
 
 
+def test__get_res_df(results_cnx):
+    """Test _get_res_df."""
+    res_df = sqldb._get_res_df(results_cnx, ANALYSIS_TEST_ID)
+    for col in RES_DF_STATS.columns.values:
+        # Have to lower tolerance due to rounding
+        assert isclose(res_df[col].count(), RES_DF_STATS.loc['cnt', col])
+        assert isclose(res_df[col].sum(), RES_DF_STATS.loc['sum', col])
+        assert isclose(res_df[col].var(), RES_DF_STATS.loc['var', col])
+        assert isclose(res_df[col].mean(), RES_DF_STATS.loc['avg', col])
+        assert isclose(res_df[col].min(), RES_DF_STATS.loc['min', col])
+        assert isclose(res_df[col].max(), RES_DF_STATS.loc['max', col])
+
+
 def test__add_best_fit(results_cnx):
     """Test _add_best_fit."""
     results_cur = results_cnx.cursor()
     # Add best Chi2 results to RHTargets
-    assert sqldb._add_best_fit(results_cur, ANALYSIS_TEST_ID)
+    assert sqldb._add_best_fit(results_cnx, ANALYSIS_TEST_ID)
 
     # Check accuracy of added data
     for col in BEST_FIT_STATS_DF.columns.values:
