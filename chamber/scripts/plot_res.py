@@ -22,6 +22,10 @@ from chamber.scripts import db_check
 TUBE_A = np.power(0.015, 2)*np.pi
 
 
+ALL_P_T = ('SELECT DISTINCT Pressure, Temperature FROM RHTargets NATURAL JOIN '
+           'Test NATURAL JOIN Setting')
+
+
 def format_plot():
     """Format the plots."""
     sns.set_palette('colorblind')
@@ -58,7 +62,7 @@ def _get_res_dict(cnx, tid_list):
     return res_dict
 
 
-def _plot_evap(cnx, res_dict, p, t):
+def _gen_plot(cnx, res_dict, p, t):
     """Plot the evaporation rate as a function of RH."""
     cur = cnx.cursor()
     for tid in res_dict.keys():
@@ -148,6 +152,14 @@ def _db_status_plot(cnx):
     return True
 
 
+def _plot_evap(cnx, p, t):
+    """Get data to plot m-dot'' vs. RH and pass it on to plot function."""
+    cur = cnx.cursor()
+    tid_list = _get_tid_list(cur, p, t)
+    res_dict = _get_res_dict(cnx, tid_list)
+    _gen_plot(cnx, res_dict, p, t)
+
+
 if __name__ == '__main__':
     print('Starting results plotting script...')
     format_plot()
@@ -156,11 +168,15 @@ if __name__ == '__main__':
     plot = True
     while plot is True:
         _db_status_plot(cnx)
-        p = input('Specify a pressure setting in Pa: ')
-        t = input('Specify a temperature setting in K: ')
-        tid_list = _get_tid_list(cur, p, t)
-        res_dict = _get_res_dict(cnx, tid_list)
-        _plot_evap(cnx, res_dict, p, t)
+        p = input('Specify a pressure setting in Pa, "a" if all: ')
+        t = input('Specify a temperature setting in K, "a" if all: ')
+        if p == 'a' or t == 'a':
+            cur.execute(ALL_P_T)
+            p_t_list = [p_t for p_t in cur.fetchall()]
+            for p_t in p_t_list:
+                _plot_evap(cnx, p_t[0], p_t[1])
+        else:
+            _plot_evap(cnx, p, t)
         if input('Plot another setting? [y/n]') != 'y':
             plot = False
     print('End.')
