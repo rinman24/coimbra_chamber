@@ -6,6 +6,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pickle as pkl
 import pytest
 from scipy import stats
 
@@ -102,6 +103,13 @@ SIGRH_STATS = pd.DataFrame(dict(
 # ----------------------------------------------------------------------------
 # Test _add_rh global variables
 RH_STATS_JOIN = RH_STATS.join(SIGRH_STATS)
+
+# ----------------------------------------------------------------------------
+# Test best fit analysis global variables
+ANALYSIS_DF = pkl.load(open(os.path.join(
+   os.getcwd(), 'tests', 'data_test_files', 'analysis_df'), 'rb'))
+RH_SET_DF = ANALYSIS_DF[ANALYSIS_DF['RH'] == 0.3].reset_index()
+Q_IDX = 8
 
 
 @pytest.fixture(scope='module')
@@ -590,3 +598,10 @@ def test_mass_transfer(df_01):
     assert math.isclose(df_res.Q[7], 0)
     assert math.isclose(df_res.nu[7], 13999)
     assert math.isclose(df_res.RH[7], 0.15)
+
+
+def test__get_df_row():
+    """Test _get_df_row."""
+    df_row = expr._get_df_row(RH_SET_DF)
+    rh_row = RH_SET_DF[RH_SET_DF.index == Q_IDX]
+    pd.testing.assert_frame_equal(df_row, rh_row)

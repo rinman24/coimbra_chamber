@@ -165,15 +165,7 @@ get_info_df = ("SELECT Temperature, Pressure, Duty, IsMass, Reservoir, "
                "Setting.SettingId FROM Test INNER JOIN Setting ON "
                "Setting.SettingId=Test.SettingId WHERE TestId={};")
 
-add_best_fit = ("UPDATE RHTargets INNER JOIN (SELECT * FROM Results WHERE "
-                "TestId={0} AND REPLACE(REPLACE(CONCAT(RH, SigB+0), '.', ''), "
-                "'0', '')+0 IN (SELECT REPLACE(REPLACE(CONCAT(RH, Min(SigB)), "
-                "'.', ''), '0', '')+0 FROM Results WHERE TestId={0} AND "
-                "CONCAT(RH, ABS(Q-0.5)) IN (SELECT CONCAT(RH, "
-                "Min(ABS(Q-0.5))) FROM Results WHERE TestId={0} AND Nu>{1} "
-                "GROUP BY RH) GROUP BY RH)) AS BestFit SET "
-                "RHTargets.Nu=BestFit.Nu WHERE RHTargets.RH=BestFit.RH AND "
-                "RHTargets.TestId=BestFit.TestId")
+update_rh_targets = "UPDATE RHTargets SET Nu={2} WHERE TestId={0} AND RH={1}"
 
 settings_df = ('SELECT Pressure, Temperature, Reservoir, TestId FROM Setting '
                'INNER JOIN Test ON Test.SettingId=Setting.SettingId')
@@ -192,3 +184,5 @@ get_rhtargets_results = ('SELECT RHT.RH, SigRH, B, SigB FROM RHTargets AS RHT '
 
 get_reservoir = ('SELECT Reservoir FROM Setting INNER JOIN Test ON '
                  'Test.SettingId=Setting.SettingId WHERE TestId={}')
+
+get_res_df = 'SELECT * FROM Results WHERE TestId={}'
