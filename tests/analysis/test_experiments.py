@@ -143,8 +143,8 @@ def df_bad():
 
 def test__zero_time(df_01, df_bad):
     """Test _zero_time."""
-    assert df_01.Idx.data[0] == 8000
-    assert df_01.Idx.data[-1] == 28000
+    assert df_01.Idx.iloc[0] == 8000
+    assert df_01.Idx.iloc[-1] == 28000
 
     df_01 = expr._zero_time(df_01)
     for col in ZERO_TIME_STATS:
@@ -155,8 +155,8 @@ def test__zero_time(df_01, df_bad):
         assert df_01[col].min() == ZERO_TIME_STATS.loc['min', col]
         assert df_01[col].max() == ZERO_TIME_STATS.loc['max', col]
 
-    assert df_01.Idx.data[0] == 0
-    assert df_01.Idx.data[-1] == 20000
+    assert df_01.Idx.iloc[0] == 0
+    assert df_01.Idx.iloc[-1] == 20000
 
     with pytest.raises(AttributeError) as err:
         expr._zero_time(df_bad)
