@@ -76,10 +76,10 @@ def _gen_plot(cnx, res_dict, p, t):
         sig_mdpp = sig_b/TUBE_A
         plt.errorbar(rh, mdpp, xerr=3*sig_rh, yerr=3*sig_mdpp, fmt='.',
                      label='High RH' if rh_val == 1 else 'Low RH')
-    plt.title(r"$\dot m$'' vs. RH at {0} kPa {1} K".format(int(p)//1000, t))
+    plt.title(r"$\dot m$'' vs. RH at {0}kPa {1}K".format(int(p)//1000, t))
     plt.legend()
     plt.xlabel('RH')
-    plt.ylabel(r"$\dot m''[kg/m^2s]$")
+    plt.ylabel(r"$\dot m''/(kg/m^2s)$")
     plt.grid()
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     plt.show()
