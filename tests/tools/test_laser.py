@@ -7,6 +7,7 @@ from chamber.tools import laser
 
 class TestLaser(object):
     """Unit testing of laser.py."""
+
     def test_laser_constructor(self):
         """Check that a laser can be instanciated properly."""
         co2_laser = laser.GaussianBeam()
@@ -94,3 +95,14 @@ class TestLaser(object):
         assert [i[0] for i in co2_laser.profile_3d] == co2_laser.profile
         assert [i[-1] for i in co2_laser.profile_3d] == co2_laser.profile
         assert [i[100] for i in co2_laser.profile_3d] == co2_laser.profile
+
+    def test_laser_constructor_plt_pro(self):
+        """Test that the plot is created and displayed correctly."""
+        co2_laser = laser.GaussianBeam()
+        co2_laser.plt_pro()
+        co2_laser.plt_pro(full=True)
+
+    def test_laser_constructor_plt_pro_3d(self):
+        """Test that the plot is created and displayed correctly."""
+        co2_laser = laser.GaussianBeam()
+        co2_laser.plt_pro_3d()
