@@ -23,6 +23,20 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 # ----------------------------------------------------------------------------
+# Test `create_tables` global variables
+BAD_TABLE = [("Tube",
+              "CREATE TABLE `Tube` ("
+              "  `TubeId` TINYINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,"
+              "  `DiameterIn` DECIMAL(7,7) UNSIGNED NOT NULL,"
+              "  `DiameterOut` DECIMAL(7,7) UNSIGNED NOT NULL,"
+              "  `Length` DECIMAL(4,4) UNSIGNED NOT NULL,"
+              "  `Material` VARCHAR(50) NOT NULL,"
+              "  `Mass` DECIMAL(7,7) UNSIGNED NOT NULL,"
+              "  PRIMARY KEY (`TubeId`))"
+              "  ENGINE = InnoDB"
+              "  DEFAULT CHARACTER SET = latin1;")]
+
+# ----------------------------------------------------------------------------
 # Test `add_tube_info` global variables
 TUBE_TABLE = [(1, Decimal('0.0300000'), Decimal('0.0400000'),
                Decimal('0.0600000'), 'Delrin', Decimal('0.0873832'))]
@@ -445,11 +459,21 @@ def test_tdms_obj():
             nptdms.TdmsFile(CORRECT_FILE_LIST[3]))
 
 
-def test_connect(cnx):
-        """Test connection to database."""
-        assert cnx
+def test_connect():
+        """Test connect."""
+        cnx = sqldb.connect('test')
         assert isinstance(cnx, mysql.connector.connection.MySQLConnection)
         assert not cnx.in_transaction
+        cnx.close()
+
+        # Database does not exist
+        sqldb.connect('fake_db')
+        # with pytest.raises(mysql.connector.Error) as err:
+        move('config.ini', 'tests/config.ini')
+        move('tests/data_test_files/config.ini', 'config.ini')
+        sqldb.connect('test')
+        move('config.ini', 'tests/data_test_files/config.ini')
+        move('tests/config.ini', 'config.ini')
 
 
 def test_create_tables(cur):
@@ -462,6 +486,7 @@ def test_create_tables(cur):
     cur.execute('SHOW TABLES;')
     for row in cur:
         assert row[0] in table_names_set
+    assert sqldb.create_tables(cur, BAD_TABLE)
 
 
 def test_add_tube_info(cur):

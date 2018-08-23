@@ -79,8 +79,6 @@ def connect(database):
                 "Something is wrong with your username or "
                 "password: {}".format(err)
                 )
-        elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exist {}".format(err))
         else:
             print(err)
     else:
@@ -138,10 +136,7 @@ def create_tables(cur, tables):
         try:
             cur.execute(ddl)
         except mysql.connector.Error as err:
-            if err.errno == mysql.connector.errorcode.ER_TABLE_EXISTS_ERROR:
-                print(name, 'already exists.')
-            else:
-                print(err.msg)
+            print(err.msg)
         else:
             print(table[0], ' OK')
     return True
