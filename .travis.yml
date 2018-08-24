@@ -6,4 +6,4 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 script:
-  - python -m pytest -xv --ignore=tests/data/test_sqldb.py --cov=./
+  - python -m pytest -xv --cov=./ --ignore=tests/data/test_sqldb.py
