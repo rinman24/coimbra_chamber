@@ -1,8 +1,13 @@
 """Module level Docstring."""
-
+import os
 from math import exp, isclose, log, pi, sqrt
 
 from chamber.tools import laser
+
+if os.getenv('CI'):
+    PLOT = False
+else:
+    PLOT = True
 
 
 class TestLaser(object):
@@ -99,10 +104,12 @@ class TestLaser(object):
     def test_laser_constructor_plt_pro(self):
         """Test that the plot is created and displayed correctly."""
         co2_laser = laser.GaussianBeam()
-        co2_laser.plt_pro()
-        co2_laser.plt_pro(full=True)
+        if PLOT:
+            co2_laser.plt_pro()
+            co2_laser.plt_pro(full=True)
 
     def test_laser_constructor_plt_pro_3d(self):
         """Test that the plot is created and displayed correctly."""
         co2_laser = laser.GaussianBeam()
-        co2_laser.plt_pro_3d()
+        if PLOT:
+            co2_laser.plt_pro_3d()
