@@ -1,5 +1,5 @@
 """.. todo:: Docstring."""
-from math import pi, sqrt, exp
+from math import pi, sqrt, exp, log
 from numpy import array
 
 import matplotlib.pyplot as plt

@@ -468,6 +468,18 @@ def test_connect():
         # Database does not exist
         sqldb.connect('fake_db')
         # with pytest.raises(mysql.connector.Error) as err:
+        if not os.path.isfile('tests/data_test_files/config.ini'):
+            config = configparser.ConfigParser()
+            config.read('config.ini')
+            host = config['MySQL-Server']['host']
+            config['MySQL-Server'] = {
+               'host': host,
+               'user': 'user',
+               'password': 'password'
+            }
+            with open('tests/data_test_files/config.ini', 'w') as configfile:
+                config.write(configfile)
+        assert os.path.isfile('tests/data_test_files/config.ini')
         move('config.ini', 'tests/config.ini')
         move('tests/data_test_files/config.ini', 'config.ini')
         sqldb.connect('test')
