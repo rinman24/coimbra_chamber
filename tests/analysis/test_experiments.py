@@ -404,7 +404,7 @@ def test__multi_rh_err(df_01):
     rh_err = expr._multi_rh_err(df_01, param_list=PARAM_LIST)
     for col in SIGRH_STATS:
         assert rh_err.count() == SIGRH_STATS.loc['cnt', col]
-        assert rh_err.sum() == SIGRH_STATS.loc['sum', col]
+        assert math.isclose(rh_err.sum(), SIGRH_STATS.loc['sum', col], rel_tol=1e-6)
         assert rh_err.var() == SIGRH_STATS.loc['var', col]
         assert rh_err.mean() == SIGRH_STATS.loc['avg', col]
         assert rh_err.min() == SIGRH_STATS.loc['min', col]
