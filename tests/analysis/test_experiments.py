@@ -373,7 +373,7 @@ def test__get_coolprop_rh():
 def test__get_coolprop_rh_err():
     """Test _get_coolprop_rh_err."""
     rh = expr._get_coolprop_rh_err([101325, 290, 275])
-    assert math.isclose(rh, 0.00523992533195583)
+    assert math.isclose(rh, 0.00523992533195583, rel_tol=1e-06)
     rh = expr._get_coolprop_rh_err([70000, 290, 273])
     assert math.isclose(rh, 0.005145568640554932)
 
