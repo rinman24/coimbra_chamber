@@ -1,7 +1,7 @@
 UCSD Coimbra Chamber
 ====================
 
-|docs| |license|
+|docs| |build| |license|
 
 .. image:: images/coimbra_ucsd_logo.png
 
@@ -129,6 +129,11 @@ Back to `Table of Contents`_
     :alt: Documentation Status
     :scale: 100%
     :target: https://chamber.readthedocs.io/en/latest/?badge=latest
+
+.. |build| image:: https://travis-ci.com/rinman24/chamber.svg?branch=master
+    :alt: Build Status
+    :scale: 100%
+    :target: https://travis-ci.com/rinman24/chamber
 
 .. |license| image:: https://img.shields.io/badge/License-MIT-yellow.svg
     :alt: License Badge

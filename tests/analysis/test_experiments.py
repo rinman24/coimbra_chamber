@@ -373,7 +373,7 @@ def test__get_coolprop_rh():
 def test__get_coolprop_rh_err():
     """Test _get_coolprop_rh_err."""
     rh = expr._get_coolprop_rh_err([101325, 290, 275])
-    assert math.isclose(rh, 0.005239925265924594)
+    assert math.isclose(rh, 0.00523992533195583, rel_tol=1e-06)
     rh = expr._get_coolprop_rh_err([70000, 290, 273])
     assert math.isclose(rh, 0.005145568640554932)
 
@@ -405,7 +405,11 @@ def test__multi_rh_err(df_01):
     for col in SIGRH_STATS:
         assert rh_err.count() == SIGRH_STATS.loc['cnt', col]
         assert rh_err.sum() == SIGRH_STATS.loc['sum', col]
-        assert rh_err.var() == SIGRH_STATS.loc['var', col]
+        assert math.isclose(
+            rh_err.var(),
+            SIGRH_STATS.loc['var', col],
+            rel_tol=1e-6
+            )
         assert rh_err.mean() == SIGRH_STATS.loc['avg', col]
         assert rh_err.min() == SIGRH_STATS.loc['min', col]
         assert rh_err.max() == SIGRH_STATS.loc['max', col]
@@ -432,7 +436,11 @@ def test__add_rh(df_01):
     for col in RH_STATS_JOIN:
         assert df_01[col].count() == RH_STATS_JOIN.loc['cnt', col]
         assert df_01[col].sum() == RH_STATS_JOIN.loc['sum', col]
-        assert df_01[col].var() == RH_STATS_JOIN.loc['var', col]
+        assert math.isclose(
+            df_01[col].var(),
+            RH_STATS_JOIN.loc['var', col],
+            rel_tol=1e-6
+            )
         assert df_01[col].mean() == RH_STATS_JOIN.loc['avg', col]
         assert df_01[col].min() == RH_STATS_JOIN.loc['min', col]
         assert df_01[col].max() == RH_STATS_JOIN.loc['max', col]
@@ -540,7 +548,7 @@ def test_preprocess(df_01, df_01_original):
 
 def test_mass_transfer(df_01):
     """Test _analysis."""
-    df_res = expr.mass_transfer(df_01, sigma=SIGMA, steps=1000, plot=True)
+    df_res = expr.mass_transfer(df_01, sigma=SIGMA, steps=1000, plot=PLOT)
     assert math.isclose(df_res.a[0], 0.09929181759175223)
     assert math.isclose(df_res.sig_a[0], 1.882350488972039e-09)
     assert math.isclose(df_res.b[0], -8.48536063565115e-09)
