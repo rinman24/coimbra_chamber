@@ -135,10 +135,10 @@ Back to `Table of Contents`_
     :scale: 100%
     :target: https://travis-ci.com/rinman24/chamber
 
-.. |codecov| image:: https://codecov.io/gh/codecov/example-python/branch/master/graph/badge.svg
+.. |codecov| image:: https://codecov.io/gh/rinman24/chamber/branch/master/graph/badge.svg
     :alt: Code Coverage Badge
     :scale: 100%
-    :target: https://codecov.io/gh/codecov/example-python
+    :target: https://codecov.io/gh/rinman24/chamber
 
 .. |license| image:: https://img.shields.io/badge/License-MIT-yellow.svg
     :alt: License Badge
