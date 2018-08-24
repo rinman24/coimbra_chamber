@@ -14,7 +14,6 @@ import nptdms
 import pandas as pd
 import pytest
 
-import chamber.const as const
 from chamber.analysis import experiments
 from chamber.data import sqldb, ddl, dml
 import dml_test

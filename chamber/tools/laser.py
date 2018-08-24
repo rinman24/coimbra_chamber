@@ -6,9 +6,12 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 from mpl_toolkits.mplot3d import Axes3D
 
-from chamber.const import LAM, POW, W_0, HWHM_COEFF_W
 from chamber.tools import tools
 
+LAM = 10.59e-6      # 10.59 microns; beam radius at laser head
+POW = 20            # 20 W; total power transmitted by the beam
+W_0 = 0.9e-3        # 0.9 mm; Rayleigh length at the laser head
+HWHM_COEFF_W = sqrt(2 * log(2)) / 2    # 0.589
 
 FONT = {'family': 'Times New Roman', 'weight': 'normal', 'size': 15}
 rc('font', **FONT)

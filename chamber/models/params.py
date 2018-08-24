@@ -18,9 +18,9 @@ Functions
 from math import log
 
 from chamber.models import props
-from chamber import const
 
-RADIUS = 0.015
+RADIUS = 0.015 # m; tube radius
+ACC_GRAV = 9.80665  # m/s^2; gravitational acceleration
 
 
 def get_schmidt(p, t, t_dp, ref):
@@ -106,7 +106,7 @@ def get_grashof(p, t, t_dp, t_s):
 
     """
     # Constants
-    g = const.ACC_GRAV
+    g = ACC_GRAV
     radius = RADIUS
 
     # Calculate water vapor parameters

@@ -28,7 +28,6 @@ import pandas as pd
 from scipy import stats
 from tqdm import tqdm
 
-from chamber import const
 from chamber.analysis import experiments
 from chamber.data import ddl, dml
 
@@ -150,8 +149,8 @@ def add_tube_info(cur):
     """
     Use a MySQL cursor to add test-independant Tube info.
 
-    Uses cursor .execute function on the ADD_TUBE and TUBE_DATA constants in
-    ddl.py. Adds the new Tube if the Tube doesn't exist. If the Tube already
+    Uses cursor .execute function on the dml.add_tube and ddl.tube_data.
+    Adds the new Tube if the Tube doesn't exist. If the Tube already
     exists, then the function does nothing.
 
     Parameters
