@@ -1158,8 +1158,8 @@ def test_get_high_low_testids(results_cnx):
     clear_results(results_cur, True)
     results_cur.execute(dml.add_rh_targets, [1, 0.35, 0.0002])
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1]
-    results_cur.execute(dml.add_rh_targets, [4, 0.30, 0.0001])
-    assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1, 4]
+    results_cur.execute(dml.add_rh_targets, [2, 0.30, 0.0001])
+    assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1, 2]
     clear_results(results_cur, True)
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == []
 
