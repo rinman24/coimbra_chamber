@@ -12,6 +12,11 @@ from scipy import stats
 
 import chamber.analysis.experiments as expr
 
+if os.getenv('CI'):
+    PLOT = False
+else:
+    PLOT = True
+
 TARGET_RH = 0.15
 TARGET_IDX = 12770
 HALF_LEN = 7000
@@ -273,14 +278,15 @@ def test__add_avg_te(df_01, df_bad):
         )
     assert err.value.args[0] == err_msg
 
-    plt.plot(df_01.loc[:, tc_keys], 'k')
-    plt.plot(df_01.Te, 'r', label='Average Temperature')
+    if PLOT:
+        plt.plot(df_01.loc[:, tc_keys], 'k')
+        plt.plot(df_01.Te, 'r', label='Average Temperature')
 
-    plt.legend()
-    plt.xlabel('time/s')
-    plt.ylabel('temperature/K')
-    plt.title('Average Temperature: No Smoothing')
-    plt.show()
+        plt.legend()
+        plt.xlabel('time/s')
+        plt.ylabel('temperature/K')
+        plt.title('Average Temperature: No Smoothing')
+        plt.show()
 
 
 def test__add_smooth_avg_te(df_01, df_bad):
@@ -296,14 +302,15 @@ def test__add_smooth_avg_te(df_01, df_bad):
         expr._add_smooth_avg_te(df_bad)
     assert err.value.args[0] == "'DataFrame' object has no attribute 'Te'"
 
-    plt.plot(df_01.Te, label='before')
-    plt.plot(df_01.TeSmooth, label='smoothed')
+    if PLOT:
+        plt.plot(df_01.Te, label='before')
+        plt.plot(df_01.TeSmooth, label='smoothed')
 
-    plt.legend()
-    plt.xlabel('time/s')
-    plt.ylabel('temperature/K')
-    plt.title('Smoothed Average Temperature')
-    plt.show()
+        plt.legend()
+        plt.xlabel('time/s')
+        plt.ylabel('temperature/K')
+        plt.title('Smoothed Average Temperature')
+        plt.show()
 
 
 def test__add_smooth_dew_point(df_01, df_bad):
@@ -320,14 +327,15 @@ def test__add_smooth_dew_point(df_01, df_bad):
     assert err.value.args[0] == ("'DataFrame' object has no attribute" +
                                  " 'DewPoint'")
 
-    plt.plot(df_01.DewPoint, label='before')
-    plt.plot(df_01.DewPointSmooth, label='smoothed')
+    if PLOT:
+        plt.plot(df_01.DewPoint, label='before')
+        plt.plot(df_01.DewPointSmooth, label='smoothed')
 
-    plt.legend()
-    plt.xlabel('time/s')
-    plt.ylabel('Dew Point/K')
-    plt.title('Smoothed Dew Point')
-    plt.show()
+        plt.legend()
+        plt.xlabel('time/s')
+        plt.ylabel('Dew Point/K')
+        plt.title('Smoothed Dew Point')
+        plt.show()
 
 
 def test__add_smooth_pressure(df_01, df_bad):
@@ -345,14 +353,15 @@ def test__add_smooth_pressure(df_01, df_bad):
         "'DataFrame' object has no attribute 'Pressure'"
         )
 
-    plt.plot(df_01.Pressure, label='before')
-    plt.plot(df_01.PressureSmooth, label='smoothed')
+    if PLOT:
+        plt.plot(df_01.Pressure, label='before')
+        plt.plot(df_01.PressureSmooth, label='smoothed')
 
-    plt.legend()
-    plt.xlabel('time/s')
-    plt.ylabel('Pressure/Pa')
-    plt.title('Smoothed Pressure')
-    plt.show()
+        plt.legend()
+        plt.xlabel('time/s')
+        plt.ylabel('Pressure/Pa')
+        plt.title('Smoothed Pressure')
+        plt.show()
 
 
 def test__get_coolprop_rh():
@@ -364,7 +373,7 @@ def test__get_coolprop_rh():
 def test__get_coolprop_rh_err():
     """Test _get_coolprop_rh_err."""
     rh = expr._get_coolprop_rh_err([101325, 290, 275])
-    assert math.isclose(rh, 0.005239925265924594)
+    assert math.isclose(rh, 0.00523992533195583, rel_tol=1e-06)
     rh = expr._get_coolprop_rh_err([70000, 290, 273])
     assert math.isclose(rh, 0.005145568640554932)
 
@@ -380,13 +389,14 @@ def test__multi_rh(df_01):
         assert rh.min() == RH_STATS.loc['min', col]
         assert rh.max() == RH_STATS.loc['max', col]
 
-    plt.plot(rh, label='RH')
+    if PLOT:
+        plt.plot(rh, label='RH')
 
-    plt.legend()
-    plt.xlabel('time/s')
-    plt.ylabel('RH')
-    plt.title('Relative Humidity')
-    plt.show()
+        plt.legend()
+        plt.xlabel('time/s')
+        plt.ylabel('RH')
+        plt.title('Relative Humidity')
+        plt.show()
 
 
 def test__multi_rh_err(df_01):
@@ -395,18 +405,23 @@ def test__multi_rh_err(df_01):
     for col in SIGRH_STATS:
         assert rh_err.count() == SIGRH_STATS.loc['cnt', col]
         assert rh_err.sum() == SIGRH_STATS.loc['sum', col]
-        assert rh_err.var() == SIGRH_STATS.loc['var', col]
+        assert math.isclose(
+            rh_err.var(),
+            SIGRH_STATS.loc['var', col],
+            rel_tol=1e-6
+            )
         assert rh_err.mean() == SIGRH_STATS.loc['avg', col]
         assert rh_err.min() == SIGRH_STATS.loc['min', col]
         assert rh_err.max() == SIGRH_STATS.loc['max', col]
 
-    plt.plot(rh_err, label='SigRH Function')
+    if PLOT:
+        plt.plot(rh_err, label='SigRH Function')
 
-    plt.legend()
-    plt.xlabel('time/s')
-    plt.ylabel('SigRH')
-    plt.title('Relative Humidity Error')
-    plt.show()
+        plt.legend()
+        plt.xlabel('time/s')
+        plt.ylabel('SigRH')
+        plt.title('Relative Humidity Error')
+        plt.show()
 
 
 def test__add_rh(df_01):
@@ -421,18 +436,23 @@ def test__add_rh(df_01):
     for col in RH_STATS_JOIN:
         assert df_01[col].count() == RH_STATS_JOIN.loc['cnt', col]
         assert df_01[col].sum() == RH_STATS_JOIN.loc['sum', col]
-        assert df_01[col].var() == RH_STATS_JOIN.loc['var', col]
+        assert math.isclose(
+            df_01[col].var(),
+            RH_STATS_JOIN.loc['var', col],
+            rel_tol=1e-6
+            )
         assert df_01[col].mean() == RH_STATS_JOIN.loc['avg', col]
         assert df_01[col].min() == RH_STATS_JOIN.loc['min', col]
         assert df_01[col].max() == RH_STATS_JOIN.loc['max', col]
 
-    plt.errorbar(df_01.Idx, df_01.RH, yerr=df_01.SigRH, label='RH')
+    if PLOT:
+        plt.errorbar(df_01.Idx, df_01.RH, yerr=df_01.SigRH, label='RH')
 
-    plt.legend()
-    plt.xlabel('time/s')
-    plt.ylabel('RH')
-    plt.title('Relative Humidity')
-    plt.show()
+        plt.legend()
+        plt.xlabel('time/s')
+        plt.ylabel('RH')
+        plt.title('Relative Humidity')
+        plt.show()
 
 
 def test__get_max_half_len(df_01):
@@ -461,15 +481,16 @@ def test__get_rh_idx(df_01):
     rh = df_01.RH[idx]
     assert math.isclose(rh, TARGET_RH, abs_tol=0.01)
 
-    plt.plot(df_01.RH, label='RH', color='orange')
-    plt.axvline(x=idx)
-    plt.axhline(y=TARGET_RH)
+    if PLOT:
+        plt.plot(df_01.RH, label='RH', color='orange')
+        plt.axvline(x=idx)
+        plt.axhline(y=TARGET_RH)
 
-    plt.legend()
-    plt.xlabel('time/s')
-    plt.ylabel('RH')
-    plt.title('Relative Humidity')
-    plt.show()
+        plt.legend()
+        plt.xlabel('time/s')
+        plt.ylabel('RH')
+        plt.title('Relative Humidity')
+        plt.show()
 
 
 def test__get_stat_group(df_01):
@@ -479,18 +500,19 @@ def test__get_stat_group(df_01):
     assert len(time) == 2*HALF_LEN + 1
     assert len(mass) == 2*HALF_LEN + 1
 
-    plt.plot(df_01.RH, label='RH', color='orange')
-    plt.plot(time, mass, 'r', label='Group')
-    plt.axvline(x=TARGET_IDX)
-    plt.axvline(x=TARGET_IDX-HALF_LEN, linestyle='--')
-    plt.axvline(x=TARGET_IDX+HALF_LEN+1, linestyle='--')
-    plt.axhline(y=TARGET_RH)
+    if PLOT:
+        plt.plot(df_01.RH, label='RH', color='orange')
+        plt.plot(time, mass, 'r', label='Group')
+        plt.axvline(x=TARGET_IDX)
+        plt.axvline(x=TARGET_IDX-HALF_LEN, linestyle='--')
+        plt.axvline(x=TARGET_IDX+HALF_LEN+1, linestyle='--')
+        plt.axhline(y=TARGET_RH)
 
-    plt.legend()
-    plt.xlabel('time/s')
-    plt.ylabel('RH')
-    plt.title('Relative Humidity')
-    plt.show()
+        plt.legend()
+        plt.xlabel('time/s')
+        plt.ylabel('RH')
+        plt.title('Relative Humidity')
+        plt.show()
 
 
 def test__get_valid_rh_targets(df_01):
@@ -526,7 +548,7 @@ def test_preprocess(df_01, df_01_original):
 
 def test_mass_transfer(df_01):
     """Test _analysis."""
-    df_res = expr.mass_transfer(df_01, sigma=SIGMA, steps=1000, plot=True)
+    df_res = expr.mass_transfer(df_01, sigma=SIGMA, steps=1000, plot=PLOT)
     assert math.isclose(df_res.a[0], 0.09929181759175223)
     assert math.isclose(df_res.sig_a[0], 1.882350488972039e-09)
     assert math.isclose(df_res.b[0], -8.48536063565115e-09)
