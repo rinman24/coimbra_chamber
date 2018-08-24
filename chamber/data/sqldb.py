@@ -156,7 +156,7 @@ def add_tube_info(cur):
 
     Parameters
     ----------
-    cur : mysql.connector.crsor.MySqlCursor
+    cur : mysql.connector.cursor.MySqlCursor
         Cursor for MySQL database.
 
     Returns
