@@ -468,6 +468,18 @@ def test_connect():
         # Database does not exist
         sqldb.connect('fake_db')
         # with pytest.raises(mysql.connector.Error) as err:
+        if not os.path.isfile('tests/data_test_files/config.ini'):
+            config = configparser.ConfigParser()
+            config.read('config.ini')
+            host = config['MySQL-Server']['host']
+            config['MySQL-Server'] = {
+               'host': host,
+               'user': 'user',
+               'password': 'password'
+            }
+            with open('tests/data_test_files/config.ini', 'w') as configfile:
+                config.write(configfile)
+        assert os.path.isfile('tests/data_test_files/config.ini')
         move('config.ini', 'tests/config.ini')
         move('tests/data_test_files/config.ini', 'config.ini')
         sqldb.connect('test')
@@ -1158,8 +1170,8 @@ def test_get_high_low_testids(results_cnx):
     clear_results(results_cur, True)
     results_cur.execute(dml.add_rh_targets, [1, 0.35, 0.0002])
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1]
-    results_cur.execute(dml.add_rh_targets, [4, 0.30, 0.0001])
-    assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1, 4]
+    results_cur.execute(dml.add_rh_targets, [2, 0.30, 0.0001])
+    assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1, 2]
     clear_results(results_cur, True)
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == []
 
