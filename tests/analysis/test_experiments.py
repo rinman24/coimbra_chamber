@@ -436,7 +436,11 @@ def test__add_rh(df_01):
     for col in RH_STATS_JOIN:
         assert df_01[col].count() == RH_STATS_JOIN.loc['cnt', col]
         assert df_01[col].sum() == RH_STATS_JOIN.loc['sum', col]
-        assert df_01[col].var() == RH_STATS_JOIN.loc['var', col]
+        assert math.isclose(
+            df_01[col].var(),
+            RH_STATS_JOIN.loc['var', col],
+            rel_tol=1e-6
+            )
         assert df_01[col].mean() == RH_STATS_JOIN.loc['avg', col]
         assert df_01[col].min() == RH_STATS_JOIN.loc['min', col]
         assert df_01[col].max() == RH_STATS_JOIN.loc['max', col]
