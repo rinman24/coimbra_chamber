@@ -419,7 +419,7 @@ def test__multi_rh_err(df_01):
     """Test _multi_rh_err."""
     rh_err = expr._multi_rh_err(df_01, param_list=PARAM_LIST)
     for col in SIGRH_STATS:
-        assert math.isclsoe(rh_err.count(), SIGRH_STATS.loc['cnt', col])
+        assert math.isclose(rh_err.count(), SIGRH_STATS.loc['cnt', col])
         assert math.isclose(rh_err.sum(), SIGRH_STATS.loc['sum', col])
         assert math.isclose(
             rh_err.var(),
