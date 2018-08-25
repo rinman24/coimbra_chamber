@@ -10,4 +10,4 @@ install:
 script:
   - python -m pytest -xv --cov=./ --ignore=tests/data/test_sqldb.py
 after_success:
-  - codecov
+  - bash < (curl -s https://codecov.io/bash)
