@@ -1,3 +1,0 @@
-ignore:
-  - "chamber/data/sqldb.py"
-  - "setup.py"
