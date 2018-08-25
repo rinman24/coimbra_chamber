@@ -1,4 +1,2 @@
 [run]
-omit = 
-    */scripts/*
-    */chamber/data/sqldb.py
+omit = */scripts/*
