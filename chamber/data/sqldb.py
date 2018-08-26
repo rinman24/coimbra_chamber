@@ -29,12 +29,313 @@ from scipy import stats
 from tqdm import tqdm
 
 from chamber.analysis import experiments
-from chamber.data import ddl, dml
 
 # ----------------------------------------------------------------------------
-# Connect and setup
+# MySQL DDL constants
+# ----------------------------------------------------------------------------
+TABLES = list()
+
+# 'Tube' table ddl
+TABLES.append(("Tube",
+               "CREATE TABLE IF NOT EXISTS `Tube` ("
+               "  `TubeId` TINYINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "  `DiameterIn` DECIMAL(7,7) UNSIGNED NOT NULL,"
+               "  `DiameterOut` DECIMAL(7,7) UNSIGNED NOT NULL,"
+               "  `Length` DECIMAL(4,4) UNSIGNED NOT NULL,"
+               "  `Material` VARCHAR(50) NOT NULL,"
+               "  `Mass` DECIMAL(7,7) UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`TubeId`))"
+               "  ENGINE = InnoDB"
+               "  DEFAULT CHARACTER SET = latin1;"))
+
+# 'Setting' table ddl
+TABLES.append(("Setting",
+               "CREATE TABLE IF NOT EXISTS `Setting` ("
+               "  `SettingId` SMALLINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "  `Duty` DECIMAL(4,1) UNSIGNED NOT NULL,"
+               "  `IsMass` BIT(1) NOT NULL,"
+               "  `Pressure` MEDIUMINT(6) UNSIGNED NOT NULL,"
+               "  `Temperature` DECIMAL(4,1) UNSIGNED NOT NULL,"
+               "  `TimeStep` DECIMAL(4,2) UNSIGNED NOT NULL,"
+               "  `Reservoir` BIT(1) NOT NULL,"
+               "  `TubeId` TINYINT(3) UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`SettingId`, `TubeId`),"
+               "  INDEX `fk_Setting_Tube1_idx` (`TubeId` ASC),"
+               "  CONSTRAINT `fk_Setting_Tube`"
+               "    FOREIGN KEY (`TubeId`)"
+               "    REFERENCES `Tube` (`TubeId`)"
+               "    ON DELETE RESTRICT"
+               "    ON UPDATE CASCADE) "
+               "  ENGINE = InnoDB"
+               "  DEFAULT CHARACTER SET = latin1;"))
+
+# 'Test' table ddl
+TABLES.append(("Test",
+               "CREATE TABLE IF NOT EXISTS `Test` ("
+               "  `TestId` SMALLINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,"
+               "  `Author` VARCHAR(50) NOT NULL,"
+               "  `DateTime` DATETIME NOT NULL,"
+               "  `Description` VARCHAR(1000) NOT NULL,"
+               "  `SettingId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`TestId`, `SettingId`),"
+               "  INDEX `fk_Test_Setting_idx` (`SettingId` ASC),"
+               "  CONSTRAINT `fk_Test_Setting`"
+               "    FOREIGN KEY (`SettingId`)"
+               "    REFERENCES `Setting` (`SettingId`)"
+               "    ON DELETE RESTRICT"
+               "    ON UPDATE CASCADE)"
+               "  ENGINE = InnoDB"
+               "  DEFAULT CHARACTER SET = latin1;"))
+
+# 'Observation' table ddl
+TABLES.append(("Observation",
+               "CREATE TABLE IF NOT EXISTS `Observation` ("
+               "  `CapManOk` BIT(1) NOT NULL,"
+               "  `DewPoint` DECIMAL(5,2) UNSIGNED NOT NULL,"
+               "  `Idx` MEDIUMINT(6) UNSIGNED NOT NULL,"
+               "  `Mass` DECIMAL(7,7) UNSIGNED NULL DEFAULT NULL,"
+               "  `OptidewOk` BIT(1) NOT NULL,"
+               "  `PowOut` DECIMAL(6,4) NULL DEFAULT NULL,"
+               "  `PowRef` DECIMAL(6,4) NULL DEFAULT NULL,"
+               "  `Pressure` MEDIUMINT(6) UNSIGNED NOT NULL,"
+               "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`Idx`, `TestId`),"
+               "  INDEX `fk_Observation_Test_idx` (`TestId` ASC),"
+               "  CONSTRAINT `fk_Observation_Test`"
+               "    FOREIGN KEY (`TestId`)"
+               "    REFERENCES `Test` (`TestId`)"
+               "    ON UPDATE CASCADE)"
+               "  ENGINE = InnoDB"
+               "  DEFAULT CHARACTER SET = latin1;"))
+
+# 'TempObservation' table ddl
+TABLES.append(("TempObservation",
+               "CREATE TABLE IF NOT EXISTS `TempObservation` ("
+               "  `ThermocoupleNum` TINYINT(2) UNSIGNED NOT NULL,"
+               "  `Temperature` DECIMAL(5,2) NOT NULL,"
+               "  `Idx` MEDIUMINT(6) UNSIGNED NOT NULL,"
+               "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`Idx`, `TestId`, `ThermocoupleNum`),"
+               "  CONSTRAINT `fk_TempObservation_Observation`"
+               "    FOREIGN KEY (`Idx` , `TestId`)"
+               "    REFERENCES `Observation` (`Idx` , `TestId`)"
+               "    ON UPDATE CASCADE)"
+               "  ENGINE = InnoDB"
+               "  DEFAULT CHARACTER SET = latin1;"))
+
+# 'RHTargets' table ddl
+TABLES.append(("RHTargets",
+               "  CREATE TABLE IF NOT EXISTS `RHTargets` ("
+               "  `RH` DECIMAL(3,2) UNSIGNED NOT NULL,"
+               "  `SigRH` FLOAT UNSIGNED NOT NULL,"
+               "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  `Nu` SMALLINT UNSIGNED,"
+               "  PRIMARY KEY (`RH`, `TestId`),"
+               "  INDEX `fk_RHTargets_Test_idx` (`TestId` ASC),"
+               "  CONSTRAINT `fk_RHTargets_Test`"
+               "    FOREIGN KEY (`TestId`)"
+               "    REFERENCES `Test` (`TestId`)"
+               "    ON DELETE RESTRICT"
+               "    ON UPDATE CASCADE)"
+               " ENGINE = InnoDB;"))
+
+# 'Results' table ddl
+TABLES.append(("Results",
+               "  CREATE TABLE IF NOT EXISTS `Results` ("
+               "  `RH` DECIMAL(3,2) UNSIGNED NOT NULL,"
+               "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
+               "  `A` FLOAT NOT NULL,"
+               "  `SigA` FLOAT UNSIGNED NOT NULL,"
+               "  `B` FLOAT NOT NULL,"
+               "  `SigB` FLOAT UNSIGNED NOT NULL,"
+               "  `Chi2` FLOAT UNSIGNED NOT NULL,"
+               "  `Q` DECIMAL(3,2) UNSIGNED NOT NULL,"
+               "  `Nu` SMALLINT UNSIGNED NOT NULL,"
+               "  PRIMARY KEY (`Nu`, `RH`, `TestId`),"
+               "  CONSTRAINT `fk_Results_RHTargets1`"
+               "    FOREIGN KEY (`RH` , `TestId`)"
+               "    REFERENCES `RHTargets` (`RH` , `TestId`)"
+               "    ON DELETE RESTRICT"
+               "    ON UPDATE CASCADE)"
+               "ENGINE = InnoDB;"))
+
+# 'Unit' table ddl
+TABLES.append(("Unit",
+               "CREATE TABLE IF NOT EXISTS `Unit` ("
+               "  `Duty` VARCHAR(50) NOT NULL,"
+               "  `Length` VARCHAR(50) NOT NULL,"
+               "  `Mass` VARCHAR(50) NOT NULL,"
+               "  `Power` VARCHAR(50) NOT NULL,"
+               "  `Pressure` VARCHAR(50) NOT NULL,"
+               "  `Temperature` VARCHAR(50) NOT NULL,"
+               "  `Time` VARCHAR(50) NOT NULL)"
+               "  ENGINE = InnoDB"
+               "  DEFAULT CHARACTER SET = latin1;"))
+
+# Convert tables list to immutable tuple
+TABLES = tuple(TABLES)
+
+# Constant for Table Drop
+TABLE_NAME_LIST = [table[0] for table in reversed(TABLES)]
 
 
+# Default tube
+TUBE_DATA = dict(
+    DiameterIn=0.03, DiameterOut=0.04, Length=0.06, Material='Delrin',
+    Mass=0.0873832
+    )
+
+# Default units
+UNITS = dict(
+    Duty='Percent', Length='Meter', Mass='Kilogram', Power='Watt',
+    Pressure='Pascal', Temperature='Kelvin', Time='Second'
+    )
+
+# ----------------------------------------------------------------------------
+# MySQL DML insert and update statement constants
+# ----------------------------------------------------------------------------
+# dml to add data into the 'Setting' table
+ADD_SETTING = ("INSERT INTO Setting "
+               "(Duty, IsMass, Pressure, Reservoir, Temperature, TimeStep,"
+               " TubeId)"
+               " VALUES "
+               "(%(Duty)s, %(IsMass)s, %(Pressure)s, %(Reservoir)s, "
+               "%(Temperature)s, %(TimeStep)s, %(TubeId)s)")
+
+# dml to add data into the 'test' table
+ADD_TEST = ("INSERT INTO Test "
+            "(Author, DateTime, Description,"
+            " SettingID)"
+            " VALUES "
+            "(%(Author)s, %(DateTime)s, %(Description)s,"
+            " %(SettingID)s)")
+
+# dml to add data with mass measurements into the 'Observation' table
+ADD_OBS_M_T = ("INSERT INTO Observation "
+               "(CapManOk, DewPoint, Idx, Mass, OptidewOk, PowOut, PowRef,"
+               " Pressure, TestID)"
+               " VALUES "
+               "(%(CapManOk)s, %(DewPoint)s, %(Idx)s, %(Mass)s, %(OptidewOk)s,"
+               " %(PowOut)s, %(PowRef)s, %(Pressure)s, %(TestId)s)")
+
+# dml to add data without mass measurements into the 'Observation' table
+ADD_OBS_M_F = ("INSERT INTO Observation "
+               "(CapManOk, DewPoint, Idx, OptidewOk, PowOut, PowRef,"
+               " Pressure, TestID)"
+               " VALUES "
+               "(%(CapManOk)s, %(DewPoint)s, %(Idx)s, %(OptidewOk)s,"
+               " %(PowOut)s, %(PowRef)s, %(Pressure)s, %(TestId)s)")
+
+# dml to add data into the 'Tempobservation' table
+ADD_TEMP = ("INSERT INTO TempObservation "
+            "(ThermocoupleNum, Temperature, Idx, TestId)"
+            " VALUES "
+            "(%s, %s, %s, %s)")
+
+# dml to add 'RH', 'TestId' and 'SigRH' data into the 'RHTarget' table
+ADD_RH_TARGETS = ("INSERT INTO RHTargets (TestId, RH, SigRH) VALUES "
+                  "(%s, %s, %s)")
+
+# dml to add analysis results into the 'Results' table
+ADD_RESULTS = ("INSERT INTO Results"
+               "  (TestId, RH, A, SigA, B, SigB, Chi2, Q, Nu)"
+               "  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
+
+# dml to add tube data into the 'Tube' table
+ADD_TUBE = ("INSERT INTO Tube "
+            "(DiameterIn, DiameterOut, Length, Material, Mass)"
+            " VALUES "
+            "(%(DiameterIn)s, %(DiameterOut)s, %(Length)s,"
+            " %(Material)s, %(Mass)s)")
+
+# dml to add unit information into the 'Unit' table
+ADD_UNIT = ("INSERT INTO Unit "
+            "(Duty, Length, Mass, Power, Pressure, Temperature, Time)"
+            " VALUES "
+            "(%(Duty)s, %(Length)s, %(Mass)s, %(Power)s, %(Pressure)s,"
+            " %(Temperature)s, %(Time)s)")
+
+# dml to update 'RHTargets', adding data to the 'Nu' column
+UPDATE_RH_TARGET = "UPDATE RHTargets SET Nu={2} WHERE TestId={0} AND RH={1}"
+
+# ----------------------------------------------------------------------------
+# MySQL DML select statement constants
+# ----------------------------------------------------------------------------
+# dml to select the 'SettingID' from specified setting info
+SELECT_SETTING = ("SELECT SettingID FROM Setting WHERE "
+                  "  Duty = %(Duty)s AND"
+                  "  Pressure = %(Pressure)s AND"
+                  "  Temperature = %(Temperature)s AND"
+                  "  IsMass = %(IsMass)s AND"
+                  "  Reservoir = %(Reservoir)s AND"
+                  "  TimeStep = %(TimeStep)s AND"
+                  "  TubeId = %(TubeId)s")
+
+# dml to select a 'TestId' basesd on its 'DataTime'
+SELECT_TEST = ("SELECT TestID FROM Test WHERE "
+               "    DateTime='{}'")
+
+# dml to select a 'TestId' based on a 'SettingId'
+TEST_FROM_SETTING = ("SELECT TestId FROM Test WHERE "
+                     "    SettingId=({})")
+
+# dml to select a 'TubeId' based on tube info
+SELECT_TUBE = ("SELECT TubeID FROM Tube WHERE "
+               "  DiameterIn = %(DiameterIn)s AND"
+               "  DiameterOut = %(DiameterOut)s AND"
+               "  Length = %(Length)s AND"
+               "  Material = %(Material)s AND"
+               "  Mass = %(Mass)s")
+# dml to select data from joined 'Setting' and 'Test' tables
+GET_INFO_DF = ("SELECT Temperature, Pressure, Duty, IsMass, Reservoir, "
+               "TimeStep, Test.DateTime, Author, Description, TubeId, TestId, "
+               "Setting.SettingId FROM Test INNER JOIN Setting ON "
+               "Setting.SettingId=Test.SettingId WHERE TestId={};")
+
+# dml to select data from 'Observation' based on a 'TestId'
+GET_OBS_DF = ("SELECT Idx, DewPoint, Mass, Pressure, PowOut, PowRef, "
+              "OptidewOk, CapManOk FROM Observation WHERE TestId={};")
+
+# dml tp delect data from 'TempObesrvation' based on a 'TestId'
+GET_TEMP_DF = ("SELECT Idx,"
+               "MAX(CASE WHEN ThermocoupleNum=0 THEN VALUE ELSE 0 END) TC0, "
+               "MAX(CASE WHEN ThermocoupleNum=1 THEN VALUE ELSE 0 END) TC1, "
+               "MAX(CASE WHEN ThermocoupleNum=2 THEN VALUE ELSE 0 END) TC2, "
+               "MAX(CASE WHEN ThermocoupleNum=3 THEN VALUE ELSE 0 END) TC3, "
+               "MAX(CASE WHEN ThermocoupleNum=4 THEN VALUE ELSE 0 END) TC4, "
+               "MAX(CASE WHEN ThermocoupleNum=5 THEN VALUE ELSE 0 END) TC5, "
+               "MAX(CASE WHEN ThermocoupleNum=6 THEN VALUE ELSE 0 END) TC6, "
+               "MAX(CASE WHEN ThermocoupleNum=7 THEN VALUE ELSE 0 END) TC7, "
+               "MAX(CASE WHEN ThermocoupleNum=8 THEN VALUE ELSE 0 END) TC8, "
+               "MAX(CASE WHEN ThermocoupleNum=9 THEN VALUE ELSE 0 END) TC9, "
+               "MAX(CASE WHEN ThermocoupleNum=10 THEN VALUE ELSE 0 END) TC10, "
+               "MAX(CASE WHEN ThermocoupleNum=11 THEN VALUE ELSE 0 END) TC11, "
+               "MAX(CASE WHEN ThermocoupleNum=12 THEN VALUE ELSE 0 END) TC12, "
+               "MAX(CASE WHEN ThermocoupleNum=13 THEN VALUE ELSE 0 END) TC13 "
+               "FROM("
+               "SELECT Idx, ThermocoupleNum, Temperature VALUE FROM "
+               "TempObservation WHERE TestId={}) "
+               "src GROUP BY Idx;")
+
+# dml to get the 'TestId' from both the high and low RH tests for a 'Setting'
+GET_HIGH_LOW_TESTIDS = ('SELECT TestId FROM Test Inner Join Setting ON '
+                        'Test.SettingId=Setting.SettingId WHERE '
+                        'Setting.Temperature={0} AND Setting.Pressure={1} AND '
+                        'TestId IN (SELECT TestId FROM RHTargets)')
+
+# dml to get the analysis results from joined 'RHTarget' and 'Results' tables.
+GET_RHTARGET_RESULTS = ('SELECT RHT.RH, SigRH, B, SigB FROM RHTargets AS RHT '
+                        'INNER JOIN Results AS Res ON RHT.RH=Res.RH AND '
+                        'RHT.TestId=Res.TestId AND RHT.Nu=Res.Nu WHERE '
+                        'RHT.TestId={}')
+
+# dml to get data from the 'Resuts' table for a TestId
+GET_RES_DF = 'SELECT * FROM Results WHERE TestId={}'
+
+
+# ----------------------------------------------------------------------------
+# Connect and setup functions
+# ----------------------------------------------------------------------------
 def connect(database):
     """
     Use config file to return connection and cursor to a MySQL database.
@@ -116,10 +417,9 @@ def create_tables(cur, tables):
     --------
     Create tables in the MySQL database:
 
-    >>> from chamebr.database import ddl
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
-    >>> assert create_tables(cur, ddl.tables)
+    >>> assert create_tables(cur, TABLES)
     Setting up tables...
     Setting  OK
     Tube  OK
@@ -142,14 +442,13 @@ def create_tables(cur, tables):
 
 
 # ----------------------------------------------------------------------------
-# `Tube` Table
-
-
+# `Tube` table functions
+# ----------------------------------------------------------------------------
 def add_tube_info(cur):
     """
     Use a MySQL cursor to add test-independant Tube info.
 
-    Uses cursor .execute function on the dml.add_tube and ddl.tube_data.
+    Uses cursor .execute function on the ADD_TUBE and TUBE_DATA.
     Adds the new Tube if the Tube doesn't exist. If the Tube already
     exists, then the function does nothing.
 
@@ -179,12 +478,12 @@ def add_tube_info(cur):
 
     """
     # First query if the tube exists
-    cur.execute(dml.select_tube, ddl.tube_data)
+    cur.execute(SELECT_TUBE, TUBE_DATA)
 
     # If the tube does not exist, add it
     # Else, it already exists.
     if not cur.fetchall():
-        cur.execute(dml.add_tube, ddl.tube_data)
+        cur.execute(ADD_TUBE, TUBE_DATA)
         print('Tube added.')
         return True
     else:
@@ -193,9 +492,8 @@ def add_tube_info(cur):
 
 
 # ----------------------------------------------------------------------------
-# `Setting` Table
-
-
+# `Setting` table finctions
+# ----------------------------------------------------------------------------
 def _get_setting_info(tdms_obj):
     """
     Use TDMS file to return initial state of test.
@@ -313,7 +611,7 @@ def _setting_exists(cur, setting_info):
     """
     # ------------------------------------------------------------------------
     # Query the settings table and fetch the result
-    cur.execute(dml.select_setting, setting_info)
+    cur.execute(SELECT_SETTING, setting_info)
     result = cur.fetchall()
 
     # ------------------------------------------------------------------------
@@ -374,7 +672,7 @@ def _add_setting_info(cur, tdms_obj):
     # ------------------------------------------------------------------------
     # If the setting didn't exist, add it, and return the new setting id.
     if not setting_id:
-        cur.execute(dml.add_setting, setting_info)
+        cur.execute(ADD_SETTING, setting_info)
         setting_id = cur.lastrowid
 
     return setting_id
@@ -382,8 +680,7 @@ def _add_setting_info(cur, tdms_obj):
 
 # ----------------------------------------------------------------------------
 # `Test` Table
-
-
+# ----------------------------------------------------------------------------
 def _get_test_info(tdms_obj):
     """
     Use TDMS file to return test details.
@@ -493,7 +790,7 @@ def _test_exists(cur, test_info):
     # ------------------------------------------------------------------------
     # Querry the data base to see if the test exists in the database and fetch
     # the results
-    cur.execute(dml.select_test.format(
+    cur.execute(SELECT_TEST.format(
         test_info['DateTime'].replace(microsecond=0).replace(tzinfo=None))
         )
     result = cur.fetchall()
@@ -558,15 +855,14 @@ def _add_test_info(cur, tdms_obj, setting_id):
     #       it is not contained in the `test_info`.
     if not test_id:
         test_info["SettingID"] = setting_id
-        cur.execute(dml.add_test, test_info)
+        cur.execute(ADD_TEST, test_info)
         test_id = cur.lastrowid
     return test_id
 
 
 # ----------------------------------------------------------------------------
 # `Observation` Table
-
-
+# ----------------------------------------------------------------------------
 def _get_obs_info(tdms_obj, tdms_idx):
     """
     Use TDMS file and index to return observation info.
@@ -685,16 +981,16 @@ def _add_obs_info(cur, tdms_obj, test_id, tdms_idx):
     # If the test is a mass test, then include mass info
     # Else, don't consider mass.
     if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        cur.execute(dml.add_obs_m_t, obs_info)
+        cur.execute(ADD_OBS_M_T, obs_info)
         return True
     else:
-        cur.execute(dml.add_obs_m_f, obs_info)
+        cur.execute(ADD_OBS_M_F, obs_info)
         return True
 
 
 # ----------------------------------------------------------------------------
 # `TempObservation` Table
-
+# ----------------------------------------------------------------------------
 def _get_temp_info(tdms_obj, tdms_idx, couple_idx):
     """
     Get thermocouple observations.
@@ -802,14 +1098,14 @@ def _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
         ]
 
     # Execute many using the temp_data_list
-    cur.executemany(dml.add_temp, temp_data_list)
+    cur.executemany(ADD_TEMP, temp_data_list)
 
     return True
 
+
 # ----------------------------------------------------------------------------
 # Add all data, main function
-
-
+# ----------------------------------------------------------------------------
 def add_tdms_file(cnx, tdms_obj):
     """
     Insert tdms files into the MySQL database.
@@ -918,9 +1214,9 @@ def _get_test_dict(cnx, test_id):
 
     """
     # Build DataFrames
-    info_df = pd.read_sql(dml.get_info_df.format(test_id), con=cnx)
-    temp_df = pd.read_sql(dml.get_temp_df.format(test_id), con=cnx)
-    obs_df = pd.read_sql(dml.get_obs_df.format(test_id), con=cnx)
+    info_df = pd.read_sql(GET_INFO_DF.format(test_id), con=cnx)
+    temp_df = pd.read_sql(GET_TEMP_DF .format(test_id), con=cnx)
+    obs_df = pd.read_sql(GET_OBS_DF.format(test_id), con=cnx)
     data_df = temp_df.merge(obs_df)
 
     # Make dictionary
@@ -960,7 +1256,7 @@ def get_high_low_testids(cur, p, t):
     [1, 4]
 
     """
-    cur.execute(dml.get_high_low_testids.format(t, p))
+    cur.execute(GET_HIGH_LOW_TESTIDS.format(t, p))
     res = cur.fetchall()
     tid_list = [tid[0] for tid in res]
     return tid_list
@@ -999,7 +1295,7 @@ def get_rht_results(cnx, test_id):
     3   0.25  0.004452 -4.396130e-09  2.163040e-12
 
     """
-    res_df = pd.read_sql(dml.get_rhtargets_results.format(test_id), con=cnx)
+    res_df = pd.read_sql(GET_RHTARGET_RESULTS.format(test_id), con=cnx)
     return res_df
 
 
@@ -1038,7 +1334,7 @@ def get_test_from_set(cur, setting_info):
     '[1, 4]'
 
     """
-    test_from_set = dml.test_from_setting.format(dml.select_setting)
+    test_from_set = TEST_FROM_SETTING.format(SELECT_SETTING)
     cur.execute(test_from_set, setting_info)
     result = cur.fetchall()
     if not result:
@@ -1088,7 +1384,7 @@ def _add_rh_targets(cur, analyzed_df, test_id):
          float(analyzed_df.loc[analyzed_df['RH'] == rh].SigRH.iloc[0])
          ) for rh in analyzed_df.RH.unique()
     ]
-    cur.executemany(dml.add_rh_targets, rh_trgt_list)
+    cur.executemany(ADD_RH_TARGETS, rh_trgt_list)
 
     return True
 
@@ -1140,7 +1436,7 @@ def _add_results(cur, analyzed_df, test_id):
             float(analyzed_df.iloc[idx]['nu'])
         ) for idx in analyzed_df.index
     ]
-    cur.executemany(dml.add_results, results_list)
+    cur.executemany(ADD_RESULTS, results_list)
 
     return True
 
@@ -1175,7 +1471,7 @@ def _get_res_df(cnx, test_id):
     ..todo: Add output.
 
     """
-    res_df = pd.read_sql(dml.get_res_df.format(test_id), con=cnx)
+    res_df = pd.read_sql(GET_RES_DF.format(test_id), con=cnx)
     return res_df
 
 
@@ -1215,7 +1511,7 @@ def _add_best_fit(cnx, test_id):
         rh_set_df = res_df[res_df['RH'] == rh].reset_index()
         rh_row = experiments._get_df_row(rh_set_df)
         if rh_row is not None:
-            cur.execute(dml.update_rh_targets.format(
+            cur.execute(UPDATE_RH_TARGET.format(
                 rh_row.TestId.iloc[0], rh_row.RH.iloc[0], rh_row.Nu.iloc[0]))
     return True
 
