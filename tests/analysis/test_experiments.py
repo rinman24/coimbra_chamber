@@ -153,12 +153,14 @@ def test__zero_time(df_01, df_bad):
 
     df_01 = expr._zero_time(df_01)
     for col in ZERO_TIME_STATS:
-        assert df_01[col].count() == ZERO_TIME_STATS.loc['cnt', col]
-        assert df_01[col].sum() == ZERO_TIME_STATS.loc['sum', col]
-        assert df_01[col].var() == ZERO_TIME_STATS.loc['var', col]
-        assert df_01[col].mean() == ZERO_TIME_STATS.loc['avg', col]
-        assert df_01[col].min() == ZERO_TIME_STATS.loc['min', col]
-        assert df_01[col].max() == ZERO_TIME_STATS.loc['max', col]
+        assert math.isclose(
+            df_01[col].count(), ZERO_TIME_STATS.loc['cnt', col]
+            )
+        assert math.isclose(df_01[col].sum(), ZERO_TIME_STATS.loc['sum', col])
+        assert math.isclose(df_01[col].var(), ZERO_TIME_STATS.loc['var', col])
+        assert math.isclose(df_01[col].mean(), ZERO_TIME_STATS.loc['avg', col])
+        assert math.isclose(df_01[col].min(), ZERO_TIME_STATS.loc['min', col])
+        assert math.isclose(df_01[col].max(), ZERO_TIME_STATS.loc['max', col])
 
     assert df_01.Idx.iloc[0] == 0
     assert df_01.Idx.iloc[-1] == 20000
@@ -176,12 +178,24 @@ def test__format_temp(df_01, df_bad):
 
     df_01 = expr._format_temp(df_01)
     for col in FORMAT_TEMP_STATS:
-        assert df_01[col].count() == FORMAT_TEMP_STATS.loc['cnt', col]
-        assert df_01[col].sum() == FORMAT_TEMP_STATS.loc['sum', col]
-        assert df_01[col].var() == FORMAT_TEMP_STATS.loc['var', col]
-        assert df_01[col].mean() == FORMAT_TEMP_STATS.loc['avg', col]
-        assert df_01[col].min() == FORMAT_TEMP_STATS.loc['min', col]
-        assert df_01[col].max() == FORMAT_TEMP_STATS.loc['max', col]
+        assert math.isclose(
+            df_01[col].count(), FORMAT_TEMP_STATS.loc['cnt', col]
+            )
+        assert math.isclose(
+            df_01[col].sum(), FORMAT_TEMP_STATS.loc['sum', col]
+            )
+        assert math.isclose(
+            df_01[col].var(), FORMAT_TEMP_STATS.loc['var', col]
+            )
+        assert math.isclose(
+            df_01[col].mean(), FORMAT_TEMP_STATS.loc['avg', col]
+            )
+        assert math.isclose(
+            df_01[col].min(), FORMAT_TEMP_STATS.loc['min', col]
+            )
+        assert math.isclose(
+            df_01[col].max(), FORMAT_TEMP_STATS.loc['max', col]
+            )
 
     assert math.isclose(df_01.TC4[0], round(290.799, 1))
     assert math.isclose(df_01.TC7[100], round(290.358, 1))
@@ -204,12 +218,14 @@ def test__format_dew_point(df_01, df_bad):
 
     df_01 = expr._format_dew_point(df_01)
     for col in FORMAT_DP_STATS:
-        assert df_01[col].count() == FORMAT_DP_STATS.loc['cnt', col]
-        assert df_01[col].sum() == FORMAT_DP_STATS.loc['sum', col]
-        assert df_01[col].var() == FORMAT_DP_STATS.loc['var', col]
-        assert df_01[col].mean() == FORMAT_DP_STATS.loc['avg', col]
-        assert df_01[col].min() == FORMAT_DP_STATS.loc['min', col]
-        assert df_01[col].max() == FORMAT_DP_STATS.loc['max', col]
+        assert math.isclose(
+            df_01[col].count(), FORMAT_DP_STATS.loc['cnt', col]
+            )
+        assert math.isclose(df_01[col].sum(), FORMAT_DP_STATS.loc['sum', col])
+        assert math.isclose(df_01[col].var(), FORMAT_DP_STATS.loc['var', col])
+        assert math.isclose(df_01[col].mean(), FORMAT_DP_STATS.loc['avg', col])
+        assert math.isclose(df_01[col].min(), FORMAT_DP_STATS.loc['min', col])
+        assert math.isclose(df_01[col].max(), FORMAT_DP_STATS.loc['max', col])
 
     assert math.isclose(df_01.DewPoint[0], round(259.04, 1))
     assert math.isclose(df_01.DewPoint[100], round(259.145, 1))
@@ -230,12 +246,12 @@ def test__format_pressure(df_01, df_bad):
 
     df_01 = expr._format_pressure(df_01)
     for col in FORMAT_P_STATS:
-        assert df_01[col].count() == FORMAT_P_STATS.loc['cnt', col]
-        assert df_01[col].sum() == FORMAT_P_STATS.loc['sum', col]
-        assert df_01[col].var() == FORMAT_P_STATS.loc['var', col]
-        assert df_01[col].mean() == FORMAT_P_STATS.loc['avg', col]
-        assert df_01[col].min() == FORMAT_P_STATS.loc['min', col]
-        assert df_01[col].max() == FORMAT_P_STATS.loc['max', col]
+        assert math.isclose(df_01[col].count(), FORMAT_P_STATS.loc['cnt', col])
+        assert math.isclose(df_01[col].sum(), FORMAT_P_STATS.loc['sum', col])
+        assert math.isclose(df_01[col].var(), FORMAT_P_STATS.loc['var', col])
+        assert math.isclose(df_01[col].mean(), FORMAT_P_STATS.loc['avg', col])
+        assert math.isclose(df_01[col].min(), FORMAT_P_STATS.loc['min', col])
+        assert math.isclose(df_01[col].max(), FORMAT_P_STATS.loc['max', col])
 
     assert math.isclose(df_01.Pressure[0], round(100156.841, 0))
     assert math.isclose(df_01.Pressure[100], round(100161.21800000001, 0))
@@ -259,12 +275,12 @@ def test__add_avg_te(df_01, df_bad):
     assert 'Te' in set(df_01)
 
     for col in AVG_T_STATS:
-        assert df_01[col].count() == AVG_T_STATS.loc['cnt', col]
-        assert df_01[col].sum() == AVG_T_STATS.loc['sum', col]
-        assert df_01[col].var() == AVG_T_STATS.loc['var', col]
-        assert df_01[col].mean() == AVG_T_STATS.loc['avg', col]
-        assert df_01[col].min() == AVG_T_STATS.loc['min', col]
-        assert df_01[col].max() == AVG_T_STATS.loc['max', col]
+        assert math.isclose(df_01[col].count(), AVG_T_STATS.loc['cnt', col])
+        assert math.isclose(df_01[col].sum(), AVG_T_STATS.loc['sum', col])
+        assert math.isclose(df_01[col].var(), AVG_T_STATS.loc['var', col])
+        assert math.isclose(df_01[col].mean(), AVG_T_STATS.loc['avg', col])
+        assert math.isclose(df_01[col].min(), AVG_T_STATS.loc['min', col])
+        assert math.isclose(df_01[col].max(), AVG_T_STATS.loc['max', col])
 
     tc_keys = ['TC{}'.format(i) for i in range(4, 14)]
     mean = np.mean(df_01.loc[0, tc_keys])
@@ -382,12 +398,12 @@ def test__multi_rh(df_01):
     """Test _multi_rh."""
     rh = expr._multi_rh(df_01, param_list=PARAM_LIST)
     for col in RH_STATS:
-        assert rh.count() == RH_STATS.loc['cnt', col]
-        assert rh.sum() == RH_STATS.loc['sum', col]
-        assert rh.var() == RH_STATS.loc['var', col]
-        assert rh.mean() == RH_STATS.loc['avg', col]
-        assert rh.min() == RH_STATS.loc['min', col]
-        assert rh.max() == RH_STATS.loc['max', col]
+        assert math.isclose(rh.count(), RH_STATS.loc['cnt', col])
+        assert math.isclose(rh.sum(), RH_STATS.loc['sum', col])
+        assert math.isclose(rh.var(), RH_STATS.loc['var', col])
+        assert math.isclose(rh.mean(), RH_STATS.loc['avg', col])
+        assert math.isclose(rh.min(), RH_STATS.loc['min', col])
+        assert math.isclose(rh.max(), RH_STATS.loc['max', col])
 
     if PLOT:
         plt.plot(rh, label='RH')
@@ -403,16 +419,16 @@ def test__multi_rh_err(df_01):
     """Test _multi_rh_err."""
     rh_err = expr._multi_rh_err(df_01, param_list=PARAM_LIST)
     for col in SIGRH_STATS:
-        assert rh_err.count() == SIGRH_STATS.loc['cnt', col]
-        assert rh_err.sum() == SIGRH_STATS.loc['sum', col]
+        assert math.isclose(rh_err.count(), SIGRH_STATS.loc['cnt', col])
+        assert math.isclose(rh_err.sum(), SIGRH_STATS.loc['sum', col])
         assert math.isclose(
             rh_err.var(),
             SIGRH_STATS.loc['var', col],
             rel_tol=1e-6
             )
-        assert rh_err.mean() == SIGRH_STATS.loc['avg', col]
-        assert rh_err.min() == SIGRH_STATS.loc['min', col]
-        assert rh_err.max() == SIGRH_STATS.loc['max', col]
+        assert math.isclose(rh_err.mean(), SIGRH_STATS.loc['avg', col])
+        assert math.isclose(rh_err.min(), SIGRH_STATS.loc['min', col])
+        assert math.isclose(rh_err.max(), SIGRH_STATS.loc['max', col])
 
     if PLOT:
         plt.plot(rh_err, label='SigRH Function')
@@ -434,16 +450,16 @@ def test__add_rh(df_01):
     assert 'RH' in set(df_01)
 
     for col in RH_STATS_JOIN:
-        assert df_01[col].count() == RH_STATS_JOIN.loc['cnt', col]
-        assert df_01[col].sum() == RH_STATS_JOIN.loc['sum', col]
+        assert math.isclose(df_01[col].count(), RH_STATS_JOIN.loc['cnt', col])
+        assert math.isclose(df_01[col].sum(), RH_STATS_JOIN.loc['sum', col])
         assert math.isclose(
             df_01[col].var(),
             RH_STATS_JOIN.loc['var', col],
             rel_tol=1e-6
             )
-        assert df_01[col].mean() == RH_STATS_JOIN.loc['avg', col]
-        assert df_01[col].min() == RH_STATS_JOIN.loc['min', col]
-        assert df_01[col].max() == RH_STATS_JOIN.loc['max', col]
+        assert math.isclose(df_01[col].mean(), RH_STATS_JOIN.loc['avg', col])
+        assert math.isclose(df_01[col].min(), RH_STATS_JOIN.loc['min', col])
+        assert math.isclose(df_01[col].max(), RH_STATS_JOIN.loc['max', col])
 
     if PLOT:
         plt.errorbar(df_01.Idx, df_01.RH, yerr=df_01.SigRH, label='RH')
