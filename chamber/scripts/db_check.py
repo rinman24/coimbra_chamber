@@ -13,12 +13,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from chamber.data import sqldb, dml
+from chamber.data import sqldb
 
+# List of temperature and pressure coordintates for tests
 PT_LIST = [(275, 30000), (275, 50000), (275, 70000), (275, 90000),
            (280, 40000), (280, 60000), (280, 80000), (280, 100000),
            (290, 60000), (290, 80000), (290, 100000), (300, 80000),
            (300, 100000), (310, 100000)]
+
+# dml to get all 'Setting' and 'TestId' stored in the database
+SETTINGS_DF = ('SELECT Pressure, Temperature, Reservoir, TestId FROM Setting '
+               'INNER JOIN Test ON Test.SettingId=Setting.SettingId')
+
+# dml to select all distinct 'TestId's in the 'RHTargets' table
+ANALYSIS_TID = 'SELECT DISTINCT TestId FROM RHTargets'
 
 
 def _get_setting_df(cnx):
@@ -50,7 +58,7 @@ def _get_setting_df(cnx):
     2     60000        290.0          0       3
 
     """
-    settings = pd.read_sql(dml.settings_df, cnx)
+    settings = pd.read_sql(SETTINGS_DF, cnx)
     return settings
 
 
@@ -82,7 +90,7 @@ def _get_analysis_tid_df(cnx):
     1        2
 
     """
-    tid_df = pd.read_sql(dml.analysis_tid, cnx)
+    tid_df = pd.read_sql(ANALYSIS_TID, cnx)
     return tid_df
 
 
