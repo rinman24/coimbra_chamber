@@ -461,7 +461,7 @@ def test__add_rh(df_01):
         assert math.isclose(df_01[col].min(), RH_STATS_JOIN.loc['min', col])
         assert math.isclose(df_01[col].max(), RH_STATS_JOIN.loc['max', col])
 
-    if PLOT:
+    if PLOT:  # pragma: no cover
         plt.errorbar(df_01.Idx, df_01.RH, yerr=df_01.SigRH, label='RH')
 
         plt.legend()

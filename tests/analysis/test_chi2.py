@@ -32,7 +32,7 @@ YP75 = chi2.add_noise(Y, 0.75)
 # Check if the test is being run in Continuous Integration or not
 if os.getenv('CI'):
     PLOT = False
-else:
+else:  # pragma: no cover
     PLOT = True
 
 
