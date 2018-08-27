@@ -571,69 +571,49 @@ def _add_test_info(cur, tdms_obj, setting_id):
 # `Observation` Table
 
 
-def _get_obs_info(tdms_obj, tdms_idx):
+def _add_obs_info(cur, tdms_obj, test_id):
     """
-    Use TDMS file and index to return observation info.
+    Add relevant data to the 'Observation' table in the MySQL databse.
 
-    Builds a dictionary containing the observation for a given index (time) in
-    the nptdms.TdmsFile object.
-
-    It is important to note here that tdms_idx is NOT the same as the Idx
-    comumn in the MySQL schema. Because the tdms files are read in using
-    `nptdms` data is converted into arrays of type `np.ndarray`. As a result,
-    I can use the tdms_idx as a proxy for the idx column in the tdms file.
+    Use npTDMS.as_dataframe to create a `DataFrame` object containint the data
+    from the argument `nptdms.TdmsFile` object. Format the `Dataframe` for use
+    with _load_data and compatibility with the 'Observation' table. Calls
+    _load_data to insert data into the database.
 
     Parameters
     ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
     tdms_obj : nptdms.TdmsFile
         Object containg the data from the tdms test file. Original tdms files
         were created from UCSD Chamber experiments in the Coimbra Lab in SERF
         159.
-    tdms_idx : int
-        Index in the tdms file representing a single time.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
 
     Returns
     -------
-    obs_info : dict of {str: str or int}
-        Set of values to insert into the Observation table. Keys should be
-        column names and values should be the value to insert.
+    True
+        Returns `True` after sucess.
 
     Examples
     --------
-    Get the observation information from index 10:
-
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> _get_obs_info(tdms_file, 10)
-    {'DewPoint': '270.69', 'Idx': 8, 'Mass': '0.0985090', 'CapManOk': 1,
-    'Pressure': 100393, 'OptidewOk': 1, 'PowRef': '-0.0003', 'PowOut':
-    '-0.0003'}
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> test_id = 1
+    >>> _add_obs_info(cur, tdms_obj, test_id)
+    True
 
     """
-    # ------------------------------------------------------------------------
-    # Construct the obs_info dictionary
-    obs_info = {'CapManOk': int(
-                    tdms_obj.object("Data", "CapManOk").data[tdms_idx]),
-                'DewPoint': '{:.2f}'.format(
-                    tdms_obj.object("Data", "DewPoint").data[tdms_idx]),
-                'Idx': int(
-                    tdms_obj.object("Data", "Idx").data[tdms_idx]),
-                'OptidewOk': int(
-                    tdms_obj.object("Data", "OptidewOk").data[tdms_idx]),
-                'PowOut': '{:.4f}'.format(
-                    tdms_obj.object("Data", "PowOut").data[tdms_idx]),
-                'PowRef': '{:.4f}'.format(
-                    tdms_obj.object("Data", "PowRef").data[tdms_idx]),
-                'Pressure': int(
-                    tdms_obj.object("Data", "Pressure").data[tdms_idx])}
-
-    # ------------------------------------------------------------------------
-    # If the setting IsMass is True, then also add mass
-    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        obs_info['Mass'] = '{:.7f}'.format(
-            tdms_obj.object("Data", "Mass").data[tdms_idx])
-
-    return obs_info
+    obs_df = tdms_obj.object('Data').as_dataframe()
+    obs_df['TestId'] = [test_id for i in range(len(obs_df))]
+    obs_df = obs_df[['CapManOk', 'DewPoint', 'Idx', 'Mass', 'OptidewOk',
+                     'PowOut', 'PowRef', 'Pressure', 'TestId']]
+    assert _load_data(cur, obs_df, 'Observation')
+    return True
 
 
 # ----------------------------------------------------------------------------
@@ -682,18 +662,45 @@ def _get_temp_info(tdms_obj, tdms_idx, couple_idx):
     return temp_info
 
 
-def _add_obs_info(cur, tdms_obj, test_id):
-    obs_df = tdms_obj.object('Data').as_dataframe()
-    obs_df['TestId'] = [test_id for i in range(len(obs_df))]
-    obs_df = obs_df[['CapManOk', 'DewPoint', 'Idx', 'Mass', 'OptidewOk',
-                     'PowOut', 'PowRef', 'Pressure', 'TestId']]
-    assert _load_data(cur, obs_df, 'Observation')
-    return True
-
-
 # ----------------------------------------------------------------------------
 # `TempObservation` Table
 def _add_temp_info(cur, tdms_obj, test_id):
+    """
+    Add relevant data to the 'TempObservation' table in the MySQL databse.
+
+    Use npTDMS.as_dataframe to create a `DataFrame` object containint the data
+    from the argument `nptdms.TdmsFile` object. Format the `Dataframe` for use
+    with _load_data and compatibility with the 'TempObservation' table. Calls
+    _load_data to insert data into the database.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    tdms_obj : nptdms.TdmsFile
+        Object containg the data from the tdms test file. Original tdms files
+        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
+        159.
+    test_id : int
+        TestID for the MySQL database, which is the primary key for the Test
+        table.
+
+    Returns
+    -------
+    True
+        Returns `True` after sucess.
+
+    Examples
+    --------
+    >>> import nptdms
+    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
+    >>> cnx = connect('my-schema')
+    >>> cur = cnx.cursor()
+    >>> test_id = 1
+    >>> _add_temp_info(cur, tdms_obj, test_id)
+    True
+
+    """
     temp_df = pd.DataFrame()
     is_mass = (int(tdms_obj.object('Settings', 'IsMass').data[0]) == 1)
     for n in range(4 if is_mass else 0, 14):
@@ -709,6 +716,29 @@ def _add_temp_info(cur, tdms_obj, test_id):
 
 
 def _load_data(cur, df, table):
+    """
+    Leverage MySQL 'LOAD DATA INFILE' functionality to rapidly upload data.
+
+    Seve the argument `DataFrame` as a .csv file. Use a MySQL
+    'LOAD DATA INFILE' style querry to rapidly mass-upload the data into the
+    argument table. The .csv file is created and deleted in the root of the
+    repository every time _load_data is run.
+
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    df: DataFrame
+        A `DataFrame` object compatible with the argument table.
+    table: str
+        The name of the MySQL database table in which the data will be written.
+
+    Returns
+    -------
+    True
+        Returns `True` after sucess.
+
+    """
     df.to_csv(path_or_buf='_data.csv', index=False)
     assert os.path.isfile('_data.csv')
     cur.execute(LOAD_DATA.format(table))

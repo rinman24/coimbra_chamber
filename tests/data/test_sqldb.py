@@ -608,37 +608,6 @@ def test__get_test_info(test_tdms_obj):
         assert TDMS_04_TEST == sqldb._get_test_info(test_tdms_obj[3])
 
 
-def test__get_obs_info(test_tdms_obj):
-        """Test get_obs_info."""
-        # --------------------------------------------------------------------
-        # File 1
-        assert (
-            TDMS_01_OBS_07 ==
-            sqldb._get_obs_info(test_tdms_obj[0], TEST_INDEX)
-            )
-
-        # --------------------------------------------------------------------
-        # File 2
-        assert (
-            TDMS_02_OBS_07 ==
-            sqldb._get_obs_info(test_tdms_obj[1], TEST_INDEX)
-            )
-
-        # --------------------------------------------------------------------
-        # File 3
-        assert (
-            TDMS_03_OBS_07 ==
-            sqldb._get_obs_info(test_tdms_obj[2], TEST_INDEX)
-            )
-
-        # --------------------------------------------------------------------
-        # File 4
-        assert (
-            TDMS_04_OBS_07 ==
-            sqldb._get_obs_info(test_tdms_obj[3], TEST_INDEX)
-            )
-
-
 def test__add_setting_info(cur, test_tdms_obj):
     """Test _add_setting_info."""
     # ------------------------------------------------------------------------
