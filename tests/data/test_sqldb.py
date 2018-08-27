@@ -135,17 +135,15 @@ OBS_COLS = ['Idx', 'PowOut', 'PowRef', 'Pressure', 'TestId', 'Mass']
 OBS_BIT_COLS = ['CapManOk', 'OptidewOk']
 OBS_STATS_1 = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
-    CapManOk=[27, 27, 0, 1.0000, 1, 1],
+    CapManOk=[27, 27, 0, 1, 1, 1],
     DewPoint=[27, 7737.23, 0.000705624142660792, 286.564074, 286.52, 286.63],
     Idx=[27, 405, 60.666666666666664, 15.0000, 2, 28],
     Mass=[0, None, None, None, None, None],
-    OptidewOk=[27, 27, 0, 1.0000, 1, 1],
-    PowOut=[27, 0.0051, 0.000000012839506172839506,
-            0.00018889, -0.0001, 0.0004],
-    PowRef=[27, -0.0009, 0.00000000888888888888889,
-            -0.00003333, -0.0003, 0.0002],
-    Pressure=[27, 2698644, 239.28395061728366, 99949.7778, 99929, 99986],
-    TestId=[27, 27, 0, 1.0000, 1, 1],
+    OptidewOk=[27, 27, 0, 1, 1, 1],
+    PowOut=[27, 5.1e-3, 1.2839506172839506e-8, 1.8889e-4, -1e-4, 4e-4],
+    PowRef=[27, -0.0009, 8.88888888888889e-9, -3.333e-5, -3e-4, 2e-4],
+    Pressure=[27, 2698654, 235.01508916327026, 99950.1481, 99929, 99986],
+    TestId=[27, 27, 0, 1, 1, 1],
     )
 ).set_index('idx')
 OBS_STATS_2 = pd.DataFrame(dict(
@@ -160,7 +158,7 @@ OBS_STATS_2 = pd.DataFrame(dict(
             -0.0001, 0.0002],
     PowRef=[15, 0.0002, 0.000000003822222222222223, 0.00001333,
             -0.0001, 0.0001],
-    Pressure=[15, 1498947, 439.6266666666366, 99929.8000, 99907, 99981],
+    Pressure=[15, 1498957, 449.71555555555057, 99930.4667, 99907, 99982],
     TestId=[15, 30, 0, 2.0000, 2, 2],
     )
 ).set_index('idx')
@@ -175,7 +173,7 @@ OBS_STATS_3 = pd.DataFrame(dict(
             0.0001, 0.0004],
     PowRef=[13, 0.0003, 0.000000004852071005917161, 0.00002308,
             -0.0001, 0.0001],
-    Pressure=[13, 1299252, 95.47928994086436, 99942.4615, 99929, 99964],
+    Pressure=[13, 1299260, 91.30177514793556, 99943.0769, 99929, 99964],
     TestId=[13, 39, 0, 3.0000, 3, 3],
     )
 ).set_index('idx')
@@ -190,7 +188,7 @@ OBS_STATS_4 = pd.DataFrame(dict(
     PowOut=[14, 0.0027, 0.00000000923469387755102, 0.00019286, 0.0000, 0.0003],
     PowRef=[14, 0.0006, 0.00000000816326530612245, 0.00004286,
             -0.0001, 0.0002],
-    Pressure=[14, 1398995, 67.02551020410793, 99928.2143, 99911, 99942],
+    Pressure=[14, 1399006, 67.57142857140576, 99929, 99912, 99942],
     TestId=[14, 56, 0, 4.0000, 4, 4],
     )
 ).set_index('idx')
@@ -208,8 +206,8 @@ TEMP_OBS_4 = [292.06, 291.83, 291.7, 291.94, 292.1, 291.64, 291.56, 291.61,
 TEMP_OBS_STATS_1 = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     ThermocoupleNum=[378, 2457, 16.25000000000001, 6.5000, 0, 13],
-    Temperature=[378, 110454.30, 0.5940934240362769,
-                 292.207143, 291.51, 293.96],
+    Temperature=[378, 110454.42, 0.5943596875787265,
+                 292.207460, 291.52, 293.96],
     Idx=[378, 5670, 60.666666666666664, 15.0000, 2, 28],
     TestId=[378, 378, 0, 1.0000, 1, 1],
     )
@@ -217,8 +215,8 @@ TEMP_OBS_STATS_1 = pd.DataFrame(dict(
 TEMP_OBS_STATS_2 = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     ThermocoupleNum=[150, 1275, 8.25, 8.5000, 4, 13],
-    Temperature=[150, 43780.54, 0.0793492622222213,
-                 291.870267, 291.56, 292.43],
+    Temperature=[150, 43780.64, 0.0796217955555548,
+                 291.870933, 291.56, 292.43],
     Idx=[150, 1650, 18.666666666666675, 11.0000, 4, 18],
     TestId=[150, 300, 0, 2.0000, 2, 2],
     )
@@ -226,8 +224,8 @@ TEMP_OBS_STATS_2 = pd.DataFrame(dict(
 TEMP_OBS_STATS_3 = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     ThermocoupleNum=[182, 1183, 16.250000000000007, 6.5000, 0, 13],
-    Temperature=[182, 53149.04, 0.30165401521555363,
-                 292.027692, 291.49, 293.09],
+    Temperature=[182, 53149.14, 0.301965040454052,
+                 292.028242, 291.49, 293.09],
     Idx=[182, 1456, 13.999999999999982, 8.0000, 2, 14],
     TestId=[182, 546, 0, 3.0000, 3, 3],
     )
@@ -235,8 +233,8 @@ TEMP_OBS_STATS_3 = pd.DataFrame(dict(
 TEMP_OBS_STATS_4 = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     ThermocoupleNum=[140, 1190, 8.25, 8.5000, 4, 13],
-    Temperature=[140, 40850.05, 0.03764956632653166,
-                 291.786071, 291.53, 292.14],
+    Temperature=[140, 40850.13, 0.03772230102040992,
+                 291.786643, 291.53, 292.14],
     Idx=[140, 1190, 16.250000000000007, 8.5000, 2, 15],
     TestId=[140, 560, 0, 4.0000, 4, 4],
     )
@@ -257,17 +255,19 @@ TEST_1_INFO_DF = _[['Temperature', 'Pressure', 'Duty', 'IsMass', 'Reservoir',
                     'TestId', 'SettingId']]
 TEST_1_STATS_DF = pd.DataFrame(dict(
     idx=['sum', 'mean', 'min', 'max', 'var'],
-    TC0=[7929.21, 293.67444444444442, 293.65, 293.71, 0.00031794871794867406],
-    TC1=[7911.38, 293.014074, 292.99, 293.04, 0.00014045584045569836],
-    TC7=[7882.79, 291.955185, 291.94, 291.98, 0.00011054131054147711],
-    TC13=[7878.85, 291.809259, 291.80, 291.81999999999999,
-          2.2507122507081566e-05],
-    Pressure=[2698644, 99949.7778, 99929, 99986, 248.48717948717953],
+    TC0=[7929.219999999998, 293.67481481481474, 293.65, 293.71,
+         3.336182336181693e-4],
+    TC1=[7911.41, 293.0151851851852, 292.99, 293.04, 1.4900284900268648e-4],
+    TC7=[7882.79, 291.9551851851852, 291.94, 291.98, 0.00011054131054147711],
+    TC13=[7878.86000000000015, 291.8096296296297, 291.80, 291.81999999999999,
+          2.6780626780578073e-05],
+    Pressure=[2698654, 99950.1481, 99929, 99986, 244.05413105413103],
     PowOut=[0.0051, 0.00018888888888888883, -0.0001, 0.0004,
             1.3333333333333332e-08],
     PowRef=[-0.0009, -3.3333333333333335e-05, -0.0003, 0.0002,
             9.2307692307692321e-09],
-    DewPoint=[7737.23, 286.564074, 286.52, 286.63, 0.00073276353276327522],
+    DewPoint=[7737.240000000001, 286.56444444444446, 286.52, 286.64,
+              7.871794871791728e-4],
     )
 ).set_index('idx')
 TEST_1_DATA_DF_SIZE = (27, 22)
@@ -744,129 +744,6 @@ def test__test_exists(cur, test_tdms_obj):
     assert not 6 == sqldb._test_exists(cur, '')
 
 
-def test__add_obs_info(cur, test_tdms_obj):
-    """Test _add_obs_info."""
-    # ------------------------------------------------------------------------
-    # File 1
-    # For every index in the data enter all of the data
-    for tdms_idx in range(len(test_tdms_obj[0].object("Data", "Idx").data)):
-        assert sqldb._add_obs_info(cur, test_tdms_obj[0], 1, tdms_idx)
-
-    # Check column statistics for the TestId
-    for col in OBS_COLS[:-1]:
-        # First loop through the coloumn names eg. 'Mass', 'DewPoint', etc...
-        cur.execute(dml_test.get_stats_test_id.format(col, 1, 'Observation'))
-        res = cur.fetchall()[0]
-        for idx in range(len(OBS_STATS_1)):
-            # Loop through the length of the dataframe
-            # This allows us to loop through the index values, 'min', 'max'...
-            val = OBS_STATS_1.index.values[idx]
-            # This idx also is used to loop through the querry results
-            assert isclose(res[idx], OBS_STATS_1.loc[val, col])
-
-    for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 1, 'Observation'))
-        res = cur.fetchall()[0]
-        for idx in range(len(OBS_STATS_1)):
-            val = OBS_STATS_1.index.values[idx]
-            assert isclose(res[idx], OBS_STATS_1.loc[val, col])
-
-    # ------------------------------------------------------------------------
-    # File 2
-    for tdms_idx in range(len(test_tdms_obj[1].object("Data", "Idx").data)):
-        assert sqldb._add_obs_info(cur, test_tdms_obj[1], 2, tdms_idx)
-
-    for col in OBS_COLS:
-        cur.execute(dml_test.get_stats_test_id.format(col, 2, 'Observation'))
-        res = cur.fetchall()[0]
-        for idx in range(len(OBS_STATS_2)):
-            val = OBS_STATS_2.index.values[idx]
-            assert isclose(res[idx], OBS_STATS_2.loc[val, col])
-
-    for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 2, 'Observation'))
-        res = cur.fetchall()[0]
-        for idx in range(len(OBS_STATS_2)):
-            val = OBS_STATS_2.index.values[idx]
-            assert isclose(res[idx], OBS_STATS_2.loc[val, col])
-
-    # ------------------------------------------------------------------------
-    # File 3
-    for tdms_idx in range(len(test_tdms_obj[2].object("Data", "Idx").data)):
-        assert sqldb._add_obs_info(cur, test_tdms_obj[2], 3, tdms_idx)
-
-    for col in OBS_COLS[:-1]:
-        cur.execute(dml_test.get_stats_test_id.format(col, 3, 'Observation'))
-        res = cur.fetchall()[0]
-        for idx in range(len(OBS_STATS_3)):
-            val = OBS_STATS_3.index.values[idx]
-            assert isclose(res[idx], OBS_STATS_3.loc[val, col])
-
-    for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 3, 'Observation'))
-        res = cur.fetchall()[0]
-        for idx in range(len(OBS_STATS_3)):
-            val = OBS_STATS_3.index.values[idx]
-            assert isclose(res[idx], OBS_STATS_3.loc[val, col])
-
-    # ------------------------------------------------------------------------
-    # File 4
-    for tdms_idx in range(len(test_tdms_obj[3].object("Data", "Idx").data)):
-        assert sqldb._add_obs_info(cur, test_tdms_obj[3], 4, tdms_idx)
-
-    for col in OBS_COLS:
-        cur.execute(dml_test.get_stats_test_id.format(col, 4, 'Observation'))
-        res = cur.fetchall()[0]
-        for idx in range(len(OBS_STATS_4)):
-            val = OBS_STATS_4.index.values[idx]
-            assert isclose(res[idx], OBS_STATS_4.loc[val, col])
-
-    for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 4, 'Observation'))
-        res = cur.fetchall()[0]
-        for idx in range(len(OBS_STATS_4)):
-            val = OBS_STATS_4.index.values[idx]
-            assert isclose(res[idx], OBS_STATS_4.loc[val, col])
-
-
-def test__add_temp_info(cur, test_tdms_obj):
-    """Test _add_temp_info."""
-    # ------------------------------------------------------------------------
-    # File 1
-
-    # Add temps with tdms_idx 7 and Idx 8
-    assert sqldb._add_temp_info(cur, test_tdms_obj[0], 1,
-                                TEST_INDEX, TEST_INDEX+1)
-    cur.execute(dml.get_temp_obs.format(1, TEST_INDEX+1))
-    # Now query these with the TestId and Idx
-    res = [float(r[0]) for r in cur.fetchall()]
-    assert res == TEMP_OBS_1
-
-    # ------------------------------------------------------------------------
-    # File 2
-    assert sqldb._add_temp_info(cur, test_tdms_obj[1], 2,
-                                TEST_INDEX, TEST_INDEX)
-    cur.execute(dml.get_temp_obs.format(2, TEST_INDEX))
-    res = [float(r[0]) for r in cur.fetchall()]
-    assert res == TEMP_OBS_2
-
-    # ------------------------------------------------------------------------
-    # File 3
-    assert sqldb._add_temp_info(cur, test_tdms_obj[2], 3,
-                                TEST_INDEX, TEST_INDEX+1)
-    cur.execute(dml.get_temp_obs.format(3, TEST_INDEX+1))
-    res = [float(r[0]) for r in cur.fetchall()]
-    assert res == TEMP_OBS_3
-
-    # ------------------------------------------------------------------------
-    # File 4
-    assert sqldb._add_temp_info(cur, test_tdms_obj[3], 4,
-                                TEST_INDEX, TEST_INDEX+1)
-    cur.execute(dml.get_temp_obs.format(4, TEST_INDEX+1))
-    res = [float(r[0]) for r in cur.fetchall()]
-    assert res == TEMP_OBS_4
-
-
 def test_add_tdms_file(cnx, cur, test_tdms_obj):
     """
     Test add_tdms_file.
@@ -1047,7 +924,7 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
 
     # ------------------------------------------------------------------------
     # Test adding file 4 again
-    assert sqldb.add_tdms_file(cnx, test_tdms_obj[3]) is None
+    assert sqldb.add_tdms_file(cnx, test_tdms_obj[3]) is True
 
 
 def test__get_test_dict(cnx):
@@ -1057,8 +934,7 @@ def test__get_test_dict(cnx):
     Test resultant `DataFrame` accuracy and structure.
     """
     test_dict = sqldb._get_test_dict(cnx, 1)
-    assert pd.testing.assert_frame_equal(test_dict['info'],
-                                         TEST_1_INFO_DF) is None
+    pd.testing.assert_frame_equal(test_dict['info'], TEST_1_INFO_DF)
     assert test_dict['data'].shape == TEST_1_DATA_DF_SIZE
     assert test_dict['data']['Idx'].iloc[3] == 5
     assert test_dict['data']['OptidewOk'].iloc[3] == 1
@@ -1075,19 +951,6 @@ def test__get_test_dict(cnx):
                        TEST_1_STATS_DF.loc['max', col])
         assert isclose(test_dict['data'][col].var(),
                        TEST_1_STATS_DF.loc['var', col])
-
-
-def test_get_test_from_set(cur):
-    """
-    Test get_test_test_from_set.
-
-    Test the accuracy of returned TestId lists.
-    """
-    assert sqldb.get_test_from_set(cur, TDMS_01_SETTING) == [1]
-    assert sqldb.get_test_from_set(cur, TDMS_02_SETTING) == [2]
-    assert sqldb.get_test_from_set(cur, TDMS_03_SETTING) == [3]
-    assert sqldb.get_test_from_set(cur, TDMS_04_SETTING) == [4]
-    assert sqldb.get_test_from_set(cur, FALSE_SETTING) is False
 
 
 def test__add_rh_targets(results_cnx):
