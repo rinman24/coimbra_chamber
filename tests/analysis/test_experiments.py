@@ -14,7 +14,7 @@ import chamber.analysis.experiments as expr
 
 if os.getenv('CI'):
     PLOT = False
-else:
+else:  # pragma: no cover
     PLOT = True
 
 TARGET_RH = 0.15
