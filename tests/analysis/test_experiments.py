@@ -294,7 +294,7 @@ def test__add_avg_te(df_01, df_bad):
         )
     assert err.value.args[0] == err_msg
 
-    if PLOT:
+    if PLOT:  # pragma: no cover
         plt.plot(df_01.loc[:, tc_keys], 'k')
         plt.plot(df_01.Te, 'r', label='Average Temperature')
 
@@ -318,7 +318,7 @@ def test__add_smooth_avg_te(df_01, df_bad):
         expr._add_smooth_avg_te(df_bad)
     assert err.value.args[0] == "'DataFrame' object has no attribute 'Te'"
 
-    if PLOT:
+    if PLOT:  # pragma: no cover
         plt.plot(df_01.Te, label='before')
         plt.plot(df_01.TeSmooth, label='smoothed')
 
@@ -343,7 +343,7 @@ def test__add_smooth_dew_point(df_01, df_bad):
     assert err.value.args[0] == ("'DataFrame' object has no attribute" +
                                  " 'DewPoint'")
 
-    if PLOT:
+    if PLOT:  # pragma: no cover
         plt.plot(df_01.DewPoint, label='before')
         plt.plot(df_01.DewPointSmooth, label='smoothed')
 
@@ -369,7 +369,7 @@ def test__add_smooth_pressure(df_01, df_bad):
         "'DataFrame' object has no attribute 'Pressure'"
         )
 
-    if PLOT:
+    if PLOT:  # pragma: no cover
         plt.plot(df_01.Pressure, label='before')
         plt.plot(df_01.PressureSmooth, label='smoothed')
 
@@ -405,7 +405,7 @@ def test__multi_rh(df_01):
         assert math.isclose(rh.min(), RH_STATS.loc['min', col])
         assert math.isclose(rh.max(), RH_STATS.loc['max', col])
 
-    if PLOT:
+    if PLOT:  # pragma: no cover
         plt.plot(rh, label='RH')
 
         plt.legend()
@@ -430,7 +430,7 @@ def test__multi_rh_err(df_01):
         assert math.isclose(rh_err.min(), SIGRH_STATS.loc['min', col])
         assert math.isclose(rh_err.max(), SIGRH_STATS.loc['max', col])
 
-    if PLOT:
+    if PLOT:  # pragma: no cover
         plt.plot(rh_err, label='SigRH Function')
 
         plt.legend()
@@ -497,7 +497,7 @@ def test__get_rh_idx(df_01):
     rh = df_01.RH[idx]
     assert math.isclose(rh, TARGET_RH, abs_tol=0.01)
 
-    if PLOT:
+    if PLOT:  # pragma: no cover
         plt.plot(df_01.RH, label='RH', color='orange')
         plt.axvline(x=idx)
         plt.axhline(y=TARGET_RH)
@@ -516,7 +516,7 @@ def test__get_stat_group(df_01):
     assert len(time) == 2*HALF_LEN + 1
     assert len(mass) == 2*HALF_LEN + 1
 
-    if PLOT:
+    if PLOT:  # pragma: no cover
         plt.plot(df_01.RH, label='RH', color='orange')
         plt.plot(time, mass, 'r', label='Group')
         plt.axvline(x=TARGET_IDX)
