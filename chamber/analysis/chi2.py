@@ -99,7 +99,7 @@ def chi2(x, y, sigma, plot=False):
     chi2_res = _chi2(x, y, a_res, b_res, sigma)
     nu = len(x) - 2
     q_res = scipy.stats.chi2.sf(chi2_res, nu)
-    if plot:
+    if plot:    # pragma: no cover
         plt.subplot(121)
         plt.errorbar(x, y, yerr=sigma, label='data', fmt='o', zorder=0)
         plt.plot(x, list(map(lambda x: a_res + b_res*x, x)),
