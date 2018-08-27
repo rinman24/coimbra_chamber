@@ -105,11 +105,11 @@ class TestLaser(object):
         """Test that the plot is created and displayed correctly."""
         co2_laser = laser.GaussianBeam()
         if PLOT:
-            co2_laser.plt_pro()
-            co2_laser.plt_pro(full=True)
+            co2_laser.plt_pro()  # pragma: no cover
+            co2_laser.plt_pro(full=True)  # pragma: no cover
 
     def test_laser_constructor_plt_pro_3d(self):
         """Test that the plot is created and displayed correctly."""
         co2_laser = laser.GaussianBeam()
         if PLOT:
-            co2_laser.plt_pro_3d()
+            co2_laser.plt_pro_3d()  # pragma: no cover
