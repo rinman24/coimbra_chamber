@@ -15,11 +15,32 @@ import pandas as pd
 import pytest
 
 from chamber.analysis import experiments
-from chamber.data import sqldb, ddl, dml
-import dml_test
+from chamber.data import sqldb
 
 config = configparser.ConfigParser()
 config.read('config.ini')
+
+# ----------------------------------------------------------------------------
+# DML constants
+# ----------------------------------------------------------------------------
+# Get full tables
+GET_TUBE = 'SELECT * FROM Tube'
+GET_SETTING = 'SELECT * FROM Setting WHERE SettingID={}'
+GET_TEST = 'SELECT * FROM Test WHERE TestID={}'
+
+# Get general table statistics
+GET_STATS_TEST_ID = ('SELECT COUNT({0}), SUM({0}), VARIANCE({0}), AVG({0}),'
+                     ' MIN({0}), MAX({0}) FROM {2} WHERE TestId={1}')
+
+GET_BIT_STATS = ('SELECT COUNT({0}), SUM({0}), VARIANCE({0}), AVG({0}), '
+                 'MIN(CAST({0} AS UNSIGNED)), MAX(CAST({0} AS UNSIGNED)) '
+                 'FROM {2} WHERE TestId={1}')
+
+# Get specific rows from tables
+GET_TEMP_OBS = ("SELECT Temperature, ThermocoupleNum"
+                " FROM TempObservation"
+                " WHERE TestId={} AND Idx={}"
+                " ORDER BY ThermocoupleNum ASC;")
 
 # ----------------------------------------------------------------------------
 # Test `create_tables` global variables
@@ -490,10 +511,10 @@ def test_connect():
 def test_create_tables(cur):
     """Test create_tables."""
     # Create the tables
-    assert sqldb.create_tables(cur, ddl.tables)
+    assert sqldb.create_tables(cur, sqldb.TABLES)
 
     # Now check that all tables exist
-    table_names_set = set(ddl.table_name_list)
+    table_names_set = set(sqldb.TABLE_NAME_LIST)
     cur.execute('SHOW TABLES;')
     for row in cur:
         assert row[0] in table_names_set
@@ -505,7 +526,7 @@ def test_add_tube_info(cur):
     # Add the tube the first time and we should get true
     assert sqldb.add_tube_info(cur)
 
-    cur.execute(dml_test.get_tube)
+    cur.execute(GET_TUBE)
     res = cur.fetchall()
     assert res == TUBE_TABLE
 
@@ -513,7 +534,7 @@ def test_add_tube_info(cur):
     assert not sqldb.add_tube_info(cur)
 
     # Check that Tube table is unaffected
-    cur.execute(dml_test.get_tube)
+    cur.execute(GET_TUBE)
     res = cur.fetchall()
     assert res == TUBE_TABLE
 
@@ -522,7 +543,7 @@ def test__setting_exists(cur):
     """Test _setting_exists."""
     # ------------------------------------------------------------------------
     # Manually add a setting and assert the setting id is 1
-    cur.execute(dml.add_setting, SETTINGS_TEST_1)
+    cur.execute(sqldb.ADD_SETTING, SETTINGS_TEST_1)
     assert 1 == sqldb._setting_exists(cur, SETTINGS_TEST_1)
 
     # ------------------------------------------------------------------------
@@ -647,28 +668,28 @@ def test__add_setting_info(cur, test_tdms_obj):
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[0])
     assert setting_id == 1
     # Query the new setting and check the results
-    cur.execute(dml_test.get_setting.format(cur.lastrowid))
+    cur.execute(GET_SETTING.format(cur.lastrowid))
     assert cur.fetchall() == TDMS_01_ADD_SETTING
 
     # ------------------------------------------------------------------------
     # File 2
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[1])
     assert setting_id == 2
-    cur.execute(dml_test.get_setting.format(cur.lastrowid))
+    cur.execute(GET_SETTING.format(cur.lastrowid))
     assert cur.fetchall() == TDMS_02_ADD_SETTING
 
     # ------------------------------------------------------------------------
     # File 3
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[2])
     assert setting_id == 3
-    cur.execute(dml_test.get_setting.format(cur.lastrowid))
+    cur.execute(GET_SETTING.format(cur.lastrowid))
     assert cur.fetchall() == TDMS_03_ADD_SETTING
 
     # ------------------------------------------------------------------------
     # File 4
     setting_id = sqldb._add_setting_info(cur, test_tdms_obj[3])
     assert setting_id == 4
-    cur.execute(dml_test.get_setting.format(4))
+    cur.execute(GET_SETTING.format(4))
     assert cur.fetchall() == TDMS_04_ADD_SETTING
 
 
@@ -685,28 +706,28 @@ def test__add_test_info(cur, test_tdms_obj):
     test_id = sqldb._add_test_info(cur, test_tdms_obj[0], 1)
     assert test_id == 1
     # Query the new test and check the results
-    cur.execute(dml_test.get_test.format(test_id))
+    cur.execute(GET_TEST.format(test_id))
     assert cur.fetchall() == TDMS_01_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 2
     test_id = sqldb._add_test_info(cur, test_tdms_obj[1], 2)
     assert test_id == 2
-    cur.execute(dml_test.get_test.format(test_id))
+    cur.execute(GET_TEST.format(test_id))
     assert cur.fetchall() == TDMS_02_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 3
     test_id = sqldb._add_test_info(cur, test_tdms_obj[2], 3)
     assert test_id == 3
-    cur.execute(dml_test.get_test.format(test_id))
+    cur.execute(GET_TEST.format(test_id))
     assert cur.fetchall() == TDMS_03_ADD_TEST
 
     # ------------------------------------------------------------------------
     # File 4
     test_id = sqldb._add_test_info(cur, test_tdms_obj[3], 4)
     assert test_id == 4
-    cur.execute(dml_test.get_test.format(test_id))
+    cur.execute(GET_TEST.format(test_id))
     assert cur.fetchall() == TDMS_04_ADD_TEST
 
 
@@ -755,7 +776,7 @@ def test__add_obs_info(cur, test_tdms_obj):
     # Check column statistics for the TestId
     for col in OBS_COLS[:-1]:
         # First loop through the coloumn names eg. 'Mass', 'DewPoint', etc...
-        cur.execute(dml_test.get_stats_test_id.format(col, 1, 'Observation'))
+        cur.execute(GET_STATS_TEST_ID.format(col, 1, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_1)):
             # Loop through the length of the dataframe
@@ -765,7 +786,7 @@ def test__add_obs_info(cur, test_tdms_obj):
             assert isclose(res[idx], OBS_STATS_1.loc[val, col])
 
     for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 1, 'Observation'))
+        cur.execute(GET_BIT_STATS.format(col, 1, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_1)):
             val = OBS_STATS_1.index.values[idx]
@@ -777,14 +798,14 @@ def test__add_obs_info(cur, test_tdms_obj):
         assert sqldb._add_obs_info(cur, test_tdms_obj[1], 2, tdms_idx)
 
     for col in OBS_COLS:
-        cur.execute(dml_test.get_stats_test_id.format(col, 2, 'Observation'))
+        cur.execute(GET_STATS_TEST_ID.format(col, 2, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_2)):
             val = OBS_STATS_2.index.values[idx]
             assert isclose(res[idx], OBS_STATS_2.loc[val, col])
 
     for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 2, 'Observation'))
+        cur.execute(GET_BIT_STATS.format(col, 2, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_2)):
             val = OBS_STATS_2.index.values[idx]
@@ -796,14 +817,14 @@ def test__add_obs_info(cur, test_tdms_obj):
         assert sqldb._add_obs_info(cur, test_tdms_obj[2], 3, tdms_idx)
 
     for col in OBS_COLS[:-1]:
-        cur.execute(dml_test.get_stats_test_id.format(col, 3, 'Observation'))
+        cur.execute(GET_STATS_TEST_ID.format(col, 3, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_3)):
             val = OBS_STATS_3.index.values[idx]
             assert isclose(res[idx], OBS_STATS_3.loc[val, col])
 
     for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 3, 'Observation'))
+        cur.execute(GET_BIT_STATS.format(col, 3, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_3)):
             val = OBS_STATS_3.index.values[idx]
@@ -815,14 +836,14 @@ def test__add_obs_info(cur, test_tdms_obj):
         assert sqldb._add_obs_info(cur, test_tdms_obj[3], 4, tdms_idx)
 
     for col in OBS_COLS:
-        cur.execute(dml_test.get_stats_test_id.format(col, 4, 'Observation'))
+        cur.execute(GET_STATS_TEST_ID.format(col, 4, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_4)):
             val = OBS_STATS_4.index.values[idx]
             assert isclose(res[idx], OBS_STATS_4.loc[val, col])
 
     for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 4, 'Observation'))
+        cur.execute(GET_BIT_STATS.format(col, 4, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_4)):
             val = OBS_STATS_4.index.values[idx]
@@ -837,7 +858,7 @@ def test__add_temp_info(cur, test_tdms_obj):
     # Add temps with tdms_idx 7 and Idx 8
     assert sqldb._add_temp_info(cur, test_tdms_obj[0], 1,
                                 TEST_INDEX, TEST_INDEX+1)
-    cur.execute(dml.get_temp_obs.format(1, TEST_INDEX+1))
+    cur.execute(GET_TEMP_OBS.format(1, TEST_INDEX+1))
     # Now query these with the TestId and Idx
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_1
@@ -846,7 +867,7 @@ def test__add_temp_info(cur, test_tdms_obj):
     # File 2
     assert sqldb._add_temp_info(cur, test_tdms_obj[1], 2,
                                 TEST_INDEX, TEST_INDEX)
-    cur.execute(dml.get_temp_obs.format(2, TEST_INDEX))
+    cur.execute(GET_TEMP_OBS.format(2, TEST_INDEX))
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_2
 
@@ -854,7 +875,7 @@ def test__add_temp_info(cur, test_tdms_obj):
     # File 3
     assert sqldb._add_temp_info(cur, test_tdms_obj[2], 3,
                                 TEST_INDEX, TEST_INDEX+1)
-    cur.execute(dml.get_temp_obs.format(3, TEST_INDEX+1))
+    cur.execute(GET_TEMP_OBS.format(3, TEST_INDEX+1))
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_3
 
@@ -862,7 +883,7 @@ def test__add_temp_info(cur, test_tdms_obj):
     # File 4
     assert sqldb._add_temp_info(cur, test_tdms_obj[3], 4,
                                 TEST_INDEX, TEST_INDEX+1)
-    cur.execute(dml.get_temp_obs.format(4, TEST_INDEX+1))
+    cur.execute(GET_TEMP_OBS.format(4, TEST_INDEX+1))
     res = [float(r[0]) for r in cur.fetchall()]
     assert res == TEMP_OBS_4
 
@@ -886,22 +907,22 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[0])
 
     # Verify the data in the 'Setting' table:
-    cur.execute(dml_test.get_setting.format(1))
+    cur.execute(GET_SETTING.format(1))
     assert cur.fetchall() == TDMS_01_ADD_SETTING
 
     # Verify the data in the 'Test' table:
-    cur.execute(dml_test.get_test.format(1))
+    cur.execute(GET_TEST.format(1))
     assert cur.fetchall() == TDMS_01_ADD_TEST
 
     # Verify the data in the 'Observation' table
     for col in OBS_COLS[:-1]:
-        cur.execute(dml_test.get_stats_test_id.format(col, 1, 'Observation'))
+        cur.execute(GET_STATS_TEST_ID.format(col, 1, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_1)):
             val = OBS_STATS_1.index.values[idx]
             assert isclose(res[idx], OBS_STATS_1.loc[val, col])
     for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 1, 'Observation'))
+        cur.execute(GET_BIT_STATS.format(col, 1, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_1)):
             val = OBS_STATS_1.index.values[idx]
@@ -909,9 +930,7 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
 
     # Verify the data in the 'TempObservation' table
     for col in TEMP_OBS_STATS_1.columns.values:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 1, 'TempObservation')
-            )
+        cur.execute(GET_STATS_TEST_ID.format(col, 1, 'TempObservation'))
         res = cur.fetchall()[0]
         for idx in range(len(TEMP_OBS_STATS_1)):
             val = TEMP_OBS_STATS_1.index.values[idx]
@@ -927,22 +946,22 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[1])
 
     # Verify the data in the 'Setting' table:
-    cur.execute(dml_test.get_setting.format(2))
+    cur.execute(GET_SETTING.format(2))
     assert cur.fetchall() == TDMS_02_ADD_SETTING
 
     # Verify the data in the 'Test' table:
-    cur.execute(dml_test.get_test.format(2))
+    cur.execute(GET_TEST.format(2))
     assert cur.fetchall() == TDMS_02_ADD_TEST
 
     # Verify the data in the 'Observation' table
     for col in OBS_COLS:
-        cur.execute(dml_test.get_stats_test_id.format(col, 2, 'Observation'))
+        cur.execute(GET_STATS_TEST_ID.format(col, 2, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_2)):
             val = OBS_STATS_2.index.values[idx]
             assert isclose(res[idx], OBS_STATS_2.loc[val, col])
     for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 2, 'Observation'))
+        cur.execute(GET_BIT_STATS.format(col, 2, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_2)):
             val = OBS_STATS_2.index.values[idx]
@@ -950,9 +969,7 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
 
     # Verify the data in the 'TempObservation' table
     for col in TEMP_OBS_STATS_2.columns.values:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 2, 'TempObservation')
-            )
+        cur.execute(GET_STATS_TEST_ID.format(col, 2, 'TempObservation'))
         res = cur.fetchall()[0]
         for idx in range(len(TEMP_OBS_STATS_2)):
             val = TEMP_OBS_STATS_2.index.values[idx]
@@ -968,22 +985,22 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[2])
 
     # Verify the data in the 'Setting' table:
-    cur.execute(dml_test.get_setting.format(3))
+    cur.execute(GET_SETTING.format(3))
     assert cur.fetchall() == TDMS_03_ADD_SETTING
 
     # Verify the data in the 'Test' table:
-    cur.execute(dml_test.get_test.format(3))
+    cur.execute(GET_TEST.format(3))
     assert cur.fetchall() == TDMS_03_ADD_TEST
 
     # Verify the data in the `Observation` table:
     for col in OBS_COLS[:-1]:
-        cur.execute(dml_test.get_stats_test_id.format(col, 3, 'Observation'))
+        cur.execute(GET_STATS_TEST_ID.format(col, 3, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_3)):
             val = OBS_STATS_3.index.values[idx]
             assert isclose(res[idx], OBS_STATS_3.loc[val, col])
     for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 3, 'Observation'))
+        cur.execute(GET_BIT_STATS.format(col, 3, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_3)):
             val = OBS_STATS_3.index.values[idx]
@@ -991,9 +1008,7 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
 
     # Verify the data in the 'TempObservation' table
     for col in TEMP_OBS_STATS_3.columns.values:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 3, 'TempObservation')
-            )
+        cur.execute(GET_STATS_TEST_ID.format(col, 3, 'TempObservation'))
         res = cur.fetchall()[0]
         for idx in range(len(TEMP_OBS_STATS_3)):
             val = TEMP_OBS_STATS_3.index.values[idx]
@@ -1009,22 +1024,22 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
     assert sqldb.add_tdms_file(cnx, test_tdms_obj[3])
 
     # Verify the data in the 'Setting' table:
-    cur.execute(dml_test.get_setting.format(4))
+    cur.execute(GET_SETTING.format(4))
     assert cur.fetchall() == TDMS_04_ADD_SETTING
 
     # Verify the data in the 'Test' table:
-    cur.execute(dml_test.get_test.format(4))
+    cur.execute(GET_TEST.format(4))
     assert cur.fetchall() == TDMS_04_ADD_TEST
 
     # Verify the data in the `Observation` table:
     for col in OBS_COLS[:-1]:
-        cur.execute(dml_test.get_stats_test_id.format(col, 4, 'Observation'))
+        cur.execute(GET_STATS_TEST_ID.format(col, 4, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_4)):
             val = OBS_STATS_4.index.values[idx]
             assert isclose(res[idx], OBS_STATS_4.loc[val, col])
     for col in OBS_BIT_COLS:
-        cur.execute(dml_test.get_bit_stats.format(col, 4, 'Observation'))
+        cur.execute(GET_BIT_STATS.format(col, 4, 'Observation'))
         res = cur.fetchall()[0]
         for idx in range(len(OBS_STATS_4)):
             val = OBS_STATS_4.index.values[idx]
@@ -1032,9 +1047,7 @@ def test_add_tdms_file(cnx, cur, test_tdms_obj):
 
     # Verify the data in the 'TempObservation' table
     for col in TEMP_OBS_STATS_4.columns.values:
-        cur.execute(
-            dml_test.get_stats_test_id.format(col, 4, 'TempObservation')
-            )
+        cur.execute(GET_STATS_TEST_ID.format(col, 4, 'TempObservation'))
         res = cur.fetchall()[0]
         for idx in range(len(TEMP_OBS_STATS_4)):
             val = TEMP_OBS_STATS_4.index.values[idx]
@@ -1125,7 +1138,7 @@ def test__add_results(results_cnx):
 
     for col in RESULTS_STATS_DF.columns.values:
         results_cur.execute(
-            dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
+            GET_STATS_TEST_ID.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()[0]
         for idx in range(len(RESULTS_STATS_DF)):
@@ -1155,7 +1168,7 @@ def test__add_best_fit(results_cnx):
 
     # Check accuracy of added data
     for col in BEST_FIT_STATS_DF.columns.values:
-        res = results_cur.execute(dml_test.get_stats_test_id.format(
+        res = results_cur.execute(GET_STATS_TEST_ID.format(
             col, ANALYSIS_TEST_ID, 'RHTargets'))
         res = results_cur.fetchall()[0]
         for idx in range(len(BEST_FIT_STATS_DF)):
@@ -1168,9 +1181,9 @@ def test_get_high_low_testids(results_cnx):
     """Test get_high_low_testids."""
     results_cur = results_cnx.cursor()
     clear_results(results_cur, True)
-    results_cur.execute(dml.add_rh_targets, [1, 0.35, 0.0002])
+    results_cur.execute(sqldb.ADD_RH_TARGETS, [1, 0.35, 0.0002])
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1]
-    results_cur.execute(dml.add_rh_targets, [2, 0.30, 0.0001])
+    results_cur.execute(sqldb.ADD_RH_TARGETS, [2, 0.30, 0.0001])
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1, 2]
     clear_results(results_cur, True)
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == []
@@ -1211,7 +1224,7 @@ def test_add_analysis(results_cnx):
 
     for col in RESULTS_STATS_DF.columns.values:
         results_cur.execute(
-            dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
+            GET_STATS_TEST_ID.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()[0]
         for idx in range(len(RESULTS_STATS_DF)):
@@ -1227,7 +1240,7 @@ def test_add_analysis(results_cnx):
     # Check that the database is uneffected
     for col in RESULTS_STATS_DF.columns.values:
         results_cur.execute(
-            dml_test.get_stats_test_id.format(col, ANALYSIS_TEST_ID, 'Results')
+            GET_STATS_TEST_ID.format(col, ANALYSIS_TEST_ID, 'Results')
             )
         res = results_cur.fetchall()[0]
         for idx in range(len(RESULTS_STATS_DF)):
@@ -1248,7 +1261,7 @@ def drop_tables(cursor, bol):
     if bol:
         print("Dropping tables...")
         cursor.execute("DROP TABLE IF EXISTS " +
-                       ", ".join(ddl.table_name_list) +
+                       ", ".join(sqldb.TABLE_NAME_LIST) +
                        ";")
     else:
         print('Tables not dropped.')
