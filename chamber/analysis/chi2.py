@@ -8,6 +8,7 @@ Functions
 
 """
 
+import itertools
 import math
 import random
 
@@ -131,14 +132,10 @@ def chi2(x, y, sigma, plot=False):
 
 def _calc_bins(y, res):
     """Use the resolution to determine bins for the function's range."""
-    y_max = max(y)
+    y_max = max(y) + res
     y_min = min(y)
-    bins = [y_min]
-
-    while y_min < y_max:
-        y_min += res
-        bins.append(y_min)
-
+    bins = [y for y in itertools.takewhile(
+        lambda y: y < y_max, itertools.count(y_min, res))]
     return bins
 
 

@@ -10,13 +10,13 @@ Functions
 - `get_high_low_testids` -- Get Low and High RH TestIds for a p and t setting.
 - `get_rht_results` Get `DataFrame` of evap reate and RH results for a TestId.
 - `get_test_dict` -- Create `DataFrame` representations of the tests.
-- `get_test_from_set` -- Get a list of TestIds corresponding to setting info.
 - `add_analysis` -- Pull, analyze, and insert analysis results into database.
 
 
 .. todo:: Decouple database and tdms volatility via modulde encapsulation.
 """
 import configparser
+import os
 import re
 
 from CoolProp.HumidAirProp import HAPropsSI
@@ -210,27 +210,11 @@ ADD_TEST = ("INSERT INTO Test "
             "(%(Author)s, %(DateTime)s, %(Description)s,"
             " %(SettingID)s)")
 
-# dml to add data with mass measurements into the 'Observation' table
-ADD_OBS_M_T = ("INSERT INTO Observation "
-               "(CapManOk, DewPoint, Idx, Mass, OptidewOk, PowOut, PowRef,"
-               " Pressure, TestID)"
-               " VALUES "
-               "(%(CapManOk)s, %(DewPoint)s, %(Idx)s, %(Mass)s, %(OptidewOk)s,"
-               " %(PowOut)s, %(PowRef)s, %(Pressure)s, %(TestId)s)")
-
-# dml to add data without mass measurements into the 'Observation' table
-ADD_OBS_M_F = ("INSERT INTO Observation "
-               "(CapManOk, DewPoint, Idx, OptidewOk, PowOut, PowRef,"
-               " Pressure, TestID)"
-               " VALUES "
-               "(%(CapManOk)s, %(DewPoint)s, %(Idx)s, %(OptidewOk)s,"
-               " %(PowOut)s, %(PowRef)s, %(Pressure)s, %(TestId)s)")
-
-# dml to add data into the 'Tempobservation' table
-ADD_TEMP = ("INSERT INTO TempObservation "
-            "(ThermocoupleNum, Temperature, Idx, TestId)"
-            " VALUES "
-            "(%s, %s, %s, %s)")
+# dml to add data from a file into the specfied table
+LOAD_DATA = ("LOAD DATA LOCAL INFILE '_data.csv' INTO TABLE "
+             "{} FIELDS TERMINATED BY ',' "
+             "ENCLOSED BY '' LINES TERMINATED BY '\n' "
+             "IGNORE 1 LINES")
 
 # dml to add 'RH', 'TestId' and 'SigRH' data into the 'RHTarget' table
 ADD_RH_TARGETS = ("INSERT INTO RHTargets (TestId, RH, SigRH) VALUES "
@@ -862,80 +846,14 @@ def _add_test_info(cur, tdms_obj, setting_id):
 
 # ----------------------------------------------------------------------------
 # `Observation` Table
-# ----------------------------------------------------------------------------
-def _get_obs_info(tdms_obj, tdms_idx):
+def _add_obs_info(cur, tdms_obj, test_id):
     """
-    Use TDMS file and index to return observation info.
+    Add relevant data to the 'Observation' table in the MySQL databse.
 
-    Builds a dictionary containing the observation for a given index (time) in
-    the nptdms.TdmsFile object.
-
-    It is important to note here that tdms_idx is NOT the same as the Idx
-    comumn in the MySQL schema. Because the tdms files are read in using
-    `nptdms` data is converted into arrays of type `np.ndarray`. As a result,
-    I can use the tdms_idx as a proxy for the idx column in the tdms file.
-
-    Parameters
-    ----------
-    tdms_obj : nptdms.TdmsFile
-        Object containg the data from the tdms test file. Original tdms files
-        were created from UCSD Chamber experiments in the Coimbra Lab in SERF
-        159.
-    tdms_idx : int
-        Index in the tdms file representing a single time.
-
-    Returns
-    -------
-    obs_info : dict of {str: str or int}
-        Set of values to insert into the Observation table. Keys should be
-        column names and values should be the value to insert.
-
-    Examples
-    --------
-    Get the observation information from index 10:
-
-    >>> import nptdms
-    >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
-    >>> _get_obs_info(tdms_file, 10)
-    {'DewPoint': '270.69', 'Idx': 8, 'Mass': '0.0985090', 'CapManOk': 1,
-    'Pressure': 100393, 'OptidewOk': 1, 'PowRef': '-0.0003', 'PowOut':
-    '-0.0003'}
-
-    """
-    # ------------------------------------------------------------------------
-    # Construct the obs_info dictionary
-    obs_info = {'CapManOk': int(
-                    tdms_obj.object("Data", "CapManOk").data[tdms_idx]),
-                'DewPoint': '{:.2f}'.format(
-                    tdms_obj.object("Data", "DewPoint").data[tdms_idx]),
-                'Idx': int(
-                    tdms_obj.object("Data", "Idx").data[tdms_idx]),
-                'OptidewOk': int(
-                    tdms_obj.object("Data", "OptidewOk").data[tdms_idx]),
-                'PowOut': '{:.4f}'.format(
-                    tdms_obj.object("Data", "PowOut").data[tdms_idx]),
-                'PowRef': '{:.4f}'.format(
-                    tdms_obj.object("Data", "PowRef").data[tdms_idx]),
-                'Pressure': int(
-                    tdms_obj.object("Data", "Pressure").data[tdms_idx])}
-
-    # ------------------------------------------------------------------------
-    # If the setting IsMass is True, then also add mass
-    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        obs_info['Mass'] = '{:.7f}'.format(
-            tdms_obj.object("Data", "Mass").data[tdms_idx])
-
-    return obs_info
-
-
-def _add_obs_info(cur, tdms_obj, test_id, tdms_idx):
-    """
-    Add an observation to the database.
-
-    Uses cursor's .execute function on a MySQL insert query and dictionary of
-    observation data built by get_obs using the argument nptdms.TdmsFile and
-    index. Adds the foreign key TestID to the dictionary before executing the
-    MySQL query.
+    Use npTDMS.as_dataframe to create a `DataFrame` object containint the data
+    from the argument `nptdms.TdmsFile` object. Format the `Dataframe` for use
+    with _load_data and compatibility with the 'Observation' table. Calls
+    _load_data to insert data into the database.
 
     Parameters
     ----------
@@ -948,49 +866,33 @@ def _add_obs_info(cur, tdms_obj, test_id, tdms_idx):
     test_id : int
         TestID for the MySQL database, which is the primary key for the Test
         table.
-    tdms_idx : int
-        Index in the tdms file representing a single time.
 
     Returns
     -------
-    `True` or `None`
-        `True` if successful. Else `None`.
+    True
+        Returns `True` after sucess.
 
     Examples
     --------
-    Add a single observation at test_idx 1 from a file with test_id 1:
-
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
-    >>> assert _add_obs_info(cur, tdms_file, 1, 0)
-
-    Add all observations in a file with test_id 2:
-
-    >>> for i in range(len(tdms_file.object("Data", "Idx").data)):
-    ...     assert add_obs_info(cur, tdms_file, 2, i)
+    >>> test_id = 1
+    >>> _add_obs_info(cur, tdms_obj, test_id)
+    True
 
     """
-    # ------------------------------------------------------------------------
-    # Get the observation info from the tdms file
-    obs_info = _get_obs_info(tdms_obj, tdms_idx)
-    # Add the test id to the dictionary of observation info
-    obs_info['TestId'] = test_id
-
-    # If the test is a mass test, then include mass info
-    # Else, don't consider mass.
-    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        cur.execute(ADD_OBS_M_T, obs_info)
-        return True
-    else:
-        cur.execute(ADD_OBS_M_F, obs_info)
-        return True
+    obs_df = tdms_obj.object('Data').as_dataframe()
+    obs_df['TestId'] = [test_id for i in range(len(obs_df))]
+    obs_df = obs_df[['CapManOk', 'DewPoint', 'Idx', 'Mass', 'OptidewOk',
+                     'PowOut', 'PowRef', 'Pressure', 'TestId']]
+    assert _load_data(cur, obs_df, 'Observation')
+    return True
 
 
 # ----------------------------------------------------------------------------
 # `TempObservation` Table
-# ----------------------------------------------------------------------------
 def _get_temp_info(tdms_obj, tdms_idx, couple_idx):
     """
     Get thermocouple observations.
@@ -1035,14 +937,16 @@ def _get_temp_info(tdms_obj, tdms_idx, couple_idx):
     return temp_info
 
 
-def _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
+# ----------------------------------------------------------------------------
+# `TempObservation` Table
+def _add_temp_info(cur, tdms_obj, test_id):
     """
-    Add a temperature observation to the database.
+    Add relevant data to the 'TempObservation' table in the MySQL databse.
 
-    Uses cursor's .execute function on a MySQL insert query and dictionary of
-    TempObservation data built by looping through get_temp_info for each
-    thermocouple using the argument nptdms.TdmsFile and index. Adds the foreign
-    key ObservationID to the dictionary before executing the MySQL query.
+    Use npTDMS.as_dataframe to create a `DataFrame` object containint the data
+    from the argument `nptdms.TdmsFile` object. Format the `Dataframe` for use
+    with _load_data and compatibility with the 'TempObservation' table. Calls
+    _load_data to insert data into the database.
 
     Parameters
     ----------
@@ -1055,51 +959,65 @@ def _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx):
     test_id : int
         TestID for the MySQL database, which is the primary key for the Test
         table.
-    tdms_idx : int
-        Index in the tdms file representing a single time.
-    idx : int
-        Idx for the MySql database, which is part of the composite primary key
-        in the the Observation table.
 
     Returns
     -------
-    `True` or `None`
-        `True` if successful. Else `None`.
+    True
+        Returns `True` after sucess.
 
     Examples
     --------
-    Add temperature from observations a tdms file where the `test_id` is 1,
-    `tdms_index` is 0, and the `idx` is 99:
-
     >>> import nptdms
     >>> tdms_file = nptdms.TdmsFile('my-file.tdms')
     >>> cnx = connect('my-schema')
     >>> cur = cnx.cursor()
-    >>> assert _add_temp_info(cur, tdms_file, 1, 0, 99)
+    >>> test_id = 1
+    >>> _add_temp_info(cur, tdms_obj, test_id)
+    True
 
     """
-    # ------------------------------------------------------------------------
-    # If this is a mass test, we want to disregard thermocouples 0-3.
-    if tdms_obj.object("Settings", "IsMass").data[0] == 1:
-        initial_tc_index = 4
-    else:
-        initial_tc_index = 0
+    temp_df = pd.DataFrame()
+    is_mass = (int(tdms_obj.object('Settings', 'IsMass').data[0]) == 1)
+    for n in range(4 if is_mass else 0, 14):
+        temp_df[n] = tdms_obj.object('Data', 'TC{}'.format(n)).data
+    temp_df['Idx'] = tdms_obj.object('Data', 'Idx').data
+    temp_df = pd.melt(temp_df, id_vars=['Idx']).sort_values('Idx')
+    temp_df['TestId'] = [test_id for i in range(len(temp_df))]
+    temp_df.columns = ['Idx', 'ThermocoupleNum', 'Temperature', 'TestId']
+    temp_df.sort_values(['Idx', 'ThermocoupleNum'], inplace=True)
+    temp_df = temp_df[['ThermocoupleNum', 'Temperature', 'Idx', 'TestId']]
+    assert _load_data(cur, temp_df, 'TempObservation')
+    return True
 
-    # Use a list comprehension to get all of the thermocouple data
-    temp_data_list = [
-        (
-            couple_idx,
-            _get_temp_info(tdms_obj, tdms_idx, couple_idx),
-            idx,
-            test_id
-        )
-        for couple_idx
-        in range(initial_tc_index, 14)
-        ]
 
-    # Execute many using the temp_data_list
-    cur.executemany(ADD_TEMP, temp_data_list)
+def _load_data(cur, df, table):
+    """
+    Leverage MySQL 'LOAD DATA INFILE' functionality to rapidly upload data.
+    Seve the argument `DataFrame` as a .csv file. Use a MySQL
+    'LOAD DATA INFILE' style querry to rapidly mass-upload the data into the
+    argument table. The .csv file is created and deleted in the root of the
+    repository every time _load_data is run.
 
+    Parameters
+    ----------
+    cur : mysql.connector.crsor.MySqlCursor
+        Cursor for MySQL database.
+    df: DataFrame
+        A `DataFrame` object compatible with the argument table.
+    table: str
+        The name of the MySQL database table in which the data will be written.
+
+    Returns
+    -------
+    True
+        Returns `True` after sucess.
+
+    """
+    df.to_csv(path_or_buf='_data.csv', index=False)
+    assert os.path.isfile('_data.csv')
+    cur.execute(LOAD_DATA.format(table))
+    os.remove('_data.csv')
+    assert not os.path.isfile('_data.csv')
     return True
 
 
@@ -1161,10 +1079,8 @@ def add_tdms_file(cnx, tdms_obj):
         # Observation and TempObservations: call add_obs_info and
         # add_temp_info in a loop which will add all of the observations from
         # the file.
-        for tdms_idx in tqdm(range(len(tdms_obj.object("Data", "Idx").data))):
-            assert _add_obs_info(cur, tdms_obj, test_id, tdms_idx)
-            idx = int(tdms_obj.object("Data", "Idx").data[tdms_idx])
-            assert _add_temp_info(cur, tdms_obj, test_id, tdms_idx, idx)
+        assert _add_obs_info(cur, tdms_obj, test_id)
+        assert _add_temp_info(cur, tdms_obj, test_id)
 
         assert cnx.in_transaction
         cnx.commit()
@@ -1297,51 +1213,6 @@ def get_rht_results(cnx, test_id):
     """
     res_df = pd.read_sql(GET_RHTARGET_RESULTS.format(test_id), con=cnx)
     return res_df
-
-
-def get_test_from_set(cur, setting_info):
-    """
-    Get a list of TestIds corresponding to specified setting information.
-
-    Uses cursor's .execute function on a MySQL querry designed to get a list
-    of TestIds corresponding to the setting info provided in the setting_info
-    argument.
-
-    Parameters
-    ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
-    setting_info : dict of {str: scalar}
-        Set of values to insert into the Setting table. Keys should be column
-        names and values should be the value to insert.
-
-    Returns
-    -------
-    list(int) or False
-        TestIDs for the MySQL database, which is the primary key for the Test
-        table. Returns `False` if no TestIds match the argument setting info.
-
-    Examples
-    --------
-    Get the TestIds corresponding to a setting_info dict.
-
-    >>> cnx = connect('my-schema')
-    >>> cur = cnx.cursor()
-    >>> setting_info = dict(
-    Duty='0.0', IsMass=0, Pressure=100000, Reservoir=0, Temperature=290,
-    TimeStep='1.00', TubeId=1)
-    >>> get_test_from_set(cur, setting_info)
-    '[1, 4]'
-
-    """
-    test_from_set = TEST_FROM_SETTING.format(SELECT_SETTING)
-    cur.execute(test_from_set, setting_info)
-    result = cur.fetchall()
-    if not result:
-        return False
-    else:
-        test_ids = [test_id[0] for test_id in result]
-        return test_ids
 
 
 def _add_rh_targets(cur, analyzed_df, test_id):
