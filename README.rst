@@ -24,13 +24,13 @@ Back to `Table of Contents`_
 
 Description will go here.
 
-Make sure that you export your MySQLCredentials environment variable for
-access
+The host, username, and password used to acces the server are all stored in config.ini in the root of the repository. Make sure to edit this file so 
+that it contains your information.
 ::
-
-    $ export MySqlUserName=<user_name>
-    $ export MySqlCredentials=<password>
-    $ export MySqlHost=<host>
+  [MySQL-Server]
+  host = your-host
+  user = your-username
+  password = your-password
 
 Python Version
 --------------
@@ -51,15 +51,19 @@ Dependencies
 
 Back to `Table of Contents`_
 
+  * codecov (for code coverage reporting)
   * CoolProp.HumidAirProp.HAPropsSI (for humid air calculations)
   * matplotlib.pyplot
   * matplotlib.legend_handler.HandlerLine2D
-  * mysql.connector (for access to MySQL databases)
+  * mysql_connector (for access to MySQL databases)
   * nptdms (for interacting with LabVIEW TDMS files)
   * pandas (for loading data into DataFrames)
   * pytest (for testing)
+  * pytest-cov (for code coverage information)
   * pytz (for datetime testing)
+  * scipy (for calculations and statistics)
   * schedule (for autonomous execution)
+  * seaborn (for plot styling)
   * tabulate.tabulate (for table formatting)
   * tqdm (for progress bars)
 
