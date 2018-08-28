@@ -32,7 +32,7 @@ YP75 = chi2.add_noise(Y, 0.75)
 # Check if the test is being run in Continuous Integration or not
 if os.getenv('CI'):
     PLOT = False
-else:
+else:  # pragma: no cover
     PLOT = True
 
 
@@ -41,34 +41,41 @@ class TestChi2_0p06(object):
 
     sigma = 0.06
 
-    def test_s(self):
+    def test__s(self):
+        """Test _s."""
         s = chi2._s(self.sigma, len(X))
         assert math.isclose(s, 3055.5555555555557)
 
-    def test_sx(self):
+    def test__sx(self):
+        """Test _s1."""
         sx = chi2._s1(X, self.sigma)
         assert math.isclose(sx, 1527.7777777777778)
 
-    def test_sy(self):
+    def test__sy(self):
+        """Test _s1."""
         sy = chi2._s1(YP06, self.sigma)
         assert math.isclose(sy, 1525)
 
-    def test_sxx(self):
+    def test__sxx(self):
+        """Test _sxx."""
         sxx = chi2._sxx(X, self.sigma)
         assert math.isclose(sxx, 1069.4444444444446)
 
-    def test_sxy(self):
+    def test__sxy(self):
+        """Test _sxy."""
         sxy = chi2._sxy(X, YP06, self.sigma)
         assert math.isclose(sxy, 467.5)
 
-    def test_delta(self):
+    def test__delta(self):
+        """Test _delta."""
         s = chi2._s(self.sigma, len(X))
         sx = chi2._s1(X, self.sigma)
         sxx = chi2._sxx(X, self.sigma)
         delta = chi2._delta(s, sx, sxx)
         assert math.isclose(delta, 933641.9753086423)
 
-    def test_a_b(self):
+    def test__a__b(self):
+        """Test _a and _b."""
         s = chi2._s(self.sigma, len(X))
         sx = chi2._s1(X, self.sigma)
         sy = chi2._s1(YP06, self.sigma)
@@ -80,7 +87,8 @@ class TestChi2_0p06(object):
         assert math.isclose(a, 0.981818181818182)
         assert math.isclose(b, -0.9654545454545456)
 
-    def test_sigma_a_b(self):
+    def test__sig_a_b(self):
+        """Test _sig_a and _sig_b."""
         s = chi2._s(self.sigma, len(X))
         sx = chi2._s1(X, self.sigma)
         sxx = chi2._sxx(X, self.sigma)
@@ -91,6 +99,7 @@ class TestChi2_0p06(object):
         assert math.isclose(sigma_b, 0.05720775535473553)
 
     def test_chi2(self):
+        """Test chi2."""
         s = chi2._s(self.sigma, len(X))
         sx = chi2._s1(X, self.sigma)
         sy = chi2._s1(YP06, self.sigma)
@@ -103,6 +112,7 @@ class TestChi2_0p06(object):
         assert math.isclose(chi_sq, 0.827272727272728)
 
     def test_run_chi2_noplot(self):
+        """Test chi2 with plot=false."""
         res = chi2.chi2(X, YP06, self.sigma)
         assert math.isclose(res[0], 0.981818181818182)
         assert math.isclose(res[1], 0.03384456448906597)
@@ -112,6 +122,7 @@ class TestChi2_0p06(object):
         assert math.isclose(res[5], 0.9997430671082018)
 
     def test_run_chi2_plot(self):
+        """Test chi2 with plot set by CI detection."""
         res = chi2.chi2(X, YP06, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 0.981818181818182)
         assert math.isclose(res[1], 0.03384456448906597)
@@ -126,35 +137,42 @@ class TestChi2_0p2(object):
 
     sigma = 0.2
 
-    def test_s(self):
+    def test__s(self):
+        """Test _s."""
         print(self.sigma)
         s = chi2._s(self.sigma, len(X))
         assert math.isclose(s, 274.99999999999994)
 
-    def test_sx(self):
+    def test__sx(self):
+        """Test _s1."""
         sx = chi2._s1(X, self.sigma)
         assert math.isclose(sx, 137.49999999999997)
 
-    def test_sy(self):
+    def test__sy(self):
+        """Test _s1."""
         sy = chi2._s1(YP2, self.sigma)
         assert math.isclose(sy, 147.5)
 
-    def test_sxx(self):
+    def test__sxx(self):
+        """Test _sxx."""
         sxx = chi2._sxx(X, self.sigma)
         assert math.isclose(sxx, 96.25)
 
     def test_sxy(self):
+        """Test _sxy."""
         sxy = chi2._sxy(X, YP2, self.sigma)
         assert math.isclose(sxy, 46.75)
 
     def test_delta(self):
+        """Test _delta."""
         s = chi2._s(self.sigma, len(X))
         sx = chi2._s1(X, self.sigma)
         sxx = chi2._sxx(X, self.sigma)
         delta = chi2._delta(s, sx, sxx)
         assert math.isclose(delta, 7562.5)
 
-    def test_a_b(self):
+    def test__a__b(self):
+        """Test _a and _b."""
         s = chi2._s(self.sigma, len(X))
         sx = chi2._s1(X, self.sigma)
         sy = chi2._s1(YP2, self.sigma)
@@ -166,7 +184,8 @@ class TestChi2_0p2(object):
         assert math.isclose(a, 1.0272727272727273)
         assert math.isclose(b, -0.9818181818181816)
 
-    def test_sigma_a_b(self):
+    def test__sig_a_b(self):
+        """Test _sig_a and _sig_b."""
         s = chi2._s(self.sigma, len(X))
         sx = chi2._s1(X, self.sigma)
         sxx = chi2._sxx(X, self.sigma)
@@ -177,6 +196,7 @@ class TestChi2_0p2(object):
         assert math.isclose(sigma_b, 0.19069251784911845)
 
     def test_chi2(self):
+        """Test chi2."""
         s = chi2._s(self.sigma, len(X))
         sx = chi2._s1(X, self.sigma)
         sy = chi2._s1(YP2, self.sigma)
@@ -189,6 +209,7 @@ class TestChi2_0p2(object):
         assert math.isclose(chi_sq, 1.1272727272727274)
 
     def test_run_chi2_noplot(self):
+        """Test chi2 with plot=false."""
         res = chi2.chi2(X, YP2, self.sigma)
         assert math.isclose(res[0], 1.0272727272727273)
         assert math.isclose(res[1], 0.11281521496355325)
@@ -198,6 +219,7 @@ class TestChi2_0p2(object):
         assert math.isclose(res[5], 0.999083798853131)
 
     def test_run_chi2_plot(self):
+        """Test chi2 with plot set by CI detection."""
         res = chi2.chi2(X, YP2, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 1.0272727272727273)
         assert math.isclose(res[1], 0.11281521496355325)
@@ -213,6 +235,7 @@ class TestChi2_0p45(object):
     sigma = 0.45
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(X, YP45, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 1.0431818181818182)
         assert math.isclose(res[1], 0.2538342336679948)
@@ -228,6 +251,7 @@ class TestChi2_0p1(object):
     sigma = 0.1
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(X, YP1, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 1.0191128267746108)
         assert math.isclose(res[1], 0.056407607481776624)
@@ -243,6 +267,7 @@ class TestChi2_0p25(object):
     sigma = 0.25
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(X, YP25, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 1.0989726209350092)
         assert math.isclose(res[1], 0.14101901870444156)
@@ -258,6 +283,7 @@ class TestChi2_0p5(object):
     sigma = 0.5
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(X, YP5, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 1.1188586115644354)
         assert math.isclose(res[1], 0.2820380374088831)
@@ -273,6 +299,7 @@ class TestChi2_0p75(object):
     sigma = 0.75
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(X, YP75, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 1.1847672848790627)
         assert math.isclose(res[1], 0.4230570561133248)
@@ -288,6 +315,7 @@ class TestChi2_0p75_0p25(object):
     sigma = 0.25
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(X, YP75, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 1.1847672848790618)
         assert math.isclose(res[1], 0.14101901870444156)
@@ -303,6 +331,7 @@ class TestChi2_0p45_0p1(object):
     sigma = 0.1
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(X, YP45, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 1.043181818181818)
         assert math.isclose(res[1], 0.056407607481776624)
@@ -318,6 +347,7 @@ class TestChi2_0p45_0p045(object):
     sigma = 0.045
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(X, YP45, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 1.0431818181818193)
         assert math.isclose(res[1], 0.025383423366799482)
@@ -333,6 +363,7 @@ class TestChi2_p11(object):
     sigma = 4e-8
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(DF11.index, DF11.Mass, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 0.09898892227272728)
         assert math.isclose(res[1], 2.256304299271065e-08)
@@ -348,6 +379,7 @@ class TestChi2_p51(object):
     sigma = 4e-8
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(DF51.index, DF51.Mass, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 0.09898901563348429)
         assert math.isclose(res[1], 1.1039487604783525e-08)
@@ -363,6 +395,7 @@ class TestChi2_p101(object):
     sigma = 4e-8
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(DF101.index, DF101.Mass, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 0.09898911309260354)
         assert math.isclose(res[1], 7.90154913558044e-09)
@@ -378,6 +411,7 @@ class TestChi2_p501(object):
     sigma = 4e-8
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(DF501.index, DF501.Mass, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 0.09899027903905232)
         assert math.isclose(res[1], 3.568792572732848e-09)
@@ -393,6 +427,7 @@ class TestChi2_p1001(object):
     sigma = 4e-8
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(DF1001.index, DF1001.Mass, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 0.09899174702441146)
         assert math.isclose(res[1], 2.52666482275547e-09)
@@ -408,6 +443,7 @@ class TestChi2_p5001(object):
     sigma = 4e-8
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(DF5001.index, DF5001.Mass, self.sigma, plot=PLOT)
         assert math.isclose(res[0], 0.09900337269225801)
         assert math.isclose(res[1], 1.1310880962516921e-09)
@@ -423,6 +459,7 @@ class TestChi2_p10001(object):
     sigma = 4e-8
 
     def test_run_chi2_plot(self):
+        """Test chi2."""
         res = chi2.chi2(DF10001.index, DF10001.Mass, self.sigma, plot=PLOT)
         print('a', res[0], res[1])
         print('b', res[2], res[3])
@@ -439,6 +476,7 @@ class TestDataset(object):
     """Unit testing of the Dataset module."""
 
     def test_calc_bins_0p06(self):
+        """Test _calc_bins."""
         res = 0.06
         bins = chi2._calc_bins(Y, res)
         assert len(bins) == 18
@@ -448,6 +486,7 @@ class TestDataset(object):
             b += res
 
     def test_calc_bins_0p2(self):
+        """Test _calc_bins."""
         res = 0.2
         bins = chi2._calc_bins(Y, res)
         assert len(bins) == 6
@@ -457,6 +496,7 @@ class TestDataset(object):
             b += res
 
     def test_calc_bins_0p45(self):
+        """Test _calc_bins."""
         res = 0.45
         bins = chi2._calc_bins(Y, res)
         assert len(bins) == 4
@@ -466,6 +506,7 @@ class TestDataset(object):
             b += res
 
     def test_calc_bins_5(self):
+        """Test _calc_bins."""
         res = 5
         bins = chi2._calc_bins(Y, res)
         assert len(bins) == 2
@@ -475,6 +516,7 @@ class TestDataset(object):
             b += res
 
     def test_add_steps_0p06(self):
+        """Test add_stepss."""
         res = 0.06
         y_new = chi2.add_steps(Y, res)
         assert math.isclose(y_new[0], 0.99)
@@ -482,6 +524,7 @@ class TestDataset(object):
         assert math.isclose(y_new[-1], 0.03)
 
     def test_add_steps_0p02(self):
+        """Test add_stepss."""
         res = 0.2
         y_new = chi2.add_steps(Y, res)
         assert math.isclose(y_new[0], 1.1)
@@ -489,6 +532,7 @@ class TestDataset(object):
         assert math.isclose(y_new[-1], 0.1)
 
     def test_add_steps_0p45(self):
+        """Test add_stepss."""
         res = 0.45
         y_new = chi2.add_steps(Y, res)
         assert math.isclose(y_new[0], 1.125)
@@ -496,6 +540,7 @@ class TestDataset(object):
         assert math.isclose(y_new[-1], 0.225)
 
     def test_add_steps_5(self):
+        """Test add_steps."""
         res = 5
         y_new = chi2.add_steps(Y, res)
         assert math.isclose(y_new[0], 2.5)
@@ -503,6 +548,7 @@ class TestDataset(object):
         assert math.isclose(y_new[-1], 2.5)
 
     def test_add_noise_0p1(self):
+        """Test add_noise."""
         amp = 0.1
         y_new = chi2.add_noise(Y, amp)
         assert math.isclose(y_new[0], 0.9993206997233096)
@@ -510,6 +556,7 @@ class TestDataset(object):
         assert math.isclose(y_new[-1], 0.05510254021456558)
 
     def test_add_noise_0p25(self):
+        """Test add_noise."""
         amp = 0.25
         y_new = chi2.add_noise(Y, amp)
         assert math.isclose(y_new[0], 0.7983029165921763)
@@ -517,6 +564,7 @@ class TestDataset(object):
         assert math.isclose(y_new[-1], -0.19025874783461144)
 
     def test_add_noise_0p5(self):
+        """Test add_noise."""
         amp = 0.5
         y_new = chi2.add_noise(Y, amp)
         assert math.isclose(y_new[0], 0.9557348586810382)
@@ -524,6 +572,7 @@ class TestDataset(object):
         assert math.isclose(y_new[-1], -0.16834277736450454)
 
     def test_add_noise_0p75(self):
+        """Test add_noise."""
         amp = 0.75
         y_new = chi2.add_noise(Y, amp)
         assert math.isclose(y_new[0], 0.7291348566408009)

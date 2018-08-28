@@ -6,7 +6,7 @@ from chamber.tools import laser
 
 if os.getenv('CI'):
     PLOT = False
-else:
+else:  # pragma: no cover
     PLOT = True
 
 
@@ -104,7 +104,7 @@ class TestLaser(object):
     def test_laser_constructor_plt_pro(self):
         """Test that the plot is created and displayed correctly."""
         co2_laser = laser.GaussianBeam()
-        if PLOT:
+        if PLOT:  # pragma: no cover
             co2_laser.plt_pro()
             co2_laser.plt_pro(full=True)
 
@@ -112,4 +112,4 @@ class TestLaser(object):
         """Test that the plot is created and displayed correctly."""
         co2_laser = laser.GaussianBeam()
         if PLOT:
-            co2_laser.plt_pro_3d()
+            co2_laser.plt_pro_3d()  # pragma: no cover

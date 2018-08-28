@@ -95,7 +95,7 @@ class GaussianBeam(object):
         """Use the beam profile to generate a grid for 3d plotting."""
         self.profile_3d = [[i]*201 for i in self.profile]
 
-    def plt_pro(self, full=False):
+    def plt_pro(self, full=False):  # pragma: no cover
         """Plot the beam profile."""
         # Constants used for plotting
         hwhm = HWHM_COEFF_W*self.radius
@@ -127,7 +127,7 @@ class GaussianBeam(object):
         plt.ylabel(r"Irradiance, $I\,$ [W/m$^2$]")
         plt.show()
 
-    def plt_pro_3d(self):
+    def plt_pro_3d(self):  # pragma: no cover
         """Plot the 3D beam profile."""
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')

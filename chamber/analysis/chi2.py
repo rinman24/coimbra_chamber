@@ -8,6 +8,7 @@ Functions
 
 """
 
+import itertools
 import math
 import random
 
@@ -98,7 +99,7 @@ def chi2(x, y, sigma, plot=False):
     chi2_res = _chi2(x, y, a_res, b_res, sigma)
     nu = len(x) - 2
     q_res = scipy.stats.chi2.sf(chi2_res, nu)
-    if plot:
+    if plot:  # pragma: no cover
         plt.subplot(121)
         plt.errorbar(x, y, yerr=sigma, label='data', fmt='o', zorder=0)
         plt.plot(x, list(map(lambda x: a_res + b_res*x, x)),
@@ -131,14 +132,10 @@ def chi2(x, y, sigma, plot=False):
 
 def _calc_bins(y, res):
     """Use the resolution to determine bins for the function's range."""
-    y_max = max(y)
+    y_max = max(y) + res
     y_min = min(y)
-    bins = [y_min]
-
-    while y_min < y_max:
-        y_min += res
-        bins.append(y_min)
-
+    bins = [y for y in itertools.takewhile(
+        lambda y: y < y_max, itertools.count(y_min, res))]
     return bins
 
 
