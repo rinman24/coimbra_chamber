@@ -15,7 +15,6 @@ from matplotlib import rcParams
 import numpy as np
 import seaborn as sns
 
-from chamber.data import dml
 from chamber.data import sqldb
 from chamber.scripts import db_check
 
@@ -24,6 +23,10 @@ TUBE_A = np.power(0.015, 2)*np.pi
 
 ALL_P_T = ('SELECT DISTINCT Pressure, Temperature FROM RHTargets NATURAL JOIN '
            'Test NATURAL JOIN Setting')
+
+
+GET_RESERVOIR = ('SELECT Reservoir FROM Setting INNER JOIN Test ON '
+                 'Test.SettingId=Setting.SettingId WHERE TestId={}')
 
 
 def format_plot():
@@ -50,7 +53,7 @@ def _get_tid_list(cur, p, t):
 
 def _check_reservoir(cur, tid):
     """Check if the reservoir was open for a TestId."""
-    cur.execute(dml.get_reservoir.format(tid))
+    cur.execute(GET_RESERVOIR.format(tid))
     return cur.fetchall()[0][0]
 
 

@@ -32,7 +32,8 @@ def add_tube(database):
         print("Sucessfully created a cursor for the database")
         print("Submitting to database...")
         add_row = (
-            "INSERT INTO Tube (DiameterIn, DiameterOut, Length, Material, Mass) "
+            "INSERT INTO Tube "
+            "(DiameterIn, DiameterOut, Length, Material, Mass) "
             "VALUES (%s, %s, %s, %s, %s);")
         row_data = (attributes['DiameterIn'], attributes['DiameterOut'],
                     attributes['Length'], attributes['Material'],
@@ -46,6 +47,7 @@ def add_tube(database):
         print("Closed the connection.")
     else:
         print("Ok, no changes made to daabase.")
+
 
 if __name__ == '__main__':
     add_tube(sys.argv[1])
