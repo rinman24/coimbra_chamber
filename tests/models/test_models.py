@@ -1,3 +1,5 @@
+"""Docstring required."""
+
 import math
 
 import pytest
@@ -16,11 +18,13 @@ EXP_STATE = dict(
 
 @pytest.fixture
 def spald():
+    """Obtain a fresh `spald` fixture for each test."""
     return models.Spalding(**EXP_STATE)
 
 
 # __init__
 def test_Spalding__init__(spald):
+    """Test __init___."""
     # Test the _guide constructor
     assert spald._film_guide['ref'] == 'Mills'
     assert spald._film_guide['rule'] == '1/2'
@@ -44,6 +48,7 @@ def test_Spalding__init__(spald):
 
 # film_guide property
 def test_Spalding_film_guide(spald):
+    """Test _film_guide."""
     assert isinstance(spald.film_guide, dict)
     assert len(spald.film_guide) == 2
     assert spald.film_guide['ref'] == 'Mills'
@@ -57,6 +62,7 @@ def test_Spalding_film_guide(spald):
 
 # exp_state property
 def test_Spalding_exp_state(spald):
+    """Test _exp_state."""
     assert isinstance(spald.exp_state, dict)
     assert len(spald.exp_state) == 3
     assert spald.exp_state['p'] == 101325
@@ -71,6 +77,7 @@ def test_Spalding_exp_state(spald):
 
 # t_s_guess property
 def test_Spalding_t_s_guess(spald):
+    """Test t_s_guess."""
     assert spald.t_s_guess is None
 
     # Test raises ValueError
@@ -81,6 +88,7 @@ def test_Spalding_t_s_guess(spald):
 
 # s-state
 def test_Spalding_s_state(spald):
+    """Test s_state."""
     assert spald.s_state is None
 
     # Test raises ValueError
@@ -90,6 +98,7 @@ def test_Spalding_s_state(spald):
 
 
 def test_Spalding_set_s_state(spald):
+    """Test set_s_state."""
     with pytest.raises(ValueError) as err:
         spald._set_s_state()
     err_msg = "Cannot set `s_state` when `self.t_s_guess` is None."
@@ -106,6 +115,7 @@ def test_Spalding_set_s_state(spald):
 
 # u-state
 def test_Spalding_u_state(spald):
+    """Test u_state."""
     assert spald.u_state is None
 
     # Test raises ValueError
@@ -115,6 +125,7 @@ def test_Spalding_u_state(spald):
 
 
 def test_Spalding_set_u_state(spald):
+    """Test set_u_state."""
     with pytest.raises(ValueError) as err:
         spald._set_u_state()
     err_msg = "Cannot set `u-state` when `self.s_state` is None."
@@ -129,6 +140,7 @@ def test_Spalding_set_u_state(spald):
 
 # liq-props
 def test_Spalding_liq_props(spald):
+    """Test liq_props."""
     assert spald.liq_props is None
 
     # Test raises ValueError
@@ -138,6 +150,7 @@ def test_Spalding_liq_props(spald):
 
 
 def test_Spalding_set_liq_props(spald):
+    """Test set_liq_props."""
     with pytest.raises(ValueError) as err:
         spald._set_liq_props()
     err_msg = ("Cannot set `liq-props` when `self.s_state` or"
@@ -154,6 +167,7 @@ def test_Spalding_set_liq_props(spald):
 
 # t-state
 def test_Spalding_t_state(spald):
+    """Test t_state."""
     assert spald.t_state is None
 
     # Test raises ValueError
@@ -163,6 +177,7 @@ def test_Spalding_t_state(spald):
 
 
 def test_Spalding_set_t_state(spald):
+    """Test set_t_state."""
     with pytest.raises(ValueError) as err:
         spald._set_t_state()
     err_msg = "Cannot set `t-state` when `self.liq_props` is None."
@@ -179,6 +194,7 @@ def test_Spalding_set_t_state(spald):
 
 # film-props
 def test_Spalding_film_props(spald):
+    """Test film_props."""
     assert spald.film_props is None
 
     # Test raises ValueError
@@ -188,6 +204,7 @@ def test_Spalding_film_props(spald):
 
 
 def test_Spalding_set_film_props(spald):
+    """Test set_film_props."""
     with pytest.raises(ValueError) as err:
         spald._set_film_props()
     err_msg = ("Cannot set `film-props` when `self.s_state` is None.")
@@ -206,6 +223,7 @@ def test_Spalding_set_film_props(spald):
 
 # e-state
 def test_Spalding_e_state(spald):
+    """Test e_state."""
     assert spald.e_state is None
 
     # Test raises ValueError
@@ -215,6 +233,7 @@ def test_Spalding_e_state(spald):
 
 
 def test_Spalding_set_e_state(spald):
+    """Test set_e_state."""
     with pytest.raises(ValueError) as err:
         spald._set_e_state()
     err_msg = "Cannot set `e-state` when `self.film_props` is None."
@@ -229,57 +248,34 @@ def test_Spalding_set_e_state(spald):
     assert math.isclose(spald.e_state['m_1e'], 0.0061357476021502095)
     assert math.isclose(spald.e_state['h_e_g'], 5099.813752743229)
 
+# ----------------------------------------------------------------------------
+# Solver helper functions
 
 
-# # film-state
-# def test_Spalding_film_state(spald):
-#     assert spald.film_state is None
+def test_Spalding_update_model(spald):
+    """Test update_model."""
+    # Update the model
+    new_t_s_guess = 287.5
+    spald._update_model(new_t_s_guess)
 
-#     # Test raises ValueError
-#     with pytest.raises(AttributeError) as err:
-#         spald.film_state = 'bacon!'
-#     assert "can't set attribute" in str(err.value)
+    # Check that everything was updated
+    assert spald.t_s_guess == new_t_s_guess
 
+    assert math.isclose(spald.s_state['m_1s_g'], 0.010143540369588422)
+    assert math.isclose(spald.s_state['h_fgs_g'], 2466889.85481398)
+    assert math.isclose(spald.s_state['h_s_g'], 0)
 
-# def test_Spalding_set_film_state(spald):
-#     with pytest.raises(ValueError) as err:
-#         spald._set_film_state()
-#     err_msg = (
-#         "Cannot set `film-state` when `self.s_state` or"
-#         " `self.e_state` is None."
-#         )
-#     assert err_msg in str(err.value)
+    assert math.isclose(spald.u_state['h_u_g'], -spald.s_state['h_fgs_g'])
 
-#     spald._t_s_guess = 285
-#     spald._set_s_state()
-#     spald._set_e_state()
-#     spald._set_film_state()
-#     assert math.isclose(spald.film_state['c_pm'], 1019.9627505486458)
-#     assert math.isclose(spald.film_state['rho_m'], 1.2229936606324967)
-#     assert math.isclose(spald.film_state['k_m'], 0.025446947707731902)
-#     assert math.isclose(spald.film_state['alpha_m'], 2.040317009201964e-05)
-#     assert math.isclose(spald.film_state['d_12'], 2.3955520502741308e-05)
+    assert math.isclose(spald.liq_props['c_pl_g'], 4188.229862295786)
 
+    assert math.isclose(spald.t_state['h_t_g'], -2456419.2801582403)
 
-# e-state
-# def test_Spalding_e_state(spald):
-#     assert spald.e_state is None
+    assert math.isclose(spald.film_props['c_pm_g'], 1021.4841291290464)
+    assert math.isclose(spald.film_props['rho_m_g'], 1.2170548183931842)
+    assert math.isclose(spald.film_props['k_m_g'], 0.025539619700973824)
+    assert math.isclose(spald.film_props['alpha_m_g'], 2.0544673661172288e-05)
+    assert math.isclose(spald.film_props['d_12_g'], 2.413048992963711e-05)
 
-#     # Test raises ValueError
-#     with pytest.raises(AttributeError) as err:
-#         spald.e_state = 'bar'
-#     assert "can't set attribute" in str(err.value)
-
-
-# def test_Spalding_set_e_state(spald):
-#     with pytest.raises(ValueError) as err:
-#         spald._set_e_state()
-#     err_msg = "Cannot set `e-state` when `self.s_state` is None."
-#     assert err_msg in str(err.value)
-
-#     spald._t_s_guess = 285
-#     spald._set_s_state()
-#     assert spald.e_state is None
-#     spald._set_e_state()
-#     assert math.isclose(spald.e_state['m_1e'], 0.0061357476021502095,)
-#     assert math.isclose(spald.e_state['h_e'], 5088.209554207289)
+    assert math.isclose(spald.e_state['m_1e'], 0.0061357476021502095)
+    assert math.isclose(spald.e_state['h_e_g'], 2553.710322822616)

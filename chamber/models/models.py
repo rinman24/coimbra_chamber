@@ -264,3 +264,19 @@ class Spalding:
                 "Cannot set `e-state` when `self.film_props` is None."
                 )
             raise ValueError(err_msg)
+
+    # ----------------------------------------------------------------------- #
+    # Iteratively Solve the Model
+    # ----------------------------------------------------------------------- #
+
+    def _update_model(self, t_s_guess):
+        # Set the t_s_guess
+        self._t_s_guess = t_s_guess
+
+        # Update all of the states and properties
+        self._set_s_state()
+        self._set_u_state()
+        self._set_liq_props()
+        self._set_t_state()
+        self._set_film_props()
+        self._set_e_state()
