@@ -31,7 +31,7 @@ if __name__ == '__main__':
     sqldb.create_tables(cur, sqldb.TABLES)
 
     print("Populating Units table...")
-    cur.execute(dml.add_unit, SQLDB.UNITS)
+    cur.execute(dml.add_unit, sqldb.UNITS)
 
     print("Committing changes to Unit table...")
     cnx.commit()
