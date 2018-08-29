@@ -19,8 +19,7 @@ original tube used for experiments at UCSD by Rich Inman.
 
 import sys
 
-import chamber.const as const
-from chamber.data import sqldb, ddl, dml
+from chamber.data import sqldb
 
 
 if __name__ == '__main__':
@@ -29,10 +28,10 @@ if __name__ == '__main__':
 
     cur = cnx.cursor()
     print("Sucessfully created a cursor for the database")
-    sqldb.create_tables(cur, ddl.tables)
+    sqldb.create_tables(cur, sqldb.TABLES)
 
     print("Populating Units table...")
-    cur.execute(dml.add_unit, ddl.units)
+    cur.execute(dml.add_unit, sqldb.UNITS)
 
     print("Committing changes to Unit table...")
     cnx.commit()
