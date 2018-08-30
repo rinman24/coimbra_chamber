@@ -6,13 +6,15 @@ import pytest
 
 from chamber.models import models
 
+LS_VALUE = 0.044
 P_VALUE = 101325
 TE_VALUE = 290
 TDP_VALUE = 280
 TS_VALUE = 285
 
 EXP_STATE = dict(
-    p=P_VALUE, t_e=TE_VALUE, t_dp=TDP_VALUE, ref='Mills', rule='1/2'
+    l_s=LS_VALUE, p=P_VALUE, t_e=TE_VALUE,
+    t_dp=TDP_VALUE, ref='Mills', rule='1/2'
     )
 
 
@@ -42,8 +44,8 @@ def test_Spalding__init__(spald):
     assert spald._film_props is None
     assert spald._e_state is None
     # assert spald._e_state is None
-    # assert spald.q_cu == 0
-    # assert spald.q_rs == 0
+    # assert spald.q_cu is None
+    # assert spald.q_rs is None
 
 
 # film_guide property
@@ -64,7 +66,8 @@ def test_Spalding_film_guide(spald):
 def test_Spalding_exp_state(spald):
     """Test _exp_state."""
     assert isinstance(spald.exp_state, dict)
-    assert len(spald.exp_state) == 3
+    assert len(spald.exp_state) == 4
+    assert spald.exp_state['l_s'] == 0.044
     assert spald.exp_state['p'] == 101325
     assert spald.exp_state['t_e'] == 290
     assert spald.exp_state['t_dp'] == 280
@@ -189,7 +192,7 @@ def test_Spalding_set_t_state(spald):
     spald._set_liq_props()
     assert spald.t_state is None
     spald._set_t_state()
-    assert math.isclose(spald.t_state['h_t_g'], -2451857.5466478113)
+    assert math.isclose(spald.t_state['h_t_g'], 20949.1436129422)
 
 
 # film-props
@@ -269,7 +272,7 @@ def test_Spalding_update_model(spald):
 
     assert math.isclose(spald.liq_props['c_pl_g'], 4188.229862295786)
 
-    assert math.isclose(spald.t_state['h_t_g'], -2456419.2801582403)
+    assert math.isclose(spald.t_state['h_t_g'], 10470.574655739465)
 
     assert math.isclose(spald.film_props['c_pm_g'], 1021.4841291290464)
     assert math.isclose(spald.film_props['rho_m_g'], 1.2170548183931842)
@@ -279,3 +282,8 @@ def test_Spalding_update_model(spald):
 
     assert math.isclose(spald.e_state['m_1e'], 0.0061357476021502095)
     assert math.isclose(spald.e_state['h_e_g'], 2553.710322822616)
+
+
+def test_Spalding_solve_system(spald):
+    """Test solve_system."""
+    spald.solve_system(10e-6, 1, 1, 0.01)

@@ -1,6 +1,9 @@
 """.. Todo:: Docstring."""
 
 import pandas as pd
+import scipy.optimize as opt
+from scipy.constants import sigma
+import numpy as np
 
 from chamber.models import film
 from chamber.models import props
@@ -9,7 +12,7 @@ from chamber.models import props
 class Spalding:
     """Init."""
 
-    def __init__(self, p, t_e, t_dp, ref, rule):
+    def __init__(self, l_s, p, t_e, t_dp, ref, rule):
         """Init."""
         self._t_s_guess = None
         self._s_state = None
@@ -18,15 +21,15 @@ class Spalding:
         self._t_state = None
         self._film_props = None
         self._e_state = None
-        # self.q_cu = 0
-        # self.q_rs = 0
+        # self.q_cu = None
+        # self.q_rs = None
 
         # Keep a 'guide' of how to calculate film props.
         self._film_guide = dict(ref=ref, rule=rule)
 
         # Set the _exp_state, which should not be confused with the
         # environmental or e-state with attributes such as m_1e and h_e.
-        self._exp_state = dict(p=p, t_e=t_e, t_dp=t_dp)
+        self._exp_state = dict(p=p, t_e=t_e, t_dp=t_dp, l_s=l_s)
 
     # ----------------------------------------------------------------------- #
     # Properties
@@ -222,7 +225,7 @@ class Spalding:
             t_s_g = self.t_s_guess
             h_u_g = self.u_state['h_u_g']
 
-            h_t_g = c_pl_g*(t_t-t_s_g) + h_u_g
+            h_t_g = c_pl_g*(t_t-t_s_g)
             self._t_state = dict(h_t_g=h_t_g)
         else:
             err_msg = (
@@ -280,3 +283,59 @@ class Spalding:
         self._set_t_state()
         self._set_film_props()
         self._set_e_state()
+
+    def _eval_model(self, guess):
+        mdpp_g = guess[0]
+        q_cu_g = guess[1]
+        q_rs_g = guess[2]
+        t_s_g = guess[3]
+        m_1s_g = guess[4]
+
+        res = [0]*5
+
+        rho_m_g = self.film_props['rho_m_g']
+        d_12_g = self.film_props['d_12_g']
+        l_s = self.exp_state['l_s']
+        # m_1s_g = self.s_state['m_1s_g']
+        m_1e = self.e_state['m_1e']
+        alpha_m_g = self.film_props['alpha_m_g']
+        h_e_g = self.e_state['h_e_g']
+        h_fgs_g = self.s_state['h_fgs_g']
+        h_t_g = self.t_state['h_t_g']
+        t_e = self.exp_state['t_e']
+
+        res[0] = (
+            mdpp_g - (rho_m_g * d_12_g / l_s) * (m_1s_g - m_1e) / (1 - m_1s_g)
+            )
+
+        res[1] = (
+            mdpp_g -
+            (rho_m_g * alpha_m_g / l_s) *
+            h_e_g / (h_fgs_g - (q_cu_g + q_rs_g) / mdpp_g)
+            )
+
+        res[2] = q_cu_g - mdpp_g * (h_t_g + h_fgs_g)
+
+        res[3] = q_rs_g - sigma * (pow(t_e, 4) - pow(t_s_g, 4))
+
+        res[4] = m_1s_g - props.get_m_1_sat(self.exp_state['p'], t_s_g)
+
+        return res
+
+    def solve_system(self, mdpp_g, q_cu_g, q_rs_g, m_1s_g):
+        t_dp = self.exp_state['t_dp']
+        t_e = self.exp_state['t_e']
+        results = dict(mdpp=[], q_cu=[], q_rs=[], t_s_g=[], t_s=[])
+        for t_s_g in np.arange(273.06, t_e, 0.01):
+            self._update_model(t_s_g)
+            guess = [mdpp_g, q_cu_g, q_rs_g, t_s_g, m_1s_g]
+            res = opt.root(self._eval_model, guess).x
+            results['mdpp'].append(res[0])
+            results['q_cu'].append(res[1])
+            results['q_rs'].append(res[2])
+            results['t_s'].append(res[3])
+            results['t_s_g'].append(t_s_g)
+        res_df = pd.DataFrame(results)
+        res_df['t_diff'] = abs(res_df['t_s'] - res_df['t_s_g'])
+        idx = res_df['t_diff'].idxmin()
+        return res_df.iloc[idx]
