@@ -225,7 +225,7 @@ class Spalding:
             t_s_g = self.t_s_guess
             h_u_g = self.u_state['h_u_g']
 
-            h_t_g = c_pl_g*(t_t-t_s_g)
+            h_t_g = c_pl_g*(t_t-t_s_g) + h_u_g
             self._t_state = dict(h_t_g=h_t_g)
         else:
             err_msg = (
@@ -323,19 +323,73 @@ class Spalding:
         return res
 
     def solve_system(self, mdpp_g, q_cu_g, q_rs_g, m_1s_g):
+        r"""
+        Iterate through guesses to solve Spalding model.
+
+        Itterate through guesses determined by a progressively decreasing step
+        size to approach and find a solution to the Spalding model.
+
+        Parameters
+        ----------
+        mdpp_g: float
+            Initial guess for the mass flux in kg/s/m\ :sup:`2`.
+        q_cu_g: float
+            Initial guess for the conductive heat flux in liquid at
+            liquid-vapor interface in W/m\ :sup:`2`.
+        q_rs_g: float
+            Initial guess for the radiative heat flux at the surface
+            in W/m\ :sup:`2`.
+        m_1s_g: float
+            Inital guess for the mass fraction of water vapor in the saturated
+            vapor mixture in [0, 1].
+
+        Returns
+        -------
+        Series
+            Series containing the results found by the solver.
+
+        Examples
+        --------
+        l_s = 0.044
+        ref = 'constant'
+        rule = '1/2'
+
+        # 1atm t_e=290K t_dp=289K
+        p = 101325
+        t_e = 290
+        t_dp = 289
+        spald_1 = Spalding(l_s, p, t_e, t_dp, ref, rule)
+        res, df = spald_1.solve_system(2e-7, 0.01, 0.1, 0.01)
+
+
+
+        """
         t_dp = self.exp_state['t_dp']
         t_e = self.exp_state['t_e']
-        results = dict(mdpp=[], q_cu=[], q_rs=[], t_s_g=[], t_s=[])
-        for t_s_g in np.arange(273.06, t_e, 0.01):
-            self._update_model(t_s_g)
-            guess = [mdpp_g, q_cu_g, q_rs_g, t_s_g, m_1s_g]
-            res = opt.root(self._eval_model, guess).x
+        results = dict(mdpp=[], q_cu=[], q_rs=[], t_s_g=[], t_s=[], m_1s_g=[])
+        # for t_s_g in np.arange(t_dp if t_dp > 273.06 else 273.06, t_e, 0.01):
+        delta = 1
+        alpha = 5e-3
+        initial_guess = [
+            mdpp_g, q_cu_g, q_rs_g, t_e if t_e > 273.07 else 273.07, m_1s_g
+            ]
+        self._update_model(t_dp)
+        while abs(delta) > 1e-9:
+            if not results['mdpp']:
+                guess = initial_guess
+            res = opt.fsolve(self._eval_model, guess)
             results['mdpp'].append(res[0])
             results['q_cu'].append(res[1])
             results['q_rs'].append(res[2])
             results['t_s'].append(res[3])
-            results['t_s_g'].append(t_s_g)
+            results['m_1s_g'].append(res[4])
+            results['t_s_g'].append(guess[3])
+            delta = results['t_s'][-1] - results['t_s_g'][-1]
+            t_s_g = self.t_s_guess + delta * alpha
+            guess = [results['mdpp'][-1], results['q_cu'][-1],
+                     results['q_rs'][-1], t_s_g,
+                     results['m_1s_g'][-1]
+                     ]
+            self._update_model(t_s_g)
         res_df = pd.DataFrame(results)
-        res_df['t_diff'] = abs(res_df['t_s'] - res_df['t_s_g'])
-        idx = res_df['t_diff'].idxmin()
-        return res_df.iloc[idx]
+        return res_df.iloc[-1]  # , res_df
