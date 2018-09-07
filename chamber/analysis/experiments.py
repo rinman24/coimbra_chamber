@@ -173,8 +173,8 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
     pool.join()
     print('Analysis complete.')
     return pd.DataFrame(
-        res, columns=['a', 'sig_a', 'b', 'sig_b',
-                      'chi2', 'Q', 'nu', 'RH', 'SigRH', 'spalding_mdpp']
+        res, columns=['a', 'sig_a', 'b', 'sig_b', 'chi2', 'Q',
+                      'nu', 'RH', 'SigRH', 'spalding_mdpp']
         )
 
 
