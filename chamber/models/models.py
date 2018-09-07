@@ -361,8 +361,6 @@ class Spalding:
         spald_1 = Spalding(l_s, p, t_e, t_dp, ref, rule)
         res, df = spald_1.solve_system(2e-7, 0.01, 0.1, 0.01)
 
-
-
         """
         t_dp = self.exp_state['t_dp']
         t_e = self.exp_state['t_e']
@@ -373,7 +371,7 @@ class Spalding:
         initial_guess = [
             mdpp_g, q_cu_g, q_rs_g, t_e if t_e > 273.07 else 273.07, m_1s_g
             ]
-        self._update_model(t_dp)
+        self._update_model(t_dp if t_dp > 273.07 else 273.07)
         while abs(delta) > 1e-9:
             if not results['mdpp']:
                 guess = initial_guess
@@ -386,6 +384,7 @@ class Spalding:
             results['t_s_g'].append(guess[3])
             delta = results['t_s'][-1] - results['t_s_g'][-1]
             t_s_g = self.t_s_guess + delta * alpha
+            t_s_g = t_s_g if t_s_g > 273.07 else 273.07
             guess = [results['mdpp'][-1], results['q_cu'][-1],
                      results['q_rs'][-1], t_s_g,
                      results['m_1s_g'][-1]

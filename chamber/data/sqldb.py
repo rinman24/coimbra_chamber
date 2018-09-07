@@ -151,6 +151,7 @@ TABLES.append(("Results",
                "  `Chi2` FLOAT UNSIGNED NOT NULL,"
                "  `Q` DECIMAL(3,2) UNSIGNED NOT NULL,"
                "  `Nu` SMALLINT UNSIGNED NOT NULL,"
+               "  `SpaldingMdpp` FLOAT NOT NULL,"
                "  PRIMARY KEY (`Nu`, `RH`, `TestId`),"
                "  CONSTRAINT `fk_Results_RHTargets1`"
                "    FOREIGN KEY (`RH` , `TestId`)"
@@ -222,8 +223,8 @@ ADD_RH_TARGETS = ("INSERT INTO RHTargets (TestId, RH, SigRH) VALUES "
 
 # dml to add analysis results into the 'Results' table
 ADD_RESULTS = ("INSERT INTO Results"
-               "  (TestId, RH, A, SigA, B, SigB, Chi2, Q, Nu)"
-               "  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
+               "  (TestId, RH, A, SigA, B, SigB, Chi2, Q, Nu, SpaldingMdpp)"
+               "  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
 
 # dml to add tube data into the 'Tube' table
 ADD_TUBE = ("INSERT INTO Tube "
@@ -993,7 +994,8 @@ def _add_temp_info(cur, tdms_obj, test_id):
 def _load_data(cur, df, table):
     """
     Leverage MySQL 'LOAD DATA INFILE' functionality to rapidly upload data.
-    Seve the argument `DataFrame` as a .csv file. Use a MySQL
+
+    Save the argument `DataFrame` as a .csv file. Use a MySQL
     'LOAD DATA INFILE' style querry to rapidly mass-upload the data into the
     argument table. The .csv file is created and deleted in the root of the
     repository every time _load_data is run.
@@ -1304,7 +1306,8 @@ def _add_results(cur, analyzed_df, test_id):
             float(analyzed_df.iloc[idx]['sig_b']),
             float(analyzed_df.iloc[idx]['chi2']),
             float(analyzed_df.iloc[idx]['Q']),
-            float(analyzed_df.iloc[idx]['nu'])
+            float(analyzed_df.iloc[idx]['nu']),
+            float(analyzed_df.iloc[idx]['spalding_mdpp'])
         ) for idx in analyzed_df.index
     ]
     cur.executemany(ADD_RESULTS, results_list)
@@ -1423,7 +1426,7 @@ def add_analysis(cnx, test_id, steps=1):
     # --------------------------------------------------------------------
     # Create a DataFrame of analyzed data
     test_dict = _get_test_dict(cnx, test_id)
-    processed_df = experiments.preprocess(test_dict['data'], purge=True)
+    processed_df = experiments.preprocess(test_dict['data'])
     analyzed_df = experiments.mass_transfer(processed_df, steps=steps)
     try:
         # --------------------------------------------------------------------
