@@ -1,4 +1,5 @@
 """Test sqldb."""
+from collections import OrderedDict
 import configparser
 from datetime import datetime
 from decimal import Decimal
@@ -258,17 +259,14 @@ TEMP_OBS_STATS_4 = pd.DataFrame(dict(
 
 # ----------------------------------------------------------------------------
 # Test `_get_test_dict` global variables`
-_ = {
-    'Temperature': [290.0], 'Pressure': [100000], 'Duty': [0.0],
-    'IsMass': [0], 'Reservoir': [0], 'TimeStep': [1.0],
-    'DateTime': [pd.Timestamp(datetime(2018, 6, 28, 17, 29, 39))],
-    'Author': 'author_1', 'Description': 'Duty 0; Resevoir Off; IsMass No',
-    'TubeId': [1], 'TestId': [1], 'SettingId': [1]
-}
-_ = pd.DataFrame(_)
-TEST_1_INFO_DF = _[['Temperature', 'Pressure', 'Duty', 'IsMass', 'Reservoir',
-                    'TimeStep', 'DateTime', 'Author', 'Description', 'TubeId',
-                    'TestId', 'SettingId']]
+_ = OrderedDict([
+    ('Temperature', [290.0]), ('Pressure', [100000]), ('Duty', [0.0]),
+    ('IsMass', [0]), ('Reservoir', [0]), ('TimeStep', [1.0]),
+    ('DateTime', [pd.Timestamp(datetime(2018, 6, 28, 17, 29, 39))]),
+    ('Author', 'author_1'), ('Description', 'Duty 0; Resevoir Off; IsMass No'),
+    ('TubeId', [1]), ('TestId', [1]), ('SettingId', [1])
+])
+TEST_1_INFO_DF = pd.DataFrame(_, columns=_.keys())
 TEST_1_STATS_DF = pd.DataFrame(dict(
     idx=['sum', 'mean', 'min', 'max', 'var'],
     TC0=[7929.219999999998, 293.67481481481474, 293.65, 293.71,
@@ -330,7 +328,10 @@ RESULTS_STATS_DF = pd.DataFrame(dict(
           97.25215148925781, 54769204],
     Q=[1099, 177.95, 0.13367083617251502,
        0.161920, 0, 1],
-    Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999]
+    Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999],
+    SpaldingMdpp=[1099, 4.438136445514829e-3, 2.143140631462824e-12,
+                  4.038340714754166e-06, 1.6635628981021e-06,
+                  7.613216439494863e-06]
     )
 ).set_index('idx')
 
@@ -367,17 +368,17 @@ BEST_FIT_STATS_DF = pd.DataFrame(dict(
 
 # ----------------------------------------------------------------------------
 # `test_tdms_obj` fixture global variables
-EVAP_DF = pd.DataFrame(dict(
-  RH=[float(rh) for rh in RH_TARGET_LIST],
-  SigRH=RH_ERR_LIST,
-  B=[-6.10832e-9, -5.18407e-9, -4.70715e-9, -3.69006e-9, -4.39613e-9,
-     -4.15584e-9, -3.69006e-9, -3.45441e-9, -3.17164e-9, -2.85822e-9,
-     -2.58906e-9, -2.29717e-9, -1.99432e-9, -1.71475e-9, -1.44389e-9],
-  SigB=[4.86253e-11, 1.72558e-11, 3.32917e-12, 2.64237e-12, 2.16304e-12,
-        1.81293e-12, 1.54803e-12, 1.3419e-12, 1.17778e-12, 9.34719e-13,
-        7.65107e-13, 6.41233e-13, 6.41233e-13, 3.91801e-13, 3.6942e-13]
-  )
-)[['RH', 'SigRH', 'B', 'SigB']]
+_ = OrderedDict([
+    ('RH', [float(rh) for rh in RH_TARGET_LIST]),
+    ('SigRH', RH_ERR_LIST),
+    ('B', [-6.10832e-9, -5.18407e-9, -4.70715e-9, -3.69006e-9, -4.39613e-9,
+           -4.15584e-9, -3.69006e-9, -3.45441e-9, -3.17164e-9, -2.85822e-9,
+           -2.58906e-9, -2.29717e-9, -1.99432e-9, -1.71475e-9, -1.44389e-9]),
+    ('SigB', [4.86253e-11, 1.72558e-11, 3.32917e-12, 2.64237e-12, 2.16304e-12,
+              1.81293e-12, 1.54803e-12, 1.3419e-12, 1.17778e-12, 9.34719e-13,
+              7.65107e-13, 6.41233e-13, 6.41233e-13, 3.91801e-13, 3.6942e-13])
+])
+EVAP_DF = pd.DataFrame(_, columns=_.keys())
 CORRECT_FILE_LIST = [os.path.join(os.getcwd(), 'tests',
                                                'data_test_files',
                                                'test_01.tdms'),
@@ -1049,22 +1050,6 @@ def test_add_analysis(results_cnx):
     for idx in range(len(res)):
         assert isclose(float(res[idx][0]), float(RESULTS_LIST[idx]))
 
-    for col in RESULTS_STATS_DF.columns.values:
-        results_cur.execute(
-            GET_STATS_TEST_ID.format(col, ANALYSIS_TEST_ID, 'Results')
-            )
-        res = results_cur.fetchall()[0]
-        for idx in range(len(RESULTS_STATS_DF)):
-            val = RESULTS_STATS_DF.index.values[idx]
-            assert isclose(res[idx], RESULTS_STATS_DF.loc[val, col])
-
-    # ------------------------------------------------------------------------
-    # Test adding the same analysis again
-    assert sqldb.add_analysis(
-        results_cnx, ANALYSIS_TEST_ID, steps=100) is None
-
-    # ------------------------------------------------------------------------
-    # Check that the database is uneffected
     for col in RESULTS_STATS_DF.columns.values:
         results_cur.execute(
             GET_STATS_TEST_ID.format(col, ANALYSIS_TEST_ID, 'Results')

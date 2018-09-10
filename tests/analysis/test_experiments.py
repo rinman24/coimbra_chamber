@@ -1,5 +1,6 @@
 """Unit tests (pytest) for the analysis module."""
 
+from collections import OrderedDict
 import math
 import os
 
@@ -110,9 +111,38 @@ SIGRH_STATS = pd.DataFrame(dict(
 RH_STATS_JOIN = RH_STATS.join(SIGRH_STATS)
 
 # ----------------------------------------------------------------------------
+# Test mass_transfer global variables
+_ = OrderedDict([
+        ('a', [0.09929181759175223, 0.09928473225936885, 0.0992847607314092,
+               0.09928492489007704, 0.09928501416933047, 0.09928517018827725,
+               0.09928533452472244, 0.09928550093016279]),
+        ('sig_a', [1.882350488972039e-09, 1.9788587163647553e-08,
+                   7.020334750875644e-09, 3.841190733562833e-09,
+                   2.5125517326302e-09, 1.8138480092937777e-09,
+                   1.394557435907611e-09, 1.1202981539221108e-09]),
+        ('b', [-8.48536063565115e-09, -7.292364819906284e-09,
+               -7.290912322449235e-09, -7.298178904296539e-09,
+               -7.2980450551660015e-09, -7.301819411160758e-09,
+               -7.304318945031545e-09, -7.304791649674251e-09]),
+        ('sig_b', [1.5480323625508021e-12, 1.54803236255134e-12,
+                   5.475172428149881e-13, 2.980678810643896e-13,
+                   1.936128652762121e-13, 1.3854328328617352e-13,
+                   1.0539608092031018e-13, 8.363961634717462e-14]),
+        ('chi2', [2802.071645, 1382.7937526640128, 10638.623831298488,
+                  54716.265494654326, 185676.2439066843, 487010.5588674388,
+                  1165909.144084889, 2540353.715297388]),
+        ('Q', [0, 1] + [0]*6),
+        ('nu', [1999] + list(range(1999, 14000, 2000))),
+        ('RH', [0.10] + [0.15]*7),
+        ('SigRH', [1.8283907632286184e-3] + [2.641933498081478e-3]*7),
+        ('spalding_mdpp', [6.131825084930425e-06] + [5.789552587893055e-06]*7)
+])
+RES_DF = pd.DataFrame(_, columns=_.keys())
+
+# ----------------------------------------------------------------------------
 # Test best fit analysis global variables
 ANALYSIS_DF = pkl.load(open(os.path.join(
-   os.getcwd(), 'tests', 'data_test_files', 'analysis_df'), 'rb'))
+    os.getcwd(), 'tests', 'data_test_files', 'analysis_df'), 'rb'))
 RH_SET_DF = ANALYSIS_DF[ANALYSIS_DF['RH'] == 0.3].reset_index()
 Q_IDX = 8
 
@@ -563,79 +593,9 @@ def test_preprocess(df_01, df_01_original):
 
 
 def test_mass_transfer(df_01):
-    """Test _analysis."""
+    """Test mass_transfer."""
     df_res = expr.mass_transfer(df_01, sigma=SIGMA, steps=1000, plot=PLOT)
-    assert math.isclose(df_res.a[0], 0.09929181759175223)
-    assert math.isclose(df_res.sig_a[0], 1.882350488972039e-09)
-    assert math.isclose(df_res.b[0], -8.48536063565115e-09)
-    assert math.isclose(df_res.sig_b[0], 1.5480323625508021e-12)
-    assert math.isclose(df_res.chi2[0], 2802.071645)
-    assert math.isclose(df_res.Q[0], 5.0309854179812744e-30)
-    assert math.isclose(df_res.nu[0], 1999)
-    assert math.isclose(df_res.RH[0], 0.10)
-
-    assert math.isclose(df_res.a[1], 0.09928473225936885)
-    assert math.isclose(df_res.sig_a[1], 1.9788587163647553e-08)
-    assert math.isclose(df_res.b[1], -7.292364819906284e-09)
-    assert math.isclose(df_res.sig_b[1], 1.54803236255134e-12)
-    assert math.isclose(df_res.chi2[1], 1382.7937526640128)
-    assert math.isclose(df_res.Q[1], 1)
-    assert math.isclose(df_res.nu[1], 1999)
-    assert math.isclose(df_res.RH[1], 0.15)
-
-    assert math.isclose(df_res.a[2], 0.0992847607314092)
-    assert math.isclose(df_res.sig_a[2], 7.020334750875644e-09)
-    assert math.isclose(df_res.b[2], -7.290912322449235e-09)
-    assert math.isclose(df_res.sig_b[2], 5.475172428149881e-13)
-    assert math.isclose(df_res.chi2[2], 10638.623831298488)
-    assert math.isclose(df_res.Q[2], 0)
-    assert math.isclose(df_res.nu[2], 3999)
-    assert math.isclose(df_res.RH[2], 0.15)
-
-    assert math.isclose(df_res.a[3], 0.09928492489007704)
-    assert math.isclose(df_res.sig_a[3], 3.841190733562833e-09)
-    assert math.isclose(df_res.b[3], -7.298178904296539e-09)
-    assert math.isclose(df_res.sig_b[3], 2.980678810643896e-13)
-    assert math.isclose(df_res.chi2[3], 54716.265494654326)
-    assert math.isclose(df_res.Q[3], 0)
-    assert math.isclose(df_res.nu[3], 5999)
-    assert math.isclose(df_res.RH[3], 0.15)
-
-    assert math.isclose(df_res.a[4], 0.09928501416933047)
-    assert math.isclose(df_res.sig_a[4], 2.5125517326302e-09)
-    assert math.isclose(df_res.b[4], -7.2980450551660015e-09)
-    assert math.isclose(df_res.sig_b[4], 1.936128652762121e-13)
-    assert math.isclose(df_res.chi2[4], 185676.2439066843)
-    assert math.isclose(df_res.Q[4], 0)
-    assert math.isclose(df_res.nu[4], 7999)
-    assert math.isclose(df_res.RH[4], 0.15)
-
-    assert math.isclose(df_res.a[5], 0.09928517018827725)
-    assert math.isclose(df_res.sig_a[5], 1.8138480092937777e-09)
-    assert math.isclose(df_res.b[5], -7.301819411160758e-09)
-    assert math.isclose(df_res.sig_b[5], 1.3854328328617352e-13)
-    assert math.isclose(df_res.chi2[5], 487010.5588674388)
-    assert math.isclose(df_res.Q[5], 0)
-    assert math.isclose(df_res.nu[5], 9999)
-    assert math.isclose(df_res.RH[5], 0.15)
-
-    assert math.isclose(df_res.a[6], 0.09928533452472244)
-    assert math.isclose(df_res.sig_a[6], 1.394557435907611e-09)
-    assert math.isclose(df_res.b[6], -7.304318945031545e-09)
-    assert math.isclose(df_res.sig_b[6], 1.0539608092031018e-13)
-    assert math.isclose(df_res.chi2[6], 1165909.144084889)
-    assert math.isclose(df_res.Q[6], 0)
-    assert math.isclose(df_res.nu[6], 11999)
-    assert math.isclose(df_res.RH[6], 0.15)
-
-    assert math.isclose(df_res.a[7], 0.09928550093016279)
-    assert math.isclose(df_res.sig_a[7], 1.1202981539221108e-09)
-    assert math.isclose(df_res.b[7], -7.304791649674251e-09)
-    assert math.isclose(df_res.sig_b[7], 8.363961634717462e-14)
-    assert math.isclose(df_res.chi2[7], 2540353.715297388)
-    assert math.isclose(df_res.Q[7], 0)
-    assert math.isclose(df_res.nu[7], 13999)
-    assert math.isclose(df_res.RH[7], 0.15)
+    pd.testing.assert_frame_equal(df_res, RES_DF, check_dtype=False)
 
 
 def test__get_df_row():
