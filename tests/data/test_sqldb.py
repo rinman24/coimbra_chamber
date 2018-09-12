@@ -295,11 +295,32 @@ FALSE_SETTING = dict(
 
 # ----------------------------------------------------------------------------
 # Test `_add_rh_targets` global variables
-RH_TARGET_LIST = [Decimal('{:g}'.format(rh/100)) for rh in range(10, 85, 5)]
+RH_TARGET_LIST = [rh/100 for rh in range(10, 85, 5)]
 RH_ERR_LIST = [0.00192007,  0.0028022,  0.00362771,  0.00445247,  0.00527192,
                0.00607349,  0.00682977,  0.00761089,  0.00840709,  0.00913833,
                0.00894471,  0.00937274,  0.00998618,  0.0106339,  0.0112474]
-RH_TARGET_LENGTH = 15
+SPALD_MDPP_LIST = [7.65707e-6, 7.17355e-6, 6.71222e-6, 6.28446e-6, 5.85229e-6,
+                   5.39369e-6, 4.9884e-6, 4.56614e-6, 4.13287e-6, 3.73085e-6,
+                   3.30426e-6, 2.89261e-6, 2.49381e-6, 2.07041e-6, 1.66769e-6]
+SPALD_MDPP_UNC_LIST = [5.54094e-8, 5.79935e-8, 6.19127e-8, 6.74405e-8,
+                       7.39026e-8, 8.03912e-8, 8.74896e-8, 9.52172e-8,
+                       1.03431e-7, 1.11144e-7, 1.09042e-7, 1.14176e-7,
+                       1.21033e-7, 1.28371e-7, 1.3542e-7]
+NU_LIST = [199, 199, 1199, 1599, 1799, 2199, 1199, 2199, 1999, 2599, 2999,
+           3599, 3599, 4999, 5199]
+_ = OrderedDict([
+    ('RH', RH_TARGET_LIST), ('SigRH', RH_ERR_LIST), ('TestId', 1),
+    ('Nu', [None]*15), ('SpaldMdpp', SPALD_MDPP_LIST),
+    ('SpaldMdppUnc', SPALD_MDPP_UNC_LIST)
+])
+RHT_DF = pd.DataFrame(_, columns=_.keys())
+_ = OrderedDict([
+    ('RH', RH_TARGET_LIST), ('SigRH', RH_ERR_LIST), ('TestId', 1),
+    ('Nu', NU_LIST), ('SpaldMdpp', SPALD_MDPP_LIST),
+    ('SpaldMdppUnc', SPALD_MDPP_UNC_LIST)
+])
+RHT_DF_NU = pd.DataFrame(_, columns=_.keys())
+
 ANALYSIS_DF = pkl.load(open(os.path.join(
     os.getcwd(), 'tests', 'data_test_files', 'analysis_df'), 'rb'))
 
@@ -328,10 +349,7 @@ RESULTS_STATS_DF = pd.DataFrame(dict(
           97.25215148925781, 54769204],
     Q=[1099, 177.95, 0.13367083617251502,
        0.161920, 0, 1],
-    Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999],
-    SpaldingMdpp=[1099, 4.438136445514829e-3, 2.143140631462824e-12,
-                  4.038340714754166e-06, 1.6635628981021e-06,
-                  7.613216439494863e-06]
+    Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999]
     )
 ).set_index('idx')
 
@@ -363,6 +381,12 @@ BEST_FIT_STATS_DF = pd.DataFrame(dict(
     RH=[15, 6.75, 0.04666666666666666, 0.450000, 0.10, 0.80],
     TestId=[15, 15, 0, 1, 1, 1],
     Nu=[15, 35585, 2111288.888888889, 2372.3333, 199, 5199],
+    SpaldMdpp=[15, 6.892034377870004e-05, 3.3745683507166798e-12,
+               4.59468958524667e-06, 1.667693709350715e-06,
+               7.657074093003757e-06],
+    SpaldMdppUnc=[15, 4.051314093089786e-07, 7.135141064361444e-17,
+                  2.7008760620598574e-08, 1.5221745641724738e-08,
+                  4.203076287012664e-08]
     )
 ).set_index('idx')
 
@@ -939,14 +963,9 @@ def test__add_rh_targets(results_cnx):
     """
     results_cur = results_cnx.cursor()
     assert sqldb._add_rh_targets(results_cur, ANALYSIS_DF, ANALYSIS_TEST_ID)
-    results_cur.execute('SELECT * FROM RHTargets;')
-    res = results_cur.fetchall()
-    assert len(res) == RH_TARGET_LENGTH
-    for idx in range(RH_TARGET_LENGTH):
-        assert res[idx][0] == RH_TARGET_LIST[idx]
-        assert res[idx][1] == RH_ERR_LIST[idx]
-        assert res[idx][2] == ANALYSIS_TEST_ID
     results_cur.close()
+    rht_df = pd.read_sql('SELECT * FROM RHTargets;', con=results_cnx)
+    pd.testing.assert_frame_equal(rht_df, RHT_DF, check_dtype=False)
 
 
 def test__add_results(results_cnx):
@@ -1009,9 +1028,9 @@ def test_get_high_low_testids(results_cnx):
     """Test get_high_low_testids."""
     results_cur = results_cnx.cursor()
     clear_results(results_cur, True)
-    results_cur.execute(sqldb.ADD_RH_TARGETS, [1, 0.35, 0.0002])
+    results_cur.execute(sqldb.ADD_RH_TARGETS, [1, 0.35, 0.0002, 6e-7, 2e-8])
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1]
-    results_cur.execute(sqldb.ADD_RH_TARGETS, [2, 0.30, 0.0001])
+    results_cur.execute(sqldb.ADD_RH_TARGETS, [2, 0.30, 0.0001, 6e-7, 2e-8])
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1, 2]
     clear_results(results_cur, True)
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == []
@@ -1034,13 +1053,10 @@ def test_add_analysis(results_cnx):
 
     # ------------------------------------------------------------------------
     # Test correct RHTargets input
-    results_cur.execute('SELECT * FROM RHTargets WHERE TestId=1;')
-    res = results_cur.fetchall()
-    assert len(res) == RH_TARGET_LENGTH
-    for idx in range(RH_TARGET_LENGTH):
-        assert res[idx][0] == RH_TARGET_LIST[idx]
-        assert res[idx][1] == RH_ERR_LIST[idx]
-        assert res[idx][2] == ANALYSIS_TEST_ID
+    rht_df = pd.read_sql(
+        'SELECT * FROM RHTargets WHERE TestId=1;', con=results_cnx
+    )
+    pd.testing.assert_frame_equal(rht_df, RHT_DF_NU, check_dtype=False)
 
     # ------------------------------------------------------------------------
     # Test correct Results input

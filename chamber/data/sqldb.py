@@ -130,6 +130,8 @@ TABLES.append(("RHTargets",
                "  `SigRH` FLOAT UNSIGNED NOT NULL,"
                "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
                "  `Nu` SMALLINT UNSIGNED,"
+               "  `SpaldMdpp` FLOAT NOT NULL,"
+               "  `SpaldMdppUnc` FLOAT NOT NULL,"
                "  PRIMARY KEY (`RH`, `TestId`),"
                "  INDEX `fk_RHTargets_Test_idx` (`TestId` ASC),"
                "  CONSTRAINT `fk_RHTargets_Test`"
@@ -151,7 +153,6 @@ TABLES.append(("Results",
                "  `Chi2` FLOAT UNSIGNED NOT NULL,"
                "  `Q` DECIMAL(3,2) UNSIGNED NOT NULL,"
                "  `Nu` SMALLINT UNSIGNED NOT NULL,"
-               "  `SpaldingMdpp` FLOAT NOT NULL,"
                "  PRIMARY KEY (`Nu`, `RH`, `TestId`),"
                "  CONSTRAINT `fk_Results_RHTargets1`"
                "    FOREIGN KEY (`RH` , `TestId`)"
@@ -218,13 +219,14 @@ LOAD_DATA = ("LOAD DATA LOCAL INFILE '_data.csv' INTO TABLE "
              "IGNORE 1 LINES")
 
 # dml to add 'RH', 'TestId' and 'SigRH' data into the 'RHTarget' table
-ADD_RH_TARGETS = ("INSERT INTO RHTargets (TestId, RH, SigRH) VALUES "
-                  "(%s, %s, %s)")
+ADD_RH_TARGETS = ("INSERT INTO RHTargets (TestId, RH, SigRH, "
+                  "SpaldMdpp, SpaldMdppUnc) VALUES "
+                  "(%s, %s, %s, %s, %s)")
 
 # dml to add analysis results into the 'Results' table
 ADD_RESULTS = ("INSERT INTO Results"
-               "  (TestId, RH, A, SigA, B, SigB, Chi2, Q, Nu, SpaldingMdpp)"
-               "  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
+               "  (TestId, RH, A, SigA, B, SigB, Chi2, Q, Nu)"
+               "  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
 
 # dml to add tube data into the 'Tube' table
 ADD_TUBE = ("INSERT INTO Tube "
@@ -1254,7 +1256,9 @@ def _add_rh_targets(cur, analyzed_df, test_id):
     rh_trgt_list = [
         (test_id,
          '{:.2f}'.format(rh),
-         float(analyzed_df.loc[analyzed_df['RH'] == rh].SigRH.iloc[0])
+         float(analyzed_df.loc[analyzed_df['RH'] == rh].SigRH.iloc[0]),
+         float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_mdpp.iloc[0]),
+         float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_mdpp_unc.iloc[0])
          ) for rh in analyzed_df.RH.unique()
     ]
     cur.executemany(ADD_RH_TARGETS, rh_trgt_list)
@@ -1306,8 +1310,7 @@ def _add_results(cur, analyzed_df, test_id):
             float(analyzed_df.iloc[idx]['sig_b']),
             float(analyzed_df.iloc[idx]['chi2']),
             float(analyzed_df.iloc[idx]['Q']),
-            float(analyzed_df.iloc[idx]['nu']),
-            float(analyzed_df.iloc[idx]['spalding_mdpp'])
+            float(analyzed_df.iloc[idx]['nu'])
         ) for idx in analyzed_df.index
     ]
     cur.executemany(ADD_RESULTS, results_list)

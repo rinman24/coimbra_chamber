@@ -172,11 +172,11 @@ def est_mix_props(p, t_e, t_dp, t_s, ref, rule):
        *Mass Transfer: Third Edition*, Temporal Publishing, LLC.
 
     """
-    c_pm = _est_c_pm(p, t_e, t_dp, t_s, rule)
-    rho_m = _est_rho_m(p, t_e, t_dp, t_s, rule)
-    k_m = _est_k_m(p, t_e, t_dp, t_s, rule)
-    alpha_m = _est_alpha_m(p, t_e, t_dp, t_s, rule)
-    d_12 = _est_d_12(p, t_e, t_dp, t_s, ref, rule)
+    c_pm = est_c_pm(p, t_e, t_dp, t_s, rule)
+    rho_m = est_rho_m(p, t_e, t_dp, t_s, rule)
+    k_m = est_k_m(p, t_e, t_dp, t_s, rule)
+    alpha_m = est_alpha_m(p, t_e, t_dp, t_s, rule)
+    d_12 = est_d_12(p, t_e, t_dp, t_s, rule, ref)
     film_props = dict(
         c_pm=c_pm, rho_m=rho_m, k_m=k_m, alpha_m=alpha_m, d_12=d_12
     )
@@ -230,12 +230,12 @@ def est_liq_props(t_s, t_t, rule):
         If `rule` is not in `{'1/2', '1/3'}`.
 
     """
-    c_pl = _est_c_pl(t_s, t_t, rule)
+    c_pl = est_c_pl(t_s, t_t, rule)
     liq_props = dict(c_pl=c_pl)
     return liq_props
 
 
-def _est_c_pm(p, t_e, t_dp, t_s, rule):
+def est_c_pm(p, t_e, t_dp, t_s, rule):
     """Estimate specific heat of the vapor mixture film."""
     c_pme = props.get_c_pm(p, t_e, t_dp)
     c_pms = props.get_c_pm_sat(p, t_s)
@@ -244,7 +244,7 @@ def _est_c_pm(p, t_e, t_dp, t_s, rule):
     return c_pm_film
 
 
-def _est_rho_m(p, t_e, t_dp, t_s, rule):
+def est_rho_m(p, t_e, t_dp, t_s, rule):
     """Estimate specific mass of the vapor mixture film."""
     rho_me = props.get_rho_m(p, t_e, t_dp)
     rho_ms = props.get_rho_m_sat(p, t_s)
@@ -253,7 +253,7 @@ def _est_rho_m(p, t_e, t_dp, t_s, rule):
     return rho_m_film
 
 
-def _est_k_m(p, t_e, t_dp, t_s, rule):
+def est_k_m(p, t_e, t_dp, t_s, rule):
     """Estimate thermal conductivity of the vapor mixture film."""
     k_me = props.get_k_m(p, t_e, t_dp)
     k_ms = props.get_k_m_sat(p, t_s)
@@ -262,7 +262,7 @@ def _est_k_m(p, t_e, t_dp, t_s, rule):
     return k_m_film
 
 
-def _est_alpha_m(p, t_e, t_dp, t_s, rule):
+def est_alpha_m(p, t_e, t_dp, t_s, rule):
     """Estimate thermal diffusivity of the vapor mixture film."""
     alpha_me = props.get_alpha_m(p, t_e, t_dp)
     alpha_ms = props.get_alpha_m_sat(p, t_s)
@@ -271,7 +271,7 @@ def _est_alpha_m(p, t_e, t_dp, t_s, rule):
     return alpha_m_film
 
 
-def _est_d_12(p, t_e, t_dp, t_s, ref, rule):
+def est_d_12(p, t_e, t_dp, t_s, rule, ref):
     """Estimate binary species diffusivity of the vapor mixture film."""
     d_12e = props.get_d_12(p, t_e, t_dp, ref)
     d_12s = props.get_d_12(p, t_s, t_s, ref)
@@ -280,7 +280,7 @@ def _est_d_12(p, t_e, t_dp, t_s, ref, rule):
     return d_12_film
 
 
-def _est_c_pl(t_s, t_t, rule):
+def est_c_pl(t_s, t_t, rule):
     """Estimate specific heat of pure liquid water at the film temperature."""
     c_pls = props.get_c_pl(t_s)
     c_plt = props.get_c_pl(t_t)

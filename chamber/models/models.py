@@ -1,5 +1,4 @@
 """.. Todo:: Docstring."""
-
 import pandas as pd
 import scipy.optimize as opt
 from scipy.constants import sigma
@@ -7,12 +6,13 @@ import numpy as np
 
 from chamber.models import film
 from chamber.models import props
+from chamber.models import uncertainty as unc
 
 
 class Spalding:
     """Init."""
 
-    def __init__(self, l_s, p, t_e, t_dp, ref, rule):
+    def __init__(self, m_l, p, t_e, t_dp, ref, rule):
         """Init."""
         self._t_s_guess = None
         self._s_state = None
@@ -29,7 +29,8 @@ class Spalding:
 
         # Set the _exp_state, which should not be confused with the
         # environmental or e-state with attributes such as m_1e and h_e.
-        self._exp_state = dict(p=p, t_e=t_e, t_dp=t_dp, l_s=l_s)
+        l_s = unc.liq_length((m_l, 0))[0]
+        self._exp_state = dict(m_l=m_l, p=p, t_e=t_e, t_dp=t_dp, l_s=l_s)
 
     # ----------------------------------------------------------------------- #
     # Properties
