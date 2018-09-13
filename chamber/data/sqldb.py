@@ -132,6 +132,7 @@ TABLES.append(("RHTargets",
                "  `Nu` SMALLINT UNSIGNED,"
                "  `SpaldMdpp` FLOAT NOT NULL,"
                "  `SpaldMdppUnc` FLOAT NOT NULL,"
+               "  `SpaldTs` FLOAT NOT NULL,"
                "  PRIMARY KEY (`RH`, `TestId`),"
                "  INDEX `fk_RHTargets_Test_idx` (`TestId` ASC),"
                "  CONSTRAINT `fk_RHTargets_Test`"
@@ -220,8 +221,8 @@ LOAD_DATA = ("LOAD DATA LOCAL INFILE '_data.csv' INTO TABLE "
 
 # dml to add 'RH', 'TestId' and 'SigRH' data into the 'RHTarget' table
 ADD_RH_TARGETS = ("INSERT INTO RHTargets (TestId, RH, SigRH, "
-                  "SpaldMdpp, SpaldMdppUnc) VALUES "
-                  "(%s, %s, %s, %s, %s)")
+                  "SpaldMdpp, SpaldMdppUnc, SpaldTs) VALUES "
+                  "(%s, %s, %s, %s, %s, %s)")
 
 # dml to add analysis results into the 'Results' table
 ADD_RESULTS = ("INSERT INTO Results"
@@ -1253,14 +1254,14 @@ def _add_rh_targets(cur, analyzed_df, test_id):
     True
 
     """
-    rh_trgt_list = [
-        (test_id,
-         '{:.2f}'.format(rh),
-         float(analyzed_df.loc[analyzed_df['RH'] == rh].SigRH.iloc[0]),
-         float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_mdpp.iloc[0]),
-         float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_mdpp_unc.iloc[0])
-         ) for rh in analyzed_df.RH.unique()
-    ]
+    rh_trgt_list = [(
+        test_id,
+        '{:.2f}'.format(rh),
+        float(analyzed_df.loc[analyzed_df['RH'] == rh].SigRH.iloc[0]),
+        float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_mdpp.iloc[0]),
+        float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_mdpp_unc.iloc[0]),
+        float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_t_s.iloc[0])
+    ) for rh in analyzed_df.RH.unique()]
     cur.executemany(ADD_RH_TARGETS, rh_trgt_list)
 
     return True

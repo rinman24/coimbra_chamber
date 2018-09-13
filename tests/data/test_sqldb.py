@@ -213,7 +213,7 @@ OBS_STATS_4 = pd.DataFrame(dict(
 # ----------------------------------------------------------------------------
 # Test `_add_temp_info` global variables
 TEMP_OBS_1 = [293.68, 293.03, 293.94, 292.68, 292.02, 291.79, 291.67, 291.96,
-              292.07, 291.62, 291.55, 291.6, 291.53, 291.81]
+              292.07, 291.62, 291.55, 291.6,  291.53, 291.81]
 TEMP_OBS_2 = [292.36, 291.85, 291.72, 292.1, 292.34, 291.67, 291.62, 291.64,
               291.58, 291.85]
 TEMP_OBS_3 = [293.06, 292.73, 293.02, 292.62, 291.85, 291.78, 291.67, 291.74,
@@ -296,28 +296,31 @@ FALSE_SETTING = dict(
 # ----------------------------------------------------------------------------
 # Test `_add_rh_targets` global variables
 RH_TARGET_LIST = [rh/100 for rh in range(10, 85, 5)]
-RH_ERR_LIST = [0.00192007,  0.0028022,  0.00362771,  0.00445247,  0.00527192,
+RH_ERR_LIST = [0.00192007,  0.0028022,   0.00362771,  0.00445247,  0.00527192,
                0.00607349,  0.00682977,  0.00761089,  0.00840709,  0.00913833,
-               0.00894471,  0.00937274,  0.00998618,  0.0106339,  0.0112474]
+               0.00894471,  0.00937274,  0.00998618,  0.0106339,   0.0112474]
 SPALD_MDPP_LIST = [7.65707e-6, 7.17355e-6, 6.71222e-6, 6.28446e-6, 5.85229e-6,
-                   5.39369e-6, 4.9884e-6, 4.56614e-6, 4.13287e-6, 3.73085e-6,
+                   5.39369e-6, 4.9884e-6,  4.56614e-6, 4.13287e-6, 3.73085e-6,
                    3.30426e-6, 2.89261e-6, 2.49381e-6, 2.07041e-6, 1.66769e-6]
 SPALD_MDPP_UNC_LIST = [5.54094e-8, 5.79935e-8, 6.19127e-8, 6.74405e-8,
                        7.39026e-8, 8.03912e-8, 8.74896e-8, 9.52172e-8,
                        1.03431e-7, 1.11144e-7, 1.09042e-7, 1.14176e-7,
                        1.21033e-7, 1.28371e-7, 1.3542e-7]
-NU_LIST = [199, 199, 1199, 1599, 1799, 2199, 1199, 2199, 1999, 2599, 2999,
+SPALD_TS_LIST = [277.454, 277.571, 277.678, 277.873, 278.07,  278.175, 278.359,
+                 278.55,  278.746, 278.928, 279.12,  279.305, 279.485, 279.675,
+                 279.855]
+NU_LIST = [199, 199,   1199, 1599, 1799, 2199, 1199, 2199, 1999, 2599, 2999,
            3599, 3599, 4999, 5199]
 _ = OrderedDict([
     ('RH', RH_TARGET_LIST), ('SigRH', RH_ERR_LIST), ('TestId', 1),
     ('Nu', [None]*15), ('SpaldMdpp', SPALD_MDPP_LIST),
-    ('SpaldMdppUnc', SPALD_MDPP_UNC_LIST)
+    ('SpaldMdppUnc', SPALD_MDPP_UNC_LIST), ('SpaldTs', SPALD_TS_LIST)
 ])
 RHT_DF = pd.DataFrame(_, columns=_.keys())
 _ = OrderedDict([
     ('RH', RH_TARGET_LIST), ('SigRH', RH_ERR_LIST), ('TestId', 1),
     ('Nu', NU_LIST), ('SpaldMdpp', SPALD_MDPP_LIST),
-    ('SpaldMdppUnc', SPALD_MDPP_UNC_LIST)
+    ('SpaldMdppUnc', SPALD_MDPP_UNC_LIST), ('SpaldTs', SPALD_TS_LIST)
 ])
 RHT_DF_NU = pd.DataFrame(_, columns=_.keys())
 
@@ -384,11 +387,12 @@ BEST_FIT_STATS_DF = pd.DataFrame(dict(
     SpaldMdpp=[15, 6.892034377870004e-05, 3.3745683507166798e-12,
                4.59468958524667e-06, 1.667693709350715e-06,
                7.657074093003757e-06],
-    SpaldMdppUnc=[15, 4.051314093089786e-07, 7.135141064361444e-17,
-                  2.7008760620598574e-08, 1.5221745641724738e-08,
-                  4.203076287012664e-08]
-    )
-).set_index('idx')
+    SpaldMdppUnc=[15, 1.4023746643943014e-06, 6.529206893138801e-16,
+                  9.349164429295342e-08, 5.540940506421066e-08,
+                  1.354203789105668e-07],
+    SpaldTs=[15, 4178.844512939453, 0.5786705229265708, 278.5896341959635,
+             277.4543762207031, 279.855224609375]
+)).set_index('idx')
 
 # ----------------------------------------------------------------------------
 # `test_tdms_obj` fixture global variables
@@ -399,7 +403,7 @@ _ = OrderedDict([
            -4.15584e-9, -3.69006e-9, -3.45441e-9, -3.17164e-9, -2.85822e-9,
            -2.58906e-9, -2.29717e-9, -1.99432e-9, -1.71475e-9, -1.44389e-9]),
     ('SigB', [4.86253e-11, 1.72558e-11, 3.32917e-12, 2.64237e-12, 2.16304e-12,
-              1.81293e-12, 1.54803e-12, 1.3419e-12, 1.17778e-12, 9.34719e-13,
+              1.81293e-12, 1.54803e-12, 1.3419e-12,  1.17778e-12, 9.34719e-13,
               7.65107e-13, 6.41233e-13, 6.41233e-13, 3.91801e-13, 3.6942e-13])
 ])
 EVAP_DF = pd.DataFrame(_, columns=_.keys())
@@ -1028,9 +1032,13 @@ def test_get_high_low_testids(results_cnx):
     """Test get_high_low_testids."""
     results_cur = results_cnx.cursor()
     clear_results(results_cur, True)
-    results_cur.execute(sqldb.ADD_RH_TARGETS, [1, 0.35, 0.0002, 6e-7, 2e-8])
+    results_cur.execute(
+        sqldb.ADD_RH_TARGETS, [1, 0.35, 0.0002, 6e-7, 2e-8, 278.123456]
+    )
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1]
-    results_cur.execute(sqldb.ADD_RH_TARGETS, [2, 0.30, 0.0001, 6e-7, 2e-8])
+    results_cur.execute(
+        sqldb.ADD_RH_TARGETS, [2, 0.30, 0.0001, 6e-7, 2e-8, 278.123456]
+    )
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1, 2]
     clear_results(results_cur, True)
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == []
