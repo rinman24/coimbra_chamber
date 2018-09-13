@@ -166,21 +166,25 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
         spald = models.Spalding(m_l, p, t_e, t_dp, ref, rule)
         sol = spald.solve_system(2e-7, 0.01, 0.1, 0.01)
         mdpp = unc.mdpp_unc(sol.mdpp, spald)
+        t_s = sol.t_s
 
         res += pool.starmap(_multi_mass, zip(repeat(dataframe), repeat(rh),
                             _half_len_gen(dataframe, idx, steps=steps),
                             repeat(idx), repeat(steps), repeat(sigma),
-                            repeat(mdpp[0]), repeat(mdpp[1]), repeat(plot)))
+                            repeat(mdpp[0]), repeat(mdpp[1]), repeat(t_s),
+                            repeat(plot)))
     pool.close()
     pool.join()
     print('Analysis complete.')
     return pd.DataFrame(
         res, columns=['a', 'sig_a', 'b', 'sig_b', 'chi2', 'Q', 'nu',
-                      'RH', 'SigRH', 'spald_mdpp', 'spald_mdpp_unc']
+                      'RH', 'SigRH', 'spald_mdpp', 'spald_mdpp_unc',
+                      'spald_t_s']
         )
 
 
-def _multi_mass(dataframe, rh, len_, idx, steps, sigma, mdpp, mdpp_unc, plot):
+def _multi_mass(dataframe, rh, len_, idx, steps, sigma,
+                mdpp, mdpp_unc, t_s, plot):
     """Calculate the Chi2 statistics for a single row of data."""
     time, mass = _get_stat_group(dataframe, idx, len_)
     stats = chi2.chi2(time, mass, sigma, plot=plot)
@@ -189,6 +193,7 @@ def _multi_mass(dataframe, rh, len_, idx, steps, sigma, mdpp, mdpp_unc, plot):
         dataframe.loc[dataframe['Idx'] == idx]['SigRH'].iloc[0])
     stats.append(mdpp)
     stats.append(mdpp_unc)
+    stats.append(t_s)
     return stats
 
 
