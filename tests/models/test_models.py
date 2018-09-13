@@ -9,62 +9,62 @@ import pytest
 
 from chamber.models import models
 
-LS_VALUE = 0.044
+ML_VALUE = 0.099
 P_VALUE = 101325
 TE_VALUE = 290
 TDP_VALUE = 280
 TS_VALUE = 285
 
 EXP_STATE = dict(
-    l_s=LS_VALUE, p=P_VALUE, t_e=TE_VALUE,
+    m_l=ML_VALUE, p=P_VALUE, t_e=TE_VALUE,
     t_dp=TDP_VALUE, ref='Mills', rule='1/2'
     )
 
 SOL_1 = pd.Series(
     dict(
-        m_1s_g=0.010952544893890066, mdpp=3.2542994900559486e-06,
-        q_cu=0.0179459798480596, q_rs=7.235231625840427,
-        t_s=288.68311886309294, t_s_g=288.6831188621335
+        m_1s_g=0.010944699615910254, mdpp=3.28506422226657e-06,
+        q_cu=0.018268302514365755, q_rs=7.295777236197718,
+        t_s=288.6720227116474, t_s_g=288.6720227106814
         )
     )
 
 SOL_2 = pd.Series(
     dict(
-        m_1s_g=0.01179343620282771, mdpp=4.133701810684298e-07,
-        q_cu=0.0002881632354045164, q_rs=0.9202099413507392,
-        t_s=289.8335070736338, t_s_g=289.8335070726376
+        m_1s_g=0.011792388869639073, mdpp=4.1725329199153945e-07,
+        q_cu=0.0002932933958794378, q_rs=0.9278693355548454,
+        t_s=289.8321200604034, t_s_g=289.8321200594131
         )
     )
 
 SOL_3 = pd.Series(
     dict(
-        m_1s_g=0.010665945867937853, mdpp=3.928569763908322e-07,
-        q_cu=0.0003081953833942, q_rs=0.8772062018356084,
-        t_s=274.8138455362526, t_s_g=274.81384553536884
+        m_1s_g=0.010664794980423274, mdpp=3.964748121823706e-07,
+        q_cu=0.00031353234940909036, q_rs=0.8842458084671191,
+        t_s=274.812350110178, t_s_g=274.81235010920227
         )
     )
 
 SOL_4 = pd.Series(
     dict(
-        m_1s_g=0.03059244423917599, mdpp=1.3334909890224947e-05,
-        q_cu=0.24745057197330064, q_rs=29.361603343130295,
-        t_s=305.5601895597046, t_s_g=305.56018955871286
+        m_1s_g=0.030536455547444427, mdpp=1.3441664924193561e-05,
+        q_cu=0.25122243971720015, q_rs=29.567827827441462,
+        t_s=305.5283148153382, t_s_g=305.52831481435766
         )
     )
 
 SOL_5 = pd.Series(
     dict(
-        m_1s_g=0.03793245726866803, mdpp=1.9886524499517363e-06,
-        q_cu=0.005425554564668938, q_rs=4.396905570481469,
-        t_s=309.3472259320884, t_s_g=309.34722593109495
+        m_1s_g=0.037923059504084755, mdpp=2.0039260029761564e-06,
+        q_cu=0.005504199111092516, q_rs=4.426546863993395,
+        t_s=309.3428112786988, t_s_g=309.3428112776991
         )
     )
 
 SOL_6 = pd.Series(
     dict(
-        m_1s_g=0.010539570274669558, mdpp=7.407057515352082e-07,
-        q_cu=0.0010964322354175176, q_rs=1.6535935744335173,
-        t_s=274.6487699668397, t_s_g=274.64876996596945
+        m_1s_g=0.010537417221180933, mdpp=7.475361665587084e-07,
+        q_cu=0.0011154526343078817, q_rs=1.6668805145155576,
+        t_s=274.6459423044933, t_s_g=274.64594230351287
         )
     )
 
@@ -117,8 +117,9 @@ def test_Spalding_film_guide(spald):
 def test_Spalding_exp_state(spald):
     """Test _exp_state."""
     assert isinstance(spald.exp_state, dict)
-    assert len(spald.exp_state) == 4
-    assert spald.exp_state['l_s'] == 0.044
+    assert len(spald.exp_state) == 5
+    assert spald.exp_state['m_l'] == 0.099
+    assert spald.exp_state['l_s'] == 0.04351613825556731
     assert spald.exp_state['p'] == 101325
     assert spald.exp_state['t_e'] == 290
     assert spald.exp_state['t_dp'] == 280
@@ -341,7 +342,7 @@ def test_Spalding_solve_system(spald):
     pd.testing.assert_series_equal(res, SOL_1, check_names=False)
 
     # Constant parameters
-    l_s = 0.044
+    m_l = 0.099
     ref = 'constant'
     rule = '1/2'
 
@@ -349,20 +350,20 @@ def test_Spalding_solve_system(spald):
     p = 101325
     t_e = 290
     t_dp = 289
-    spald_1 = models.Spalding(l_s, p, t_e, t_dp, ref, rule)
+    spald_1 = models.Spalding(m_l, p, t_e, t_dp, ref, rule)
     res = spald_1.solve_system(2e-7, 0.01, 0.1, 0.01)
     pd.testing.assert_series_equal(res, SOL_2, check_names=False)
 
     # 1atm t_e=310K t_dp=290K
     t_e = 310
     t_dp = 290
-    spald_1 = models.Spalding(l_s, p, t_e, t_dp, ref, rule)
+    spald_1 = models.Spalding(m_l, p, t_e, t_dp, ref, rule)
     res = spald_1.solve_system(2e-7, 0.01, 0.1, 0.01)
     pd.testing.assert_series_equal(res, SOL_4, check_names=False)
 
     # 1atm t_e=310K t_dp=308K
     t_dp = 308
-    spald_1 = models.Spalding(l_s, p, t_e, t_dp, ref, rule)
+    spald_1 = models.Spalding(m_l, p, t_e, t_dp, ref, rule)
     res = spald_1.solve_system(2e-7, 0.01, 0.1, 0.01)
     pd.testing.assert_series_equal(res, SOL_5, check_names=False)
 
@@ -370,7 +371,7 @@ def test_Spalding_solve_system(spald):
     p = 101325 * 0.4
     t_e = 275
     t_dp = 274
-    spald_1 = models.Spalding(l_s, p, t_e, t_dp, ref, rule)
+    spald_1 = models.Spalding(m_l, p, t_e, t_dp, ref, rule)
     res = spald_1.solve_system(2e-7, 0.01, 0.1, 0.01)
     pd.testing.assert_series_equal(res, SOL_3, check_names=False)
 
@@ -378,6 +379,6 @@ def test_Spalding_solve_system(spald):
     p = 101325 * 0.4
     t_e = 275
     t_dp = 273.07
-    spald_1 = models.Spalding(l_s, p, t_e, t_dp, ref, rule)
+    spald_1 = models.Spalding(m_l, p, t_e, t_dp, ref, rule)
     res = spald_1.solve_system(2e-7, 0.01, 0.1, 0.01)
     pd.testing.assert_series_equal(res, SOL_6, check_names=False)
