@@ -309,18 +309,29 @@ SPALD_MDPP_UNC_LIST = [5.54094e-8, 5.79935e-8, 6.19127e-8, 6.74405e-8,
 SPALD_TS_LIST = [277.454, 277.571, 277.678, 277.873, 278.07,  278.175, 278.359,
                  278.55,  278.746, 278.928, 279.12,  279.305, 279.485, 279.675,
                  279.855]
-NU_LIST = [199, 199,   1199, 1599, 1799, 2199, 1199, 2199, 1999, 2599, 2999,
+NU_LIST = [199,  399,  1199, 1599, 1799, 2199, 1199, 2199, 1999, 2599, 3199,
            3599, 3599, 4999, 5199]
+P_LIST = [39319.4, 39350.7, 39384.7, 39424.8, 39469.6, 39513.8, 39557.4,
+          39604.2, 39649.3, 39708.6, 39752.3, 39803.5, 39854.3, 39909.2,
+          39957.0]
+T_DP_LIST = [253.3, 257.6, 260.6, 263.1, 265.2, 266.9, 268.4, 269.8, 271.1,
+             272.2, 273.3, 274.4, 275.4, 276.4, 277.3]
+T_E_LIST = [280.9, 280.8, 280.7, 280.7, 280.7, 280.6, 280.6, 280.6, 280.6,
+            280.6, 280.6, 280.6, 280.6, 280.6, 280.6]
 _ = OrderedDict([
     ('RH', RH_TARGET_LIST), ('SigRH', RH_ERR_LIST), ('TestId', 1),
-    ('Nu', [None]*15), ('SpaldMdpp', SPALD_MDPP_LIST),
-    ('SpaldMdppUnc', SPALD_MDPP_UNC_LIST), ('SpaldTs', SPALD_TS_LIST)
+    ('Nu', [None]*15), ('PressureSmooth', P_LIST),
+    ('DewPointSmooth', T_DP_LIST), ('TemperatureSmooth', T_E_LIST),
+    ('SpaldMdpp', SPALD_MDPP_LIST), ('SpaldMdppUnc', SPALD_MDPP_UNC_LIST),
+    ('SpaldTs', SPALD_TS_LIST)
 ])
 RHT_DF = pd.DataFrame(_, columns=_.keys())
 _ = OrderedDict([
     ('RH', RH_TARGET_LIST), ('SigRH', RH_ERR_LIST), ('TestId', 1),
-    ('Nu', NU_LIST), ('SpaldMdpp', SPALD_MDPP_LIST),
-    ('SpaldMdppUnc', SPALD_MDPP_UNC_LIST), ('SpaldTs', SPALD_TS_LIST)
+    ('Nu', NU_LIST), ('PressureSmooth', P_LIST),
+    ('DewPointSmooth', T_DP_LIST), ('TemperatureSmooth', T_E_LIST),
+    ('SpaldMdpp', SPALD_MDPP_LIST), ('SpaldMdppUnc', SPALD_MDPP_UNC_LIST),
+    ('SpaldTs', SPALD_TS_LIST)
 ])
 RHT_DF_NU = pd.DataFrame(_, columns=_.keys())
 
@@ -337,21 +348,20 @@ RESULTS_STATS_DF = pd.DataFrame(dict(
     RH=[1099, 563.0, 0.03056339165143929, 0.512284,
         0.10000000000000001, 0.80000000000000004],
     TestId=[1099, 1099, 0, 1, 1, 1],
-    A=[1099, 108.65434961020947, 2.9013655607597385e-10, 0.09886656015487667,
-       0.09882460534572601, 0.09888922423124313],
-    SigA=[1099, 2.8483969686021737e-05, 1.6791311969228083e-14,
-          2.5918079787098944e-08, 5.754197673901729e-10,
-          2.316897962373332e-06],
-    B=[1099, -3.391460006607616e-06, 1.0181455109937529e-18,
-       -3.0859508704345916e-09, -6.390378448628553e-09,
-       -1.419641071365163e-09],
+    A=[1099, 108.6543510556221, 2.908801977543881e-10, 0.09886656147008381,
+       0.09882037341594696, 0.09888923168182373],
+    SigA=[1099, 2.847965183044865e-05, 1.6783926271171317e-14,
+          2.591415089212798e-08, 5.754197673901729e-10,
+          2.315682195330737e-06],
+    B=[1099, -3.3916215662621596e-06, 1.018295273896424e-18,
+       -3.0860978764896812e-09, -6.3922729331977735e-09,
+       -1.3307230872783293e-09],
     SigB=[1099, 1.7167214310265938e-09, 3.639741584914378e-23,
           1.5620759154018142e-12, 4.898612101351084e-14,
           4.862525659898864e-11],
-    Chi2=[1099, 3379617267.8442154, 42744441389327.21, 3075174.9479929167,
-          97.25215148925781, 54769204],
-    Q=[1099, 177.95, 0.13367083617251502,
-       0.161920, 0, 1],
+    Chi2=[1099, 3379835385.264351, 42747054187012.49, 3075373.4169830307,
+          94.02532958984375, 54771152.0],
+    Q=[1099, 179.23, 0.13445518028218226, 0.163085, 0, 1],
     Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999]
     )
 ).set_index('idx')
@@ -362,17 +372,17 @@ RES_DF_STATS = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     RH=[1099, 563.0, 0.030591227163, 0.512283894449, 0.1, 0.8],
     TestId=[1099, 1099, 0, 1, 1, 1],
-    A=[1099, 108.654349, 2.90428639548e-10, 0.0988665595996, 0.0988246,
-       0.0988892],
-    SigA=[1099, 2.8483974018e-05, 1.68066219103e-14, 2.59180837288e-08,
-          5.7542e-10, 2.3169e-06],
-    B=[1099, -3.39146005e-06, 1.01907242991e-18, -3.08595090992e-09,
-       -6.39038e-09, -1.41964e-09],
+    A=[1099, 108.65435020000001, 2.9115952811878664e-10, 0.09886656069153778,
+       0.0988204, 0.0988892],
+    SigA=[1099, 2.8479658233e-05, 1.6799225077158573e-14,
+          2.5914156717925386e-08, 5.7542e-10, 2.31568e-06],
+    B=[1099, -3.3916213899999997e-06, 1.0192229310327573e-18,
+       -3.0860977161055502e-09, -6.39227e-09, -1.33072e-09],
     SigB=[1099, 1.7167221368e-09, 3.64306158289e-23, 1.5620765576e-12,
           4.89861e-14, 4.86253e-11],
-    Chi2=[1099, 3379617400.1, 4.278336427e+13, 3075175.06833, 97.2522,
-          54769200],
-    Q=[1099, 177.95, 0.13379257646, 0.161919927207, 0, 1],
+    Chi2=[1099, 3379834745.2663, 42785962255599.59, 3075372.834637216, 94.0253,
+          54771200.0],
+    Q=[1099, 179.23, 0.13457763490903302, 0.16308462238398544, 0, 1],
     Nu=[1099, 9691301, 32457551.0441, 8818.29026388, 199, 19999]
     )
 ).set_index('idx')
@@ -383,15 +393,21 @@ BEST_FIT_STATS_DF = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
     RH=[15, 6.75, 0.04666666666666666, 0.450000, 0.10, 0.80],
     TestId=[15, 15, 0, 1, 1, 1],
-    Nu=[15, 35585, 2111288.888888889, 2372.3333, 199, 5199],
-    SpaldMdpp=[15, 6.892034377870004e-05, 3.3745683507166798e-12,
-               4.59468958524667e-06, 1.667693709350715e-06,
-               7.657074093003757e-06],
-    SpaldMdppUnc=[15, 1.4023746643943014e-06, 6.529206893138801e-16,
-                  9.349164429295342e-08, 5.540940506421066e-08,
-                  1.354203789105668e-07],
-    SpaldTs=[15, 4178.844512939453, 0.5786705229265708, 278.5896341959635,
-             277.4543762207031, 279.855224609375]
+    Nu=[15, 35985, 2074666.6666666667, 2399, 199, 5199],
+    PressureSmooth=[15, 594258.828125, 40424.636689587656, 39617.255208333336,
+                    39319.37890625, 39957.046875],
+    DewPointSmooth=[15, 4024.999984741211, 48.1274923910221, 268.3333323160807,
+                    253.3000030517578, 277.29998779296875],
+    TemperatureSmooth=[15, 4209.800079345703, 0.007821576644976324,
+                       280.65333862304686, 280.6000061035156, 280.8999938964844],
+    SpaldMdpp=[15, 6.891970610922726e-05, 3.374503537606972e-12,
+               4.594647073948485e-06, 1.667680180617026e-06,
+               7.657000423932914e-06],
+    SpaldMdppUnc=[15, 1.4023587162625972e-06, 6.529045232292923e-16,
+                  9.349058108417315e-08, 5.540884373544941e-08,
+                  1.3541892940338585e-07],
+    SpaldTs=[15, 4178.844787597656, 0.5786617114477441, 278.5896525065104,
+             277.45440673828125, 279.855224609375]
 )).set_index('idx')
 
 # ----------------------------------------------------------------------------
@@ -442,7 +458,7 @@ def cnx():
     print("\nCleaning up test database...")
     cur = cnx.cursor()
 
-    drop_tables(cur, True)
+    drop_tables(cur, sqldb.TABLE_NAME_LIST, True)
     print("Disconnecting from MySQL...")
     cnx.commit()
     assert cur.close()
@@ -475,13 +491,17 @@ def results_cnx():
     print("\nConnecting to MySQL Server...")
     results_cnx = sqldb.connect("test_results")
     print("Successfully connected to test_results.")
+    results_cur = results_cnx.cursor()
+    sqldb.create_tables(results_cur, sqldb.TABLES)
+    results_cnx.commit()
+    results_cur.close()
     yield results_cnx
 
     # ------------------------------------------------------------------------
     # Cleanup with new cursor
     print("\nClearing results...")
     results_cur = results_cnx.cursor()
-    clear_results(results_cur, True)
+    drop_tables(results_cur, ['Results', 'RHTargets'], True)
 
     print("Disconnecting from MySQL results_cnx...")
     results_cnx.commit()
@@ -1033,11 +1053,13 @@ def test_get_high_low_testids(results_cnx):
     results_cur = results_cnx.cursor()
     clear_results(results_cur, True)
     results_cur.execute(
-        sqldb.ADD_RH_TARGETS, [1, 0.35, 0.0002, 6e-7, 2e-8, 278.123456]
+        sqldb.ADD_RH_TARGETS, [1, 0.35, 0.0002, 40000.13, 290.00, 280.21, 6e-7,
+                               2e-8, 278.123456]
     )
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1]
     results_cur.execute(
-        sqldb.ADD_RH_TARGETS, [2, 0.30, 0.0001, 6e-7, 2e-8, 278.123456]
+        sqldb.ADD_RH_TARGETS, [2, 0.30, 0.0001, 40000.13, 290.00, 280.21, 6e-7,
+                               2e-8, 278.123456]
     )
     assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1, 2]
     clear_results(results_cur, True)
@@ -1064,6 +1086,9 @@ def test_add_analysis(results_cnx):
     rht_df = pd.read_sql(
         'SELECT * FROM RHTargets WHERE TestId=1;', con=results_cnx
     )
+    print(rht_df.columns.values)
+    print(len(rht_df))
+    print(rht_df)
     pd.testing.assert_frame_equal(rht_df, RHT_DF_NU, check_dtype=False)
 
     # ------------------------------------------------------------------------
@@ -1092,12 +1117,12 @@ def test_get_rht_results(results_cnx):
       res_df, EVAP_DF,  check_dtype=False) is None
 
 
-def drop_tables(cursor, bol):
+def drop_tables(cursor, table_list, bol):
     """Drop databese tables."""
     if bol:
         print("Dropping tables...")
         cursor.execute("DROP TABLE IF EXISTS " +
-                       ", ".join(sqldb.TABLE_NAME_LIST) +
+                       ", ".join(table_list) +
                        ";")
     else:
         print('Tables not dropped.')
@@ -1107,8 +1132,8 @@ def clear_results(cursor, bol):
     """Drop databese tables."""
     if bol:
         print('Clearing analysis tables...')
-        truncate(cursor, 'RHTargets')
         truncate(cursor, 'Results')
+        truncate(cursor, 'RHTargets')
         print('Analysis tables cleared.')
     else:
         print('RHTargests and Results not cleared.')

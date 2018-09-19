@@ -154,43 +154,63 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
     rh_targets = _get_valid_rh_targets(dataframe)
     res = []
     pool = multi.Pool(CPU_COUNT)
-    for rh in tqdm(rh_targets):
-        idx = _get_target_idx(dataframe, rh)
-
-        m_l = dataframe['Mass'].iloc[idx]
-        p = dataframe['PressureSmooth'].iloc[idx]
-        t_e = dataframe['TeSmooth'].iloc[idx]
-        t_dp = dataframe['DewPointSmooth'].iloc[idx]
-        ref = 'constant'
-        rule = '1/2'
-        spald = models.Spalding(m_l, p, t_e, t_dp, ref, rule)
-        sol = spald.solve_system(2e-7, 0.01, 0.1, 0.01)
-        mdpp = unc.mdpp_unc(sol.mdpp, spald)
-        t_s = sol.t_s
-
-        res += pool.starmap(_multi_mass, zip(repeat(dataframe), repeat(rh),
-                            _half_len_gen(dataframe, idx, steps=steps),
-                            repeat(idx), repeat(steps), repeat(sigma),
-                            repeat(mdpp[0]), repeat(mdpp[1]), repeat(t_s),
-                            repeat(plot)))
+    no_format_list = pool.starmap(
+        _multi_analysis,
+        zip(
+            repeat(dataframe), repeat(sigma), repeat(steps),
+            repeat(plot), rh_targets
+        )
+    )
+    for col in no_format_list:
+        res += col
     pool.close()
     pool.join()
     print('Analysis complete.')
-    return pd.DataFrame(
+    res_df = pd.DataFrame(
         res, columns=['a', 'sig_a', 'b', 'sig_b', 'chi2', 'Q', 'nu',
-                      'RH', 'SigRH', 'spald_mdpp', 'spald_mdpp_unc',
-                      'spald_t_s']
+                      'RH', 'SigRH', 'p', 't_e', 't_dp', 'spald_mdpp',
+                      'spald_mdpp_unc', 'spald_t_s']
         )
+    return res_df
 
 
-def _multi_mass(dataframe, rh, len_, idx, steps, sigma,
-                mdpp, mdpp_unc, t_s, plot):
+def _multi_analysis(dataframe, sigma, steps, plot, rh):
+    """Extract values from dataframe and build the analyzed rows as lists."""
+    idx = _get_target_idx(dataframe, rh)
+    m_l = dataframe['Mass'].iloc[idx]
+    p = dataframe['PressureSmooth'].iloc[idx]
+    t_e = dataframe['TeSmooth'].iloc[idx]
+    t_dp = dataframe['DewPointSmooth'].iloc[idx]
+    ref = 'constant'
+    rule = '1/2'
+    spald = models.Spalding(m_l, p, t_e, t_dp, ref, rule)
+    sol = spald.solve_system(2e-7, 0.01, 0.1, 0.01)
+    mdpp = unc.mdpp_unc(sol.mdpp, spald)
+    t_s = sol.t_s
+    stats = []
+    for _len in _half_len_gen(dataframe, idx, steps=steps):
+        stats.append(_add_mass(dataframe, rh, _len, idx, steps,
+                     sigma, mdpp[0], mdpp[1], t_s, plot))
+    return stats
+
+
+def _add_mass(dataframe, rh, len_, idx, steps, sigma,
+              mdpp, mdpp_unc, t_s, plot):
     """Calculate the Chi2 statistics for a single row of data."""
     time, mass = _get_stat_group(dataframe, idx, len_)
     stats = chi2.chi2(time, mass, sigma, plot=plot)
     stats.append(rh)
     stats.append(
         dataframe.loc[dataframe['Idx'] == idx]['SigRH'].iloc[0])
+    stats.append(
+        dataframe.loc[dataframe['Idx'] == idx]['PressureSmooth'].iloc[0]
+    )
+    stats.append(
+        dataframe.loc[dataframe['Idx'] == idx]['TeSmooth'].iloc[0]
+    )
+    stats.append(
+        dataframe.loc[dataframe['Idx'] == idx]['DewPointSmooth'].iloc[0]
+    )
     stats.append(mdpp)
     stats.append(mdpp_unc)
     stats.append(t_s)

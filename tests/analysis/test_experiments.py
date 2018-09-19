@@ -135,6 +135,9 @@ _ = OrderedDict([
         ('nu', [1999] + list(range(1999, 14000, 2000))),
         ('RH', [0.10] + [0.15]*7),
         ('SigRH', [1.8283907632286184e-3] + [2.641933498081478e-3]*7),
+        ('p', [100173.06882942938] + [100285.6123299085]*7),
+        ('t_e', [290.1]*8),
+        ('t_dp', [259.8] + [264.3]*7),
         ('spald_mdpp', [6.131825084930425e-06] + [5.789552587893055e-06]*7),
         ('spald_mdpp_unc',
          [4.5282274663010046e-08] + [4.618524961123844e-08]*7),
@@ -575,7 +578,6 @@ def test__half_len_gen(df_01):
     half_len_list = list(
         expr._half_len_gen(df_01, TARGET_IDX, steps=1000)
     )
-
     assert half_len_list == (
         list(map(lambda x: x*1000, range(1, 8)))
         )
@@ -584,7 +586,6 @@ def test__half_len_gen(df_01):
     for _ in range(3):
         for half_len in expr._half_len_gen(df_01, TARGET_IDX, steps=1000):
             gen_output.append(half_len)
-
     assert gen_output == 3*(
         list(map(lambda x: x*1000, range(1, 8)))
         )
@@ -598,6 +599,7 @@ def test_preprocess(df_01, df_01_original):
 def test_mass_transfer(df_01):
     """Test mass_transfer."""
     df_res = expr.mass_transfer(df_01, sigma=SIGMA, steps=1000, plot=PLOT)
+    print(df_res)
     pd.testing.assert_frame_equal(df_res, RES_DF, check_dtype=False)
 
 
