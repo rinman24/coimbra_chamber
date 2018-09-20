@@ -130,6 +130,9 @@ TABLES.append(("RHTargets",
                "  `SigRH` FLOAT UNSIGNED NOT NULL,"
                "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
                "  `Nu` SMALLINT UNSIGNED,"
+               "  `PressureSmooth` FLOAT NOT NULL,"
+               "  `DewPointSmooth` FLOAT NOT NULL,"
+               "  `TemperatureSmooth` FLOAT NOT NULL,"
                "  `SpaldMdpp` FLOAT NOT NULL,"
                "  `SpaldMdppUnc` FLOAT NOT NULL,"
                "  `SpaldTs` FLOAT NOT NULL,"
@@ -221,8 +224,9 @@ LOAD_DATA = ("LOAD DATA LOCAL INFILE '_data.csv' INTO TABLE "
 
 # dml to add 'RH', 'TestId' and 'SigRH' data into the 'RHTarget' table
 ADD_RH_TARGETS = ("INSERT INTO RHTargets (TestId, RH, SigRH, "
+                  "PressureSmooth, DewPointSmooth, TemperatureSmooth,"
                   "SpaldMdpp, SpaldMdppUnc, SpaldTs) VALUES "
-                  "(%s, %s, %s, %s, %s, %s)")
+                  "(%s, %s, %s, %s, %s, %s, %s, %s, %s)")
 
 # dml to add analysis results into the 'Results' table
 ADD_RESULTS = ("INSERT INTO Results"
@@ -1258,6 +1262,9 @@ def _add_rh_targets(cur, analyzed_df, test_id):
         test_id,
         '{:.2f}'.format(rh),
         float(analyzed_df.loc[analyzed_df['RH'] == rh].SigRH.iloc[0]),
+        float(analyzed_df.loc[analyzed_df['RH'] == rh].p.iloc[0]),
+        float(analyzed_df.loc[analyzed_df['RH'] == rh].t_dp.iloc[0]),
+        float(analyzed_df.loc[analyzed_df['RH'] == rh].t_e.iloc[0]),
         float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_mdpp.iloc[0]),
         float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_mdpp_unc.iloc[0]),
         float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_t_s.iloc[0])
