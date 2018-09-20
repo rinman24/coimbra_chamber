@@ -599,7 +599,6 @@ def test_preprocess(df_01, df_01_original):
 def test_mass_transfer(df_01):
     """Test mass_transfer."""
     df_res = expr.mass_transfer(df_01, sigma=SIGMA, steps=1000, plot=PLOT)
-    print(df_res)
     pd.testing.assert_frame_equal(df_res, RES_DF, check_dtype=False)
 
 
