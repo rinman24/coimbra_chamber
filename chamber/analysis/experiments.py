@@ -17,6 +17,7 @@ Functions
 - `results_from_csv` -- get analysis results from a .csv file.
 
 """
+from collections import defaultdict
 from itertools import repeat
 import math
 import multiprocessing as multi
@@ -25,7 +26,6 @@ from CoolProp.HumidAirProp import HAPropsSI
 import pandas as pd
 import numpy as np
 import scipy.signal as signal
-from tqdm import tqdm
 
 from chamber.analysis import chi2
 from chamber.models import models
@@ -154,46 +154,76 @@ def mass_transfer(dataframe, sigma=4e-8, steps=100, plot=False):
     rh_targets = _get_valid_rh_targets(dataframe)
     res = []
     pool = multi.Pool(CPU_COUNT)
-    for rh in tqdm(rh_targets):
-        idx = _get_target_idx(dataframe, rh)
-
-        m_l = dataframe['Mass'].iloc[idx]
-        p = dataframe['PressureSmooth'].iloc[idx]
-        t_e = dataframe['TeSmooth'].iloc[idx]
-        t_dp = dataframe['DewPointSmooth'].iloc[idx]
-        ref = 'constant'
-        rule = '1/2'
-        spald = models.Spalding(m_l, p, t_e, t_dp, ref, rule)
-        sol = spald.solve_system(2e-7, 0.01, 0.1, 0.01)
-        mdpp = unc.mdpp_unc(sol.mdpp, spald)
-        t_s = sol.t_s
-
-        res += pool.starmap(_multi_mass, zip(repeat(dataframe), repeat(rh),
-                            _half_len_gen(dataframe, idx, steps=steps),
-                            repeat(idx), repeat(steps), repeat(sigma),
-                            repeat(mdpp[0]), repeat(mdpp[1]), repeat(t_s),
-                            repeat(plot)))
+    no_format_list = pool.starmap(
+        _multi_analysis,
+        zip(
+            repeat(dataframe), repeat(sigma), repeat(steps),
+            repeat(plot), rh_targets
+        )
+    )
+    for col in no_format_list:
+        res += col
     pool.close()
     pool.join()
+    res_df = pd.DataFrame(
+        res,
+        columns=['A', 'SigA', 'B', 'SigB', 'Chi2', 'Q', 'Nu', 'RH', 'ObsIdx']
+    )
     print('Analysis complete.')
-    return pd.DataFrame(
-        res, columns=['a', 'sig_a', 'b', 'sig_b', 'chi2', 'Q', 'nu',
-                      'RH', 'SigRH', 'spald_mdpp', 'spald_mdpp_unc',
-                      'spald_t_s']
-        )
+    return res_df
 
 
-def _multi_mass(dataframe, rh, len_, idx, steps, sigma,
-                mdpp, mdpp_unc, t_s, plot):
+def rh_targets_df(dataframe, res_df):
+    """Build the RHTargets table and run Spalding analysis."""
+    rh_targets = defaultdict(list)
+    rh_list = list(res_df['RH'].unique())
+
+    pool = multi.Pool(CPU_COUNT)
+    rh_target_columns = pool.starmap(
+        _multi_rh_targets, zip(rh_list, repeat(dataframe), repeat(res_df))
+    )
+    pool.close()
+    pool.join()
+
+    rh_targets_df = pd.DataFrame(
+        rh_target_columns,
+        columns=['RH', 'SigRH', 'Nu']
+    )
+
+    return rh_targets_df
+
+
+def _multi_rh_targets(rh, dataframe, res_df):
+    """Build a row for the RHTargets table."""
+    rh_specific_df = res_df[res_df['RH'] == rh]
+    analysis_row = _get_df_row(rh_specific_df)
+    data_idx = analysis_row['ObsIdx'].iloc[0].item()
+    data_row = dataframe.iloc[data_idx]
+    sig_rh = data_row['SigRH'].item()
+
+    nu = analysis_row['Nu'].iloc[0].item()
+
+    rh_target_columns = [rh, sig_rh, nu]
+    return rh_target_columns
+
+
+def _multi_analysis(dataframe, sigma, steps, plot, rh):
+    """Extract values from dataframe and build the analyzed rows as lists."""
+    idx = _get_target_idx(dataframe, rh)
+    stats = []
+    for _len in _half_len_gen(dataframe, idx, steps=steps):
+        stats.append(_add_mass(dataframe, rh, _len, idx, steps,
+                     sigma, plot))
+    return stats
+
+
+def _add_mass(dataframe, rh, len_, idx, steps, sigma, plot):
     """Calculate the Chi2 statistics for a single row of data."""
     time, mass = _get_stat_group(dataframe, idx, len_)
     stats = chi2.chi2(time, mass, sigma, plot=plot)
+    # Check SigRH for accuracy later. Probably fine.
     stats.append(rh)
-    stats.append(
-        dataframe.loc[dataframe['Idx'] == idx]['SigRH'].iloc[0])
-    stats.append(mdpp)
-    stats.append(mdpp_unc)
-    stats.append(t_s)
+    stats.append(idx)
     return stats
 
 
@@ -754,5 +784,6 @@ def _get_df_row(res_df):
         if q < res_df.iloc[i].Q:
             q = res_df.iloc[i].Q
         if q >= 0.49:
-            df_row = res_df[res_df.index == i]
+            df_row = res_df[res_df.index == res_df.index[i]]
             return df_row
+    return res_df[res_df.index == res_df.index[0]]

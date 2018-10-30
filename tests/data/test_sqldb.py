@@ -319,8 +319,7 @@ _ = OrderedDict([
 RHT_DF = pd.DataFrame(_, columns=_.keys())
 _ = OrderedDict([
     ('RH', RH_TARGET_LIST), ('SigRH', RH_ERR_LIST), ('TestId', 1),
-    ('Nu', NU_LIST), ('SpaldMdpp', SPALD_MDPP_LIST),
-    ('SpaldMdppUnc', SPALD_MDPP_UNC_LIST), ('SpaldTs', SPALD_TS_LIST)
+    ('Nu', NU_LIST)
 ])
 RHT_DF_NU = pd.DataFrame(_, columns=_.keys())
 
@@ -330,12 +329,10 @@ ANALYSIS_DF = pkl.load(open(os.path.join(
 # ----------------------------------------------------------------------------
 # Test `_add_results` global variables`
 ANALYSIS_TEST_ID = 1
-RESULTS_LIST = [Decimal('0.50'), 1, 0.0988713, 1.36621e-07, -3.07061e-09,
-                9.40458e-12, 329.257, Decimal('1.00'), 599]
+RESULTS_LIST = [1, 0.0988713, 1.36621e-07, -3.07061e-09,
+                9.40458e-12, 329.257, 1.0, 599, 0.5, 124]
 RESULTS_STATS_DF = pd.DataFrame(dict(
     idx=['cnt', 'sum', 'var', 'avg', 'min', 'max'],
-    RH=[1099, 563.0, 0.03056339165143929, 0.512284,
-        0.10000000000000001, 0.80000000000000004],
     TestId=[1099, 1099, 0, 1, 1, 1],
     A=[1099, 108.6543510556221, 2.908801977543881e-10, 0.09886656147008381,
        0.09882037341594696, 0.09888923168182373],
@@ -352,7 +349,9 @@ RESULTS_STATS_DF = pd.DataFrame(dict(
           94.02532958984375, 54771152.0],
     Q=[1099, 179.23, 0.13445518028218226,
        0.163085, 0, 1],
-    Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999]
+    Nu=[1099, 9691301, 32428017.330669552, 8818.2903, 199, 19999],
+    RH=[1099, 563.0, 0.03056339165143929, 0.512284,
+        0.10000000000000001, 0.80000000000000004]
     )
 ).set_index('idx')
 
@@ -474,6 +473,10 @@ def results_cnx():
     # Connect
     print("\nConnecting to MySQL Server...")
     results_cnx = sqldb.connect("test_results")
+    results_cur = results_cnx.cursor()
+    sqldb.create_tables(results_cur, sqldb.TABLES)
+    results_cnx.commit()
+    results_cur.close()
     print("Successfully connected to test_results.")
     yield results_cnx
 
@@ -481,7 +484,7 @@ def results_cnx():
     # Cleanup with new cursor
     print("\nClearing results...")
     results_cur = results_cnx.cursor()
-    clear_results(results_cur, True)
+    drop_results(results_cur, True)
 
     print("Disconnecting from MySQL results_cnx...")
     results_cnx.commit()
@@ -959,91 +962,6 @@ def test__get_test_dict(cnx):
                        TEST_1_STATS_DF.loc['var', col])
 
 
-def test__add_rh_targets(results_cnx):
-    """
-    Test add_rh_targets.
-
-    Test the ability to input analysis data into the RHTargets table.
-    """
-    results_cur = results_cnx.cursor()
-    assert sqldb._add_rh_targets(results_cur, ANALYSIS_DF, ANALYSIS_TEST_ID)
-    results_cur.close()
-    rht_df = pd.read_sql('SELECT * FROM RHTargets;', con=results_cnx)
-    pd.testing.assert_frame_equal(rht_df, RHT_DF, check_dtype=False)
-
-
-def test__add_results(results_cnx):
-    """
-    Test add_results.
-
-    Test the ability to input analysis data into the Results table.
-    """
-    results_cur = results_cnx.cursor()
-    assert sqldb._add_results(results_cur, ANALYSIS_DF, ANALYSIS_TEST_ID)
-
-    results_cur.execute(('SELECT * FROM Results WHERE TestId={} AND RH=0.50'
-                         ' AND Nu=599').format(ANALYSIS_TEST_ID))
-    res = results_cur.fetchall()
-    for idx in range(len(res)):
-        assert isclose(float(res[idx][0]), float(RESULTS_LIST[idx]))
-
-    for col in RESULTS_STATS_DF.columns.values:
-        results_cur.execute(
-            GET_STATS_TEST_ID.format(col, ANALYSIS_TEST_ID, 'Results')
-            )
-        res = results_cur.fetchall()[0]
-        for idx in range(len(RESULTS_STATS_DF)):
-            val = RESULTS_STATS_DF.index.values[idx]
-            assert isclose(res[idx], RESULTS_STATS_DF.loc[val, col])
-    results_cur.close()
-
-
-def test__get_res_df(results_cnx):
-    """Test _get_res_df."""
-    res_df = sqldb._get_res_df(results_cnx, ANALYSIS_TEST_ID)
-    for col in RES_DF_STATS.columns.values:
-        # Have to lower tolerance due to rounding
-        assert isclose(res_df[col].count(), RES_DF_STATS.loc['cnt', col])
-        assert isclose(res_df[col].sum(), RES_DF_STATS.loc['sum', col])
-        assert isclose(res_df[col].var(), RES_DF_STATS.loc['var', col])
-        assert isclose(res_df[col].mean(), RES_DF_STATS.loc['avg', col])
-        assert isclose(res_df[col].min(), RES_DF_STATS.loc['min', col])
-        assert isclose(res_df[col].max(), RES_DF_STATS.loc['max', col])
-
-
-def test__add_best_fit(results_cnx):
-    """Test _add_best_fit."""
-    results_cur = results_cnx.cursor()
-    # Add best Chi2 results to RHTargets
-    assert sqldb._add_best_fit(results_cnx, ANALYSIS_TEST_ID)
-
-    # Check accuracy of added data
-    for col in BEST_FIT_STATS_DF.columns.values:
-        res = results_cur.execute(GET_STATS_TEST_ID.format(
-            col, ANALYSIS_TEST_ID, 'RHTargets'))
-        res = results_cur.fetchall()[0]
-        for idx in range(len(BEST_FIT_STATS_DF)):
-            val = BEST_FIT_STATS_DF.index.values[idx]
-            assert isclose(res[idx], BEST_FIT_STATS_DF.loc[val, col])
-    results_cur.close()
-
-
-def test_get_high_low_testids(results_cnx):
-    """Test get_high_low_testids."""
-    results_cur = results_cnx.cursor()
-    clear_results(results_cur, True)
-    results_cur.execute(
-        sqldb.ADD_RH_TARGETS, [1, 0.35, 0.0002, 6e-7, 2e-8, 278.123456]
-    )
-    assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1]
-    results_cur.execute(
-        sqldb.ADD_RH_TARGETS, [2, 0.30, 0.0001, 6e-7, 2e-8, 278.123456]
-    )
-    assert sqldb.get_high_low_testids(results_cur, 40000, 280) == [1, 2]
-    clear_results(results_cur, True)
-    assert sqldb.get_high_low_testids(results_cur, 40000, 280) == []
-
-
 def test_add_analysis(results_cnx):
     """
     Test add_analysis.
@@ -1064,6 +982,7 @@ def test_add_analysis(results_cnx):
     rht_df = pd.read_sql(
         'SELECT * FROM RHTargets WHERE TestId=1;', con=results_cnx
     )
+    print(rht_df)
     pd.testing.assert_frame_equal(rht_df, RHT_DF_NU, check_dtype=False)
 
     # ------------------------------------------------------------------------
@@ -1072,7 +991,7 @@ def test_add_analysis(results_cnx):
                          ' AND Nu=599').format(ANALYSIS_TEST_ID))
     res = results_cur.fetchall()
     for idx in range(len(res)):
-        assert isclose(float(res[idx][0]), float(RESULTS_LIST[idx]))
+        assert isclose(res[idx][0], RESULTS_LIST[idx])
 
     for col in RESULTS_STATS_DF.columns.values:
         results_cur.execute(
@@ -1109,6 +1028,16 @@ def clear_results(cursor, bol):
         print('Clearing analysis tables...')
         truncate(cursor, 'RHTargets')
         truncate(cursor, 'Results')
+        print('Analysis tables cleared.')
+    else:
+        print('RHTargests and Results not cleared.')
+
+
+def drop_results(cursor, bol):
+    if bol:
+        print('Clearing analysis tables...')
+        cursor.execute("DROP TABLE Results;")
+        cursor.execute("DROP TABLE RHTargets;")
         print('Analysis tables cleared.')
     else:
         print('RHTargests and Results not cleared.')

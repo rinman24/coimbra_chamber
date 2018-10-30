@@ -129,10 +129,7 @@ TABLES.append(("RHTargets",
                "  `RH` DECIMAL(3,2) UNSIGNED NOT NULL,"
                "  `SigRH` FLOAT UNSIGNED NOT NULL,"
                "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
-               "  `Nu` SMALLINT UNSIGNED,"
-               "  `SpaldMdpp` FLOAT NOT NULL,"
-               "  `SpaldMdppUnc` FLOAT NOT NULL,"
-               "  `SpaldTs` FLOAT NOT NULL,"
+               "  `Nu` SMALLINT UNSIGNED NOT NULL,"
                "  PRIMARY KEY (`RH`, `TestId`),"
                "  INDEX `fk_RHTargets_Test_idx` (`TestId` ASC),"
                "  CONSTRAINT `fk_RHTargets_Test`"
@@ -145,7 +142,6 @@ TABLES.append(("RHTargets",
 # 'Results' table ddl
 TABLES.append(("Results",
                "  CREATE TABLE IF NOT EXISTS `Results` ("
-               "  `RH` DECIMAL(3,2) UNSIGNED NOT NULL,"
                "  `TestId` SMALLINT(3) UNSIGNED NOT NULL,"
                "  `A` FLOAT NOT NULL,"
                "  `SigA` FLOAT UNSIGNED NOT NULL,"
@@ -154,6 +150,8 @@ TABLES.append(("Results",
                "  `Chi2` FLOAT UNSIGNED NOT NULL,"
                "  `Q` DECIMAL(3,2) UNSIGNED NOT NULL,"
                "  `Nu` SMALLINT UNSIGNED NOT NULL,"
+               "  `RH` DECIMAL(3,2) UNSIGNED NOT NULL,"
+               "  `ObsIdx` MEDIUMINT(6) UNSIGNED NOT NULL,"
                "  PRIMARY KEY (`Nu`, `RH`, `TestId`),"
                "  CONSTRAINT `fk_Results_RHTargets1`"
                "    FOREIGN KEY (`RH` , `TestId`)"
@@ -220,9 +218,8 @@ LOAD_DATA = ("LOAD DATA LOCAL INFILE '_data.csv' INTO TABLE "
              "IGNORE 1 LINES")
 
 # dml to add 'RH', 'TestId' and 'SigRH' data into the 'RHTarget' table
-ADD_RH_TARGETS = ("INSERT INTO RHTargets (TestId, RH, SigRH, "
-                  "SpaldMdpp, SpaldMdppUnc, SpaldTs) VALUES "
-                  "(%s, %s, %s, %s, %s, %s)")
+ADD_RH_TARGETS = ("INSERT INTO RHTargets (TestId, RH) VALUES "
+                  "(%s, %s)")
 
 # dml to add analysis results into the 'Results' table
 ADD_RESULTS = ("INSERT INTO Results"
@@ -1145,44 +1142,6 @@ def _get_test_dict(cnx, test_id):
     return test_dict
 
 
-def get_high_low_testids(cur, p, t):
-    """Get the Low and High RH TestIds for a specific p and t setting.
-
-    Get the TestIds that correspond to the Low and High Relative Humiditys at a
-    specified pressure (Pa) and temperature (K) setting. Only returns TestIds
-    that have been analyzed by checking the TestIds present in the RHTargets
-    table.
-
-    Parameters
-    ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
-    p : int or float
-        Pressure in Pa.
-    t : int or float
-        Dry bulb temperature in K.
-
-    Returns
-    -------
-    list(int)
-        A list of TestIds in RHTargets with the specified t and p settings.
-
-    Examples
-    --------
-    >>> cnx = connect('my-schema')
-    >>> cur = cnx.cursor()
-    >>> p = 40000
-    >>> t = 280
-    >>> get_high_low_testids(cur, p, t)
-    [1, 4]
-
-    """
-    cur.execute(GET_HIGH_LOW_TESTIDS.format(t, p))
-    res = cur.fetchall()
-    tid_list = [tid[0] for tid in res]
-    return tid_list
-
-
 def get_rht_results(cnx, test_id):
     """
     Get a `DataFrame` of evaporation rate and RH results for a TestId.
@@ -1218,180 +1177,6 @@ def get_rht_results(cnx, test_id):
     """
     res_df = pd.read_sql(GET_RHTARGET_RESULTS.format(test_id), con=cnx)
     return res_df
-
-
-def _add_rh_targets(cur, analyzed_df, test_id):
-    """
-    Insert Chi2 RH results and uncertainty into MySql database RHTargets table.
-
-    Uses cursor's .executemany function on a MySQL insert query and list
-    of RH data built by looping through an analyzed `DataFrame` built by
-    the `experiments.mass_transfer` function.
-
-    Parameters
-    ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
-    analyzed_df: DataFrame
-        Results of the analysis of the test.
-    test_id : int
-        TestID for the MySQL database, which is the primary key for the Test
-        table.
-
-    Returns
-    -------
-    `True` or `None`
-        `True` if successful. Else `None`.
-
-    Examples
-    --------
-    Add RH data for an existing TestId.
-
-    >>> cnx = connect('my-schema')
-    >>> cur = cnx.cursor()
-    >>> test_id = 1
-    >>> _add_rh_targets(cur, test_id)
-    True
-
-    """
-    rh_trgt_list = [(
-        test_id,
-        '{:.2f}'.format(rh),
-        float(analyzed_df.loc[analyzed_df['RH'] == rh].SigRH.iloc[0]),
-        float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_mdpp.iloc[0]),
-        float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_mdpp_unc.iloc[0]),
-        float(analyzed_df.loc[analyzed_df['RH'] == rh].spald_t_s.iloc[0])
-    ) for rh in analyzed_df.RH.unique()]
-    cur.executemany(ADD_RH_TARGETS, rh_trgt_list)
-
-    return True
-
-
-def _add_results(cur, analyzed_df, test_id):
-    """
-    Insert Chi2 results into MySql database Results table.
-
-    Uses cursor's .executemany function on a MySQL insert query and list
-    of results data built by looping through an analyzed `DataFrame` built by
-    the `experiments.mass_transfer` function.
-
-    Parameters
-    ----------
-    cur : mysql.connector.crsor.MySqlCursor
-        Cursor for MySQL database.
-    analyzed_df: DataFrame
-        Results of the analysis of the test.
-    test_id : int
-        TestID for the MySQL database, which is the primary key for the Test
-        table.
-
-    Returns
-    -------
-    `True` or `None`
-        `True` if successful. Else `None`.
-
-    Examples
-    --------
-    Add results data for existing RHTargets.
-
-    >>> cnx = connect('my-schema')
-    >>> cur = cnx.cursor()
-    >>> test_id = 1
-    >>> _add_results(cur, test_id)
-    True
-
-    """
-    results_list = [
-        (
-            test_id,
-            float(analyzed_df.iloc[idx]['RH']),
-            float(analyzed_df.iloc[idx]['a']),
-            float(analyzed_df.iloc[idx]['sig_a']),
-            float(analyzed_df.iloc[idx]['b']),
-            float(analyzed_df.iloc[idx]['sig_b']),
-            float(analyzed_df.iloc[idx]['chi2']),
-            float(analyzed_df.iloc[idx]['Q']),
-            float(analyzed_df.iloc[idx]['nu'])
-        ) for idx in analyzed_df.index
-    ]
-    cur.executemany(ADD_RESULTS, results_list)
-
-    return True
-
-
-def _get_res_df(cnx, test_id):
-    """
-    Get a `DataFrame` of the Results table.
-
-    Use Pandas read_sql functionality and a `MySQLConnection` object to execute
-    a querry which returns a representation of the 'Results' table in the MySQL
-    database.
-
-    Parameters
-    ----------
-    cnx : mysql.connector.connection.MySQLConnection
-        Connection to MySQL database.
-    test_id : int
-        TestID for the MySQL database, which is the primary key for the Test
-        table.
-
-    Returns
-    -------
-    DataFrame
-        `DataFrame` containing the column data stored in the 'Results' table
-        in the MySQL database.
-
-    Examples
-    --------
-    >>> cnx = connect('my-schema')
-    >>> test_id = 1
-    >>> _get_res_df(cnx, test_id)
-    ..todo: Add output.
-
-    """
-    res_df = pd.read_sql(GET_RES_DF.format(test_id), con=cnx)
-    return res_df
-
-
-def _add_best_fit(cnx, test_id):
-    """
-    Add the .Nu' value of the best Chi2 fit to the 'RHTargets' Table.
-
-    Update the RHTargets table by using a 'MySQLConnection.cursor' object
-    to insert the degrees of freeom, 'Nu' corresponding to the most appropreate
-    Chi2 linear fit for each Relative Humidity, 'RH'.
-
-    Parameters
-    ----------
-    cnx : mysql.connector.connection.MySQLConnection
-        Connection to MySQL database.
-    test_id : int
-        TestID for the MySQL database, which is the primary key for the Test
-        table.
-
-    Returns
-    -------
-    True or None
-        `True` if sucessful, `None` if not.
-
-    Examples
-    --------
-    Add best fit data for Testid 4.
-
-    >>> cnx = connect('my-schema')
-    >>> test_id = 4
-    True
-
-    """
-    cur = cnx.cursor()
-    res_df = _get_res_df(cnx, test_id)
-    for rh in res_df.RH.unique():
-        rh_set_df = res_df[res_df['RH'] == rh].reset_index()
-        rh_row = experiments._get_df_row(rh_set_df)
-        if rh_row is not None:
-            cur.execute(UPDATE_RH_TARGET.format(
-                rh_row.TestId.iloc[0], rh_row.RH.iloc[0], rh_row.Nu.iloc[0]))
-    return True
 
 
 def add_analysis(cnx, test_id, steps=1):
@@ -1432,6 +1217,9 @@ def add_analysis(cnx, test_id, steps=1):
     test_dict = _get_test_dict(cnx, test_id)
     processed_df = experiments.preprocess(test_dict['data'])
     analyzed_df = experiments.mass_transfer(processed_df, steps=steps)
+    rh_targets_df = experiments.rh_targets_df(test_dict['data'], analyzed_df)
+    analyzed_df.insert(0, 'TestId', test_id)
+    rh_targets_df.insert(2, 'TestId', test_id)
     try:
         # --------------------------------------------------------------------
         # Create a cursor and start the transaction
@@ -1440,15 +1228,13 @@ def add_analysis(cnx, test_id, steps=1):
 
         # --------------------------------------------------------------------
         # RHTargets: call add_rh_targets
-        assert _add_rh_targets(cur, analyzed_df, test_id)
+        assert _load_data(cur, rh_targets_df, 'RHTargets')
         assert cnx.in_transaction
 
         # --------------------------------------------------------------------
         # Results: call add_results
-        assert _add_results(cur, analyzed_df, test_id)
+        assert _load_data(cur, analyzed_df, 'Results')
         assert cnx.in_transaction
-
-        assert _add_best_fit(cnx, test_id)
 
         assert cnx.in_transaction
         cnx.commit()
