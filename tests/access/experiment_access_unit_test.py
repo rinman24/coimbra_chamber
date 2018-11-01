@@ -37,3 +37,11 @@ class TestConnect(object):
     def test_connect_returns_cnx(mock_mysql_connector, monkeypatch):  # noqa: D102
         result = exp_acc.connect(**_DB_CREDENTIALS)
         assert result == 'cnx'
+
+
+class TestBuildTable(object):
+    """Unit test suite for chamber.access.experiment.build_table()."""
+
+    @staticmethod
+    def test_can_call_build_table():
+        exp_acc.build_table()

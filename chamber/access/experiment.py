@@ -12,3 +12,7 @@ def connect(user, password, host, database):
         database=database
         )
     return cnx
+
+
+def build_table():
+    pass
