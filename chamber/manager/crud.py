@@ -1,0 +1,1 @@
+"""CRUD Manager module."""

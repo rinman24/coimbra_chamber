@@ -1,0 +1,1 @@
+"""CRUD manager test suite."""
