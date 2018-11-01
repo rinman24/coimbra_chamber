@@ -1,17 +1,20 @@
+"""Setup."""
+
 from distutils.core import setup
 
 setup(
     name='Chmaber',
-    version='0.1.0',
+    version='2.0.0',
     author='Rich H. Inman',
     author_email='rinman24@gmail.com',
-    packages=['chamber', 'chamber.data', 'chamber.models',
-              'chamber.tools', 'chamber.analysis'],
+    packages=['chamber.managers', 'chamber.engines', 'chamber.access'],
     url='https://github.com/rinman24/chamber',
     license='LICENSE.txt',
-    description=('Python programs for Rich Inman\'s PhD work involving the the'
-                 'Coimbra Chamber at UCSD. '),
-    # long_description=open('README.rst').read(),
+    description=(
+        'Python programs for Rich Inman\'s PhD work involving the Coimbra '
+        'Chamber at UCSD.'
+        ),
+    long_description=open('README.rst').read(),
     install_requires=[
         'npTDMS==0.11.3',
         'matplotlib==2.1.0',
@@ -22,5 +25,5 @@ setup(
         'CoolProp==6.1.0',
         'mysql-connector=2.1.6',
         'schedule==0.5.0',
-    ],
-)
+        ],
+    )
