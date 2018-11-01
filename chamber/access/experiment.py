@@ -1,5 +1,8 @@
 """Experiment access module."""
 
+import mysql.connector as conn
+
 
 def connect(schema):
-    pass
+    cnx = conn.connect(schema)
+    return cnx
