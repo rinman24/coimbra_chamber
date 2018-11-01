@@ -2,7 +2,6 @@
 
 import unittest.mock as mock
 
-import mysql
 import pytest
 
 import chamber.access.experiment as exp
@@ -14,6 +13,12 @@ def test_connect_returns_cnx(monkeypatch):  # noqa D103
     monkeypatch.setattr(
         'mysql.connector.connect', mock_mysql_connector.connect
         )
-    result = exp.connect('schema')
-    mock_mysql_connector.connect.assert_called_once_with('schema')
+    config = dict(
+        host='host',
+        user='user',
+        password='password',
+        database='database'
+        )
+    result = exp.connect(**config)
+    mock_mysql_connector.connect.assert_called_with(**config)
     assert result == 'cnx'

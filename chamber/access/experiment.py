@@ -3,6 +3,12 @@
 import mysql.connector as conn
 
 
-def connect(schema):
-    cnx = conn.connect(schema)
+def connect(user, password, host, database):
+    """Use credentials to connect to a MySQL Database."""
+    cnx = conn.connect(
+        user=user,
+        password=password,
+        host=host,
+        database=database
+        )
     return cnx
