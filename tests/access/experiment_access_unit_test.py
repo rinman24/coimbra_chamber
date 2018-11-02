@@ -12,17 +12,24 @@ _DB_CREDENTIALS = dict(
     )
 
 
-def test_connect_returns_cnx(monkeypatch):  # noqa: D103
-    mock_cnx = mock.MagicMock()
+@pytest.fixture
+def mock_mysql_connector(monkeypatch):
+    """Avoid call to external mySQL database."""
     mock_mysql_connector = mock.MagicMock()
-    mock_mysql_connector.connect = mock.MagicMock(return_value=mock_cnx)
+    mock_mysql_connector.connect = mock.MagicMock(return_value='cnx')
 
     monkeypatch.setattr(
         'mysql.connector.connect', mock_mysql_connector.connect
         )
-    cnx = exp_acc.connect(**_DB_CREDENTIALS)
-    assert cnx == mock_cnx
+
+    return mock_mysql_connector
 
 
-def test_can_call_build_table():  # noqa: D103
-    exp_acc.build_table()
+def test_can_call_connect(mock_mysql_connector, monkeypatch):  # noqa: D103
+    exp_acc.connect(**_DB_CREDENTIALS)
+    mock_mysql_connector.connect.assert_called_with(**_DB_CREDENTIALS)
+
+
+def test_connect_returns_cnx(mock_mysql_connector, monkeypatch):  # noqa: D103
+    result = exp_acc.connect(**_DB_CREDENTIALS)
+    assert result == 'cnx'
