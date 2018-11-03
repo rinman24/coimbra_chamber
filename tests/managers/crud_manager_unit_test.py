@@ -36,17 +36,16 @@ def mock_ConfigParser(mock_config, monkeypatch):
 
 
 def test_can_call_get_credentials(mock_ConfigParser, mock_config):  # noqa: D103
-    crud_mngr.get_credentials('test_database')
+    crud_mngr.get_credentials()
 
     mock_config.read.assert_called_once_with('config.ini')
 
 
 def test_get_credentials_returns_correct_dict(mock_ConfigParser, mock_config):  # noqa: D103
-    creds = crud_mngr.get_credentials('test_database')
+    creds = crud_mngr.get_credentials()
 
     correct_creds = dict(
-        host='test_host', user='test_user', password='test_password',
-        database='test_database'
+        host='test_host', user='test_user', password='test_password'
         )
     assert creds == correct_creds
 
@@ -62,7 +61,7 @@ def test_get_credentials_exception_knows_the_name_missing_key(
         )
 
     with pytest.raises(KeyError, match=err_message):
-        crud_mngr.get_credentials('host_missing')
+        crud_mngr.get_credentials()
 
 
 def _mock_config_key_setter(mock_config, keys):

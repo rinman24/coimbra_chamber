@@ -3,7 +3,7 @@
 import configparser
 
 
-def get_credentials(database):
+def get_credentials():
     """Use configparser to obtain credentials."""
     config_parser = configparser.ConfigParser()
     config_parser.read('config.ini')
@@ -13,7 +13,6 @@ def get_credentials(database):
     config_key_set = set(config.keys())
 
     if required_key_set.issubset(config_key_set):
-        config['database'] = database
         return config
     else:
         missing_key_set = required_key_set.difference(config_key_set)
