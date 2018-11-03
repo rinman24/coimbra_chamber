@@ -19,9 +19,7 @@ def mock_config(monkeypatch):
     # Production code calls Python builtin dict() on
     # mock_config['MySQL-Server'].
     mock_config['MySQL-Server'] = mock.MagicMock()
-    mock_config['MySQL-Server'].keys.return_value.__iter__.return_value = [
-        'host', 'user', 'password'
-        ]
+    _mock_config_key_setter(mock_config, ['host', 'user', 'password'])
     mock_config['MySQL-Server'].__getitem__.side_effect = [
         'test_host', 'test_user', 'test_password'
         ]
@@ -53,9 +51,21 @@ def test_get_credentials_returns_correct_dict(mock_ConfigParser, mock_config):  
     assert creds == correct_creds
 
 
-def test_get_credentials_raises_key_error(mock_ConfigParser, mock_config):  # noqa: D103
-    mock_config['MySQL-Server'].keys.return_value.__iter__.return_value = []
+def test_get_credentials_exception_knows_the_name_missing_key(
+        mock_ConfigParser, mock_config
+        ):  # noqa: D103
+    _mock_config_key_setter(mock_config, ['user', 'password'])
 
-    err_message = 'config file is missing a key.'
+    err_message = (
+        'KeyError: config file is missing the following key: {}.'
+        .format('host')
+        )
+
     with pytest.raises(KeyError, match=err_message):
-        crud_mngr.get_credentials('test_database')
+        crud_mngr.get_credentials('host_missing')
+
+
+def _mock_config_key_setter(mock_config, keys):
+    mock_config['MySQL-Server'].keys.return_value.__iter__.return_value = (
+        keys
+        )

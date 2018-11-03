@@ -16,4 +16,9 @@ def get_credentials(database):
         config['database'] = database
         return config
     else:
-        raise KeyError('config file is missing a key.')
+        missing_key_set = required_key_set.difference(config_key_set)
+        error_message = (
+            'KeyError: config file is missing the following key: {}.'
+            .format(missing_key_set.pop())
+            )
+        raise KeyError(error_message)
