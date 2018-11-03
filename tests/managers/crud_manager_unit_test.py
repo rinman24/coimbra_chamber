@@ -63,6 +63,14 @@ def test_get_credentials_exception_knows_the_name_missing_key(
         crud_mngr.get_credentials()
 
 
+def test_get_credentials_raises_file_not_found_error(mock_ConfigParser, mock_config):  # noqa: D103
+    mock_config.read.return_value = []
+
+    error_message = ('FileNotFoundError: config.ini does not exits.')
+    with pytest.raises(FileNotFoundError, match=error_message):
+        crud_mngr.get_credentials()
+
+
 def _mock_config_key_setter(mock_config, keys):
     mock_config['MySQL-Server'].keys.return_value.__iter__.return_value = (
         keys
