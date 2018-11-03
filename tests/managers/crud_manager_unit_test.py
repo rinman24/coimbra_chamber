@@ -56,8 +56,7 @@ def test_get_credentials_exception_knows_the_name_missing_key(
     _mock_config_key_setter(mock_config, ['user', 'password'])
 
     err_message = (
-        'KeyError: config file is missing the following key: {}.'
-        .format('host')
+        'KeyError: config file is missing the following key: host.'
         )
 
     with pytest.raises(KeyError, match=err_message):
