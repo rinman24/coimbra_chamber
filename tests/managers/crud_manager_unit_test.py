@@ -37,13 +37,13 @@ def mock_ConfigParser(mock_config, monkeypatch):
     return mock_ConfigParser
 
 
-def test_can_call_get_creds(mock_ConfigParser, mock_config):  # noqa: D103
+def test_can_call_get_credentials(mock_ConfigParser, mock_config):  # noqa: D103
     crud_mngr.get_credentials('test_database')
 
     mock_config.read.assert_called_once_with('config.ini')
 
 
-def test_get_creds_returns_correct_dict(mock_ConfigParser, mock_config):  # noqa: D103
+def test_get_credentials_returns_correct_dict(mock_ConfigParser, mock_config):  # noqa: D103
     creds = crud_mngr.get_credentials('test_database')
 
     correct_creds = dict(
@@ -51,3 +51,11 @@ def test_get_creds_returns_correct_dict(mock_ConfigParser, mock_config):  # noqa
         database='test_database'
         )
     assert creds == correct_creds
+
+
+def test_get_credentials_raises_key_error(mock_ConfigParser, mock_config):  # noqa: D103
+    mock_config['MySQL-Server'].keys.return_value.__iter__.return_value = []
+
+    err_message = 'config file is missing a key.'
+    with pytest.raises(KeyError, match=err_message):
+        crud_mngr.get_credentials('test_database')
