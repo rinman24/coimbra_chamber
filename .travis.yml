@@ -8,6 +8,6 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 script:
-  - run_unit_test_suite.bat
+  - run_unit_test_suite
 after_success:
   - bash <(curl -s https://codecov.io/bash)
