@@ -61,3 +61,10 @@ def _get_credentials():
             raise KeyError(error_message)
     error_message = 'FileNotFoundError: config.ini does not exits.'
     raise FileNotFoundError(error_message)
+
+
+def _get_cursor(database, creds):
+    creds['database'] = database
+    cnx = mysql.connector.connect(**creds)
+    cur = cnx.cursor()
+    return cur

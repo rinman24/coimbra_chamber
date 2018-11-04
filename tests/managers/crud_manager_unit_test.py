@@ -37,6 +37,28 @@ def mock_ConfigParser(mock_config, monkeypatch):
     return mock_ConfigParser
 
 
+@pytest.fixture
+def cnx(monkeypatch):
+    """Mock instance of mysql.connector.connection."""
+    cnx = mock.MagicMock()
+    cnx.cursor = mock.MagicMock(
+        return_value='<mysql.connector.cursor.MySQLCursor object at ...>'
+        )
+    monkeypatch.setattr(
+        'mysql.connector.connection.MySQLConnection.cursor',
+        cnx.cursor
+        )
+    return cnx
+
+
+@pytest.fixture
+def connect(cnx, monkeypatch):
+    """Mock connect method of mysql.connector."""
+    connect = mock.MagicMock(return_value=cnx)
+    monkeypatch.setattr('mysql.connector.connect', connect)
+    return connect
+
+
 # ----------------------------------------------------------------------------
 # _get_credentials
 
@@ -73,6 +95,28 @@ def test_get_credentials_raises_file_not_found_error(mock_ConfigParser, mock_con
     with pytest.raises(FileNotFoundError, match=error_message):
         crud_mngr._get_credentials()
 
+
+# ----------------------------------------------------------------------------
+# _get_cursor
+
+
+def test_get_cursor_calls_connect(connect):  # noqa: D103
+    crud_mngr._get_cursor('schema', _CORRECT_CREDS)
+
+    creds_w_pass = dict(_CORRECT_CREDS)
+    creds_w_pass['database'] = 'schema'
+    connect.assert_called_once_with(**creds_w_pass)
+
+
+def test_get_cursor_calls_cursor(connect, cnx):  # noqa: D103
+    crud_mngr._get_cursor('schema', _CORRECT_CREDS)
+
+    cnx.cursor.assert_called_once_with()
+
+
+def test_get_cursor_returns_cursor(connect, cnx):  # noqa: D103
+    cur = crud_mngr._get_cursor('schema', _CORRECT_CREDS)
+    assert cur == '<mysql.connector.cursor.MySQLCursor object at ...>'
 
 # ----------------------------------------------------------------------------
 # helpers
