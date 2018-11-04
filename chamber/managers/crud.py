@@ -11,8 +11,12 @@ Functions
 
 import configparser
 
+import mysql.connector
 
-def get_credentials():
+import chamber.access.experiment as exp_acc
+
+
+def _get_credentials():
     """
     Use configparser to obtain credentials.
 

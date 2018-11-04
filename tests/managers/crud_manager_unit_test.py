@@ -6,6 +6,8 @@ import pytest
 
 import chamber.managers.crud as crud_mngr
 
+_CORRECT_CREDS = dict(host='address', user='me', password='secret')
+
 
 @pytest.fixture
 def mock_config(monkeypatch):
@@ -21,7 +23,7 @@ def mock_config(monkeypatch):
     mock_config['MySQL-Server'] = mock.MagicMock()
     _mock_config_key_setter(mock_config, ['host', 'user', 'password'])
     mock_config['MySQL-Server'].__getitem__.side_effect = [
-        'test_host', 'test_user', 'test_password'
+        'address', 'me', 'secret'
         ]
 
     return mock_config
@@ -35,19 +37,20 @@ def mock_ConfigParser(mock_config, monkeypatch):
     return mock_ConfigParser
 
 
+# ----------------------------------------------------------------------------
+# _get_credentials
+
+
 def test_can_call_get_credentials(mock_ConfigParser, mock_config):  # noqa: D103
-    crud_mngr.get_credentials()
+    crud_mngr._get_credentials()
 
     mock_config.read.assert_called_once_with('config.ini')
 
 
 def test_get_credentials_returns_correct_dict(mock_ConfigParser, mock_config):  # noqa: D103
-    creds = crud_mngr.get_credentials()
+    creds = crud_mngr._get_credentials()
 
-    correct_creds = dict(
-        host='test_host', user='test_user', password='test_password'
-        )
-    assert creds == correct_creds
+    assert creds == _CORRECT_CREDS
 
 
 def test_get_credentials_exception_knows_the_name_missing_key(
@@ -60,7 +63,7 @@ def test_get_credentials_exception_knows_the_name_missing_key(
         )
 
     with pytest.raises(KeyError, match=err_message):
-        crud_mngr.get_credentials()
+        crud_mngr._get_credentials()
 
 
 def test_get_credentials_raises_file_not_found_error(mock_ConfigParser, mock_config):  # noqa: D103
@@ -68,7 +71,11 @@ def test_get_credentials_raises_file_not_found_error(mock_ConfigParser, mock_con
 
     error_message = ('FileNotFoundError: config.ini does not exits.')
     with pytest.raises(FileNotFoundError, match=error_message):
-        crud_mngr.get_credentials()
+        crud_mngr._get_credentials()
+
+
+# ----------------------------------------------------------------------------
+# helpers
 
 
 def _mock_config_key_setter(mock_config, keys):
