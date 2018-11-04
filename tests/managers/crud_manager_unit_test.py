@@ -10,31 +10,26 @@ _CORRECT_CREDS = dict(host='address', user='me', password='secret')
 
 
 @pytest.fixture
-def mock_config(monkeypatch):
-    """Mock of an instance of the configparser.ConfigParser() class."""
-    mock_config = mock.MagicMock()
-    mock_config.read = mock.MagicMock()
+def ConfigParser(monkeypatch):
+    """Mock of the configparser.ConfigParser constructor."""
+    configparser = mock.MagicMock()
+    configparser.read = mock.MagicMock()
     monkeypatch.setattr(
-        'configparser.ConfigParser.read', mock_config.read
+        'configparser.ConfigParser.read', configparser.read
         )
 
     # Production code calls Python builtin dict() on
-    # mock_config['MySQL-Server'].
-    mock_config['MySQL-Server'] = mock.MagicMock()
-    _mock_config_key_setter(mock_config, ['host', 'user', 'password'])
-    mock_config['MySQL-Server'].__getitem__.side_effect = [
+    # configparser['MySQL-Server'].
+    configparser['MySQL-Server'] = mock.MagicMock()
+    _configparser_key_setter(configparser, ['host', 'user', 'password'])
+    configparser['MySQL-Server'].__getitem__.side_effect = [
         'address', 'me', 'secret'
         ]
 
-    return mock_config
-
-
-@pytest.fixture
-def mock_ConfigParser(mock_config, monkeypatch):
-    """Mock of the configparser.ConfigParser() constructor."""
-    mock_ConfigParser = mock.MagicMock(return_value=mock_config)
-    monkeypatch.setattr('configparser.ConfigParser', mock_ConfigParser)
-    return mock_ConfigParser
+    ConfigParser = mock.MagicMock(return_value=configparser)
+    ConfigParser.configparser = configparser
+    monkeypatch.setattr('configparser.ConfigParser', ConfigParser)
+    return ConfigParser
 
 
 @pytest.fixture
@@ -63,22 +58,22 @@ def connect(cnx, monkeypatch):
 # _get_credentials
 
 
-def test_can_call_get_credentials(mock_ConfigParser, mock_config):  # noqa: D103
+def test_can_call_get_credentials(ConfigParser):  # noqa: D103
     crud_mngr._get_credentials()
 
-    mock_config.read.assert_called_once_with('config.ini')
+    ConfigParser.configparser.read.assert_called_once_with('config.ini')
 
 
-def test_get_credentials_returns_correct_dict(mock_ConfigParser, mock_config):  # noqa: D103
+def test_get_credentials_returns_correct_dict(ConfigParser):  # noqa: D103
     creds = crud_mngr._get_credentials()
 
     assert creds == _CORRECT_CREDS
 
 
 def test_get_credentials_exception_knows_the_name_missing_key(
-        mock_ConfigParser, mock_config
+        ConfigParser
         ):  # noqa: D103
-    _mock_config_key_setter(mock_config, ['user', 'password'])
+    _configparser_key_setter(ConfigParser.configparser, ['user', 'password'])
 
     err_message = (
         'KeyError: config file is missing the following key: host.'
@@ -88,8 +83,8 @@ def test_get_credentials_exception_knows_the_name_missing_key(
         crud_mngr._get_credentials()
 
 
-def test_get_credentials_raises_file_not_found_error(mock_ConfigParser, mock_config):  # noqa: D103
-    mock_config.read.return_value = []
+def test_get_credentials_raises_file_not_found_error(ConfigParser):  # noqa: D103
+    ConfigParser.configparser.read.return_value = []
 
     error_message = ('FileNotFoundError: config.ini does not exits.')
     with pytest.raises(FileNotFoundError, match=error_message):
@@ -118,11 +113,20 @@ def test_get_cursor_returns_cursor(connect, cnx):  # noqa: D103
     cur = crud_mngr._get_cursor('schema', _CORRECT_CREDS)
     assert cur == '<mysql.connector.cursor.MySQLCursor object at ...>'
 
+
+# ----------------------------------------------------------------------------
+# _setup_experiment_tables
+
+
+def test_can_call_setup_experiment_tables():  # noqa: D103
+    pass
+
+
 # ----------------------------------------------------------------------------
 # helpers
 
 
-def _mock_config_key_setter(mock_config, keys):
-    mock_config['MySQL-Server'].keys.return_value.__iter__.return_value = (
+def _configparser_key_setter(configparser, keys):
+    configparser['MySQL-Server'].keys.return_value.__iter__.return_value = (
         keys
         )
