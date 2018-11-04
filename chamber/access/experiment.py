@@ -1,4 +1,12 @@
-"""Experiment access module."""
+"""
+Experiment access module.
+
+Functions
+---------
+
+- `build_experiment_tables` -- Use cursor to build experiment tables.
+"""
+
 
 import mysql.connector
 
