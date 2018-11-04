@@ -22,7 +22,7 @@ def test_can_call_build_experiment_tables(monkeypatch):  # noqa: D103
         mock_build_instructions
         )
 
-    exp_acc.build_experiment_tables(mock_cursor)
+    exp_acc.build_tables(mock_cursor)
 
     mock_cursor.execute.assert_has_calls(
         list(

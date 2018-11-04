@@ -13,7 +13,7 @@ import mysql.connector
 import chamber.utilities.ddl as ddl
 
 
-def build_experiment_tables(cursor):
+def build_tables(cursor):
     """
     Use cursor to build experiment tables.
 
