@@ -24,9 +24,9 @@ copyright = '2018, Rich H. Inman'
 author = 'Rich H. Inman'
 
 # The short X.Y version
-version = '0.1'
+version = '2.0'
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = '0.0'
 
 
 # -- General configuration ---------------------------------------------------
