@@ -1,7 +1,8 @@
 """Experiment access module."""
 
-import chamber.utilities.ddl as ddl
 import mysql.connector
+
+import chamber.utilities.ddl as ddl
 
 
 def build_experiment_tables(cursor):
