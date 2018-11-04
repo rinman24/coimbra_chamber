@@ -11,7 +11,7 @@ _CORRECT_CREDS = dict(host='address', user='me', password='secret')
 
 @pytest.fixture
 def ConfigParser(monkeypatch):
-    """Mock of the configparser.ConfigParser constructor."""
+    """Mock of the configparser.ConfigParser class."""
     configparser = mock.MagicMock()
     configparser.read = mock.MagicMock()
     monkeypatch.setattr(
@@ -33,8 +33,8 @@ def ConfigParser(monkeypatch):
 
 
 @pytest.fixture
-def cnx(monkeypatch):
-    """Mock instance of mysql.connector.connection."""
+def connect(monkeypatch):
+    """Mock connect method of mysql.connector.connect."""
     cnx = mock.MagicMock()
     cnx.cursor = mock.MagicMock(
         return_value='<mysql.connector.cursor.MySQLCursor object at ...>'
@@ -43,13 +43,9 @@ def cnx(monkeypatch):
         'mysql.connector.connection.MySQLConnection.cursor',
         cnx.cursor
         )
-    return cnx
 
-
-@pytest.fixture
-def connect(cnx, monkeypatch):
-    """Mock connect method of mysql.connector."""
     connect = mock.MagicMock(return_value=cnx)
+    connect.cnx.cursor = cnx.cursor
     monkeypatch.setattr('mysql.connector.connect', connect)
     return connect
 
@@ -70,9 +66,7 @@ def test_get_credentials_returns_correct_dict(ConfigParser):  # noqa: D103
     assert creds == _CORRECT_CREDS
 
 
-def test_get_credentials_exception_knows_the_name_missing_key(
-        ConfigParser
-        ):  # noqa: D103
+def test_get_credentials_exception_knows_the_name_missing_key(ConfigParser):  # noqa: D103
     _configparser_key_setter(ConfigParser.configparser, ['user', 'password'])
 
     err_message = (
@@ -103,13 +97,13 @@ def test_get_cursor_calls_connect(connect):  # noqa: D103
     connect.assert_called_once_with(**creds_w_pass)
 
 
-def test_get_cursor_calls_cursor(connect, cnx):  # noqa: D103
+def test_get_cursor_calls_cursor(connect):  # noqa: D103
     crud_mngr._get_cursor('schema', _CORRECT_CREDS)
 
-    cnx.cursor.assert_called_once_with()
+    connect.cnx.cursor.assert_called_once_with()
 
 
-def test_get_cursor_returns_cursor(connect, cnx):  # noqa: D103
+def test_get_cursor_returns_cursor(connect):  # noqa: D103
     cur = crud_mngr._get_cursor('schema', _CORRECT_CREDS)
     assert cur == '<mysql.connector.cursor.MySQLCursor object at ...>'
 
