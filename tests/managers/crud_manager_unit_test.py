@@ -112,8 +112,12 @@ def test_get_cursor_returns_cursor(connect):  # noqa: D103
 # _setup_experiment_tables
 
 
-def test_can_call_setup_experiment_tables():  # noqa: D103
-    pass
+def test_setup_experiment_tables_returns_success(ConfigParser, connect, monkeypatch):  # noqa: D103
+    build_tables = mock.MagicMock(return_value='Success.')
+    monkeypatch.setattr('chamber.access.experiment.build_tables', build_tables)
+
+    message = crud_mngr.setup_experiment_tables('schema')
+    assert message == 'Success.'
 
 
 # ----------------------------------------------------------------------------

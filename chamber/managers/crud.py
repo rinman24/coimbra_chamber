@@ -64,7 +64,37 @@ def _get_credentials():
 
 
 def _get_cursor(database, creds):
+    """Get a cursor using mysql.connector."""
     creds['database'] = database
     cnx = mysql.connector.connect(**creds)
     cur = cnx.cursor()
     return cur
+
+
+def setup_experiment_tables(database):
+    """
+    Orchestrate construction of experiment tables.
+
+    This functions knows 'how' to build the experiment tables.
+
+    Parameters
+    ----------
+    database : str
+        Name of the database (or schema)
+
+    Returns
+    -------
+    str
+        "Success." if successful.
+
+    Examples
+    --------
+    >>> message = setup_experiment_tables('schema')
+    >>> message
+    'Success.'
+
+    """
+    creds = _get_credentials()
+    cur = _get_cursor(database, creds)
+    message = exp_acc.build_tables(cur)
+    return message

@@ -33,3 +33,4 @@ def build_tables(cursor):
             ddl.build_instructions['experiments', 'ddl'][table]
             )
         print('OK')
+    return 'Success.'
