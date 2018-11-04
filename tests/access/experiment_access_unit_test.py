@@ -5,31 +5,29 @@ import unittest.mock as mock
 import pytest
 
 import chamber.access.experiment as exp_acc
+import chamber.utilities.ddl as ddl
 
 
-_DB_CREDENTIALS = dict(
-    host='host', user='user', password='password', database='database'
-    )
+def test_can_call_build_experiment_tables(monkeypatch):  # noqa: D103
+    mock_cursor = mock.MagicMock()
+    mock_cursor.execute = mock.MagicMock()
 
-
-@pytest.fixture
-def mock_mysql_connector(monkeypatch):
-    """Avoid call to external mySQL database."""
-    mock_mysql_connector = mock.MagicMock()
-    mock_mysql_connector.connect = mock.MagicMock(return_value='cnx')
+    mock_build_instructions = {
+        ('experiments', 'table order'): ('one', 'two', 'three'),
+        ('experiments', 'ddl'): dict(one='foo', two='bar', three='bacon!')
+        }
 
     monkeypatch.setattr(
-        'mysql.connector.connect', mock_mysql_connector.connect
+        'chamber.utilities.ddl.build_instructions',
+        mock_build_instructions
         )
 
-    return mock_mysql_connector
+    exp_acc.build_experiment_tables(mock_cursor)
 
-
-def test_can_call_connect(mock_mysql_connector, monkeypatch):  # noqa: D103
-    exp_acc.connect(**_DB_CREDENTIALS)
-    mock_mysql_connector.connect.assert_called_with(**_DB_CREDENTIALS)
-
-
-def test_connect_returns_cnx(mock_mysql_connector, monkeypatch):  # noqa: D103
-    result = exp_acc.connect(**_DB_CREDENTIALS)
-    assert result == 'cnx'
+    mock_cursor.execute.assert_has_calls(
+        list(
+            mock.call(mock_build_instructions['experiments', 'ddl'][table])
+            for table
+            in mock_build_instructions['experiments', 'table order']
+            )
+        )
