@@ -49,7 +49,10 @@ def connect(monkeypatch):
         )
 
     connect = mock.MagicMock(return_value=cnx)
-    monkeypatch.setattr('mysql.connector.connect', connect)
+    monkeypatch.setattr(
+        'chamber.manager.crud.mysql.connector.connect',
+        connect
+        )
 
     connect.cnx.cursor = cnx.cursor  # connect is the manager mock
 
