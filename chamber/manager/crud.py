@@ -14,6 +14,7 @@ import configparser
 import mysql.connector
 
 import chamber.access.experiment as exp_acc
+import chamber.utility.ddl as util_ddl
 
 
 def _get_credentials():
@@ -64,15 +65,65 @@ def _get_credentials():
 
 
 def _get_cursor(database, creds):
-    """Get a cursor using mysql.connector."""
+    """
+    Get a cursor using mysql.connector.
+
+    Parameters
+    ----------
+    database: str
+        Name of the database for which to create a cursor.
+    creds: dict
+        dictionay of credentials. Typically returned from a call to the
+        `_get_credentials` function.
+
+    Returns
+    -------
+    mysql.connector.cursor.MySQLCursor
+        cursor object for the specified database.
+
+    Examples
+    --------
+    >>> creds = _get_credentials()
+    >>> cur = _get_cursor('schema', creds)
+
+    """
     creds['database'] = database
     cnx = mysql.connector.connect(**creds)
     cur = cnx.cursor()
     return cur
 
 
-def _build_tables(database):
-    pass
+def _build_tables(database, cursor):
+    """
+    Use cursor and database name to build tables.
+
+    Parameters
+    ----------
+    database: str
+        Name of the database, which is used to lookup required ddl from
+        utility.
+    cursor : mysql.connector.cursor.MySQLCursor
+        mySQL cursor object
+
+    Returns
+    -------
+    str
+        'Success.' if successful.
+
+    Examples
+    --------
+    >>> build_experiment_tables('schema', cursor)
+    'Success.'
+
+    """
+    table_order = util_ddl.build_instructions[database, 'table_order']
+    ddl = util_ddl.build_instructions[database, 'ddl']
+
+    for table in table_order:
+        print('Creating table {}: '.format(table), end='')
+        cursor.execute(ddl[table])
+        print('OK')
+    return 'Success.'
 
 
 def setup_experiment_tables(database):

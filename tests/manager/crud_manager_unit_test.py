@@ -120,12 +120,9 @@ def test_get_cursor_returns_cursor(connect):  # noqa: D103
 # ----------------------------------------------------------------------------
 # _build_tables
 
-@pytest.mark.skip
-def test_can_call_build_tables():
-    crud_mngr._build_tables('schema')
 
-@pytest.mark.skip
-def test_build_tables_executes_calls_in_correct_order(monkeypatch):
+def test_build_tables_executes_calls_in_correct_order(monkeypatch):  # noqa: D103
+    # Need to mock the contract from chamber.utility.ddl
     table_order = ('one', 'two', 'three')
     ddl = {
         'one': 'foo',
@@ -137,16 +134,24 @@ def test_build_tables_executes_calls_in_correct_order(monkeypatch):
         ('schema', 'ddl'): ddl
         }
 
-    utility = mock.MagicMock()
-    utility.ddl.build_instructions = build_instructions
+    # Now I need to mock a call to chamber.utility.ddl to return
+    # the build instructions
     monkeypatch.setattr(
         'chamber.utility.ddl.build_instructions',
-        utility.ddl.build_instructions
+        build_instructions
         )
 
-    crud_mngr._build_tables('schema')
+    # I also need to mock the cursor's call to execute
+    cursor = mock.MagicMock()
+    cursor.execute = mock.MagicMock()
 
-    pass
+    # Now call the function
+    crud_mngr._build_tables('schema', cursor)
+
+    # Assert that execute was called with the correct inputs
+    correct_calls = [mock.call('foo'), mock.call('bar'), mock.call('bacon!')]
+
+    cursor.execute.assert_has_calls(correct_calls)
 
 
 # ----------------------------------------------------------------------------
