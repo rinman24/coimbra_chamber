@@ -9,8 +9,8 @@ import chamber.manager.crud as crud_mngr
 _CORRECT_CREDS = dict(host='address', user='me', password='secret')
 
 
-@pytest.fixture
-def ConfigParser(monkeypatch):
+@pytest.fixture()
+def mock_ConfigParser(monkeypatch):
     """Mock of the configparser.ConfigParser class."""
     configparser = mock.MagicMock()
     configparser.read = mock.MagicMock()
@@ -27,56 +27,90 @@ def ConfigParser(monkeypatch):
         'address', 'me', 'secret'
         ]
 
-    ConfigParser = mock.MagicMock(return_value=configparser)
-    ConfigParser.configparser = configparser
+    mock_ConfigParser = mock.MagicMock(return_value=configparser)
+    mock_ConfigParser.configparser = configparser
     monkeypatch.setattr(
         'chamber.manager.crud.configparser.ConfigParser',
-        ConfigParser
+        mock_ConfigParser
         )
-    return ConfigParser
+    return mock_ConfigParser
 
 
-@pytest.fixture
-def connect(monkeypatch):
+@pytest.fixture()
+def mock_connect(monkeypatch):
     """Mock connect method of mysql.connector.connect."""
+    cur = mock.MagicMock()
+    cur.execute = mock.MagicMock()
+    monkeypatch.setattr(
+        'chamber.manager.crud.mysql.connector.cursor.MySQLCursor.execute',
+        cur.execute
+    )
+
     cnx = mock.MagicMock()
     cnx.cursor = mock.MagicMock(
-        return_value='<mysql.connector.cursor.MySQLCursor object at ...>'
+        return_value=cur
         )
     monkeypatch.setattr(
-        'mysql.connector.connection.MySQLConnection.cursor',
+        (
+            'chamber.manager.crud.mysql.connector.connection.MySQLConnection'
+            '.cursor'
+            ),
         cnx.cursor
         )
 
-    connect = mock.MagicMock(return_value=cnx)
+    mock_connect = mock.MagicMock(return_value=cnx)
     monkeypatch.setattr(
         'chamber.manager.crud.mysql.connector.connect',
-        connect
+        mock_connect
         )
 
-    connect.cnx.cursor = cnx.cursor  # connect is the manager mock
+    # mock_connect is the manager mock
+    mock_connect.cnx.cursor = cnx.cursor
+    mock_connect.cur = cur
 
-    return connect
+    return mock_connect
 
+
+@pytest.fixture()
+def mock_utility(monkeypatch):
+    """Mock chamber.utility."""
+    table_order = ('one', 'two', 'three')
+    ddl = {
+        'one': 'foo',
+        'two': 'bar',
+        'three': 'bacon!'
+        }
+
+    build_instructions = {
+        ('schema', 'table_order'): table_order,
+        ('schema', 'ddl'): ddl
+        }
+
+    monkeypatch.setattr(
+        'chamber.utility.ddl.build_instructions',
+        build_instructions
+        )
 
 # ----------------------------------------------------------------------------
 # _get_credentials
 
 
-def test_can_call_get_credentials(ConfigParser):  # noqa: D103
+def test_can_call_get_credentials(mock_ConfigParser):  # noqa: D103
     crud_mngr._get_credentials()
 
-    ConfigParser.configparser.read.assert_called_once_with('config.ini')
+    mock_ConfigParser.configparser.read.assert_called_once_with('config.ini')
 
 
-def test_get_credentials_returns_correct_dict(ConfigParser):  # noqa: D103
+def test_get_credentials_returns_correct_dict(mock_ConfigParser):  # noqa: D103
     creds = crud_mngr._get_credentials()
 
     assert creds == _CORRECT_CREDS
 
 
-def test_get_credentials_exception_knows_the_name_missing_key(ConfigParser):  # noqa: D103
-    _configparser_key_setter(ConfigParser.configparser, ['user', 'password'])
+def test_get_credentials_exception_knows_the_name_missing_key(mock_ConfigParser):  # noqa: D103
+    _configparser_key_setter(
+        mock_ConfigParser.configparser, ['user', 'password']
+        )
 
     err_message = (
         'KeyError: config file is missing the following key: host.'
@@ -86,8 +120,8 @@ def test_get_credentials_exception_knows_the_name_missing_key(ConfigParser):  # 
         crud_mngr._get_credentials()
 
 
-def test_get_credentials_raises_file_not_found_error(ConfigParser):  # noqa: D103
-    ConfigParser.configparser.read.return_value = []
+def test_get_credentials_raises_file_not_found_error(mock_ConfigParser):  # noqa: D103
+    mock_ConfigParser.configparser.read.return_value = []
 
     error_message = ('FileNotFoundError: config.ini does not exits.')
     with pytest.raises(FileNotFoundError, match=error_message):
@@ -98,71 +132,42 @@ def test_get_credentials_raises_file_not_found_error(ConfigParser):  # noqa: D10
 # _get_cursor
 
 
-def test_get_cursor_calls_connect(connect):  # noqa: D103
+def test_get_cursor_calls_connect(mock_connect):  # noqa: D103
     crud_mngr._get_cursor('schema', _CORRECT_CREDS)
 
     creds_w_pass = dict(_CORRECT_CREDS)
     creds_w_pass['database'] = 'schema'
-    connect.assert_called_once_with(**creds_w_pass)
+    mock_connect.assert_called_once_with(**creds_w_pass)
 
 
-def test_get_cursor_calls_cursor(connect):  # noqa: D103
+def test_get_cursor_calls_cursor(mock_connect):  # noqa: D103
     crud_mngr._get_cursor('schema', _CORRECT_CREDS)
 
-    connect.cnx.cursor.assert_called_once_with()
+    mock_connect.cnx.cursor.assert_called_once_with()
 
 
-def test_get_cursor_returns_cursor(connect):  # noqa: D103
+def test_get_cursor_returns_cursor(mock_connect):  # noqa: D103
     cur = crud_mngr._get_cursor('schema', _CORRECT_CREDS)
-    assert cur == '<mysql.connector.cursor.MySQLCursor object at ...>'
+    assert cur == mock_connect.cur
 
 
 # ----------------------------------------------------------------------------
 # _build_tables
 
 
-def test_build_tables_executes_calls_in_correct_order(monkeypatch):  # noqa: D103
-    # Need to mock the contract from chamber.utility.ddl
-    table_order = ('one', 'two', 'three')
-    ddl = {
-        'one': 'foo',
-        'two': 'bar',
-        'three': 'bacon!'
-        }
-    build_instructions = {
-        ('schema', 'table_order'): table_order,
-        ('schema', 'ddl'): ddl
-        }
+def test_build_tables_executes_calls_in_correct_order(mock_connect, mock_utility):  # noqa: D103
+    crud_mngr._build_tables('schema', mock_connect.cnx.cursor)
 
-    # Now I need to mock a call to chamber.utility.ddl to return
-    # the build instructions
-    monkeypatch.setattr(
-        'chamber.utility.ddl.build_instructions',
-        build_instructions
-        )
-
-    # I also need to mock the cursor's call to execute
-    cursor = mock.MagicMock()
-    cursor.execute = mock.MagicMock()
-
-    # Now call the function
-    crud_mngr._build_tables('schema', cursor)
-
-    # Assert that execute was called with the correct inputs
     correct_calls = [mock.call('foo'), mock.call('bar'), mock.call('bacon!')]
-
-    cursor.execute.assert_has_calls(correct_calls)
+    mock_connect.cnx.cursor.execute.assert_has_calls(correct_calls)
 
 
 # ----------------------------------------------------------------------------
 # setup_experiment_tables
 
 
-def test_setup_experiment_tables_returns_success(ConfigParser, connect, monkeypatch):  # noqa: D103
-    build_tables = mock.MagicMock(return_value='Success.')
-    monkeypatch.setattr('chamber.access.experiment.build_tables', build_tables)
-
-    message = crud_mngr.setup_experiment_tables('schema')
+def test_setup_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
+    message = crud_mngr.setup_tables('schema')
     assert message == 'Success.'
 
 

@@ -5,7 +5,7 @@ CRUD Manager module.
 Functions
 ---------
 
-- `get_credentials` -- use configparser to obtain credentials.
+- `setup_tables` -- Orchestrate construction of tables for a given database.
 
 """
 
@@ -13,7 +13,6 @@ import configparser
 
 import mysql.connector
 
-import chamber.access.experiment as exp_acc
 import chamber.utility.ddl as util_ddl
 
 
@@ -126,11 +125,9 @@ def _build_tables(database, cursor):
     return 'Success.'
 
 
-def setup_experiment_tables(database):
+def setup_tables(database):
     """
-    Orchestrate construction of experiment tables.
-
-    This functions knows 'what' to do to build the experiment tables.
+    Orchestrate construction of tables for a given database.
 
     Parameters
     ----------
@@ -151,5 +148,5 @@ def setup_experiment_tables(database):
     """
     creds = _get_credentials()
     cur = _get_cursor(database, creds)
-    message = exp_acc.build_tables(cur)
+    message = _build_tables(database, cur)
     return message
