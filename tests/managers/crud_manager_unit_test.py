@@ -109,7 +109,7 @@ def test_get_cursor_returns_cursor(connect):  # noqa: D103
 
 
 # ----------------------------------------------------------------------------
-# _setup_experiment_tables
+# setup_experiment_tables
 
 
 def test_setup_experiment_tables_returns_success(ConfigParser, connect, monkeypatch):  # noqa: D103

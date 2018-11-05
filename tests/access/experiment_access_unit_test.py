@@ -8,26 +8,38 @@ import chamber.access.experiment as exp_acc
 import chamber.utility.ddl as ddl
 
 
-def test_can_call_build_experiment_tables(monkeypatch):  # noqa: D103
-    mock_cursor = mock.MagicMock()
-    mock_cursor.execute = mock.MagicMock()
+@pytest.fixture
+def cursor(monkeypatch):
+    """Mock mysql cursor object."""
+    cursor = mock.MagicMock()
+    cursor.execute = mock.MagicMock()
+    return cursor
 
-    mock_build_instructions = {
+
+@pytest.fixture
+def utility(monkeypatch):
+    """Mock chamber.utility."""
+    utility = mock.MagicMock()
+    utility.ddl.build_instructions = {
         ('experiments', 'table order'): ('one', 'two', 'three'),
         ('experiments', 'ddl'): dict(one='foo', two='bar', three='bacon!')
         }
-
     monkeypatch.setattr(
         'chamber.utility.ddl.build_instructions',
-        mock_build_instructions
+        utility.ddl.build_instructions
         )
+    return utility
 
-    exp_acc.build_tables(mock_cursor)
 
-    mock_cursor.execute.assert_has_calls(
+def test_can_call_build_experiment_tables(cursor, utility):  # noqa: D103
+    exp_acc.build_tables(cursor)
+
+    cursor.execute.assert_has_calls(
         list(
-            mock.call(mock_build_instructions['experiments', 'ddl'][table])
+            mock.call(
+                utility.ddl.build_instructions['experiments', 'ddl'][table]
+                )
             for table
-            in mock_build_instructions['experiments', 'table order']
+            in utility.ddl.build_instructions['experiments', 'table order']
             )
         )

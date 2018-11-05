@@ -34,3 +34,7 @@ def build_tables(cursor):
             )
         print('OK')
     return 'Success.'
+
+
+# def drop_tables(cursor):
+#     pass
