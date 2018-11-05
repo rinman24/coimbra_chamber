@@ -5,7 +5,7 @@ import unittest.mock as mock
 import pytest
 
 import chamber.access.experiment as exp_acc
-import chamber.utilities.ddl as ddl
+import chamber.utility.ddl as ddl
 
 
 def test_can_call_build_experiment_tables(monkeypatch):  # noqa: D103
@@ -18,7 +18,7 @@ def test_can_call_build_experiment_tables(monkeypatch):  # noqa: D103
         }
 
     monkeypatch.setattr(
-        'chamber.utilities.ddl.build_instructions',
+        'chamber.utility.ddl.build_instructions',
         mock_build_instructions
         )
 

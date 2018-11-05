@@ -7,7 +7,12 @@ setup(
     version='2.0.0',
     author='Rich H. Inman',
     author_email='rinman24@gmail.com',
-    packages=['chamber.managers', 'chamber.engines', 'chamber.access'],
+    packages=[
+        'chamber.manager',
+        'chamber.engine',
+        'chamber.access',
+        'chamber.utility'
+        ],
     url='https://github.com/rinman24/chamber',
     license='LICENSE.txt',
     description=(

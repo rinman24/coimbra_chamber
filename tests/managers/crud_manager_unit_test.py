@@ -4,7 +4,7 @@ import unittest.mock as mock
 
 import pytest
 
-import chamber.managers.crud as crud_mngr
+import chamber.manager.crud as crud_mngr
 
 _CORRECT_CREDS = dict(host='address', user='me', password='secret')
 

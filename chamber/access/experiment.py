@@ -10,7 +10,7 @@ Functions
 
 import mysql.connector
 
-import chamber.utilities.ddl as ddl
+import chamber.utility.ddl as ddl
 
 
 def build_tables(cursor):
