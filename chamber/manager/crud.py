@@ -71,6 +71,10 @@ def _get_cursor(database, creds):
     return cur
 
 
+def _build_tables(database):
+    pass
+
+
 def setup_experiment_tables(database):
     """
     Orchestrate construction of experiment tables.

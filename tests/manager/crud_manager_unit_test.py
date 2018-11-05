@@ -15,7 +15,8 @@ def ConfigParser(monkeypatch):
     configparser = mock.MagicMock()
     configparser.read = mock.MagicMock()
     monkeypatch.setattr(
-        'configparser.ConfigParser.read', configparser.read
+        'chamber.manager.crud.configparser.ConfigParser.read',
+        configparser.read
         )
 
     # Production code calls Python builtin dict() on
@@ -28,7 +29,10 @@ def ConfigParser(monkeypatch):
 
     ConfigParser = mock.MagicMock(return_value=configparser)
     ConfigParser.configparser = configparser
-    monkeypatch.setattr('configparser.ConfigParser', ConfigParser)
+    monkeypatch.setattr(
+        'chamber.manager.crud.configparser.ConfigParser',
+        ConfigParser
+        )
     return ConfigParser
 
 
@@ -45,8 +49,10 @@ def connect(monkeypatch):
         )
 
     connect = mock.MagicMock(return_value=cnx)
-    connect.cnx.cursor = cnx.cursor
     monkeypatch.setattr('mysql.connector.connect', connect)
+
+    connect.cnx.cursor = cnx.cursor  # connect is the manager mock
+
     return connect
 
 
@@ -106,6 +112,38 @@ def test_get_cursor_calls_cursor(connect):  # noqa: D103
 def test_get_cursor_returns_cursor(connect):  # noqa: D103
     cur = crud_mngr._get_cursor('schema', _CORRECT_CREDS)
     assert cur == '<mysql.connector.cursor.MySQLCursor object at ...>'
+
+
+# ----------------------------------------------------------------------------
+# _build_tables
+
+@pytest.mark.skip
+def test_can_call_build_tables():
+    crud_mngr._build_tables('schema')
+
+@pytest.mark.skip
+def test_build_tables_executes_calls_in_correct_order(monkeypatch):
+    table_order = ('one', 'two', 'three')
+    ddl = {
+        'one': 'foo',
+        'two': 'bar',
+        'three': 'bacon!'
+        }
+    build_instructions = {
+        ('schema', 'table_order'): table_order,
+        ('schema', 'ddl'): ddl
+        }
+
+    utility = mock.MagicMock()
+    utility.ddl.build_instructions = build_instructions
+    monkeypatch.setattr(
+        'chamber.utility.ddl.build_instructions',
+        utility.ddl.build_instructions
+        )
+
+    crud_mngr._build_tables('schema')
+
+    pass
 
 
 # ----------------------------------------------------------------------------
