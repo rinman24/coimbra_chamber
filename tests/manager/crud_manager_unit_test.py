@@ -76,41 +76,6 @@ def mock_mysql(monkeypatch):
 
 
 @pytest.fixture()
-def mock_connect(monkeypatch):
-    """Mock connect method of mysql.connector.connect."""
-    cur = mock.MagicMock()
-    cur.execute = mock.MagicMock()
-    monkeypatch.setattr(
-        'chamber.manager.crud.mysql.connector.cursor.MySQLCursor.execute',
-        cur.execute
-    )
-
-    cnx = mock.MagicMock()
-    cnx.cursor = mock.MagicMock(
-        return_value=cur
-        )
-    monkeypatch.setattr(
-        (
-            'chamber.manager.crud.mysql.connector.connection.MySQLConnection'
-            '.cursor'
-            ),
-        cnx.cursor
-        )
-
-    mock_connect = mock.MagicMock(return_value=cnx)
-    monkeypatch.setattr(
-        'chamber.manager.crud.mysql.connector.connect',
-        mock_connect
-        )
-
-    # mock_connect is the manager mock
-    mock_connect.cnx.cursor = cnx.cursor
-    mock_connect.cur = cur
-
-    return mock_connect
-
-
-@pytest.fixture()
 def mock_utility(monkeypatch):
     """Mock chamber.utility."""
     table_order = ('one', 'two', 'three')
@@ -210,18 +175,18 @@ def test_connect_does_not_execute_use_database_by_default(mock_mysql):  # noqa: 
 
 
 def test_execute_build_executes_calls_in_correct_order(
-        mock_connect, mock_utility
+        mock_mysql, mock_utility
         ):  # noqa: D103
-    crud_mngr._execute_build('schema', mock_connect.cnx.cursor)
+    crud_mngr._execute_build('schema', mock_mysql.cur)
 
     correct_calls = [mock.call('foo'), mock.call('bar'), mock.call('bacon!')]
-    mock_connect.cnx.cursor.execute.assert_has_calls(correct_calls)
+    mock_mysql.cur.execute.assert_has_calls(correct_calls)
 
 
 def test_execute_build_returns_success(
-        mock_connect, mock_utility
+        mock_mysql, mock_utility
         ):  # noqa: D103
-    message = crud_mngr._execute_build('schema', mock_connect.cnx.cursor)
+    message = crud_mngr._execute_build('schema', mock_mysql.cur)
     assert message == _SETUP_MESSAGE
 
 
@@ -230,22 +195,22 @@ def test_execute_build_returns_success(
 
 
 def test_execute_drop_executes_calls_in_correct_order(
-        mock_connect, mock_utility
+        mock_mysql, mock_utility
         ):  # noqa D103
-    crud_mngr._execute_drop('schema', mock_connect.cnx.cursor)
+    crud_mngr._execute_drop('schema', mock_mysql.cur)
 
     correct_calls = [
         mock.call('DROP TABLE three;'),
         mock.call('DROP TABLE two;'),
         mock.call('DROP TABLE one;')
         ]
-    mock_connect.cnx.cursor.execute.assert_has_calls(correct_calls)
+    mock_mysql.cur.execute.assert_has_calls(correct_calls)
 
 
 def test_execute_drop_returns_success(
-        mock_connect, mock_utility
+        mock_mysql, mock_utility
         ):  # noqa: D103
-    message = crud_mngr._execute_drop('schema', mock_connect.cnx.cursor)
+    message = crud_mngr._execute_drop('schema', mock_mysql.cur)
     assert message == _TEARDOWN_MESSAGE
 
 
@@ -254,7 +219,7 @@ def test_execute_drop_returns_success(
 
 
 def test_build_tables_returns_success(
-        mock_ConfigParser, mock_connect, mock_utility
+        mock_ConfigParser, mock_mysql, mock_utility
         ):  # noqa: D103
     message = crud_mngr.build_tables('schema')
     assert message == _SETUP_MESSAGE
@@ -265,7 +230,7 @@ def test_build_tables_returns_success(
 
 
 def test_drop_tables_returns_success(
-        mock_ConfigParser, mock_connect, mock_utility
+        mock_ConfigParser, mock_mysql, mock_utility
         ):  # noqa: D103
     message = crud_mngr.drop_tables('schema')
     assert message == _TEARDOWN_MESSAGE
