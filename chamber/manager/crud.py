@@ -1,4 +1,3 @@
-
 """
 CRUD Manager module.
 
@@ -123,7 +122,7 @@ def _build_tables(database, cursor):
         print('Creating table {}: '.format(table), end='')
         cursor.execute(ddl[table])
         print('OK')
-    return 'Success.'
+    return 'Sucessfully setup {} tables.'.format(database)
 
 
 def _drop_tables(database, cursor):

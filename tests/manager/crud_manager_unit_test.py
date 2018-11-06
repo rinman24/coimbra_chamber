@@ -7,6 +7,7 @@ import pytest
 import chamber.manager.crud as crud_mngr
 
 _CORRECT_CREDS = dict(host='address', user='me', password='secret')
+_SUCCESS_MESSAGE = 'Sucessfully setup schema tables.' 
 
 
 @pytest.fixture()
@@ -164,7 +165,7 @@ def test_build_tables_executes_calls_in_correct_order(mock_connect, mock_utility
 
 def test_build_tables_returns_success(mock_connect, mock_utility):  # noqa: D103
     message = crud_mngr._build_tables('schema', mock_connect.cnx.cursor)
-    assert message == 'Success.'
+    assert message == _SUCCESS_MESSAGE
 
 
 # ----------------------------------------------------------------------------
@@ -193,7 +194,7 @@ def test_drop_tables_returns_success(mock_connect, mock_utility):  # noqa: D103
 
 def test_setup_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
     message = crud_mngr.setup_tables('schema')
-    assert message == 'Success.'
+    assert message == _SUCCESS_MESSAGE
 
 
 # ----------------------------------------------------------------------------
