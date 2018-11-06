@@ -63,9 +63,13 @@ def _get_credentials():
     raise FileNotFoundError(error_message)
 
 
-def _connect(creds):
+def _connect(creds, database=None):
     cnx = mysql.connector.connect(**creds)
     cur = cnx.cursor()
+    if database:
+        cur.execute(
+            'USE DATABASE {};'.format(database)
+            )
     return cnx, cur
 
 

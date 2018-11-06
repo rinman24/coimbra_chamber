@@ -193,6 +193,12 @@ def test_connect_returns_cnx_and_cur(mock_mysql):  # noqa: D103
     assert cur == mock_mysql.cur
 
 
+def test_connect_executes_use_database_when_given(mock_mysql):  # noqa: D103
+    crud_mngr._connect(_CORRECT_CREDS, database='schema')
+
+    mock_mysql.cur.execute.assert_called_once_with('USE DATABASE schema;')
+
+
 # ----------------------------------------------------------------------------
 # _execute_build
 
