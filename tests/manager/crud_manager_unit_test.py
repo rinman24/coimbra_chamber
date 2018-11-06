@@ -176,7 +176,7 @@ def test_get_credentials_raises_file_not_found_error(
 # ----------------------------------------------------------------------------
 # _connect
 
-def test_connect_calls_connect(mock_mysql):  # noqa: D103
+def test_connect_calls_connect_before_cursor(mock_mysql):  # noqa: D103
     crud_mngr._connect(_CORRECT_CREDS)
 
     correct_calls = [
