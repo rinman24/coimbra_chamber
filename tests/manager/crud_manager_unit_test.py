@@ -199,11 +199,11 @@ def test_build_tables_returns_success(mock_ConfigParser, mock_connect, mock_util
 
 
 # ----------------------------------------------------------------------------
-# teardown_tables
+# drop_tables
 
 
-def test_teardown_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
-    message = crud_mngr.teardown_tables('schema')
+def test_drop_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
+    message = crud_mngr.drop_tables('schema')
     assert message == _TEARDOWN_MESSAGE
 
 

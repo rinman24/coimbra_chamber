@@ -5,7 +5,7 @@ Functions
 ---------
 
 - `build_tables` -- Orchestrate construction of tables for a given database.
-- `teardown_tables` -- Orchestrate destuction of tables for a given database.
+- `drop_tables` -- Orchestrate destuction of tables for a given database.
 
 """
 
@@ -185,7 +185,7 @@ def build_tables(database):
     return message
 
 
-def teardown_tables(database):
+def drop_tables(database):
     """
     Orchestrate destruction of tables for a given database.
 
@@ -201,7 +201,7 @@ def teardown_tables(database):
 
     Examples
     --------
-    >>> message = teardown_tables('schema')
+    >>> message = drop_tables('schema')
     >>> message
     'Success.'
 
