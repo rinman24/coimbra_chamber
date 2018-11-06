@@ -103,13 +103,17 @@ def test_can_call_get_credentials(mock_ConfigParser):  # noqa: D103
     mock_ConfigParser.configparser.read.assert_called_once_with('config.ini')
 
 
-def test_get_credentials_returns_correct_dict(mock_ConfigParser):  # noqa: D103
+def test_get_credentials_returns_correct_dict(
+        mock_ConfigParser
+        ):  # noqa: D103
     creds = crud_mngr._get_credentials()
 
     assert creds == _CORRECT_CREDS
 
 
-def test_get_credentials_exception_knows_the_name_missing_key(mock_ConfigParser):  # noqa: D103
+def test_get_credentials_exception_knows_the_name_missing_key(
+        mock_ConfigParser
+        ):  # noqa: D103
     _configparser_key_setter(
         mock_ConfigParser.configparser, ['user', 'password']
         )
@@ -122,7 +126,9 @@ def test_get_credentials_exception_knows_the_name_missing_key(mock_ConfigParser)
         crud_mngr._get_credentials()
 
 
-def test_get_credentials_raises_file_not_found_error(mock_ConfigParser):  # noqa: D103
+def test_get_credentials_raises_file_not_found_error(
+        mock_ConfigParser
+        ):  # noqa: D103
     mock_ConfigParser.configparser.read.return_value = []
 
     error_message = ('FileNotFoundError: config.ini does not exits.')
@@ -153,35 +159,32 @@ def test_get_cursor_returns_cursor(mock_connect):  # noqa: D103
     assert cur == mock_connect.cur
 
 
-
 # ----------------------------------------------------------------------------
 # _authenticate
 
-def test_can_call_authenticate(mock_connect):  # noqa: D103
-    crud_mngr._authenticate('schema')
 
-
-def test_authenticate_returns_cursor(mock_connect):
+def test_authenticate_returns_cursor(mock_connect):  # noqa: D103
     cur = crud_mngr._authenticate('schema')
 
     assert cur == mock_connect.cur
-
-
-
 
 
 # ----------------------------------------------------------------------------
 # _execute_build
 
 
-def test_execute_build_executes_calls_in_correct_order(mock_connect, mock_utility):  # noqa: D103
+def test_execute_build_executes_calls_in_correct_order(
+        mock_connect, mock_utility
+        ):  # noqa: D103
     crud_mngr._execute_build('schema', mock_connect.cnx.cursor)
 
     correct_calls = [mock.call('foo'), mock.call('bar'), mock.call('bacon!')]
     mock_connect.cnx.cursor.execute.assert_has_calls(correct_calls)
 
 
-def test_execute_build_returns_success(mock_connect, mock_utility):  # noqa: D103
+def test_execute_build_returns_success(
+        mock_connect, mock_utility
+        ):  # noqa: D103
     message = crud_mngr._execute_build('schema', mock_connect.cnx.cursor)
     assert message == _SETUP_MESSAGE
 
@@ -190,7 +193,9 @@ def test_execute_build_returns_success(mock_connect, mock_utility):  # noqa: D10
 # _execute_drop
 
 
-def test_execute_drop_executes_calls_in_correct_order(mock_connect, mock_utility):  # noqa D103
+def test_execute_drop_executes_calls_in_correct_order(
+        mock_connect, mock_utility
+        ):  # noqa D103
     crud_mngr._execute_drop('schema', mock_connect.cnx.cursor)
 
     correct_calls = [
@@ -201,7 +206,9 @@ def test_execute_drop_executes_calls_in_correct_order(mock_connect, mock_utility
     mock_connect.cnx.cursor.execute.assert_has_calls(correct_calls)
 
 
-def test_execute_drop_returns_success(mock_connect, mock_utility):  # noqa: D103
+def test_execute_drop_returns_success(
+        mock_connect, mock_utility
+        ):  # noqa: D103
     message = crud_mngr._execute_drop('schema', mock_connect.cnx.cursor)
     assert message == _TEARDOWN_MESSAGE
 
@@ -210,7 +217,9 @@ def test_execute_drop_returns_success(mock_connect, mock_utility):  # noqa: D103
 # build_tables
 
 
-def test_build_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
+def test_build_tables_returns_success(
+        mock_ConfigParser, mock_connect, mock_utility
+        ):  # noqa: D103
     message = crud_mngr.build_tables('schema')
     assert message == _SETUP_MESSAGE
 
@@ -219,7 +228,9 @@ def test_build_tables_returns_success(mock_ConfigParser, mock_connect, mock_util
 # drop_tables
 
 
-def test_drop_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
+def test_drop_tables_returns_success(
+        mock_ConfigParser, mock_connect, mock_utility
+        ):  # noqa: D103
     message = crud_mngr.drop_tables('schema')
     assert message == _TEARDOWN_MESSAGE
 
