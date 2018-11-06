@@ -64,11 +64,47 @@ def _get_credentials():
 
 
 def _connect(creds, database=None):
+    """
+    Use credentials to connect to mySQL database.
+
+    Parameters
+    ----------
+    creds : dict
+        Credentials for the mysql database.
+    database : str, optional
+        Database to connect to. If database is not specified, you must run
+        cursor.execute('USE <database>;') to proceed.
+
+    Returns
+    -------
+    cnx : mysql.connector.MySQLConnection
+        MySQL database connection object
+    cur : mysql.connector.cursor.MySQLCursor
+        MySQL database cursor object corresponding to `cnx`.
+
+    Examples
+    --------
+    Connect to a host without specifying the database. You will have to run
+    cursor.execute('USE <database>;') to proceed.
+
+    >>> creds = dict(host='address', user='me', password='secret')
+    >>> cnx, cur = _connect(creds)
+    >>> cur.execute('USE schema;')
+    >>> cnx.commit()
+    >>> cur.close()
+
+    Specifying the optional database can be used to save time.
+
+    >>> cnx, cur = _connect(creds, database='schema')
+    >>> cnx.commit()
+    >>> cur.close()
+
+    """
     cnx = mysql.connector.connect(**creds)
     cur = cnx.cursor()
     if database:
         cur.execute(
-            'USE DATABASE {};'.format(database)
+            'USE {};'.format(database)
             )
     return cnx, cur
 
@@ -161,8 +197,7 @@ def build_tables(database):
 
     """
     creds = _get_credentials()
-    _, cur = _connect(creds)
-    cur.execute('USE {};'.format(database))
+    _, cur = _connect(creds, database=database)
     message = _execute_build(database, cur)
     return message
 
@@ -189,7 +224,6 @@ def drop_tables(database):
 
     """
     creds = _get_credentials()
-    _, cur = _connect(creds)
-    cur.execute('USE {};'.format(database))
+    _, cur = _connect(creds, database=database)
     message = _execute_drop(database, cur)
     return message
