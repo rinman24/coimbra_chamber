@@ -4,7 +4,7 @@ CRUD Manager module.
 Functions
 ---------
 
-- `setup_tables` -- Orchestrate construction of tables for a given database.
+- `build_tables` -- Orchestrate construction of tables for a given database.
 - `teardown_tables` -- Orchestrate destuction of tables for a given database.
 
 """
@@ -158,7 +158,7 @@ def _execute_drop(database, cursor):
     return 'Sucessfully tore down {} tables.'.format(database)
 
 
-def setup_tables(database):
+def build_tables(database):
     """
     Orchestrate construction of tables for a given database.
 
@@ -174,7 +174,7 @@ def setup_tables(database):
 
     Examples
     --------
-    >>> message = setup_tables('schema')
+    >>> message = build_tables('schema')
     >>> message
     'Success.'
 

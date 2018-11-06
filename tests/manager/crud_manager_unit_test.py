@@ -190,11 +190,11 @@ def test_execute_drop_returns_success(mock_connect, mock_utility):  # noqa: D103
 
 
 # ----------------------------------------------------------------------------
-# setup_tables
+# build_tables
 
 
-def test_setup_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
-    message = crud_mngr.setup_tables('schema')
+def test_build_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
+    message = crud_mngr.build_tables('schema')
     assert message == _SETUP_MESSAGE
 
 
