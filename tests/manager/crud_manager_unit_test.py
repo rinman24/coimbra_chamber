@@ -194,39 +194,6 @@ def test_connect_returns_cnx_and_cur(mock_mysql):  # noqa: D103
 
 
 # ----------------------------------------------------------------------------
-# _get_cursor
-
-
-def test_get_cursor_calls_connect(mock_connect):  # noqa: D103
-    crud_mngr._get_cursor('schema', _CORRECT_CREDS)
-
-    creds_w_pass = dict(_CORRECT_CREDS)
-    creds_w_pass['database'] = 'schema'
-    mock_connect.assert_called_once_with(**creds_w_pass)
-
-
-def test_get_cursor_calls_cursor(mock_connect):  # noqa: D103
-    crud_mngr._get_cursor('schema', _CORRECT_CREDS)
-
-    mock_connect.cnx.cursor.assert_called_once_with()
-
-
-def test_get_cursor_returns_cursor(mock_connect):  # noqa: D103
-    cur = crud_mngr._get_cursor('schema', _CORRECT_CREDS)
-    assert cur == mock_connect.cur
-
-
-# ----------------------------------------------------------------------------
-# _authenticate
-
-
-def test_authenticate_returns_cursor(mock_connect):  # noqa: D103
-    cur = crud_mngr._authenticate('schema')
-
-    assert cur == mock_connect.cur
-
-
-# ----------------------------------------------------------------------------
 # _execute_build
 
 

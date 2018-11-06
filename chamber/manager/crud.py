@@ -69,42 +69,6 @@ def _connect(creds):
     return cnx, cur
 
 
-def _get_cursor(database, creds):
-    """
-    Get a cursor using mysql.connector.
-
-    Parameters
-    ----------
-    database: str
-        Name of the database for which to create a cursor.
-    creds: dict
-        dictionay of credentials. Typically returned from a call to the
-        `_get_credentials` function.
-
-    Returns
-    -------
-    mysql.connector.cursor.MySQLCursor
-        cursor object for the specified database.
-
-    Examples
-    --------
-    >>> creds = _get_credentials()
-    >>> cur = _get_cursor('schema', creds)
-
-    """
-    creds['database'] = database
-    cnx = mysql.connector.connect(**creds)
-    cur = cnx.cursor()
-    return cur
-
-
-def _authenticate(database):
-    """Use database to obtain a mySQL cursor."""
-    creds = _get_credentials()
-    cur = _get_cursor(database, creds)
-    return cur
-
-
 def _execute_build(database, cursor):
     """
     Use cursor and database name to build tables.
@@ -192,7 +156,9 @@ def build_tables(database):
     'Successfully built schema tables.'
 
     """
-    cur = _authenticate(database)
+    creds = _get_credentials()
+    _, cur = _connect(creds)
+    cur.execute('USE {};'.format(database))
     message = _execute_build(database, cur)
     return message
 
@@ -218,6 +184,8 @@ def drop_tables(database):
     'Successfully dropped schema tables.'
 
     """
-    cur = _authenticate(database)
+    creds = _get_credentials()
+    _, cur = _connect(creds)
+    cur.execute('USE {};'.format(database))
     message = _execute_drop(database, cur)
     return message
