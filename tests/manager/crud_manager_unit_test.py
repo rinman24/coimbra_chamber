@@ -39,6 +39,43 @@ def mock_ConfigParser(monkeypatch):
 
 
 @pytest.fixture()
+def mock_mysql(monkeypatch):
+    """Mock of mysql.connector module."""
+    mock_mysql = mock.MagicMock()
+
+    # Define instances before method definition and return value assignment.
+    cnx_instance = mock_mysql.cnx
+    cur_instance = mock_mysql.cur
+
+    # Define methods and assign return values.
+    connect_method = mock_mysql.connect
+    connect_method.return_value = cnx_instance
+
+    cursor_method = cnx_instance.cursor
+    cursor_method.return_value = cur_instance
+
+    execute_method = cur_instance.execute
+
+    # Patch calls now that mock_mysql is setup.
+    monkeypatch.setattr(
+        'chamber.manager.crud.mysql.connector.connect', connect_method
+        )
+    monkeypatch.setattr(
+        (
+            'chamber.manager.crud.mysql.connector.connection.MySQLConnection'
+            '.cursor'
+            ),
+        cursor_method
+        )
+    monkeypatch.setattr(
+        'chamber.manager.crud.mysql.connector.cursor.MySQLCursor.execute',
+        execute_method
+        )
+
+    return mock_mysql
+
+
+@pytest.fixture()
 def mock_connect(monkeypatch):
     """Mock connect method of mysql.connector.connect."""
     cur = mock.MagicMock()
@@ -134,6 +171,26 @@ def test_get_credentials_raises_file_not_found_error(
     error_message = ('FileNotFoundError: config.ini does not exits.')
     with pytest.raises(FileNotFoundError, match=error_message):
         crud_mngr._get_credentials()
+
+
+# ----------------------------------------------------------------------------
+# _connect
+
+def test_connect_calls_connect(mock_mysql):  # noqa: D103
+    crud_mngr._connect(_CORRECT_CREDS)
+
+    correct_calls = [
+        mock.call.connect(**_CORRECT_CREDS),
+        mock.call.cnx.cursor()
+        ]
+    mock_mysql.assert_has_calls(correct_calls)
+
+
+def test_connect_returns_cnx_and_cur(mock_mysql):  # noqa: D103
+    cnx, cur = crud_mngr._connect(_CORRECT_CREDS)
+
+    assert cnx == mock_mysql.cnx
+    assert cur == mock_mysql.cur
 
 
 # ----------------------------------------------------------------------------

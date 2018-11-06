@@ -63,6 +63,12 @@ def _get_credentials():
     raise FileNotFoundError(error_message)
 
 
+def _connect(creds):
+    cnx = mysql.connector.connect(**creds)
+    cur = cnx.cursor()
+    return cnx, cur
+
+
 def _get_cursor(database, creds):
     """
     Get a cursor using mysql.connector.
