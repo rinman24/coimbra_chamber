@@ -157,6 +157,7 @@ def _drop_tables(database, cursor):
         print('OK')
     return 'Success.'
 
+
 def setup_tables(database):
     """
     Orchestrate construction of tables for a given database.
