@@ -111,7 +111,7 @@ def _build_tables(database, cursor):
 
     Examples
     --------
-    >>> build_experiment_tables('schema', cursor)
+    >>> _build_tables('schema', cursor)
     'Success.'
 
     """
@@ -124,6 +124,38 @@ def _build_tables(database, cursor):
         print('OK')
     return 'Success.'
 
+
+def _drop_tables(database, cursor):
+    """
+    Use cursor and database name to drop tables.
+
+    Parameters
+    ----------
+    database: str
+        Name of the database, which is used to lookup required table order
+        from utility.
+    cursor : mysql.connector.cursor.MySQLCursor
+        mySQL cursor object
+
+    Returns
+    -------
+    str
+        'Success.' if successful.
+
+    Examples
+    --------
+    >>> drop_tables('schema', cursor)
+    'Success.'
+
+    """
+    table_order = util_ddl.build_instructions[database, 'table_order']
+    reversed_table_order = table_order[::-1]
+
+    for table in reversed_table_order:
+        print('Dropping table {}: '.format(table), end='')
+        cursor.execute('DROP TABLE {};'.format(table))
+        print('OK')
+    return 'Success.'
 
 def setup_tables(database):
     """
