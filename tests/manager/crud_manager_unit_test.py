@@ -153,6 +153,23 @@ def test_get_cursor_returns_cursor(mock_connect):  # noqa: D103
     assert cur == mock_connect.cur
 
 
+
+# ----------------------------------------------------------------------------
+# _authenticate
+
+def test_can_call_authenticate(mock_connect):  # noqa: D103
+    crud_mngr._authenticate('schema')
+
+
+def test_authenticate_returns_cursor(mock_connect):
+    cur = crud_mngr._authenticate('schema')
+
+    assert cur == mock_connect.cur
+
+
+
+
+
 # ----------------------------------------------------------------------------
 # _execute_build
 

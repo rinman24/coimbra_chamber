@@ -41,7 +41,7 @@ def _get_credentials():
     """
     config_parser = configparser.ConfigParser()
 
-    # congif_parser.read() returns a list containing the files read;
+    # config_parser.read() returns a list containing the files read;
     # e.g. ['config.ini'].
     config_result = config_parser.read('config.ini')
 
@@ -89,6 +89,13 @@ def _get_cursor(database, creds):
     creds['database'] = database
     cnx = mysql.connector.connect(**creds)
     cur = cnx.cursor()
+    return cur
+
+
+def _authenticate(database):
+    """Use database to obtain a mySQL cursor."""
+    creds = _get_credentials()
+    cur = _get_cursor(database, creds)
     return cur
 
 
@@ -179,8 +186,7 @@ def build_tables(database):
     'Success.'
 
     """
-    creds = _get_credentials()
-    cur = _get_cursor(database, creds)
+    cur = _authenticate(database)
     message = _execute_build(database, cur)
     return message
 
@@ -206,7 +212,6 @@ def drop_tables(database):
     'Success.'
 
     """
-    creds = _get_credentials()
-    cur = _get_cursor(database, creds)
+    cur = _authenticate(database)
     message = _execute_drop(database, cur)
     return message
