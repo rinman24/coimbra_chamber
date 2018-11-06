@@ -154,18 +154,18 @@ def test_get_cursor_returns_cursor(mock_connect):  # noqa: D103
 
 
 # ----------------------------------------------------------------------------
-# _build_tables
+# _execute_build
 
 
-def test_build_tables_executes_calls_in_correct_order(mock_connect, mock_utility):  # noqa: D103
-    crud_mngr._build_tables('schema', mock_connect.cnx.cursor)
+def test_execute_build_executes_calls_in_correct_order(mock_connect, mock_utility):  # noqa: D103
+    crud_mngr._execute_build('schema', mock_connect.cnx.cursor)
 
     correct_calls = [mock.call('foo'), mock.call('bar'), mock.call('bacon!')]
     mock_connect.cnx.cursor.execute.assert_has_calls(correct_calls)
 
 
-def test_build_tables_returns_success(mock_connect, mock_utility):  # noqa: D103
-    message = crud_mngr._build_tables('schema', mock_connect.cnx.cursor)
+def test_execute_build_returns_success(mock_connect, mock_utility):  # noqa: D103
+    message = crud_mngr._execute_build('schema', mock_connect.cnx.cursor)
     assert message == _SETUP_MESSAGE
 
 

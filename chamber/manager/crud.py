@@ -92,7 +92,7 @@ def _get_cursor(database, creds):
     return cur
 
 
-def _build_tables(database, cursor):
+def _execute_build(database, cursor):
     """
     Use cursor and database name to build tables.
 
@@ -111,7 +111,7 @@ def _build_tables(database, cursor):
 
     Examples
     --------
-    >>> _build_tables('schema', cursor)
+    >>> _execute_build('schema', cursor)
     'Success.'
 
     """
@@ -181,7 +181,7 @@ def setup_tables(database):
     """
     creds = _get_credentials()
     cur = _get_cursor(database, creds)
-    message = _build_tables(database, cur)
+    message = _execute_build(database, cur)
     return message
 
 
