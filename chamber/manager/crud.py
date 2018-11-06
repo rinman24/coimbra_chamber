@@ -6,6 +6,7 @@ Functions
 ---------
 
 - `setup_tables` -- Orchestrate construction of tables for a given database.
+- `teardown_tables` -- Orchestrate destuction of tables for a given database.
 
 """
 
@@ -174,7 +175,7 @@ def setup_tables(database):
 
     Examples
     --------
-    >>> message = setup_experiment_tables('schema')
+    >>> message = setup_tables('schema')
     >>> message
     'Success.'
 
@@ -182,4 +183,31 @@ def setup_tables(database):
     creds = _get_credentials()
     cur = _get_cursor(database, creds)
     message = _build_tables(database, cur)
+    return message
+
+
+def teardown_tables(database):
+    """
+    Orchestrate destruction of tables for a given database.
+
+    Parameters
+    ----------
+    database : str
+        Name of the database (or schema)
+
+    Returns
+    -------
+    str
+        "Success." if successful.
+
+    Examples
+    --------
+    >>> message = teardown_tables('schema')
+    >>> message
+    'Success.'
+
+    """
+    creds = _get_credentials()
+    cur = _get_cursor(database, creds)
+    message = _drop_tables(database, cur)
     return message

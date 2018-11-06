@@ -188,11 +188,20 @@ def test_drop_tables_returns_success(mock_connect, mock_utility):  # noqa: D103
 
 
 # ----------------------------------------------------------------------------
-# setup_experiment_tables
+# setup_tables
 
 
 def test_setup_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
     message = crud_mngr.setup_tables('schema')
+    assert message == 'Success.'
+
+
+# ----------------------------------------------------------------------------
+# teardown_tables
+
+
+def test_teardown_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
+    message = crud_mngr.teardown_tables('schema')
     assert message == 'Success.'
 
 
