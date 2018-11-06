@@ -7,8 +7,8 @@ import pytest
 import chamber.manager.crud as crud_mngr
 
 _CORRECT_CREDS = dict(host='address', user='me', password='secret')
-_SETUP_MESSAGE = 'Sucessfully setup schema tables.'
-_TEARDOWN_MESSAGE = 'Sucessfully tore down schema tables.'
+_SETUP_MESSAGE = 'Sucessfully built schema tables.'
+_TEARDOWN_MESSAGE = 'Sucessfully dropped schema tables.'
 
 
 @pytest.fixture()

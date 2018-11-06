@@ -129,7 +129,7 @@ def _execute_build(database, cursor):
         print('Creating table {}: '.format(table), end='')
         cursor.execute(ddl[table])
         print('OK')
-    return 'Sucessfully setup {} tables.'.format(database)
+    return 'Sucessfully built {} tables.'.format(database)
 
 
 def _execute_drop(database, cursor):
@@ -162,7 +162,7 @@ def _execute_drop(database, cursor):
         print('Dropping table {}: '.format(table), end='')
         cursor.execute('DROP TABLE {};'.format(table))
         print('OK')
-    return 'Sucessfully tore down {} tables.'.format(database)
+    return 'Sucessfully dropped {} tables.'.format(database)
 
 
 def build_tables(database):
@@ -183,7 +183,7 @@ def build_tables(database):
     --------
     >>> message = build_tables('schema')
     >>> message
-    'Success.'
+    'Successfully built schema tables.'
 
     """
     cur = _authenticate(database)
@@ -209,7 +209,7 @@ def drop_tables(database):
     --------
     >>> message = drop_tables('schema')
     >>> message
-    'Success.'
+    'Successfully dropped schema tables.'
 
     """
     cur = _authenticate(database)
