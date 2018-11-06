@@ -34,7 +34,7 @@ def _get_credentials():
 
     Examples
     --------
-    >>> creds = get_credentials()
+    >>> creds = _get_credentials()
     >>> type(creds)
     <class 'dict'>
 
