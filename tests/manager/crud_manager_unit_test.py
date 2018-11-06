@@ -7,7 +7,8 @@ import pytest
 import chamber.manager.crud as crud_mngr
 
 _CORRECT_CREDS = dict(host='address', user='me', password='secret')
-_SUCCESS_MESSAGE = 'Sucessfully setup schema tables.' 
+_SETUP_MESSAGE = 'Sucessfully setup schema tables.'
+_TEARDOWN_MESSAGE = 'Sucessfully tore down schema tables.'
 
 
 @pytest.fixture()
@@ -165,7 +166,7 @@ def test_build_tables_executes_calls_in_correct_order(mock_connect, mock_utility
 
 def test_build_tables_returns_success(mock_connect, mock_utility):  # noqa: D103
     message = crud_mngr._build_tables('schema', mock_connect.cnx.cursor)
-    assert message == _SUCCESS_MESSAGE
+    assert message == _SETUP_MESSAGE
 
 
 # ----------------------------------------------------------------------------
@@ -185,7 +186,7 @@ def test_drop_tables_executes_calls_in_correct_order(mock_connect, mock_utility)
 
 def test_drop_tables_returns_success(mock_connect, mock_utility):  # noqa: D103
     message = crud_mngr._drop_tables('schema', mock_connect.cnx.cursor)
-    assert message == 'Success.'
+    assert message == _TEARDOWN_MESSAGE
 
 
 # ----------------------------------------------------------------------------
@@ -194,7 +195,7 @@ def test_drop_tables_returns_success(mock_connect, mock_utility):  # noqa: D103
 
 def test_setup_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
     message = crud_mngr.setup_tables('schema')
-    assert message == _SUCCESS_MESSAGE
+    assert message == _SETUP_MESSAGE
 
 
 # ----------------------------------------------------------------------------
@@ -203,7 +204,7 @@ def test_setup_tables_returns_success(mock_ConfigParser, mock_connect, mock_util
 
 def test_teardown_tables_returns_success(mock_ConfigParser, mock_connect, mock_utility):  # noqa: D103
     message = crud_mngr.teardown_tables('schema')
-    assert message == 'Success.'
+    assert message == _TEARDOWN_MESSAGE
 
 
 # ----------------------------------------------------------------------------

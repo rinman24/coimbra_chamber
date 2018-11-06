@@ -155,7 +155,7 @@ def _drop_tables(database, cursor):
         print('Dropping table {}: '.format(table), end='')
         cursor.execute('DROP TABLE {};'.format(table))
         print('OK')
-    return 'Success.'
+    return 'Sucessfully tore down {} tables.'.format(database)
 
 
 def setup_tables(database):
