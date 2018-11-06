@@ -170,11 +170,11 @@ def test_execute_build_returns_success(mock_connect, mock_utility):  # noqa: D10
 
 
 # ----------------------------------------------------------------------------
-# _drop_tables
+# _execute_drop
 
 
-def test_drop_tables_executes_calls_in_correct_order(mock_connect, mock_utility):  # noqa D103
-    crud_mngr._drop_tables('schema', mock_connect.cnx.cursor)
+def test_execute_drop_executes_calls_in_correct_order(mock_connect, mock_utility):  # noqa D103
+    crud_mngr._execute_drop('schema', mock_connect.cnx.cursor)
 
     correct_calls = [
         mock.call('DROP TABLE three;'),
@@ -184,8 +184,8 @@ def test_drop_tables_executes_calls_in_correct_order(mock_connect, mock_utility)
     mock_connect.cnx.cursor.execute.assert_has_calls(correct_calls)
 
 
-def test_drop_tables_returns_success(mock_connect, mock_utility):  # noqa: D103
-    message = crud_mngr._drop_tables('schema', mock_connect.cnx.cursor)
+def test_execute_drop_returns_success(mock_connect, mock_utility):  # noqa: D103
+    message = crud_mngr._execute_drop('schema', mock_connect.cnx.cursor)
     assert message == _TEARDOWN_MESSAGE
 
 

@@ -125,7 +125,7 @@ def _execute_build(database, cursor):
     return 'Sucessfully setup {} tables.'.format(database)
 
 
-def _drop_tables(database, cursor):
+def _execute_drop(database, cursor):
     """
     Use cursor and database name to drop tables.
 
@@ -144,7 +144,7 @@ def _drop_tables(database, cursor):
 
     Examples
     --------
-    >>> drop_tables('schema', cursor)
+    >>> _execute_drop('schema', cursor)
     'Success.'
 
     """
@@ -208,5 +208,5 @@ def teardown_tables(database):
     """
     creds = _get_credentials()
     cur = _get_cursor(database, creds)
-    message = _drop_tables(database, cur)
+    message = _execute_drop(database, cur)
     return message
