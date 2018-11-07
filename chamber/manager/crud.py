@@ -4,7 +4,7 @@ CRUD Manager module.
 Functions
 ---------
 
-- `build_tables` -- Orchestrate construction of tables for a given database.
+- `create_db` -- Orchestrate construction of tables for a given database.
 - `drop_tables` -- Orchestrate destuction of tables for a given database.
 
 """
@@ -175,7 +175,7 @@ def _execute_drop(database, cursor):
     return 'Sucessfully dropped {} tables.'.format(database)
 
 
-def build_tables(database):
+def create_db(database):
     """
     Orchestrate construction of tables for a given database.
 
@@ -191,7 +191,7 @@ def build_tables(database):
 
     Examples
     --------
-    >>> message = build_tables('schema')
+    >>> message = create_db('schema')
     >>> message
     'Successfully built schema tables.'
 

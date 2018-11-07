@@ -215,13 +215,13 @@ def test_execute_drop_returns_success(
 
 
 # ----------------------------------------------------------------------------
-# build_tables
+# create_db
 
 
-def test_build_tables_returns_success(
+def test_create_db_returns_success(
         mock_ConfigParser, mock_mysql, mock_utility
         ):  # noqa: D103
-    message = crud_mngr.build_tables('schema')
+    message = crud_mngr.create_db('schema')
     assert message == _SETUP_MESSAGE
 
 
