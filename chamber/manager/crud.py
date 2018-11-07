@@ -179,6 +179,10 @@ def create_tables(database):
     """
     Orchestrate construction of tables for a given database.
 
+    In general, creation of tables occurs most often during creation of the
+    schema. As a result, this function attempts to create the database if it
+    doesn't already exist.
+
     Parameters
     ----------
     database : str
@@ -198,6 +202,9 @@ def create_tables(database):
     """
     creds = _get_credentials()
     _, cur = _connect(creds, database=database)
+    cur.execute(
+        'CREATE DATABASE IF NOT EXISTS {};'.format(database)
+        )
     message = _execute_build(database, cur)
     return message
 

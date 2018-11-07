@@ -225,6 +225,15 @@ def test_create_tables_returns_success(
     assert message == _SETUP_MESSAGE
 
 
+def test_create_tables_creates_db_if_does_not_exists(
+        mock_ConfigParser, mock_mysql, mock_utility
+        ):  # noqa: D103
+    crud_mngr.create_tables('schema')
+    mock_mysql.cur.execute.assert_any_call(
+        'CREATE DATABASE IF NOT EXISTS schema;'
+        )
+
+
 # ----------------------------------------------------------------------------
 # drop_tables
 
