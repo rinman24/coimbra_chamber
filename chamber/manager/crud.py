@@ -28,8 +28,10 @@ def _get_credentials():
 
     Raises
     ------
-    FileNotFoundError: If the config.ini file is not found.
-    KeyError: If any keys are missing from the `MySQL-Server` section of the
+    FileNotFoundError
+        If the config.ini file is not found.
+    KeyError
+        If any keys are missing from the `MySQL-Server` section of the
         config.ini file.
 
     Examples
@@ -115,7 +117,7 @@ def _execute_build(database, cursor):
 
     Parameters
     ----------
-    database: str
+    database : str
         Name of the database, which is used to lookup required ddl from
         utility.
     cursor : mysql.connector.cursor.MySQLCursor
@@ -124,7 +126,7 @@ def _execute_build(database, cursor):
     Returns
     -------
     str
-        'Success.' if successful.
+        Message confirming that tables were built for the database.
 
     Examples
     --------
@@ -148,7 +150,7 @@ def _execute_drop(database, cursor):
 
     Parameters
     ----------
-    database: str
+    database : str
         Name of the database, which is used to lookup required table order
         from utility.
     cursor : mysql.connector.cursor.MySQLCursor
@@ -157,12 +159,12 @@ def _execute_drop(database, cursor):
     Returns
     -------
     str
-        'Success.' if successful.
+        Message confirming that tables were dropped for the database.
 
     Examples
     --------
     >>> _execute_drop('schema', cursor)
-    'Success.'
+    'Successfully dropped schema tables.'
 
     """
     table_order = util_ddl.build_instructions[database, 'table_order']
@@ -191,7 +193,7 @@ def create_tables(database):
     Returns
     -------
     str
-        "Success." if successful.
+        Message confirming that tables were built for the database.
 
     Examples
     --------
@@ -225,7 +227,8 @@ def drop_tables(database, drop_db=False):
     Returns
     -------
     str
-        "Success." if successful.
+        Message confirming that tables were dropped for the database. Will
+        also confirm that database was dropped if `drop_db` is True.
 
     Examples
     --------
