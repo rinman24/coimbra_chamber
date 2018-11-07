@@ -2,7 +2,7 @@
 
 build_instructions = {
     ('experiment', 'table_order'): (
-        'Tube', 'Setting'
+        'Tube', 'Setting', 'Test', 'Observation', 'TempObservation'
         ),
     ('experiment', 'ddl'): dict(
         Tube=(
@@ -14,8 +14,8 @@ build_instructions = {
             '  `Material` VARCHAR(50) NOT NULL,'
             '  `Mass` DECIMAL(7,7) UNSIGNED NOT NULL,'
             '  PRIMARY KEY (`TubeId`))'
-            'ENGINE = InnoDB '
-            'DEFAULT CHARACTER SET = latin1;'
+            '  ENGINE = InnoDB'
+            '  DEFAULT CHARACTER SET = latin1;'
             ),
         Setting=(
             'CREATE TABLE IF NOT EXISTS `Setting` ('
@@ -31,10 +31,60 @@ build_instructions = {
             '  INDEX `fk_Setting_Tube1_idx` (`TubeId` ASC),'
             '  CONSTRAINT `fk_Setting_Tube`'
             '    FOREIGN KEY (`TubeId`)'
-            '    REFERENCES `chamber`.`Tube` (`TubeId`)'
+            '    REFERENCES `Tube` (`TubeId`)'
             '    ON UPDATE CASCADE)'
-            'ENGINE = InnoDB '
-            'DEFAULT CHARACTER SET = latin1;'
+            '  ENGINE = InnoDB'
+            '  DEFAULT CHARACTER SET = latin1;'
+            ),
+        Test=(
+            'CREATE TABLE IF NOT EXISTS `Test` ('
+            '  `TestId` SMALLINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,'
+            '  `Author` VARCHAR(50) NOT NULL,'
+            '  `DateTime` DATETIME NOT NULL,'
+            '  `Description` VARCHAR(1000) NOT NULL,'
+            '  `SettingId` SMALLINT(3) UNSIGNED NOT NULL,'
+            '  PRIMARY KEY (`TestId`, `SettingId`),'
+            '  INDEX `fk_Test_Setting_idx` (`SettingId` ASC),'
+            '  CONSTRAINT `fk_Test_Setting`'
+            '    FOREIGN KEY (`SettingId`)'
+            '    REFERENCES `Setting` (`SettingId`)'
+            '    ON UPDATE CASCADE) '
+            '  ENGINE = InnoDB'
+            '  DEFAULT CHARACTER SET = latin1;'
+            ),
+        Observation=(
+            'CREATE TABLE IF NOT EXISTS `Observation` ('
+            '  `CapManOk` BIT(1) NOT NULL,'
+            '  `DewPoint` DECIMAL(5,2) UNSIGNED NOT NULL,'
+            '  `Idx` MEDIUMINT(6) UNSIGNED NOT NULL,'
+            '  `Mass` DECIMAL(7,7) UNSIGNED NULL DEFAULT NULL,'
+            '  `OptidewOk` BIT(1) NOT NULL,'
+            '  `PowOut` DECIMAL(6,4) NULL DEFAULT NULL,'
+            '  `PowRef` DECIMAL(6,4) NULL DEFAULT NULL,'
+            '  `Pressure` MEDIUMINT(6) UNSIGNED NOT NULL,'
+            '  `TestId` SMALLINT(3) UNSIGNED NOT NULL,'
+            '  PRIMARY KEY (`Idx`, `TestId`),'
+            '  INDEX `fk_Observation_Test_idx` (`TestId` ASC),'
+            '  CONSTRAINT `fk_Observation_Test`'
+            '    FOREIGN KEY (`TestId`)'
+            '    REFERENCES `Test` (`TestId`)'
+            '    ON UPDATE CASCADE)'
+            '  ENGINE = InnoDB'
+            '  DEFAULT CHARACTER SET = latin1;'
+            ),
+        TempObservation=(
+            'CREATE TABLE IF NOT EXISTS `TempObservation` ('
+            '  `ThermocoupleNum` TINYINT(2) UNSIGNED NOT NULL,'
+            '  `Temperature` DECIMAL(5,2) NOT NULL,'
+            '  `Idx` MEDIUMINT(6) UNSIGNED NOT NULL,'
+            '  `TestId` SMALLINT(3) UNSIGNED NOT NULL,'
+            '  PRIMARY KEY (`Idx`, `TestId`, `ThermocoupleNum`),'
+            '  CONSTRAINT `fk_TempObservation_Observation`'
+            '    FOREIGN KEY (`Idx` , `TestId`)'
+            '    REFERENCES `Observation` (`Idx` , `TestId`)'
+            '    ON UPDATE CASCADE)'
+            '  ENGINE = InnoDB'
+            '  DEFAULT CHARACTER SET = latin1;'
             )
         )
     }
