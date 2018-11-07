@@ -2,6 +2,7 @@
 
 import unittest.mock as mock
 
+from mysql.connector import Error as mysql_Error
 import pytest
 
 import chamber.manager.crud as crud_mngr
@@ -232,6 +233,15 @@ def test_create_tables_creates_db_if_does_not_exists(
     mock_mysql.cur.execute.assert_any_call(
         'CREATE DATABASE IF NOT EXISTS schema DEFAULT CHARACTER SET latin1 ;'
         )
+
+
+def test_create_tables_catches_mysql_errors_during_connect_call(mock_mysql):  # noqa: D103
+    mock_mysql.connect.side_effect = mysql_Error('Test error.')
+    mock_mysql.connect.return_value = None
+
+    message = crud_mngr.create_tables('test')
+
+    assert message == 'mySQL Error: Test error.'
 
 
 # ----------------------------------------------------------------------------

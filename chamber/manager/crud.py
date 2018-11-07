@@ -203,7 +203,11 @@ def create_tables(database):
 
     """
     creds = _get_credentials()
-    _, cur = _connect(creds)
+    try:
+        _, cur = _connect(creds)
+    except mysql.connector.Error as err:
+        print(err)
+        return 'mySQL Error: ' + str(err)
     cur.execute(
         'CREATE DATABASE IF NOT EXISTS {} '
         'DEFAULT CHARACTER SET latin1 ;'
