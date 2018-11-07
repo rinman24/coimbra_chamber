@@ -24,10 +24,10 @@ from chamber.data import sqldb
 
 if __name__ == '__main__':
     cnx = sqldb.connect(sys.argv[1])
-    print("Sucessfully created a connection to the database")
+    print("Successfully created a connection to the database")
 
     cur = cnx.cursor()
-    print("Sucessfully created a cursor for the database")
+    print("Successfully created a cursor for the database")
     sqldb.create_tables(cur, sqldb.TABLES)
 
     print("Populating Units table...")

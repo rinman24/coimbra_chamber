@@ -141,7 +141,7 @@ def _execute_build(database, cursor):
         print('Creating table {}: '.format(table), end='')
         cursor.execute(ddl[table])
         print('OK')
-    return 'Sucessfully built {} tables.'.format(database)
+    return 'Successfully built {} tables.'.format(database)
 
 
 def _execute_drop(database, cursor):
@@ -174,7 +174,7 @@ def _execute_drop(database, cursor):
         print('Dropping table {}: '.format(table), end='')
         cursor.execute('DROP TABLE {};'.format(table))
         print('OK')
-    return 'Sucessfully dropped {} tables.'.format(database)
+    return 'Successfully dropped {} tables.'.format(database)
 
 
 def create_tables(database):

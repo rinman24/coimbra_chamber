@@ -27,9 +27,9 @@ def add_tube(database):
     # If user said yes, add the tube to the database
     if "y" in resp.lower():
         cnx = sqldb.connect(database)
-        print("Sucessfully created a connection to the database")
+        print("Successfully created a connection to the database")
         cur = cnx.cursor()
-        print("Sucessfully created a cursor for the database")
+        print("Successfully created a cursor for the database")
         print("Submitting to database...")
         add_row = (
             "INSERT INTO Tube "
