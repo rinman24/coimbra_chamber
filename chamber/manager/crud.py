@@ -209,7 +209,7 @@ def create_tables(database):
     return message
 
 
-def drop_tables(database):
+def drop_tables(database, drop_db=False):
     """
     Orchestrate destruction of tables for a given database.
 
@@ -217,6 +217,10 @@ def drop_tables(database):
     ----------
     database : str
         Name of the database (or schema)
+    drop_db : bool, defalut False
+        Deault beavior is to leave the schema in place after all tables are
+        dropped. If `drop_db` is set to True, the schema is dropped with the
+        tables.
 
     Returns
     -------
@@ -225,7 +229,15 @@ def drop_tables(database):
 
     Examples
     --------
+    Default behavior is to leave the schema in place.
+
     >>> message = drop_tables('schema')
+    >>> message
+    'Successfully dropped schema tables.'
+
+    However, you can also drop the schema with the tables.
+
+    >>> message = drop_tables('schema', drop_db=True)
     >>> message
     'Successfully dropped schema tables.'
 
@@ -233,4 +245,8 @@ def drop_tables(database):
     creds = _get_credentials()
     _, cur = _connect(creds, database=database)
     message = _execute_drop(database, cur)
+    if drop_db:
+        cur.execute(
+            'DROP DATABASE {};'.format(database)
+            )
     return message
