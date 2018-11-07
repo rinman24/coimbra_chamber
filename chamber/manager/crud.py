@@ -4,8 +4,8 @@ CRUD Manager module.
 Functions
 ---------
 
-- `create_tables` -- Orchestrate construction of tables for a given database.
-- `drop_tables` -- Orchestrate destuction of tables for a given database.
+- `create_tables` -- Manage construction of tables for a given database.
+- `drop_tables` -- Manage destuction of tables for a given database.
 
 """
 
