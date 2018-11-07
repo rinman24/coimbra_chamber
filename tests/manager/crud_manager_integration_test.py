@@ -8,4 +8,4 @@ import chamber.manager.crud as crud_mngr
 
 def test_can_create_experiment_tables():  # noqa: D103
     message = crud_mngr.create_tables('experiment')
-    assert message == 'Successfully build experiment tables.' 
+    assert message == 'Successfully build experiment tables.'
