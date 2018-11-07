@@ -8,8 +8,10 @@ import pytest
 import chamber.manager.crud as crud_mngr
 
 _CORRECT_CREDS = dict(host='address', user='me', password='secret')
-_SETUP_MESSAGE = 'Successfully built schema tables.'
-_TEARDOWN_MESSAGE = 'Successfully dropped schema tables.'
+_SETUP_MESSAGE = 'Successfully built `group` tables.'
+_FULL_SETUP_MESSAGE = 'Successfully built `group` tables in `schema`.'
+_TEARDOWN_MESSAGE = 'Successfully dropped `group` tables.'
+_FULL_TEARDOWN_MESSAGE = 'Successfully dropped `group` tables from `schema`.'
 
 
 @pytest.fixture()
@@ -87,8 +89,8 @@ def mock_utility(monkeypatch):
         }
 
     build_instructions = {
-        ('schema', 'table_order'): table_order,
-        ('schema', 'ddl'): ddl
+        ('group', 'table_order'): table_order,
+        ('group', 'ddl'): ddl
         }
 
     monkeypatch.setattr(
@@ -178,7 +180,7 @@ def test_connect_does_not_execute_use_database_by_default(mock_mysql):  # noqa: 
 def test_execute_build_executes_calls_in_correct_order(
         mock_mysql, mock_utility
         ):  # noqa: D103
-    crud_mngr._execute_build('schema', mock_mysql.cur)
+    crud_mngr._execute_build(mock_mysql.cur, 'group')
 
     correct_calls = [mock.call('foo'), mock.call('bar'), mock.call('bacon!')]
     mock_mysql.cur.execute.assert_has_calls(correct_calls)
@@ -187,7 +189,7 @@ def test_execute_build_executes_calls_in_correct_order(
 def test_execute_build_returns_success(
         mock_mysql, mock_utility
         ):  # noqa: D103
-    message = crud_mngr._execute_build('schema', mock_mysql.cur)
+    message = crud_mngr._execute_build(mock_mysql.cur, 'group')
     assert message == _SETUP_MESSAGE
 
 
@@ -198,7 +200,7 @@ def test_execute_build_returns_success(
 def test_execute_drop_executes_calls_in_correct_order(
         mock_mysql, mock_utility
         ):  # noqa D103
-    crud_mngr._execute_drop('schema', mock_mysql.cur)
+    crud_mngr._execute_drop(mock_mysql.cur, 'group')
 
     correct_calls = [
         mock.call('DROP TABLE three;'),
@@ -211,7 +213,7 @@ def test_execute_drop_executes_calls_in_correct_order(
 def test_execute_drop_returns_success(
         mock_mysql, mock_utility
         ):  # noqa: D103
-    message = crud_mngr._execute_drop('schema', mock_mysql.cur)
+    message = crud_mngr._execute_drop(mock_mysql.cur, 'group')
     assert message == _TEARDOWN_MESSAGE
 
 
@@ -222,14 +224,14 @@ def test_execute_drop_returns_success(
 def test_create_tables_returns_success(
         mock_ConfigParser, mock_mysql, mock_utility
         ):  # noqa: D103
-    message = crud_mngr.create_tables('schema')
-    assert message == _SETUP_MESSAGE
+    message = crud_mngr.create_tables('group', 'schema')
+    assert message == _FULL_SETUP_MESSAGE
 
 
 def test_create_tables_creates_db_if_does_not_exists(
         mock_ConfigParser, mock_mysql, mock_utility
         ):  # noqa: D103
-    crud_mngr.create_tables('schema')
+    crud_mngr.create_tables('group', 'schema')
     mock_mysql.cur.execute.assert_any_call(
         'CREATE DATABASE IF NOT EXISTS schema DEFAULT CHARACTER SET latin1 ;'
         )
@@ -239,7 +241,7 @@ def test_create_tables_catches_mysql_errors_during_connect_call(mock_mysql):  # 
     mock_mysql.connect.side_effect = mysql_Error('Test error.')
     mock_mysql.connect.return_value = None
 
-    message = crud_mngr.create_tables('test')
+    message = crud_mngr.create_tables('group', 'schema')
 
     assert message == 'mySQL Error: Test error.'
 
@@ -251,14 +253,14 @@ def test_create_tables_catches_mysql_errors_during_connect_call(mock_mysql):  # 
 def test_drop_tables_returns_success(
         mock_ConfigParser, mock_mysql, mock_utility
         ):  # noqa: D103
-    message = crud_mngr.drop_tables('schema')
-    assert message == _TEARDOWN_MESSAGE
+    message = crud_mngr.drop_tables('group', 'schema')
+    assert message == _FULL_TEARDOWN_MESSAGE
 
 
 def test_drop_tables_drops_db_if_drop_db_is_true(
         mock_ConfigParser, mock_mysql, mock_utility
         ):  # noqa: D103
-    crud_mngr.drop_tables('schema', drop_db=True)
+    crud_mngr.drop_tables('group', 'schema', drop_db=True)
     mock_mysql.cur.execute.assert_called_with(
         'DROP DATABASE schema;'
         )
@@ -267,8 +269,10 @@ def test_drop_tables_drops_db_if_drop_db_is_true(
 def test_drop_tables_with_drop_db_true_has_extended_message(
         mock_ConfigParser, mock_mysql, mock_utility
         ):  # noqa: D103
-    message = crud_mngr.drop_tables('schema', drop_db=True)
-    assert message == _TEARDOWN_MESSAGE + ' Database also dropped.'
+    message = crud_mngr.drop_tables('group', 'schema', drop_db=True)
+    assert message == (
+        _FULL_TEARDOWN_MESSAGE + ' Database `schema` also dropped.'
+        )
 
 # ----------------------------------------------------------------------------
 # helpers

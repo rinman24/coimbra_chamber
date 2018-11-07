@@ -111,40 +111,40 @@ def _connect(creds, database=None):
     return cnx, cur
 
 
-def _execute_build(database, cursor):
+def _execute_build(cursor, table_group):
     """
     Use cursor and database name to build tables.
 
     Parameters
     ----------
-    database : str
-        Name of the database, which is used to lookup required ddl from
-        utility.
     cursor : mysql.connector.cursor.MySQLCursor
         mySQL cursor object
+    table_group : str
+        Name of the group of tables to build. Typically accessed from
+        `chamber.utility`.
 
     Returns
     -------
     str
-        Message confirming that tables were built for the database.
+        Message confirming tables in group were built for the database.
 
     Examples
     --------
-    >>> _execute_build('schema', cursor)
-    'Success.'
+    >>> _execute_build(cursor, 'group')
+    'Successfully built `group` tables.'
 
     """
-    table_order = util_ddl.build_instructions[database, 'table_order']
-    ddl = util_ddl.build_instructions[database, 'ddl']
+    table_order = util_ddl.build_instructions[table_group, 'table_order']
+    ddl = util_ddl.build_instructions[table_group, 'ddl']
 
     for table in table_order:
         print('Creating table {}: '.format(table), end='')
         cursor.execute(ddl[table])
         print('OK')
-    return 'Successfully built {} tables.'.format(database)
+    return 'Successfully built `{}` tables.'.format(table_group)
 
 
-def _execute_drop(database, cursor):
+def _execute_drop(cursor, table_group):
     """
     Use cursor and database name to drop tables.
 
@@ -167,19 +167,19 @@ def _execute_drop(database, cursor):
     'Successfully dropped schema tables.'
 
     """
-    table_order = util_ddl.build_instructions[database, 'table_order']
+    table_order = util_ddl.build_instructions[table_group, 'table_order']
     reversed_table_order = table_order[::-1]
 
     for table in reversed_table_order:
         print('Dropping table {}: '.format(table), end='')
         cursor.execute('DROP TABLE {};'.format(table))
         print('OK')
-    return 'Successfully dropped {} tables.'.format(database)
+    return 'Successfully dropped `{}` tables.'.format(table_group)
 
 
-def create_tables(database):
+def create_tables(table_group, database):
     """
-    Orchestrate construction of tables for a given database.
+    Orchestrate construction of a group of tables for a given database.
 
     In general, creation of tables occurs most often during creation of the
     schema. As a result, this function attempts to create the database if it
@@ -187,19 +187,22 @@ def create_tables(database):
 
     Parameters
     ----------
+    table_group : str
+        Name of the group of tables to build. Typically accessed from
+        `chamber.utility`.
     database : str
-        Name of the database (or schema)
+        Name of the database (or schema).
 
     Returns
     -------
     str
-        Message confirming that tables were built for the database.
+        Message confirming tables in group were built for the database.
 
     Examples
     --------
-    >>> message = create_tables('schema')
+    >>> message = create_tables('group', 'schema')
     >>> message
-    'Successfully built schema tables.'
+    'Successfully built `group` tables in `schema`.'
 
     """
     creds = _get_credentials()
@@ -208,22 +211,26 @@ def create_tables(database):
     except mysql.connector.Error as err:
         print(err)
         return 'mySQL Error: ' + str(err)
-    cur.execute(
-        'CREATE DATABASE IF NOT EXISTS {} '
-        'DEFAULT CHARACTER SET latin1 ;'
-        .format(database)
-        )
-    cur.execute('USE {};'.format(database))
-    message = _execute_build(database, cur)
-    return message
+    else:
+        cur.execute(
+            'CREATE DATABASE IF NOT EXISTS {} '
+            'DEFAULT CHARACTER SET latin1 ;'
+            .format(database)
+            )
+        cur.execute('USE {};'.format(database))
+        message = _execute_build(cur, table_group)
+        return message[:-1] + ' in `{}`.'.format(database)
 
 
-def drop_tables(database, drop_db=False):
+def drop_tables(table_group, database, drop_db=False):
     """
     Orchestrate destruction of tables for a given database.
 
     Parameters
     ----------
+    table_group : str
+        Name of the group of tables to build. Typically accessed from
+        `chamber.utility`.
     database : str
         Name of the database (or schema)
     drop_db : bool, defalut False
@@ -241,23 +248,24 @@ def drop_tables(database, drop_db=False):
     --------
     Default behavior is to leave the schema in place.
 
-    >>> message = drop_tables('schema')
+    >>> message = drop_tables('group', 'schema')
     >>> message
-    'Successfully dropped schema tables.'
+    'Successfully dropped `group` tables.'
 
     However, you can also drop the schema with the tables.
 
-    >>> message = drop_tables('schema', drop_db=True)
+    >>> message = drop_tables('group', 'schema', drop_db=True)
     >>> message
-    'Successfully dropped schema tables. Database also dropped.'
+    'Successfully dropped `group` tables from `schema`.'
 
     """
     creds = _get_credentials()
     _, cur = _connect(creds, database=database)
-    message = _execute_drop(database, cur)
+    message = _execute_drop(cur, table_group)
+    message = message[:-1] + ' from `{}`.'.format(database)
     if drop_db:
         cur.execute(
             'DROP DATABASE {};'.format(database)
             )
-        message += ' Database also dropped.'
+        message += ' Database `{}` also dropped.'.format(database)
     return message

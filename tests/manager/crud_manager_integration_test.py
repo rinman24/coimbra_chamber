@@ -7,8 +7,8 @@ import chamber.manager.crud as crud_mngr
 
 
 def test_can_create_experiment_tables():  # noqa: D103
-    message = crud_mngr.create_tables('experiment')
-    assert message == 'Successfully built experiment tables.'
+    message = crud_mngr.create_tables('experiment', 'test')
+    assert message == 'Successfully built `experiment` tables in `test`.'
 
 
 # ----------------------------------------------------------------------------
@@ -16,7 +16,8 @@ def test_can_create_experiment_tables():  # noqa: D103
 
 
 def test_can_drop_experiment_tables():  # noqa: D103
-    message = crud_mngr.drop_tables('experiment', drop_db=True)
+    message = crud_mngr.drop_tables('experiment', 'test', drop_db=True)
     assert message == (
-        'Successfully dropped experiment tables. Database also dropped.'
+        'Successfully dropped `experiment` tables from `test`. '
+        'Database `test` also dropped.'
         )
