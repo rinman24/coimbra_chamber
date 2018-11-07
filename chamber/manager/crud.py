@@ -239,7 +239,7 @@ def drop_tables(database, drop_db=False):
 
     >>> message = drop_tables('schema', drop_db=True)
     >>> message
-    'Successfully dropped schema tables.'
+    'Successfully dropped schema tables. Database also dropped.'
 
     """
     creds = _get_credentials()
@@ -249,4 +249,5 @@ def drop_tables(database, drop_db=False):
         cur.execute(
             'DROP DATABASE {};'.format(database)
             )
+        message += ' Database also dropped.'
     return message

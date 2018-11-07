@@ -253,6 +253,13 @@ def test_drop_tables_drops_db_if_drop_db_is_true(
         'DROP DATABASE schema;'
         )
 
+
+def test_drop_tables_with_drop_db_true_has_extended_message(
+        mock_ConfigParser, mock_mysql, mock_utility
+        ):  # noqa: D103
+    message = crud_mngr.drop_tables('schema', drop_db=True)
+    assert message == _TEARDOWN_MESSAGE + ' Database also dropped.'
+
 # ----------------------------------------------------------------------------
 # helpers
 
