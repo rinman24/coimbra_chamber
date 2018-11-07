@@ -203,10 +203,11 @@ def create_tables(database):
 
     """
     creds = _get_credentials()
-    _, cur = _connect(creds, database=database)
+    _, cur = _connect(creds)
     cur.execute(
-        'CREATE DATABASE IF NOT EXISTS {};'.format(database)
+        'CREATE DATABASE IF NOT EXISTS {} DEFAULT CHARACTER SET latin1 ;'.format(database)
         )
+    cur.execute('USE {};'.format(database))
     message = _execute_build(database, cur)
     return message
 

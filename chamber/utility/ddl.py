@@ -1,10 +1,21 @@
 """DDL utility module."""
 
 build_instructions = {
-    ('experiments', 'table order'): ('a', 'b', 'c'),
+    ('experiments', 'table_order'): (
+        'Tube', 'Setting'
+        ),
     ('experiments', 'ddl'): dict(
-        a='ddl a',
-        b='ddl b',
-        c='ddl c'
+        Tube=(
+            'ddl a'
+            ),
+        Setting=(
+            'ddl b'
+            )
         )
     }
+
+table_order = (
+    'Tube'
+)
+
+ddl = dict()
