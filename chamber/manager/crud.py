@@ -16,6 +16,15 @@ import mysql.connector
 import chamber.utility.ddl as util_ddl
 
 
+DEFAULT_TUBE = dict(
+    DiameterIn=0.03,
+    DiameterOut=0.04,
+    Length=0.06,
+    Material='Delrin',
+    Mass=0.0873832
+    )
+
+
 def _get_credentials():
     """
     Use configparser to obtain credentials.
@@ -269,3 +278,8 @@ def drop_tables(table_group, database, drop_db=False):
             )
         message += ' Database `{}` also dropped.'.format(database)
     return message
+
+
+def add_tube():
+    """TEMP DOCSTRNG."""
+    pass

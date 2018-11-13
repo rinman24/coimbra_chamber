@@ -274,6 +274,15 @@ def test_drop_tables_with_drop_db_true_has_extended_message(
         _FULL_TEARDOWN_MESSAGE + ' Database `schema` also dropped.'
         )
 
+
+# ----------------------------------------------------------------------------
+# add_tube
+
+
+def test_can_call_add_tube():
+    crud_mngr.add_tube()
+
+
 # ----------------------------------------------------------------------------
 # helpers
 
