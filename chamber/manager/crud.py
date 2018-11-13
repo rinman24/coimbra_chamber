@@ -1,5 +1,5 @@
 """
-CRUD Manager module.
+CRUD manager module.
 
 Functions
 ---------
