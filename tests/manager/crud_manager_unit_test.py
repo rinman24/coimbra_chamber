@@ -13,7 +13,7 @@ _FULL_SETUP_MESSAGE = 'Successfully built `group` tables in `schema`.'
 _TEARDOWN_MESSAGE = 'Successfully dropped `group` tables.'
 _FULL_TEARDOWN_MESSAGE = 'Successfully dropped `group` tables from `schema`.'
 
-_ENGINE_STRING = (
+_ENGINE_INTANCE = (
     'Engine(mysql+mysqlconnector://me:***@address:3306/test_schema)'
     )
 
@@ -108,10 +108,28 @@ def mock_sqlalchemy(monkeypatch):
     """Mock of sqlalchemy package."""
     mock_sqlalchemy = mock.MagicMock()
     create_engine = mock_sqlalchemy.create_engine
-    create_engine.return_value = _ENGINE_STRING
-    monkeypatch.setattr('sqlalchemy.create_engine', create_engine)
+    create_engine.return_value = _ENGINE_INTANCE
+    monkeypatch.setattr(
+        'chamber.manager.crud.sqlalchemy.create_engine',
+        create_engine
+        )
 
     return mock_sqlalchemy
+
+
+@pytest.fixture()
+def mock_pd(monkeypatch):
+    """Mock of pandas package."""
+    mock_pd = mock.MagicMock()
+
+    DataFrame = mock_pd.DataFrame
+    to_sql = DataFrame.to_sql
+
+    monkeypatch.setattr(
+        'chamber.manager.crud.pd.core.frame.DataFrame.to_sql', to_sql
+        )
+
+    return mock_pd
 
 # ----------------------------------------------------------------------------
 # _get_credentials
@@ -248,7 +266,7 @@ def test_get_engine_calls_create_engine(mock_sqlalchemy):  # noqa: D103
 def test_get_engine_returns_correct_value(mock_sqlalchemy):  # noqa: D103
     engine = crud_mngr._get_engine('test_schema', _CORRECT_CREDS)
 
-    assert engine == _ENGINE_STRING
+    assert engine == _ENGINE_INTANCE
 
 
 # ----------------------------------------------------------------------------
@@ -313,8 +331,29 @@ def test_drop_tables_with_drop_db_true_has_extended_message(
 # add_tube
 
 
-def test_can_call_add_tube():  # noqa: D103
-    crud_mngr.add_tube()
+def test_add_tube_calls_to_sql_with_correct_inputs(
+        mock_ConfigParser,
+        mock_sqlalchemy,
+        mock_pd
+        ):  # noqa: D103
+
+    crud_mngr.add_tube('test_schema')
+
+    correct_params = dict(
+        name='Tube', con=_ENGINE_INTANCE, if_exists='append', index=False
+        )
+    mock_pd.DataFrame.to_sql.assert_called_once_with(**correct_params)
+
+
+def test_add_tube_returns_correct_message(
+        mock_ConfigParser,
+        mock_sqlalchemy,
+        mock_pd
+        ):  # noqa: D103
+
+    message = crud_mngr.add_tube('test_schema')
+
+    assert message == 'Sucessfully added default tube to `test_schema`.'
 
 
 # ----------------------------------------------------------------------------

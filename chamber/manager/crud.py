@@ -12,18 +12,22 @@ Functions
 import configparser
 
 import mysql.connector
+import pandas as pd
 import sqlalchemy
 
 import chamber.utility.ddl as util_ddl
 
 
-DEFAULT_TUBE = dict(
-    DiameterIn=0.03,
-    DiameterOut=0.04,
-    Length=0.06,
-    Material='Delrin',
-    Mass=0.0873832
-    )
+DEFAULT_TUBE = pd.DataFrame(
+        data=dict(
+            DiameterIn=0.03,
+            DiameterOut=0.04,
+            Length=0.06,
+            Material='Delrin',
+            Mass=0.0873832
+            ),
+        index=[0]
+        )
 
 
 def _get_credentials():
@@ -188,6 +192,28 @@ def _execute_drop(cursor, table_group):
 
 
 def _get_engine(database, creds):
+    """
+    Use database and creds to get an sqlalchemy engine.
+
+    Parameters
+    ----------
+    database : str
+        Name of the database, which is used to lookup required table order
+        from utility.
+     creds : dict
+        Credentials for the mysql database.
+
+    Returns
+    -------
+    sqlalchemy.engine.base.Engine
+        Engine configured for mysql and mysql.connector
+
+    Examples
+    --------
+    >>> creds = _get_credentials()
+    >>> engine = _get_engine('schema', creds)
+
+    """
     creds['database'] = database
     engine_url = (
         'mysql+mysqlconnector://{user}:{password}@{host}:3306/{database}'
@@ -201,7 +227,7 @@ def _get_engine(database, creds):
 
 def create_tables(table_group, database):
     """
-    Orchestrate construction of a group of tables for a given database.
+    Manage construction of a group of tables for a given database.
 
     In general, creation of tables occurs most often during creation of the
     schema. As a result, this function attempts to create the database if it
@@ -246,7 +272,7 @@ def create_tables(table_group, database):
 
 def drop_tables(table_group, database, drop_db=False):
     """
-    Orchestrate destruction of tables for a given database.
+    Manage destruction of tables for a given database.
 
     Parameters
     ----------
@@ -293,6 +319,35 @@ def drop_tables(table_group, database, drop_db=False):
     return message
 
 
-def add_tube():
-    """TEMP DOCSTRNG."""
-    pass
+def add_tube(database):
+    """
+    Manage addition of tube into a given database.
+
+    Parameters
+    ----------
+    database : str
+        Name of the database (or schema)
+
+    Returns
+    -------
+    str
+        Message confirming tube was added.
+
+    Examples
+    --------
+    >>> message = add_tube('schema')
+    >>> message
+    'Sucessfully added default tube to `schema`.'
+
+    """
+    creds = _get_credentials()
+    engine = _get_engine(database, creds)
+    DEFAULT_TUBE.to_sql(
+        name='Tube',
+        con=engine,
+        if_exists='append',
+        index=False
+        )
+
+    message = 'Sucessfully added default tube to `{}`.'.format(database)
+    return message
