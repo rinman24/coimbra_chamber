@@ -135,15 +135,13 @@ def mock_pd(monkeypatch):
 # _get_credentials
 
 
-def test_can_call_get_credentials(mock_ConfigParser):  # noqa: D103
+def test_can_call_get_credentials(mock_ConfigParser):
     crud_mngr._get_credentials()
 
     mock_ConfigParser.configparser.read.assert_called_once_with('config.ini')
 
 
-def test_get_credentials_returns_correct_dict(
-        mock_ConfigParser
-        ):  # noqa: D103
+def test_get_credentials_returns_correct_dict(mock_ConfigParser):
     creds = crud_mngr._get_credentials()
 
     assert creds == _CORRECT_CREDS
@@ -151,7 +149,7 @@ def test_get_credentials_returns_correct_dict(
 
 def test_get_credentials_exception_knows_the_name_missing_key(
         mock_ConfigParser
-        ):  # noqa: D103
+        ):
     _configparser_key_setter(
         mock_ConfigParser.configparser, ['user', 'password']
         )
@@ -164,9 +162,7 @@ def test_get_credentials_exception_knows_the_name_missing_key(
         crud_mngr._get_credentials()
 
 
-def test_get_credentials_raises_file_not_found_error(
-        mock_ConfigParser
-        ):  # noqa: D103
+def test_get_credentials_raises_file_not_found_error(mock_ConfigParser):
     mock_ConfigParser.configparser.read.return_value = []
 
     error_message = ('FileNotFoundError: config.ini does not exits.')
@@ -177,7 +173,7 @@ def test_get_credentials_raises_file_not_found_error(
 # ----------------------------------------------------------------------------
 # _connect
 
-def test_connect_calls_connect_before_cursor(mock_mysql):  # noqa: D103
+def test_connect_calls_connect_before_cursor(mock_mysql):
     crud_mngr._connect(_CORRECT_CREDS)
 
     correct_calls = [
@@ -187,20 +183,20 @@ def test_connect_calls_connect_before_cursor(mock_mysql):  # noqa: D103
     mock_mysql.assert_has_calls(correct_calls)
 
 
-def test_connect_returns_cnx_and_cur(mock_mysql):  # noqa: D103
+def test_connect_returns_cnx_and_cur(mock_mysql):
     cnx, cur = crud_mngr._connect(_CORRECT_CREDS)
 
     assert cnx == mock_mysql.cnx
     assert cur == mock_mysql.cur
 
 
-def test_connect_executes_use_database_when_given(mock_mysql):  # noqa: D103
+def test_connect_executes_use_database_when_given(mock_mysql):
     crud_mngr._connect(_CORRECT_CREDS, database='schema')
 
     mock_mysql.cur.execute.assert_called_once_with('USE schema;')
 
 
-def test_connect_does_not_execute_use_database_by_default(mock_mysql):  # noqa: D103
+def test_connect_does_not_execute_use_database_by_default(mock_mysql):
     crud_mngr._connect(_CORRECT_CREDS)
 
     mock_mysql.cur.execute.assert_not_called()
@@ -212,16 +208,14 @@ def test_connect_does_not_execute_use_database_by_default(mock_mysql):  # noqa: 
 
 def test_execute_build_executes_calls_in_correct_order(
         mock_mysql, mock_utility
-        ):  # noqa: D103
+        ):
     crud_mngr._execute_build(mock_mysql.cur, 'group')
 
     correct_calls = [mock.call('foo'), mock.call('bar'), mock.call('bacon!')]
     mock_mysql.cur.execute.assert_has_calls(correct_calls)
 
 
-def test_execute_build_returns_success(
-        mock_mysql, mock_utility
-        ):  # noqa: D103
+def test_execute_build_returns_success(mock_mysql, mock_utility):
     message = crud_mngr._execute_build(mock_mysql.cur, 'group')
     assert message == _SETUP_MESSAGE
 
@@ -232,7 +226,7 @@ def test_execute_build_returns_success(
 
 def test_execute_drop_executes_calls_in_correct_order(
         mock_mysql, mock_utility
-        ):  # noqa D103
+        ):
     crud_mngr._execute_drop(mock_mysql.cur, 'group')
 
     correct_calls = [
@@ -243,9 +237,7 @@ def test_execute_drop_executes_calls_in_correct_order(
     mock_mysql.cur.execute.assert_has_calls(correct_calls)
 
 
-def test_execute_drop_returns_success(
-        mock_mysql, mock_utility
-        ):  # noqa: D103
+def test_execute_drop_returns_success(mock_mysql, mock_utility):
     message = crud_mngr._execute_drop(mock_mysql.cur, 'group')
     assert message == _TEARDOWN_MESSAGE
 
@@ -254,7 +246,7 @@ def test_execute_drop_returns_success(
 # _get_engine
 
 
-def test_get_engine_calls_create_engine(mock_sqlalchemy):  # noqa: D103
+def test_get_engine_calls_create_engine(mock_sqlalchemy):
     crud_mngr._get_engine('test_schema', _CORRECT_CREDS)
 
     correct_url = 'mysql+mysqlconnector://me:secret@address:3306/test_schema'
@@ -263,7 +255,7 @@ def test_get_engine_calls_create_engine(mock_sqlalchemy):  # noqa: D103
         )
 
 
-def test_get_engine_returns_correct_value(mock_sqlalchemy):  # noqa: D103
+def test_get_engine_returns_correct_value(mock_sqlalchemy):
     engine = crud_mngr._get_engine('test_schema', _CORRECT_CREDS)
 
     assert engine == _ENGINE_INTANCE
@@ -275,21 +267,23 @@ def test_get_engine_returns_correct_value(mock_sqlalchemy):  # noqa: D103
 
 def test_create_tables_returns_success(
         mock_ConfigParser, mock_mysql, mock_utility
-        ):  # noqa: D103
+        ):
     message = crud_mngr.create_tables('group', 'schema')
     assert message == _FULL_SETUP_MESSAGE
 
 
 def test_create_tables_creates_db_if_does_not_exists(
         mock_ConfigParser, mock_mysql, mock_utility
-        ):  # noqa: D103
+        ):
     crud_mngr.create_tables('group', 'schema')
     mock_mysql.cur.execute.assert_any_call(
         'CREATE DATABASE IF NOT EXISTS schema DEFAULT CHARACTER SET latin1 ;'
         )
 
 
-def test_create_tables_catches_mysql_errors_during_connect_call(mock_ConfigParser, mock_mysql):  # noqa: D103
+def test_create_tables_catches_mysql_errors_during_connect_call(
+        mock_ConfigParser, mock_mysql
+        ):
     mock_mysql.connect.side_effect = mysql_Error('Test error.')
     mock_mysql.connect.return_value = None
 
@@ -304,14 +298,14 @@ def test_create_tables_catches_mysql_errors_during_connect_call(mock_ConfigParse
 
 def test_drop_tables_returns_success(
         mock_ConfigParser, mock_mysql, mock_utility
-        ):  # noqa: D103
+        ):
     message = crud_mngr.drop_tables('group', 'schema')
     assert message == _FULL_TEARDOWN_MESSAGE
 
 
 def test_drop_tables_drops_db_if_drop_db_is_true(
         mock_ConfigParser, mock_mysql, mock_utility
-        ):  # noqa: D103
+        ):
     crud_mngr.drop_tables('group', 'schema', drop_db=True)
     mock_mysql.cur.execute.assert_called_with(
         'DROP DATABASE schema;'
@@ -320,7 +314,7 @@ def test_drop_tables_drops_db_if_drop_db_is_true(
 
 def test_drop_tables_with_drop_db_true_has_extended_message(
         mock_ConfigParser, mock_mysql, mock_utility
-        ):  # noqa: D103
+        ):
     message = crud_mngr.drop_tables('group', 'schema', drop_db=True)
     assert message == (
         _FULL_TEARDOWN_MESSAGE + ' Database `schema` also dropped.'
@@ -335,7 +329,7 @@ def test_add_tube_calls_to_sql_with_correct_inputs(
         mock_ConfigParser,
         mock_sqlalchemy,
         mock_pd
-        ):  # noqa: D103
+        ):
 
     crud_mngr.add_tube('test_schema')
 
@@ -349,7 +343,7 @@ def test_add_tube_returns_correct_message(
         mock_ConfigParser,
         mock_sqlalchemy,
         mock_pd
-        ):  # noqa: D103
+        ):
 
     message = crud_mngr.add_tube('test_schema')
 
