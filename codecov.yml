@@ -13,7 +13,8 @@ coverage:
     changes: no
 
   ignore:
-    -  "*_integration_test.py" 
+    - "**/*_integration_test.py"
+    - "setup.py"
 
 parsers:
   gcov:
