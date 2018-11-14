@@ -13,6 +13,10 @@ _FULL_SETUP_MESSAGE = 'Successfully built `group` tables in `schema`.'
 _TEARDOWN_MESSAGE = 'Successfully dropped `group` tables.'
 _FULL_TEARDOWN_MESSAGE = 'Successfully dropped `group` tables from `schema`.'
 
+_ENGINE_STRING = (
+    'Engine(mysql+mysqlconnector://me:***@address:3306/test_schema)'
+    )
+
 
 @pytest.fixture()
 def mock_ConfigParser(monkeypatch):
@@ -97,6 +101,17 @@ def mock_utility(monkeypatch):
         'chamber.utility.ddl.build_instructions',
         build_instructions
         )
+
+
+@pytest.fixture()
+def mock_sqlalchemy(monkeypatch):
+    """Mock of sqlalchemy package."""
+    mock_sqlalchemy = mock.MagicMock()
+    create_engine = mock_sqlalchemy.create_engine
+    create_engine.return_value = _ENGINE_STRING
+    monkeypatch.setattr('sqlalchemy.create_engine', create_engine)
+
+    return mock_sqlalchemy
 
 # ----------------------------------------------------------------------------
 # _get_credentials
@@ -218,6 +233,25 @@ def test_execute_drop_returns_success(
 
 
 # ----------------------------------------------------------------------------
+# _get_engine
+
+
+def test_get_engine_calls_create_engine(mock_sqlalchemy):  # noqa: D103
+    crud_mngr._get_engine('test_schema', _CORRECT_CREDS)
+
+    correct_url = 'mysql+mysqlconnector://me:secret@address:3306/test_schema'
+    mock_sqlalchemy.create_engine.assert_called_once_with(
+        correct_url
+        )
+
+
+def test_get_engine_returns_correct_value(mock_sqlalchemy):  # noqa: D103
+    engine = crud_mngr._get_engine('test_schema', _CORRECT_CREDS)
+
+    assert engine == _ENGINE_STRING
+
+
+# ----------------------------------------------------------------------------
 # create_tables
 
 
@@ -279,7 +313,7 @@ def test_drop_tables_with_drop_db_true_has_extended_message(
 # add_tube
 
 
-def test_can_call_add_tube():
+def test_can_call_add_tube():  # noqa: D103
     crud_mngr.add_tube()
 
 

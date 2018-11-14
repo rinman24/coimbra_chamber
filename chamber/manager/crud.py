@@ -12,6 +12,7 @@ Functions
 import configparser
 
 import mysql.connector
+import sqlalchemy
 
 import chamber.utility.ddl as util_ddl
 
@@ -184,6 +185,18 @@ def _execute_drop(cursor, table_group):
         cursor.execute('DROP TABLE {};'.format(table))
         print('OK')
     return 'Successfully dropped `{}` tables.'.format(table_group)
+
+
+def _get_engine(database, creds):
+    creds['database'] = database
+    engine_url = (
+        'mysql+mysqlconnector://{user}:{password}@{host}:3306/{database}'
+        .format(**creds)
+        )
+
+    engine = sqlalchemy.create_engine(engine_url)
+
+    return engine
 
 
 def create_tables(table_group, database):
