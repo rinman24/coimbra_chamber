@@ -1,5 +1,4 @@
-mysql_connector==8.0.12
-pandas==0.23.4
+mysql_connector==2.1.6
 pytest==3.8.1
 pytest-cov==2.6.0
 sqlalchemy==1.2.12
