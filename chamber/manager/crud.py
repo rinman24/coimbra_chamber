@@ -248,8 +248,12 @@ def create_tables(table_group, database):
 
     Examples
     --------
-    >>> message = create_tables('group', 'schema')
-    >>> message
+    >>> create_tables('group', 'schema')
+    Creating table Tube: OK
+    Creating table Setting: OK
+    Creating table Test: OK
+    Creating table Observation: OK
+    Creating table TempObservation: OK
     'Successfully built `group` tables in `schema`.'
 
     """
@@ -296,15 +300,23 @@ def drop_tables(table_group, database, drop_db=False):
     --------
     Default behavior is to leave the schema in place.
 
-    >>> message = drop_tables('group', 'schema')
-    >>> message
+    >>> drop_tables('group', 'schema')
+    Dropping table TempObservation: OK
+    Dropping table Observation: OK
+    Dropping table Test: OK
+    Dropping table Setting: OK
+    Dropping table Tube: OK
     'Successfully dropped `group` tables.'
 
     However, you can also drop the schema with the tables.
 
-    >>> message = drop_tables('group', 'schema', drop_db=True)
-    >>> message
-    'Successfully dropped `group` tables from `schema`.'
+    >>> drop_tables('group', 'schema', drop_db=True)
+    Dropping table TempObservation: OK
+    Dropping table Observation: OK
+    Dropping table Test: OK
+    Dropping table Setting: OK
+    Dropping table Tube: OK
+    'Successfully dropped `group` tables from `schema`. Database `schema` also dropped.'
 
     """
     creds = _get_credentials()
@@ -335,8 +347,7 @@ def add_tube(database):
 
     Examples
     --------
-    >>> message = add_tube('schema')
-    >>> message
+    >>> add_tube('schema')
     'Sucessfully added default tube to `schema`.'
 
     """
