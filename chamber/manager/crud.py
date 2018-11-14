@@ -31,30 +31,7 @@ DEFAULT_TUBE = pd.DataFrame(
 
 
 def _get_credentials():
-    """
-    Use configparser to obtain credentials.
-
-    Returns
-    -------
-    dict
-        Crednetials included in the config.ini file. Keys include: `host`,
-        `user`, and `password`.
-
-    Raises
-    ------
-    FileNotFoundError
-        If the config.ini file is not found.
-    KeyError
-        If any keys are missing from the `MySQL-Server` section of the
-        config.ini file.
-
-    Examples
-    --------
-    >>> creds = _get_credentials()
-    >>> type(creds)
-    <class 'dict'>
-
-    """
+    """Use configparser to obtain credentials."""
     config_parser = configparser.ConfigParser()
 
     # config_parser.read() returns a list containing the files read;
@@ -80,42 +57,7 @@ def _get_credentials():
 
 
 def _connect(creds, database=None):
-    """
-    Use credentials to connect to mySQL database.
-
-    Parameters
-    ----------
-    creds : dict
-        Credentials for the mysql database.
-    database : str, optional
-        Database to connect to. If database is not specified, you must run
-        cursor.execute('USE <database>;') to proceed.
-
-    Returns
-    -------
-    cnx : mysql.connector.MySQLConnection
-        MySQL database connection object
-    cur : mysql.connector.cursor.MySQLCursor
-        MySQL database cursor object corresponding to `cnx`.
-
-    Examples
-    --------
-    Connect to a host without specifying the database. You will have to run
-    cursor.execute('USE <database>;') to proceed.
-
-    >>> creds = dict(host='address', user='me', password='secret')
-    >>> cnx, cur = _connect(creds)
-    >>> cur.execute('USE schema;')
-    >>> cnx.commit()
-    >>> cur.close()
-
-    Specifying the optional database can be used to save time.
-
-    >>> cnx, cur = _connect(creds, database='schema')
-    >>> cnx.commit()
-    >>> cur.close()
-
-    """
+    """Use credentials to connect to mySQL database."""
     cnx = mysql.connector.connect(**creds)
     cur = cnx.cursor()
     if database:
@@ -126,28 +68,7 @@ def _connect(creds, database=None):
 
 
 def _execute_build(cursor, table_group):
-    """
-    Use cursor and database name to build tables.
-
-    Parameters
-    ----------
-    cursor : mysql.connector.cursor.MySQLCursor
-        mySQL cursor object
-    table_group : str
-        Name of the group of tables to build. Typically accessed from
-        `chamber.utility`.
-
-    Returns
-    -------
-    str
-        Message confirming tables in group were built for the database.
-
-    Examples
-    --------
-    >>> _execute_build(cursor, 'group')
-    'Successfully built `group` tables.'
-
-    """
+    """Use cursor and database name to build tables."""
     table_order = util_ddl.build_instructions[table_group, 'table_order']
     ddl = util_ddl.build_instructions[table_group, 'ddl']
 
@@ -159,28 +80,7 @@ def _execute_build(cursor, table_group):
 
 
 def _execute_drop(cursor, table_group):
-    """
-    Use cursor and database name to drop tables.
-
-    Parameters
-    ----------
-    database : str
-        Name of the database, which is used to lookup required table order
-        from utility.
-    cursor : mysql.connector.cursor.MySQLCursor
-        mySQL cursor object
-
-    Returns
-    -------
-    str
-        Message confirming that tables were dropped for the database.
-
-    Examples
-    --------
-    >>> _execute_drop('schema', cursor)
-    'Successfully dropped schema tables.'
-
-    """
+    """Use cursor and database name to drop tables."""
     table_order = util_ddl.build_instructions[table_group, 'table_order']
     reversed_table_order = table_order[::-1]
 
@@ -192,28 +92,7 @@ def _execute_drop(cursor, table_group):
 
 
 def _get_engine(database, creds):
-    """
-    Use database and creds to get an sqlalchemy engine.
-
-    Parameters
-    ----------
-    database : str
-        Name of the database, which is used to lookup required table order
-        from utility.
-     creds : dict
-        Credentials for the mysql database.
-
-    Returns
-    -------
-    sqlalchemy.engine.base.Engine
-        Engine configured for mysql and mysql.connector
-
-    Examples
-    --------
-    >>> creds = _get_credentials()
-    >>> engine = _get_engine('schema', creds)
-
-    """
+    """Use database and creds to create an sqlalchemy engine."""
     creds['database'] = database
     engine_url = (
         'mysql+mysqlconnector://{user}:{password}@{host}:3306/{database}'
