@@ -289,7 +289,7 @@ def test_create_tables_creates_db_if_does_not_exists(
         )
 
 
-def test_create_tables_catches_mysql_errors_during_connect_call(mock_mysql):  # noqa: D103
+def test_create_tables_catches_mysql_errors_during_connect_call(mock_ConfigParser, mock_mysql):  # noqa: D103
     mock_mysql.connect.side_effect = mysql_Error('Test error.')
     mock_mysql.connect.return_value = None
 
