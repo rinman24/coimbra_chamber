@@ -13,8 +13,7 @@ coverage:
     changes: no
 
   ignore:
-    - "chamber/data/sqldb.py"
-    - "setup.py"
+    -  "*_integration_test.py" 
 
 parsers:
   gcov:
