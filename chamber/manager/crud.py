@@ -6,14 +6,19 @@ Functions
 
 - `create_tables` -- Manage construction of tables for a given database.
 - `drop_tables` -- Manage destuction of tables for a given database.
+- `add_tube` -- Manage addition of tube into a given database.
 
 """
 
 import configparser
+import pathlib
 
 import mysql.connector
+import nptdms
 import pandas as pd
 import sqlalchemy
+import tkinter as tk
+from tkinter import filedialog
 
 import chamber.utility.ddl as util_ddl
 
@@ -102,6 +107,19 @@ def _get_engine(database, creds):
     engine = sqlalchemy.create_engine(engine_url)
 
     return engine
+
+
+def _get_experimental_data():
+    root = tk.Tk()
+    root.withdraw()
+    fp = filedialog.askopenfilename(title='Select Experiment')
+
+    tdms_file = nptdms.TdmsFile(fp)
+    # You need some helper functions here. namely get settings df
+    # However, this may belong in an engine. The question is, should
+    # CRUD manager be responsible for knowing how to get the data out
+    # of nptdms files? Probably not. So who should know how to do this?
+    # Well an engine. but What engine?     
 
 
 def create_tables(table_group, database):

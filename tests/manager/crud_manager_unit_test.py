@@ -6,6 +6,7 @@ from mysql.connector import Error as mysql_Error
 import pytest
 
 import chamber.manager.crud as crud_mngr
+from tests.conftest import _configparser_key_setter
 
 _CORRECT_CREDS = dict(host='address', user='me', password='secret')
 _SETUP_MESSAGE = 'Successfully built `group` tables.'
@@ -13,123 +14,12 @@ _FULL_SETUP_MESSAGE = 'Successfully built `group` tables in `schema`.'
 _TEARDOWN_MESSAGE = 'Successfully dropped `group` tables.'
 _FULL_TEARDOWN_MESSAGE = 'Successfully dropped `group` tables from `schema`.'
 
-_ENGINE_INTANCE = (
+_ENGINE_INSTANCE = (
     'Engine(mysql+mysqlconnector://me:***@address:3306/test_schema)'
     )
 
+_TEST_FILEPATH = 'C:/Users/Me/test_experiment.tdms'
 
-@pytest.fixture()
-def mock_ConfigParser(monkeypatch):
-    """Mock of the configparser.ConfigParser class."""
-    configparser = mock.MagicMock()
-    configparser.read = mock.MagicMock()
-    monkeypatch.setattr(
-        'chamber.manager.crud.configparser.ConfigParser.read',
-        configparser.read
-        )
-
-    # Production code calls Python builtin dict() on
-    # configparser['MySQL-Server'].
-    configparser['MySQL-Server'] = mock.MagicMock()
-    _configparser_key_setter(configparser, ['host', 'user', 'password'])
-    configparser['MySQL-Server'].__getitem__.side_effect = [
-        'address', 'me', 'secret'
-        ]
-
-    mock_ConfigParser = mock.MagicMock(return_value=configparser)
-    mock_ConfigParser.configparser = configparser
-    monkeypatch.setattr(
-        'chamber.manager.crud.configparser.ConfigParser',
-        mock_ConfigParser
-        )
-    return mock_ConfigParser
-
-
-@pytest.fixture()
-def mock_mysql(monkeypatch):
-    """Mock of mysql.connector module."""
-    mock_mysql = mock.MagicMock()
-
-    # Define instances before method definition and return value assignment.
-    cnx_instance = mock_mysql.cnx
-    cur_instance = mock_mysql.cur
-
-    # Define methods and assign return values.
-    connect_method = mock_mysql.connect
-    connect_method.return_value = cnx_instance
-
-    cursor_method = cnx_instance.cursor
-    cursor_method.return_value = cur_instance
-
-    execute_method = cur_instance.execute
-
-    # Patch calls now that mock_mysql is setup.
-    monkeypatch.setattr(
-        'chamber.manager.crud.mysql.connector.connect', connect_method
-        )
-    monkeypatch.setattr(
-        (
-            'chamber.manager.crud.mysql.connector.connection.MySQLConnection'
-            '.cursor'
-            ),
-        cursor_method
-        )
-    monkeypatch.setattr(
-        'chamber.manager.crud.mysql.connector.cursor.MySQLCursor.execute',
-        execute_method
-        )
-
-    return mock_mysql
-
-
-@pytest.fixture()
-def mock_utility(monkeypatch):
-    """Mock chamber.utility."""
-    table_order = ('one', 'two', 'three')
-    ddl = {
-        'one': 'foo',
-        'two': 'bar',
-        'three': 'bacon!'
-        }
-
-    build_instructions = {
-        ('group', 'table_order'): table_order,
-        ('group', 'ddl'): ddl
-        }
-
-    monkeypatch.setattr(
-        'chamber.utility.ddl.build_instructions',
-        build_instructions
-        )
-
-
-@pytest.fixture()
-def mock_sqlalchemy(monkeypatch):
-    """Mock of sqlalchemy package."""
-    mock_sqlalchemy = mock.MagicMock()
-    create_engine = mock_sqlalchemy.create_engine
-    create_engine.return_value = _ENGINE_INTANCE
-    monkeypatch.setattr(
-        'chamber.manager.crud.sqlalchemy.create_engine',
-        create_engine
-        )
-
-    return mock_sqlalchemy
-
-
-@pytest.fixture()
-def mock_pd(monkeypatch):
-    """Mock of pandas package."""
-    mock_pd = mock.MagicMock()
-
-    DataFrame = mock_pd.DataFrame
-    to_sql = DataFrame.to_sql
-
-    monkeypatch.setattr(
-        'chamber.manager.crud.pd.core.frame.DataFrame.to_sql', to_sql
-        )
-
-    return mock_pd
 
 # ----------------------------------------------------------------------------
 # _get_credentials
@@ -258,7 +148,7 @@ def test_get_engine_calls_create_engine(mock_sqlalchemy):
 def test_get_engine_returns_correct_value(mock_sqlalchemy):
     engine = crud_mngr._get_engine('test_schema', _CORRECT_CREDS)
 
-    assert engine == _ENGINE_INTANCE
+    assert engine == _ENGINE_INSTANCE
 
 
 # ----------------------------------------------------------------------------
@@ -334,7 +224,7 @@ def test_add_tube_calls_to_sql_with_correct_inputs(
     crud_mngr.add_tube('test_schema')
 
     correct_params = dict(
-        name='Tube', con=_ENGINE_INTANCE, if_exists='append', index=False
+        name='Tube', con=_ENGINE_INSTANCE, if_exists='append', index=False
         )
     mock_pd.DataFrame.to_sql.assert_called_once_with(**correct_params)
 
@@ -351,10 +241,22 @@ def test_add_tube_returns_correct_message(
 
 
 # ----------------------------------------------------------------------------
-# helpers
+# get_experimental_data
 
 
-def _configparser_key_setter(configparser, keys):
-    configparser['MySQL-Server'].keys.return_value.__iter__.return_value = (
-        keys
-        )
+def test_get_experimental_data_calls_askopenfilename(mock_tk, mock_nptdms):
+    crud_mngr._get_experimental_data()
+
+    correct_calls = [
+        mock.call.Tk(),
+        mock.call.root.withdraw(),
+        mock.call.filedialog.askopenfilename(title='Select Experiment')
+        ]
+
+    mock_tk.assert_has_calls(correct_calls)
+
+
+def test_get_experimental_data_reads_tdms_file(mock_tk, mock_nptdms):
+    crud_mngr._get_experimental_data()
+
+    mock_nptdms.TdmsFile.assert_called_once_with(_TEST_FILEPATH)
