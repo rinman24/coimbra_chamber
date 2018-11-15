@@ -18,7 +18,7 @@ def mock_ConfigParser(monkeypatch):
     # Production code calls Python builtin dict() on
     # configparser['MySQL-Server'].
     configparser['MySQL-Server'] = mock.MagicMock()
-    _configparser_key_setter(configparser, ['host', 'user', 'password'])
+    configparser_key_setter(configparser, ['host', 'user', 'password'])
     configparser['MySQL-Server'].__getitem__.side_effect = [
         'address', 'me', 'secret'
         ]
@@ -161,7 +161,7 @@ def mock_nptdms(monkeypatch):
 # helpers
 
 
-def _configparser_key_setter(configparser, keys):
+def configparser_key_setter(configparser, keys):
     configparser['MySQL-Server'].keys.return_value.__iter__.return_value = (
         keys
         )

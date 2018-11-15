@@ -6,7 +6,7 @@ from mysql.connector import Error as mysql_Error
 import pytest
 
 import chamber.manager.crud as crud_mngr
-from tests.conftest import _configparser_key_setter
+from tests.conftest import configparser_key_setter
 
 _CORRECT_CREDS = dict(host='address', user='me', password='secret')
 _SETUP_MESSAGE = 'Successfully built `group` tables.'
@@ -40,7 +40,7 @@ def test_get_credentials_returns_correct_dict(mock_ConfigParser):
 def test_get_credentials_exception_knows_the_name_missing_key(
         mock_ConfigParser
         ):
-    _configparser_key_setter(
+    configparser_key_setter(
         mock_ConfigParser.configparser, ['user', 'password']
         )
 
