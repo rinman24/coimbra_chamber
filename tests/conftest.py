@@ -162,6 +162,7 @@ def mock_nptdms(monkeypatch):
 
 
 def configparser_key_setter(configparser, keys):
+    """Change keys that configparser returns."""
     configparser['MySQL-Server'].keys.return_value.__iter__.return_value = (
         keys
         )
