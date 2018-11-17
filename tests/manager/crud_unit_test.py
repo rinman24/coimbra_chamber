@@ -160,8 +160,6 @@ def mock_tk(monkeypatch):
     return mock_tk
 
 
-
-
 # ----------------------------------------------------------------------------
 # _get_credentials
 
