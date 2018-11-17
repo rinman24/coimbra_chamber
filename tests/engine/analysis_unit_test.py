@@ -1,4 +1,4 @@
-"""CRUD manager unit test suite."""
+"""Analysis engine unit test suite."""
 
 import unittest.mock as mock
 
