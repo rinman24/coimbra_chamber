@@ -114,7 +114,7 @@ def _get_experimental_data():
     root.withdraw()
     fp = filedialog.askopenfilename(title='Select Experiment')
 
-    #tdms_file = nptdms.TdmsFile(fp)
+    # tdms_file = nptdms.TdmsFile(fp)
     # You need some helper functions here. namely get settings df
     # However, this may belong in an engine. The question is, should
     # CRUD manager be responsible for knowing how to get the data out

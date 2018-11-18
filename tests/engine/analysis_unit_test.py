@@ -70,6 +70,7 @@ _TEST_PROPS_AS_DF = pd.DataFrame(
 
 @pytest.fixture()
 def mock_TdmsFile(monkeypatch):
+    """Mock of nptdms.TdmsFile class."""
     mock_TdmsFile = mock.MagicMock()
     monkeypatch.setattr(
         'chamber.engine.analysis.nptdms.TdmsFile', mock_TdmsFile
