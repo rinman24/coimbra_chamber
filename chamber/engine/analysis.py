@@ -91,7 +91,7 @@ def _build_setting_df(dataframes):
 def _build_observation_df(dataframes):
     """
     Add columns to observation and drop columns from data.
-    
+
     In order to manage resources, when a columns is moved to
     `dataframes['observation'] is is immediately dropped from
     `databases['data']`.
@@ -100,7 +100,7 @@ def _build_observation_df(dataframes):
     ----------
     dataframes : dict of {str: pandas.DataFrame}
         Keys include `setting`, `data`, and `test`.
-    
+
     Returns
     -------
     dict of {str: pandas.DataFrame}
@@ -122,12 +122,11 @@ def _build_observation_df(dataframes):
 
     if is_mass:
         columns_to_move.append('Mass')
-    if not duty:
-        dataframes['data'].drop(
-            columns=['PowOut', 'PowRef'], inplace=True
-            )
+
     if duty:
         columns_to_move += ['PowRef', 'PowOut']
+    else:
+        dataframes['data'].drop(columns=['PowOut', 'PowRef'], inplace=True)
 
     dataframes['observation'] = dataframes['data'][columns_to_move].copy()
     dataframes['data'].drop(
