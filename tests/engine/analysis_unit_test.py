@@ -64,7 +64,7 @@ _TEST_PROPS_AS_DF = pd.DataFrame(
         )
     )
 
-_BASE_OBS_COL_SET = {'CapManOk', 'DewPoint', 'Idx', 'OptidewOk', 'Pressure'}
+_BASE_OBS_COL_SET = {'CapManOk', 'DewPoint', 'OptidewOk', 'Pressure'}
 
 
 # ----------------------------------------------------------------------------
@@ -217,6 +217,16 @@ def test_build_observation_df_with_mass_1_and_duty_1(mock_TdmsFile):
     assert set(dataframes['observation'].columns) == correct_col_set
 
     assert _correct_data_tables_dropped(dataframes, dropped_col_set)
+
+
+# ----------------------------------------------------------------------------
+# _build_temp_observation_df
+
+@pytest.mark.skip
+def test_can_call_build_temp_observation():
+    """You want a function that will pivot the data left in the data_df into
+    the correct format."""
+    anlys_eng._build_temp_observation_table()
 
 
 # ----------------------------------------------------------------------------

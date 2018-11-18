@@ -113,6 +113,7 @@ def _get_experimental_data():
     root = tk.Tk()
     root.withdraw()
     fp = filedialog.askopenfilename(title='Select Experiment')
+    return fp
 
     # tdms_file = nptdms.TdmsFile(fp)
     # You need some helper functions here. namely get settings df
