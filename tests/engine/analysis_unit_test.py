@@ -10,11 +10,11 @@ import chamber.engine.analysis as anlys_eng
 
 _SETTINGS_OBJ_AS_DF = pd.DataFrame(
     dict(
-            TubeID=[1.0],
-            TimeStep=[1.0],
-            IsMass=[1.0],
             DutyCycle=[0.0],
-            Reservoir=[1.0]
+            IsMass=[1.0],
+            TimeStep=[1.0],
+            Reservoir=[1.0],
+            TubeID=[1.0],
         )
     )
 
@@ -51,14 +51,57 @@ _DATA_OBJ_AS_DF = pd.DataFrame(
         )
 
 
-@mock.patch("chamber.engine.analysis.nptdms.TdmsFile")
-def test_get_tdms_returns_correct_dicts(mock_TdmsFile):
+@pytest.fixture()
+def mock_TdmsFile(monkeypatch):
+    mock_TdmsFile = mock.MagicMock()
     mock_tdms = mock_TdmsFile.return_value
     mock_tdms.object.return_value.as_dataframe.side_effect = [
         _SETTINGS_OBJ_AS_DF, _DATA_OBJ_AS_DF
         ]
+    monkeypatch.setattr(
+        'chamber.engine.analysis.nptdms.TdmsFile', mock_TdmsFile
+        )
 
-    setting_obj_as_df, data_obj_as_df = anlys_eng._get_tdms_objs('test_path')
+    return mock_TdmsFile
 
+
+def test_get_tdms_returns_correct_dicts(mock_TdmsFile):
+    # Act
+    setting_obj_as_df, data_obj_as_df = (
+        anlys_eng._get_tdms_objs_as_df('test_path')
+        )
+
+    # Assert
     pd.testing.assert_frame_equal(setting_obj_as_df, _SETTINGS_OBJ_AS_DF)
     pd.testing.assert_frame_equal(data_obj_as_df, _DATA_OBJ_AS_DF)
+
+
+def test_build_setting_df_with_is_mass_1(mock_TdmsFile):
+    # Arrange
+    setting_df, data_df = anlys_eng._get_tdms_objs_as_df('test path')
+
+    # Act
+    setting_df = anlys_eng._build_setting_df(setting_df, data_df)
+
+    # Assert
+    correct_df = _SETTINGS_OBJ_AS_DF.copy()
+    correct_df['Pressure'] = 80e3
+    correct_df['Temperature'] = 300.0
+
+    pd.testing.assert_frame_equal(setting_df, correct_df)
+
+
+def test_build_setting_df_with_is_mass_0(mock_TdmsFile):
+    # Arrange
+    setting_df, data_df = anlys_eng._get_tdms_objs_as_df('test path')
+    setting_df.loc[0, 'IsMass'] = 0
+
+    # Act
+    setting_df = anlys_eng._build_setting_df(setting_df, data_df)
+
+    # Assert
+    correct_df = _SETTINGS_OBJ_AS_DF.copy()
+    correct_df['Pressure'] = 80e3
+    correct_df['Temperature'] = 950.0
+
+    pd.testing.assert_frame_equal(setting_df, correct_df)

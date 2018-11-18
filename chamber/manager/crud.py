@@ -119,7 +119,7 @@ def _get_experimental_data():
     # However, this may belong in an engine. The question is, should
     # CRUD manager be responsible for knowing how to get the data out
     # of nptdms files? Probably not. So who should know how to do this?
-    # Well an engine. but What engine?     
+    # Well an engine. but What engine?
 
 
 def create_tables(table_group, database):
