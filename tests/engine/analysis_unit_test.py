@@ -64,6 +64,9 @@ _TEST_PROPS_AS_DF = pd.DataFrame(
         )
     )
 
+_BASE_OBS_COL_SET = {'CapManOk', 'DewPoint', 'Idx', 'OptidewOk', 'Pressure'}
+
+
 # ----------------------------------------------------------------------------
 # fixtures
 
@@ -78,7 +81,7 @@ def mock_TdmsFile(monkeypatch):
 
     mock_tdms = mock_TdmsFile.return_value
     mock_tdms.object.return_value.as_dataframe.side_effect = [
-        _SETTINGS_OBJ_AS_DF, _DATA_OBJ_AS_DF
+        _SETTINGS_OBJ_AS_DF.copy(), _DATA_OBJ_AS_DF.copy()
         ]
 
     mock_tdms.object.return_value.properties.__getitem__.side_effect = [
@@ -104,67 +107,166 @@ def test_get_tdms_objs_as_df_returns_correct_dicts(mock_TdmsFile):
 # _build_setting_df
 
 
-def test_build_setting_df_with_is_mass_0(mock_TdmsFile):
-    # Arrange
-    dataframes = anlys_eng._get_tdms_objs_as_df('test path')
-    setting_df = dataframes['setting']
-    data_df = dataframes['data']
-    setting_df.loc[0, 'IsMass'] = 0
-
-    # Act
-    setting_df, data_df = anlys_eng._build_setting_df(setting_df, data_df)
-
-    # Assert
-    correct_df = _SETTINGS_OBJ_AS_DF.copy()
-    correct_df['Pressure'] = 80e3
-    correct_df['Temperature'] = 950.0
-
-    pd.testing.assert_frame_equal(setting_df, correct_df)
-
-    correct_tc_set = set('TC{}'.format(tc_num) for tc_num in range(0, 14))
-    df_set = set(data_df.columns)
-    assert correct_tc_set.issubset(df_set)
-
-
 def test_build_setting_df_with_is_mass_1(mock_TdmsFile):
     # Arrange
-    dataframes = anlys_eng._get_tdms_objs_as_df('test path')
-    setting_df = dataframes['setting']
-    data_df = dataframes['data']
-    setting_df.loc[0, 'IsMass'] = 1
+    correct_setting_df = _setup_correct_setting_df(
+        is_mass=1.0, avg_temp=300.0, avg_pres=80e3
+        )
+    dataframes = _setup_dataframes(is_mass=1.0)
+    tc_dropped_set = set('TC{}'.format(tc_num) for tc_num in range(0, 4))
 
     # Act
-    setting_df, data_df = anlys_eng._build_setting_df(setting_df, data_df)
+    dataframes = anlys_eng._build_setting_df(dataframes)
 
     # Assert
-    correct_df = _SETTINGS_OBJ_AS_DF.copy()
-    correct_df['Pressure'] = 80e3
-    correct_df['Temperature'] = 300.0
+    pd.testing.assert_frame_equal(
+        dataframes['setting'], correct_setting_df
+        )
+    assert not tc_dropped_set.issubset(
+        set(dataframes['data'].columns)
+        )
 
-    pd.testing.assert_frame_equal(setting_df, correct_df)
 
-    tc_dropped_set = set('TC{}'.format(tc_num) for tc_num in range(0, 4))
-    df_set = set(data_df.columns)
-    assert tc_dropped_set not in df_set
+def test_build_setting_df_with_is_mass_0(mock_TdmsFile):
+    # Arrange
+    correct_setting_df = _setup_correct_setting_df(
+        is_mass=0.0, avg_temp=950.0, avg_pres=80e3
+        )
+    dataframes = _setup_dataframes(is_mass=0.0)
+    correct_tc_set = set('TC{}'.format(tc_num) for tc_num in range(0, 14))
+
+    # Act
+    dataframes = anlys_eng._build_setting_df(dataframes)
+
+    # Assert
+    pd.testing.assert_frame_equal(
+        dataframes['setting'], correct_setting_df
+        )
+    assert correct_tc_set.issubset(
+        set(dataframes['data'].columns)
+        )
 
 
 # ----------------------------------------------------------------------------
 # _build_observation_df
 
 
-@pytest.mark.skip
 def test_build_observation_df_with_mass_1_and_duty_0(mock_TdmsFile):
     # Arrange
-    dataframes = anlys_eng._get_tdms_objs_as_df('test path')
-    setting_df = dataframes['setting']
-    data_df = dataframes['data']
+    is_mass, duty = 1.0, 0.0
+    correct_col_set, dropped_col_set = _setup_observation_sets(
+        is_mass=is_mass, duty=duty
+        )
+    dataframes = _setup_dataframes(is_mass=is_mass, duty=duty)
 
     # Act
-    observation_df = anlys_eng._build_observation_df(setting_df, data_df)
+    dataframes = anlys_eng._build_observation_df(dataframes)
 
     # Assert
-    correct_cols = {
-        'CapManOk', 'DewPoint', 'Idx', 'Mass', 'OptidewOk', 'Pressure'
-        }
-    df_cols = set(observation_df.columns)
-    assert correct_cols == df_cols
+    assert _obs_has_correct_cols(dataframes, correct_col_set)
+    assert _correct_data_tables_dropped(dataframes, dropped_col_set)
+
+
+def test_build_observation_df_with_mass_0_and_duty_0(mock_TdmsFile):
+    # Arrange
+    is_mass, duty = 0.0, 0.0
+    correct_col_set, dropped_col_set = _setup_observation_sets(
+        is_mass=is_mass, duty=duty
+        )
+
+    dataframes = _setup_dataframes(is_mass=is_mass, duty=duty)
+
+    # Act
+    dataframes = anlys_eng._build_observation_df(dataframes)
+
+    # Assert
+    assert _obs_has_correct_cols(dataframes, correct_col_set)
+    assert _correct_data_tables_dropped(dataframes, dropped_col_set)
+
+
+def test_build_observation_df_with_mass_0_and_duty_1(mock_TdmsFile):
+    # Arrange
+    is_mass, duty = 0.0, 1.0
+    correct_col_set, dropped_col_set = _setup_observation_sets(
+        is_mass=is_mass, duty=duty
+        )
+
+    dataframes = _setup_dataframes(is_mass=is_mass, duty=duty)
+
+    # Act
+    dataframes = anlys_eng._build_observation_df(dataframes)
+
+    # Assert
+    assert _obs_has_correct_cols(dataframes, correct_col_set)
+    assert _correct_data_tables_dropped(dataframes, dropped_col_set)
+
+
+def test_build_observation_df_with_mass_1_and_duty_1(mock_TdmsFile):
+    # Arrange
+    is_mass, duty = 1.0, 1.0
+    correct_col_set, dropped_col_set = _setup_observation_sets(
+        is_mass=is_mass, duty=duty
+        )
+
+    dataframes = _setup_dataframes(is_mass=is_mass, duty=duty)
+
+    # Act
+    dataframes = anlys_eng._build_observation_df(dataframes)
+
+    # Assert
+    assert set(dataframes['observation'].columns) == correct_col_set
+
+    assert _correct_data_tables_dropped(dataframes, dropped_col_set)
+
+
+# ----------------------------------------------------------------------------
+# helpers
+
+def _setup_correct_setting_df(is_mass=None, avg_temp=None, avg_pres=None):
+    correct_setting_df = _SETTINGS_OBJ_AS_DF.copy()
+
+    correct_setting_df.loc[0, 'IsMass'] = is_mass
+    correct_setting_df['Temperature'] = avg_temp
+    correct_setting_df['Pressure'] = avg_pres
+
+    return correct_setting_df
+
+
+def _setup_dataframes(is_mass=None, duty=None):
+    dataframes = anlys_eng._get_tdms_objs_as_df('test path')
+    dataframes['setting'].loc[0, 'IsMass'] = is_mass
+    if duty:
+        dataframes['setting'].loc[0, 'Duty'] = duty
+
+    return dataframes
+
+
+def _setup_observation_sets(is_mass=None, duty=None):
+    obs_col_set = set(_BASE_OBS_COL_SET)
+    if is_mass:
+        obs_col_set.add('Mass')
+
+    dropped_col_set = set(obs_col_set)
+    if duty:
+        obs_col_set.add('PowOut')
+        obs_col_set.add('PowRef')
+
+        dropped_col_set.add('PowOut')
+        dropped_col_set.add('PowRef')
+
+    return obs_col_set, dropped_col_set
+
+
+def _obs_has_correct_cols(dataframes, correct_col_set):
+    observation_cols_set = set(dataframes['observation'].columns)
+    if observation_cols_set == correct_col_set:
+        return True
+    return False
+
+
+def _correct_data_tables_dropped(dataframes, dropped_col_set):
+    data_cols_set = set(dataframes['data'].columns)
+    intersection = (data_cols_set & dropped_col_set)
+    if not intersection:  # No intersection: correct dropped tables
+        return True
+    return False

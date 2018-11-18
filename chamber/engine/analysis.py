@@ -16,7 +16,7 @@ def _get_tdms_objs_as_df(filepath):
     Returns
     -------
     dict of {str: pandas.DataFrame}
-        Keys include `settings`, `data`, and `test`.
+        Keys include `setting`, `data`, and `test`.
 
     Examples
     --------
@@ -24,9 +24,12 @@ def _get_tdms_objs_as_df(filepath):
 
     """
     tdms_file = nptdms.TdmsFile(filepath)
+
     settings_df = tdms_file.object('Settings').as_dataframe()
-    settings_df.rename(columns={'DutyCycle': 'Duty'})
+    settings_df = settings_df.rename(columns={'DutyCycle': 'Duty'})
+
     data_df = tdms_file.object('Data').as_dataframe()
+
     test_df = pd.DataFrame(
         data=dict(
             Author=tdms_file.object().properties['author'],
@@ -37,10 +40,11 @@ def _get_tdms_objs_as_df(filepath):
         )
 
     dataframes = dict(setting=settings_df, data=data_df, test=test_df)
+
     return dataframes
 
 
-def _build_setting_df(setting_df, data_df):
+def _build_setting_df(dataframes):
     """
     Add `Temperature` and `Pressure` keys to `setting_df`.
 
@@ -50,59 +54,91 @@ def _build_setting_df(setting_df, data_df):
 
     Parameters
     ----------
-    setting_df : dict of {str: list of numpy.float64}
-    data_df : dict of {str: list of numpy.fload64}
+    dataframes : dict of {str: pandas.DataFrame}
+        Keys include `setting`, `data`, and `test`.
 
     Returns
     -------
-    pandas.DataFrame
-        Updated setting_df
+    dict of {str: pandas.DataFrame}
+        Keys include `setting`, `data`, and `test`.
 
     Examples
     --------
     >>> dataframes = _get_tdms_objs_as_df(filepath)
-    >>> setting_df = dataframes['settings']
-    >>> data_df = dataframes['data']
-    >>> setting_df = _build_setting_df(setting_df, data_df)
+    >>> dataframes = _build_setting_df(dataframes)
 
     """
-    if setting_df.loc[0, 'IsMass'] == 1.0:
-            tc_numbers = range(4, 14)
-            # Drop the measurement from TC0-3 because they junk
-            data_df.drop(
-                columns=['TC{}'.format(tc_bad) for tc_bad in range(0, 3)]
+    initial_tc = 0
+
+    if dataframes['setting'].loc[0, 'IsMass']:  # TCs 0-3 not connected.
+            initial_tc = 4
+            dataframes['data'].drop(
+                columns=['TC{}'.format(tc_bad) for tc_bad in range(0, 3)],
+                inplace=True
                 )
-    else:
-            tc_numbers = range(0, 14)
 
-    tc_cols = ['TC{}'.format(num) for num in tc_numbers]
+    tc_cols = ['TC{}'.format(num) for num in range(initial_tc, 14)]
 
-    avg_temp = data_df.loc[:, tc_cols].mean().mean()
-    avg_pressure = data_df.loc[:, 'Pressure'].mean()
+    avg_temp = dataframes['data'].loc[:, tc_cols].mean().mean()
+    avg_pressure = dataframes['data'].loc[:, 'Pressure'].mean()
 
-    rounded_temp = 5*round(avg_temp/5)
-    rounded_pressure = 5000*round(avg_pressure/5000)
+    dataframes['setting'].loc[0, 'Temperature'] = _round(avg_temp, 5)
+    dataframes['setting'].loc[0, 'Pressure'] = _round(avg_pressure, 5000)
 
-    setting_df.loc[0, 'Temperature'] = rounded_temp
-    setting_df.loc[0, 'Pressure'] = rounded_pressure
-
-    return setting_df, data_df
+    return dataframes
 
 
-def _build_observation_df(setting_df, data_df):
+def _build_observation_df(dataframes):
+    """
+    Add columns to observation and drop columns from data.
+    
+    In order to manage resources, when a columns is moved to
+    `dataframes['observation'] is is immediately dropped from
+    `databases['data']`.
+
+    Parameters
+    ----------
+    dataframes : dict of {str: pandas.DataFrame}
+        Keys include `setting`, `data`, and `test`.
+    
+    Returns
+    -------
+    dict of {str: pandas.DataFrame}
+        Keys same as input plus `observation`.
+
+    Examples
+    --------
+    >>> dataframes = _get_tdms_objs_as_df(filepath)
+    >>> dataframes = _build_setting_df(dataframes)
+    >>> dataframes = _build_observation_df(dataframes)
+
+    """
     columns_to_move = [
             'CapManOk', 'DewPoint', 'Idx', 'OptidewOk', 'Pressure'
             ]
 
-    is_mass = setting_df.loc[0, 'IsMass']
-    duty = setting_df.loc[0, 'Duty']
+    is_mass = dataframes['setting'].loc[0, 'IsMass']
+    duty = dataframes['setting'].loc[0, 'Duty']
 
     if is_mass:
         columns_to_move.append('Mass')
+    if not duty:
+        dataframes['data'].drop(
+            columns=['PowOut', 'PowRef'], inplace=True
+            )
+    if duty:
+        columns_to_move += ['PowRef', 'PowOut']
 
-    observation_df = data_df[columns_to_move].copy()
-    data_df = data_df.drop(columns=columns_to_move)
+    dataframes['observation'] = dataframes['data'][columns_to_move].copy()
+    dataframes['data'].drop(
+        columns=columns_to_move, inplace=True
+        )
+
+    return dataframes
+
+# ----------------------------------------------------------------------------
+# helpers
 
 
-        
-        
+def _round(number, nearest):
+    return nearest*round(number/nearest)
