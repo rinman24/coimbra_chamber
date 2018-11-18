@@ -14,7 +14,7 @@ import chamber.engine.analysis as anlys_eng
 
 _SETTINGS_OBJ_AS_DF = pd.DataFrame(
     dict(
-            DutyCycle=[0.0],
+            Duty=[0.0],
             IsMass=[1.0],
             TimeStep=[1.0],
             Reservoir=[1.0],

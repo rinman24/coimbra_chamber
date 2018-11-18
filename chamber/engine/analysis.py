@@ -25,6 +25,7 @@ def _get_tdms_objs_as_df(filepath):
     """
     tdms_file = nptdms.TdmsFile(filepath)
     settings_df = tdms_file.object('Settings').as_dataframe()
+    settings_df.rename(columns={'DutyCycle': 'Duty'})
     data_df = tdms_file.object('Data').as_dataframe()
     test_df = pd.DataFrame(
         data=dict(
