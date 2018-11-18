@@ -244,6 +244,8 @@ def _setup_dataframes(is_mass=None, duty=None):
 def _setup_observation_sets(is_mass=None, duty=None):
     obs_col_set = set(_BASE_OBS_COL_SET)
     dropped_col_set = set(obs_col_set)
+    dropped_col_set.add('Mass') # Mass is dropped wither way
+
     if is_mass:
         obs_col_set.add('Mass')
 
