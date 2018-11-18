@@ -1,12 +1,16 @@
 """Analysis engine unit test suite."""
 
+import datetime
 import unittest.mock as mock
 
 import pandas as pd
 import pytest
+import pytz
 
 import chamber.engine.analysis as anlys_eng
 
+# ----------------------------------------------------------------------------
+# globals
 
 _SETTINGS_OBJ_AS_DF = pd.DataFrame(
     dict(
@@ -50,35 +54,60 @@ _DATA_OBJ_AS_DF = pd.DataFrame(
             )
         )
 
+_DATETIME = datetime.datetime(2018, 9, 5, 23, 53, 44, 570569, pytz.UTC)
+
+_TEST_PROPS_AS_DF = pd.DataFrame(
+    dict(
+        Author=['me'],
+        DateTime=[_DATETIME],
+        Description=['test description.']
+        )
+    )
+
+# ----------------------------------------------------------------------------
+# fixtures
+
 
 @pytest.fixture()
 def mock_TdmsFile(monkeypatch):
     mock_TdmsFile = mock.MagicMock()
-    mock_tdms = mock_TdmsFile.return_value
-    mock_tdms.object.return_value.as_dataframe.side_effect = [
-        _SETTINGS_OBJ_AS_DF, _DATA_OBJ_AS_DF
-        ]
     monkeypatch.setattr(
         'chamber.engine.analysis.nptdms.TdmsFile', mock_TdmsFile
         )
 
+    mock_tdms = mock_TdmsFile.return_value
+    mock_tdms.object.return_value.as_dataframe.side_effect = [
+        _SETTINGS_OBJ_AS_DF, _DATA_OBJ_AS_DF
+        ]
+
+    mock_tdms.object.return_value.properties.__getitem__.side_effect = [
+        'me', _DATETIME, 'test description.'
+        ]
+
     return mock_TdmsFile
 
+# ----------------------------------------------------------------------------
+# _get_tdms_objs_as_df
 
-def test_get_tdms_returns_correct_dicts(mock_TdmsFile):
+
+def test_get_tdms_objs_as_df_returns_correct_dicts(mock_TdmsFile):
     # Act
-    setting_obj_as_df, data_obj_as_df = (
-        anlys_eng._get_tdms_objs_as_df('test_path')
-        )
+    result = anlys_eng._get_tdms_objs_as_df('test_path')
 
     # Assert
-    pd.testing.assert_frame_equal(setting_obj_as_df, _SETTINGS_OBJ_AS_DF)
-    pd.testing.assert_frame_equal(data_obj_as_df, _DATA_OBJ_AS_DF)
+    pd.testing.assert_frame_equal(result['setting'], _SETTINGS_OBJ_AS_DF)
+    pd.testing.assert_frame_equal(result['data'], _DATA_OBJ_AS_DF)
+    pd.testing.assert_frame_equal(result['test'], _TEST_PROPS_AS_DF)
+
+# ----------------------------------------------------------------------------
+# _build_setting_df
 
 
 def test_build_setting_df_with_is_mass_1(mock_TdmsFile):
     # Arrange
-    setting_df, data_df = anlys_eng._get_tdms_objs_as_df('test path')
+    dataframes = anlys_eng._get_tdms_objs_as_df('test path')
+    setting_df = dataframes['setting']
+    data_df = dataframes['data']
 
     # Act
     setting_df = anlys_eng._build_setting_df(setting_df, data_df)
@@ -93,7 +122,9 @@ def test_build_setting_df_with_is_mass_1(mock_TdmsFile):
 
 def test_build_setting_df_with_is_mass_0(mock_TdmsFile):
     # Arrange
-    setting_df, data_df = anlys_eng._get_tdms_objs_as_df('test path')
+    dataframes = anlys_eng._get_tdms_objs_as_df('test path')
+    setting_df = dataframes['setting']
+    data_df = dataframes['data']
     setting_df.loc[0, 'IsMass'] = 0
 
     # Act

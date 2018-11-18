@@ -1,13 +1,24 @@
 """Analysis engine module."""
 
 import nptdms
+import pandas as pd
 
 
 def _get_tdms_objs_as_df(filepath):
     tdms_file = nptdms.TdmsFile(filepath)
     settings_df = tdms_file.object('Settings').as_dataframe()
     data_df = tdms_file.object('Data').as_dataframe()
-    return settings_df, data_df
+    test_df = pd.DataFrame(
+        data=dict(
+            Author=tdms_file.object().properties['author'],
+            DateTime=tdms_file.object().properties['DateTime'],
+            Description=tdms_file.object().properties['description']
+            ),
+        index=[0]
+        )
+
+    dataframes = dict(setting=settings_df, data=data_df, test=test_df)
+    return dataframes
 
 
 def _build_setting_df(setting_df, data_df):
