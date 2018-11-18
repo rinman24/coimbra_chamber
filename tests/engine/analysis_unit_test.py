@@ -243,10 +243,10 @@ def _setup_dataframes(is_mass=None, duty=None):
 
 def _setup_observation_sets(is_mass=None, duty=None):
     obs_col_set = set(_BASE_OBS_COL_SET)
+    dropped_col_set = set(obs_col_set)
     if is_mass:
         obs_col_set.add('Mass')
 
-    dropped_col_set = set(obs_col_set)
     if duty:
         obs_col_set.add('PowOut')
         obs_col_set.add('PowRef')
