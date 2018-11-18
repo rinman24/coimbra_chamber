@@ -73,7 +73,7 @@ def _build_setting_df(dataframes):
     if dataframes['setting'].loc[0, 'IsMass']:  # TCs 0-3 not connected.
             initial_tc = 4
             dataframes['data'].drop(
-                columns=['TC{}'.format(tc_bad) for tc_bad in range(0, 3)],
+                columns=['TC{}'.format(tc_bad) for tc_bad in range(0, 4)],
                 inplace=True
                 )
 
