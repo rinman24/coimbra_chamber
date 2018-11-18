@@ -68,7 +68,7 @@ _TEST_PROPS_AS_DF = pd.DataFrame(
 # fixtures
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_TdmsFile(monkeypatch):
     """Mock of nptdms.TdmsFile class."""
     mock_TdmsFile = mock.MagicMock()
@@ -104,23 +104,6 @@ def test_get_tdms_objs_as_df_returns_correct_dicts(mock_TdmsFile):
 # _build_setting_df
 
 
-def test_build_setting_df_with_is_mass_1(mock_TdmsFile):
-    # Arrange
-    dataframes = anlys_eng._get_tdms_objs_as_df('test path')
-    setting_df = dataframes['setting']
-    data_df = dataframes['data']
-
-    # Act
-    setting_df, data_df = anlys_eng._build_setting_df(setting_df, data_df)
-
-    # Assert
-    correct_df = _SETTINGS_OBJ_AS_DF.copy()
-    correct_df['Pressure'] = 80e3
-    correct_df['Temperature'] = 300.0
-
-    pd.testing.assert_frame_equal(setting_df, correct_df)
-
-
 def test_build_setting_df_with_is_mass_0(mock_TdmsFile):
     # Arrange
     dataframes = anlys_eng._get_tdms_objs_as_df('test path')
@@ -137,6 +120,32 @@ def test_build_setting_df_with_is_mass_0(mock_TdmsFile):
     correct_df['Temperature'] = 950.0
 
     pd.testing.assert_frame_equal(setting_df, correct_df)
+
+    correct_tc_set = set('TC{}'.format(tc_num) for tc_num in range(0, 14))
+    df_set = set(data_df.columns)
+    assert correct_tc_set.issubset(df_set)
+
+
+def test_build_setting_df_with_is_mass_1(mock_TdmsFile):
+    # Arrange
+    dataframes = anlys_eng._get_tdms_objs_as_df('test path')
+    setting_df = dataframes['setting']
+    data_df = dataframes['data']
+    setting_df.loc[0, 'IsMass'] = 1
+
+    # Act
+    setting_df, data_df = anlys_eng._build_setting_df(setting_df, data_df)
+
+    # Assert
+    correct_df = _SETTINGS_OBJ_AS_DF.copy()
+    correct_df['Pressure'] = 80e3
+    correct_df['Temperature'] = 300.0
+
+    pd.testing.assert_frame_equal(setting_df, correct_df)
+
+    tc_dropped_set = set('TC{}'.format(tc_num) for tc_num in range(0, 4))
+    df_set = set(data_df.columns)
+    assert tc_dropped_set not in df_set
 
 
 # ----------------------------------------------------------------------------

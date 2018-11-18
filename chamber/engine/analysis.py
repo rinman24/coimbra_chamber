@@ -90,4 +90,19 @@ def _build_setting_df(setting_df, data_df):
 
 
 def _build_observation_df(setting_df, data_df):
-    pass
+    columns_to_move = [
+            'CapManOk', 'DewPoint', 'Idx', 'OptidewOk', 'Pressure'
+            ]
+
+    is_mass = setting_df.loc[0, 'IsMass']
+    duty = setting_df.loc[0, 'Duty']
+
+    if is_mass:
+        columns_to_move.append('Mass')
+
+    observation_df = data_df[columns_to_move].copy()
+    data_df = data_df.drop(columns=columns_to_move)
+
+
+        
+        
