@@ -68,6 +68,10 @@ def _build_setting_df(setting_df, data_df):
     """
     if setting_df.loc[0, 'IsMass'] == 1.0:
             tc_numbers = range(4, 14)
+            # Drop the measurement from TC0-3 because they junk
+            data_df.drop(
+                columns=['TC{}'.format(tc_bad) for tc_bad in range(0, 3)]
+                )
     else:
             tc_numbers = range(0, 14)
 
@@ -82,4 +86,8 @@ def _build_setting_df(setting_df, data_df):
     setting_df.loc[0, 'Temperature'] = rounded_temp
     setting_df.loc[0, 'Pressure'] = rounded_pressure
 
-    return setting_df
+    return setting_df, data_df
+
+
+def _build_observation_df(setting_df, data_df):
+    pass

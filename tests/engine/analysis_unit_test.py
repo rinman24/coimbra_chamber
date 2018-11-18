@@ -111,7 +111,7 @@ def test_build_setting_df_with_is_mass_1(mock_TdmsFile):
     data_df = dataframes['data']
 
     # Act
-    setting_df = anlys_eng._build_setting_df(setting_df, data_df)
+    setting_df, data_df = anlys_eng._build_setting_df(setting_df, data_df)
 
     # Assert
     correct_df = _SETTINGS_OBJ_AS_DF.copy()
@@ -129,7 +129,7 @@ def test_build_setting_df_with_is_mass_0(mock_TdmsFile):
     setting_df.loc[0, 'IsMass'] = 0
 
     # Act
-    setting_df = anlys_eng._build_setting_df(setting_df, data_df)
+    setting_df, data_df = anlys_eng._build_setting_df(setting_df, data_df)
 
     # Assert
     correct_df = _SETTINGS_OBJ_AS_DF.copy()
@@ -137,3 +137,25 @@ def test_build_setting_df_with_is_mass_0(mock_TdmsFile):
     correct_df['Temperature'] = 950.0
 
     pd.testing.assert_frame_equal(setting_df, correct_df)
+
+
+# ----------------------------------------------------------------------------
+# _build_observation_df
+
+
+@pytest.mark.skip
+def test_build_observation_df_with_mass_1_and_duty_0(mock_TdmsFile):
+    # Arrange
+    dataframes = anlys_eng._get_tdms_objs_as_df('test path')
+    setting_df = dataframes['setting']
+    data_df = dataframes['data']
+
+    # Act
+    observation_df = anlys_eng._build_observation_df(setting_df, data_df)
+
+    # Assert
+    correct_cols = {
+        'CapManOk', 'DewPoint', 'Idx', 'Mass', 'OptidewOk', 'Pressure'
+        }
+    df_cols = set(observation_df.columns)
+    assert correct_cols == df_cols
