@@ -262,11 +262,30 @@ def test_build_observation_df_with_mass_1_and_duty_1(mock_TdmsFile):
 # ----------------------------------------------------------------------------
 # _build_temp_observation_df
 
+
+def test_build_temp_observation_with_is_mass_1(mock_TdmsFile):
+    is_mass = 1.0
+    # Arrange
+    dataframes = _setup_dataframes(is_mass=is_mass)
+    dataframes = anlys_eng._build_setting_df(dataframes)
+    dataframes = anlys_eng._build_observation_df(dataframes)
+
+    # Act
+    dataframes = anlys_eng._build_temp_observation_df(dataframes)
+
+    # Assert
+    pd.testing.assert_frame_equal(
+        dataframes['temp_observation'], _CORRECT_TEMP_OBSERVATION_DF
+        )
+    assert ('Idx' in set(dataframes['observation'].columns))
+    assert ('Idx' not in set(dataframes['data'].columns))
+
+
 @pytest.mark.skip
-def test_can_call_build_temp_observation():
-    """You want a function that will pivot the data left in the data_df into
-    the correct format."""
-    anlys_eng._build_temp_observation_table()
+def test_build_temp_observation_with_is_mass_0(mock_TdmsFile):
+    # When mass is zero you need to make sure that all the rest of the
+    # temperature columns are included in temp observation
+    assert False
 
 
 # ----------------------------------------------------------------------------

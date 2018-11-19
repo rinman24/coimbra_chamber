@@ -130,6 +130,33 @@ def _build_observation_df(dataframes):
 
     return dataframes
 
+
+def _build_temp_observation_df(dataframes):
+    tc_num, temp, idx = [], [], []
+    elements = len(dataframes['data'].index)
+
+    for tc in range(4, 14):
+        tc_num += [tc]*elements
+
+        col = 'TC{}'.format(tc)
+        temp += list(dataframes['data'].loc[:, col])
+        dataframes['data'].drop(columns=[col], inplace=True)
+
+        idx += list(dataframes['data'].loc[:, 'Idx'])
+
+    dataframes['observation'].loc[:, 'Idx'] = dataframes['data'].loc[:, 'Idx']
+    dataframes['data'].drop(columns=['Idx'], inplace=True)
+
+    dataframes['temp_observation'] = pd.DataFrame(
+        dict(
+            ThermocoupleNum=tc_num,
+            Temperature=temp,
+            Idx=idx
+            )
+        )
+
+    return dataframes
+
 # ----------------------------------------------------------------------------
 # helpers
 
