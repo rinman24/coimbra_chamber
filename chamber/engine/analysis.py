@@ -46,11 +46,11 @@ def _get_tdms_objs_as_df(filepath):
 
 def _build_setting_df(dataframes):
     """
-    Add `Temperature` and `Pressure` keys to `setting_df`.
+    Add `Temperature` and `Pressure` keys to `setting` dataframe.
 
-    Use `data_df` to calculate averave values of temperature and pressure
-    over the course of the experiment. Average temperature and pressure
-    are then rounded to the nearest 5 K and 5000 Pa, respectively.
+    Use `data` dataframe to calculate averave values of temperature and
+    pressure over the course of the experiment. Average temperature and
+    pressure are then rounded to the nearest 5 K and 5000 Pa, respectively.
 
     Parameters
     ----------
@@ -68,7 +68,8 @@ def _build_setting_df(dataframes):
     >>> dataframes = _build_setting_df(dataframes)
 
     """
-    initial_tc = 0
+    if not dataframes['setting'].loc[0, 'Duty']:
+        dataframes['data'].drop(columns=['PowOut', 'PowRef'], inplace=True)
 
     if dataframes['setting'].loc[0, 'IsMass']:  # TCs 0-3 not connected.
             initial_tc = 4
@@ -76,14 +77,16 @@ def _build_setting_df(dataframes):
                 columns=['TC{}'.format(tc_bad) for tc_bad in range(0, 4)],
                 inplace=True
                 )
+    else:
+        initial_tc = 0
+        dataframes['data'].drop(columns=['Mass'], inplace=True)
 
     tc_cols = ['TC{}'.format(num) for num in range(initial_tc, 14)]
-
     avg_temp = dataframes['data'].loc[:, tc_cols].mean().mean()
     avg_pressure = dataframes['data'].loc[:, 'Pressure'].mean()
 
-    dataframes['setting'].loc[0, 'Temperature'] = _round(avg_temp, 5)
     dataframes['setting'].loc[0, 'Pressure'] = _round(avg_pressure, 5000)
+    dataframes['setting'].loc[0, 'Temperature'] = _round(avg_temp, 5)
 
     return dataframes
 
@@ -183,6 +186,14 @@ def _build_temp_observation_df(dataframes):
             )
         )
 
+    return dataframes
+
+
+def read_tdms(filepath):
+    dataframes = _get_tdms_objs_as_df(filepath)
+    dataframes = _build_setting_df(dataframes)
+    # dataframes = _build_observation_df(dataframes)
+    # dataframes = _build_temp_observation_df(dataframes)
     return dataframes
 
 
