@@ -132,10 +132,38 @@ def _build_observation_df(dataframes):
 
 
 def _build_temp_observation_df(dataframes):
+    """
+    Reformat data table to temp observation format.
+
+    Pivot remaining tc columns in `data` to the format required by database.
+
+    Parameters
+    ----------
+    dataframes : dict of {str: pandas.DataFrame}
+        Keys include `setting`, `data`, `test`, and `observation`.
+
+     Returns
+    -------
+    dict of {str: pandas.DataFrame}
+        Keys same as input plus `temp_observation`.
+
+     Examples
+    --------
+    >>> dataframes = _get_tdms_objs_as_df(filepath)
+    >>> dataframes = _build_setting_df(dataframes)
+    >>> dataframes = _build_observation_df(dataframes)
+    >>> dataframes = _build_temp_observation_df(dataframes)
+
+    """
     tc_num, temp, idx = [], [], []
     elements = len(dataframes['data'].index)
 
-    for tc in range(4, 14):
+    initial_tc = 0
+
+    if dataframes['setting'].loc[0, 'IsMass']:
+        initial_tc = 4
+
+    for tc in range(initial_tc, 14):
         tc_num += [tc]*elements
 
         col = 'TC{}'.format(tc)
@@ -156,6 +184,7 @@ def _build_temp_observation_df(dataframes):
         )
 
     return dataframes
+
 
 # ----------------------------------------------------------------------------
 # helpers

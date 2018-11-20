@@ -62,8 +62,60 @@ _TEST_PROPS_AS_DF = pd.DataFrame(
         )
     )
 
+_CORRECT_TEMP_OBSERVATION_DF_MASS_0 = pd.DataFrame(
+    data=dict(
+        ThermocoupleNum=[
+            0, 0, 0, 0, 0,
+            1, 1, 1, 1, 1,
+            2, 2, 2, 2, 2,
+            3, 3, 3, 3, 3,
+            4, 4, 4, 4, 4,
+            5, 5, 5, 5, 5,
+            6, 6, 6, 6, 6,
+            7, 7, 7, 7, 7,
+            8, 8, 8, 8, 8,
+            9, 9, 9, 9, 9,
+            10, 10, 10, 10, 10,
+            11, 11, 11, 11, 11,
+            12, 12, 12, 12, 12,
+            13, 13, 13, 13, 13
+            ],
+        Temperature=[
+            2572.301, 2572.309, 2572.316, 2572.303, 2572.297,
+            2572.301, 2572.309, 2572.316, 2572.303, 2572.297,
+            2572.301, 2572.309, 2572.316, 2572.303, 2572.297,
+            2572.301, 2572.309, 2572.316, 2572.303, 2572.297,
+            302.283, 302.285, 302.304, 302.311, 302.311,
+            300.989, 300.997, 300.998, 301.002, 300.995,
+            300.914, 300.919, 300.921, 300.920, 300.923,
+            301.237, 301.244, 301.264, 301.258, 301.256,
+            301.593, 301.603, 301.601, 301.595, 301.586,
+            300.829, 300.823, 300.835, 300.826, 300.823,
+            300.915, 300.914, 300.929, 300.914, 300.909,
+            300.753, 300.767, 300.771, 300.762, 300.753,
+            300.860, 300.863, 300.872, 300.859, 300.851,
+            301.159, 301.167, 301.168, 301.151, 301.147
+            ],
+        Idx=[
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0,
+            12.0, 13.0, 14.0, 15.0, 16.0
+            ]
+        )
+    )
 
-_CORRECT_TEMP_OBSERVATION_DF = pd.DataFrame(
+_CORRECT_TEMP_OBSERVATION_DF_MASS_1 = pd.DataFrame(
     data=dict(
         ThermocoupleNum=[
             4, 4, 4, 4, 4,
@@ -77,7 +129,7 @@ _CORRECT_TEMP_OBSERVATION_DF = pd.DataFrame(
             12, 12, 12, 12, 12,
             13, 13, 13, 13, 13
             ],
-        Temperature = [
+        Temperature=[
             302.283, 302.285, 302.304, 302.311, 302.311,
             300.989, 300.997, 300.998, 301.002, 300.995,
             300.914, 300.919, 300.921, 300.920, 300.923,
@@ -89,7 +141,7 @@ _CORRECT_TEMP_OBSERVATION_DF = pd.DataFrame(
             300.860, 300.863, 300.872, 300.859, 300.851,
             301.159, 301.167, 301.168, 301.151, 301.147
             ],
-        Idx = [
+        Idx=[
             12.0, 13.0, 14.0, 15.0, 16.0,
             12.0, 13.0, 14.0, 15.0, 16.0,
             12.0, 13.0, 14.0, 15.0, 16.0,
@@ -275,17 +327,28 @@ def test_build_temp_observation_with_is_mass_1(mock_TdmsFile):
 
     # Assert
     pd.testing.assert_frame_equal(
-        dataframes['temp_observation'], _CORRECT_TEMP_OBSERVATION_DF
+        dataframes['temp_observation'], _CORRECT_TEMP_OBSERVATION_DF_MASS_1
         )
     assert ('Idx' in set(dataframes['observation'].columns))
     assert ('Idx' not in set(dataframes['data'].columns))
 
 
-@pytest.mark.skip
 def test_build_temp_observation_with_is_mass_0(mock_TdmsFile):
-    # When mass is zero you need to make sure that all the rest of the
-    # temperature columns are included in temp observation
-    assert False
+    is_mass = 0.0
+    # Arrange
+    dataframes = _setup_dataframes(is_mass=is_mass)
+    dataframes = anlys_eng._build_setting_df(dataframes)
+    dataframes = anlys_eng._build_observation_df(dataframes)
+
+    # Act
+    dataframes = anlys_eng._build_temp_observation_df(dataframes)
+
+    # Assert
+    pd.testing.assert_frame_equal(
+        dataframes['temp_observation'], _CORRECT_TEMP_OBSERVATION_DF_MASS_0
+        )
+    assert ('Idx' in set(dataframes['observation'].columns))
+    assert ('Idx' not in set(dataframes['data'].columns))
 
 
 # ----------------------------------------------------------------------------
