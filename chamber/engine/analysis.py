@@ -118,18 +118,18 @@ def _build_observation_df(dataframes):
     """
     columns_to_move = ['CapManOk', 'DewPoint', 'OptidewOk', 'Pressure']
 
-    if dataframes['setting'].loc[0, 'IsMass']:
-        columns_to_move.append('Mass')
-    else:
-        dataframes['data'].drop(columns=['Mass'], inplace=True)
+    #if dataframes['setting'].loc[0, 'IsMass']:
+    ##columns_to_move.append('Mass')
+    #else:
+        #dataframes['data'].drop(columns=['Mass'], inplace=True)
 
-    if dataframes['setting'].loc[0, 'Duty']:
-        columns_to_move += ['PowRef', 'PowOut']
-    else:
-        dataframes['data'].drop(columns=['PowOut', 'PowRef'], inplace=True)
+    #if dataframes['setting'].loc[0, 'Duty']:
+    ##columns_to_move += ['PowRef', 'PowOut']
+    #else:
+        #dataframes['data'].drop(columns=['PowOut', 'PowRef'], inplace=True)
 
-    dataframes['observation'] = dataframes['data'][columns_to_move].copy()
-    dataframes['data'].drop(columns=columns_to_move, inplace=True)
+    ##dataframes['observation'] = dataframes['data'][columns_to_move].copy()
+    #dataframes['data'].drop(columns=columns_to_move, inplace=True)
 
     return dataframes
 

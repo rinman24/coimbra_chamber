@@ -296,6 +296,27 @@ def test_build_setting_keeps_powout_powref_in_data_when_duty_is_1(
 # ----------------------------------------------------------------------------
 # _build_observation_df
 
+
+def test_build_observation_df_returns_correct_df():
+    # Arrange
+    dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
+    correct_observation_df = _build_correct_observation_df(
+        duty=duty, is_mass=is_mass
+        )
+
+    # Act
+    dataframes = anlys_eng._build_observation_df(dataframes)
+
+    # Assert
+    pd.testing.assert_frame_equal(
+        dataframes['observation'], correct_observation_df
+        )
+
+
+
+
+
+
 @pytest.mark.skip
 def test_build_observation_df_with_mass_1_and_duty_0(mock_TdmsFile):
     # Arrange
@@ -430,6 +451,15 @@ def test_read_tdms_returns_correct_dfs_mass_0_duty_1(mock_TdmsFile):
 # helpers
 
 
+def _configure_input_dataframes(is_mass, duty):
+    dataframes = anlys_eng._get_tdms_objs_as_df('test_path')
+
+    dataframes['setting'].loc[0, 'IsMass'] = is_mass
+    dataframes['setting'].loc[0, 'Duty'] = duty
+
+    return dataframes
+
+
 def _build_correct_setting_df(is_mass, duty):
     correct_setting_df = _SETTINGS_OBJ_AS_DF.copy()
 
@@ -446,14 +476,20 @@ def _build_correct_setting_df(is_mass, duty):
     return correct_setting_df
 
 
-def _configure_input_dataframes(is_mass, duty):
-    dataframes = anlys_eng._get_tdms_objs_as_df('test_path')
+def _build_correct_observation_df(is_mass, duty):
+    correct_observation_df = _DATA_OBJ_AS_DF.copy()
 
-    dataframes['setting'].loc[0, 'IsMass'] = is_mass
-    dataframes['setting'].loc[0, 'Duty'] = duty
+    tc_cols = ['TC{}'.format(tc_num) for tc_num in range(0, 14)]
+    correct_observation_df.drop(columns=tc_cols, inplace=True)
 
-    return dataframes
+    if not is_mass:
+        correct_observation_df.drop(columns=['Mass'], inplace=True)
+    if not duty:
+         correct_observation_df.drop(
+             columns=['PowOut', 'PowRef'], inplace=True
+             )
 
+    return correct_observation_df
 
 # def _setup_observation_sets(is_mass=None, duty=None):
 #     obs_col_set = set(_BASE_OBS_COL_SET)
