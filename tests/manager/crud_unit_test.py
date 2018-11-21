@@ -368,6 +368,65 @@ def test_get_lastrow_id_returns_correct_value(mock_pd):  # noqa: D103
 
 
 # ----------------------------------------------------------------------------
+# _update_table
+
+
+def test_update_table_adds_col_if_necessary(mock_pd):  # noqa: D103
+    # Arange
+    dataframe = pd.DataFrame(index=range(10))
+    column, value = 'test_row', 123
+
+    # Act
+    return_value = crud_mngr._update_table(
+        table='test_table',
+        dataframe=dataframe,
+        engine=_ENGINE_INSTANCE,
+        col_to_add=(column, value)
+        )
+
+    # Assert
+    unique_values = set(dataframe.loc[:, column])
+    assert unique_values.pop() == value
+    assert not unique_values
+    assert not return_value
+
+
+def test_update_table_calls_to_sql_correctly(mock_pd):  # noqa: D103
+    # Arange
+    correct_params = dict(
+        name='test_table', con=_ENGINE_INSTANCE, if_exists='append',
+        index=False
+        )
+
+    # Act
+    return_value = crud_mngr._update_table(
+        table='test_table',
+        dataframe=mock_pd.DataFrame,
+        engine=_ENGINE_INSTANCE
+        )
+
+    # Assert
+    mock_pd.DataFrame.to_sql.assert_called_once_with(**correct_params)
+    assert not return_value
+
+
+def test_update_table_returns_last_row_id_if_necessary(mock_pd):  # noqa: D103
+    # Arange
+    table, column = 'test_table', 'table_id'
+
+    # Act
+    requested_id = crud_mngr._update_table(
+        table=table,
+        dataframe=mock_pd.DataFrame,
+        engine=_ENGINE_INSTANCE,
+        id_to_get=column
+        )
+
+    # Assert
+    assert requested_id == _LAST_ROW_ID
+
+
+# ----------------------------------------------------------------------------
 # create_tables
 
 
@@ -458,65 +517,6 @@ def test_add_tube_returns_correct_message(
 
 
 # ----------------------------------------------------------------------------
-# update_table
-
-
-def test_update_table_adds_col_if_necessary(mock_pd):  # noqa: D103
-    # Arange
-    dataframe = pd.DataFrame(index=range(10))
-    column, value = 'test_row', 123
-
-    # Act
-    return_value = crud_mngr.update_table(
-        table='test_table',
-        dataframe=dataframe,
-        engine=_ENGINE_INSTANCE,
-        col_to_add=(column, value)
-        )
-
-    # Assert
-    unique_values = set(dataframe.loc[:, column])
-    assert unique_values.pop() == value
-    assert not unique_values
-    assert not return_value
-
-
-def test_update_table_calls_to_sql_correctly(mock_pd):  # noqa: D103
-    # Arange
-    correct_params = dict(
-        name='test_table', con=_ENGINE_INSTANCE, if_exists='append',
-        index=False
-        )
-
-    # Act
-    return_value = crud_mngr.update_table(
-        table='test_table',
-        dataframe=mock_pd.DataFrame,
-        engine=_ENGINE_INSTANCE
-        )
-
-    # Assert
-    mock_pd.DataFrame.to_sql.assert_called_once_with(**correct_params)
-    assert not return_value
-
-
-def test_update_table_returns_last_row_id_if_necessary(mock_pd):  # noqa: D103
-    # Arange
-    table, column = 'test_table', 'table_id'
-
-    # Act
-    requested_id = crud_mngr.update_table(
-        table=table,
-        dataframe=mock_pd.DataFrame,
-        engine=_ENGINE_INSTANCE,
-        id_to_get=column
-        )
-
-    # Assert
-    assert requested_id == _LAST_ROW_ID
-
-
-# ----------------------------------------------------------------------------
 # add_experiment
 
 @pytest.mark.skip
@@ -525,7 +525,7 @@ def test_add_experiment_call_stack(
         ):  # noqa: D103
     # Arange
     mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)
-    monkeypatch.setattr('chamber.manager.crud.update_table', mock_update_table)
+    monkeypatch.setattr('chamber.manager.crud._update_table', mock_update_table)
     correct_calls = [
         mock.call(
             'Setting',

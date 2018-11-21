@@ -266,7 +266,7 @@ def add_tube(database):
     return message
 
 
-def update_table(table, dataframe, engine, col_to_add=None, id_to_get=None):
+def _update_table(table, dataframe, engine, col_to_add=None, id_to_get=None):
     """
     Upload a `dataframe` into sql `table` using provided `engine`.
 
@@ -298,19 +298,19 @@ def update_table(table, dataframe, engine, col_to_add=None, id_to_get=None):
 
     If you want to update the dataframe as is:
 
-    >>> update_table('table', dataframe, engine)
+    >>> _update_table('table', dataframe, engine)
 
     You can also add a column called `table_id` with a value of 1
     to the dataframe before inserting:
 
     >>> col_to_add = ('table_id', 1)
-    >>> update_table('table', dataframe, engine, col_to_add=col_to_add)
+    >>> _update_table('table', dataframe, engine, col_to_add=col_to_add)
 
 
     You can also retreive the last row id as well:
 
     >>> id_to_get = 'table_id'
-    >>> id = update_table('table', dataframe, engine, id_to_get=id_to_get)
+    >>> id = _update_table('table', dataframe, engine, id_to_get=id_to_get)
 
     """
     if col_to_add:
