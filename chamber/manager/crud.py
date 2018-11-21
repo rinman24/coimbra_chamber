@@ -121,6 +121,11 @@ def _get_experimental_data():
     return databases
 
 
+def _get_last_row_id(table, column, engine):
+    dml = 'SELECT IFNULL(MAX({0}), 0) + 1 FROM {1};'.format(column, table)
+    return pd.read_sql_query(dml, con=engine).iloc[0, 0]
+
+
 def create_tables(table_group, database):
     """
     Manage construction of a group of tables for a given database.
@@ -258,3 +263,4 @@ def add_tube(database):
 
     message = 'Sucessfully added default tube to `{}`.'.format(database)
     return message
+

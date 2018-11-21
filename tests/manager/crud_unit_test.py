@@ -3,6 +3,7 @@
 import unittest.mock as mock
 
 from mysql.connector import Error as mysql_Error
+import pandas as pd
 import pytest
 
 import chamber.manager.crud as crud_mngr
@@ -125,12 +126,16 @@ def mock_sqlalchemy(monkeypatch):
 def mock_pd(monkeypatch):
     """Mock of pandas package."""
     mock_pd = mock.MagicMock()
-
-    DataFrame = mock_pd.DataFrame
-    to_sql = DataFrame.to_sql
+    
+    mock_pd.read_sql_query.return_value.iloc.__getitem__.return_value = 924
+    monkeypatch.setattr(
+        'chamber.manager.crud.pd.read_sql_query',
+        mock_pd.read_sql_query
+        )
 
     monkeypatch.setattr(
-        'chamber.manager.crud.pd.core.frame.DataFrame.to_sql', to_sql
+        'chamber.manager.crud.pd.core.frame.DataFrame.to_sql',
+        mock_pd.DataFrame.to_sql
         )
 
     return mock_pd
@@ -344,6 +349,19 @@ def test_get_experimental_data_returns_correct(mock_tk, mock_engine):
 
 
 # ----------------------------------------------------------------------------
+# _get_last_row_id
+
+def test_can_call_get_lastrow_id(mock_pd):
+    # Arange
+    correct_return_value = 924
+    
+    # Act
+    last_row_id = crud_mngr._get_last_row_id('Setting', 'SettingId', 'engine')
+
+    # Assert
+    assert (last_row_id == correct_return_value)
+
+# ----------------------------------------------------------------------------
 # create_tables
 
 
@@ -412,12 +430,15 @@ def test_add_tube_calls_to_sql_with_correct_inputs(
         mock_sqlalchemy,
         mock_pd
         ):
-
-    crud_mngr.add_tube('test_schema')
-
+    # Arange
     correct_params = dict(
         name='Tube', con=_ENGINE_INSTANCE, if_exists='append', index=False
         )
+    
+    # Act
+    crud_mngr.add_tube('test_schema')
+
+    # Assert
     mock_pd.DataFrame.to_sql.assert_called_once_with(**correct_params)
 
 
