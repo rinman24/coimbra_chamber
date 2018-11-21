@@ -1,6 +1,7 @@
 """Analysis engine unit test suite."""
 
 import datetime
+import pdb
 import unittest.mock as mock
 
 import pandas as pd
@@ -188,7 +189,7 @@ def mock_TdmsFile(monkeypatch):
 
 def test_get_tdms_objs_as_df_returns_correct_dicts(mock_TdmsFile):
     # Act
-    result = anlys_eng._get_tdms_objs_as_df('test_path')
+    result = anlys_eng._tdms_2_dict_of_df('test_path')
 
     # Assert
     pd.testing.assert_frame_equal(result['setting'], _SETTINGS_OBJ_AS_DF)
@@ -297,7 +298,9 @@ def test_build_setting_keeps_powout_powref_in_data_when_duty_is_1(
 # _build_observation_df
 
 
-def test_build_observation_df_returns_correct_df():
+@pytest.mark.parametrize('duty', [0, 1])
+@pytest.mark.parametrize('is_mass', [0, 1])
+def test_build_observation_df_returns_correct_df(duty, is_mass, mock_TdmsFile):
     # Arrange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
     correct_observation_df = _build_correct_observation_df(
@@ -313,87 +316,33 @@ def test_build_observation_df_returns_correct_df():
         )
 
 
-
-
-
-
-@pytest.mark.skip
-def test_build_observation_df_with_mass_1_and_duty_0(mock_TdmsFile):
+@pytest.mark.parametrize('duty', [0, 1])
+@pytest.mark.parametrize('is_mass', [0, 1])
+def test_build_observation_removes_keys_from_data(
+        duty, is_mass, mock_TdmsFile
+        ):
     # Arrange
-    is_mass, duty = 1.0, 0.0
-    correct_col_set, dropped_col_set = _setup_observation_sets(
-        is_mass=is_mass, duty=duty
-        )
-    dataframes = _configure_input_dataframes(is_mass=is_mass, duty=duty)
+    dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
 
     # Act
     dataframes = anlys_eng._build_observation_df(dataframes)
 
     # Assert
-    assert _obs_has_correct_cols(dataframes, correct_col_set)
-    assert _correct_data_tables_dropped(dataframes, dropped_col_set)
-
-@pytest.mark.skip
-def test_build_observation_df_with_mass_0_and_duty_0(mock_TdmsFile):
-    # Arrange
-    is_mass, duty = 0.0, 0.0
-    correct_col_set, dropped_col_set = _setup_observation_sets(
-        is_mass=is_mass, duty=duty
+    assert not (
+        set(dataframes['observation'].columns)
+        & set(dataframes['data'].columns)
         )
-
-    dataframes = _configure_input_dataframes(is_mass=is_mass, duty=duty)
-
-    # Act
-    dataframes = anlys_eng._build_observation_df(dataframes)
-
-    # Assert
-    assert _obs_has_correct_cols(dataframes, correct_col_set)
-    assert _correct_data_tables_dropped(dataframes, dropped_col_set)
-
-@pytest.mark.skip
-def test_build_observation_df_with_mass_0_and_duty_1(mock_TdmsFile):
-    # Arrange
-    is_mass, duty = 0.0, 1.0
-    correct_col_set, dropped_col_set = _setup_observation_sets(
-        is_mass=is_mass, duty=duty
-        )
-
-    dataframes = _configure_input_dataframes(is_mass=is_mass, duty=duty)
-
-    # Act
-    dataframes = anlys_eng._build_observation_df(dataframes)
-
-    # Assert
-    assert _obs_has_correct_cols(dataframes, correct_col_set)
-    assert _correct_data_tables_dropped(dataframes, dropped_col_set)
-
-@pytest.mark.skip
-def test_build_observation_df_with_mass_1_and_duty_1(mock_TdmsFile):
-    # Arrange
-    is_mass, duty = 1.0, 1.0
-    correct_col_set, dropped_col_set = _setup_observation_sets(
-        is_mass=is_mass, duty=duty
-        )
-
-    dataframes = _configure_input_dataframes(is_mass=is_mass, duty=duty)
-
-    # Act
-    dataframes = anlys_eng._build_observation_df(dataframes)
-
-    # Assert
-    assert set(dataframes['observation'].columns) == correct_col_set
-
-    assert _correct_data_tables_dropped(dataframes, dropped_col_set)
 
 
 # ----------------------------------------------------------------------------
 # _build_temp_observation_df
 
-@pytest.mark.skip
-def test_build_temp_observation_with_is_mass_1(mock_TdmsFile):
-    is_mass = 1.0
+
+@pytest.mark.parametrize('duty', [0, 1])
+def test_build_temp_observation_with_is_mass_1(duty, mock_TdmsFile):
     # Arrange
-    dataframes = _configure_input_dataframes(is_mass=is_mass)
+    dataframes = _configure_input_dataframes(is_mass=1, duty=duty)
+    dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
 
     # Act
@@ -403,14 +352,13 @@ def test_build_temp_observation_with_is_mass_1(mock_TdmsFile):
     pd.testing.assert_frame_equal(
         dataframes['temp_observation'], _CORRECT_TEMP_OBSERVATION_DF_MASS_1
         )
-    assert ('Idx' in set(dataframes['observation'].columns))
-    assert ('Idx' not in set(dataframes['data'].columns))
 
-@pytest.mark.skip
-def test_build_temp_observation_with_is_mass_0(mock_TdmsFile):
-    is_mass = 0.0
+
+@pytest.mark.parametrize('duty', [0, 1])
+def test_build_temp_observation_with_is_mass_0(duty, mock_TdmsFile):
     # Arrange
-    dataframes = _configure_input_dataframes(is_mass=is_mass)
+    dataframes = _configure_input_dataframes(is_mass=0, duty=duty)
+    dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
 
     # Act
@@ -420,31 +368,23 @@ def test_build_temp_observation_with_is_mass_0(mock_TdmsFile):
     pd.testing.assert_frame_equal(
         dataframes['temp_observation'], _CORRECT_TEMP_OBSERVATION_DF_MASS_0
         )
-    assert ('Idx' in set(dataframes['observation'].columns))
-    assert ('Idx' not in set(dataframes['data'].columns))
 
 
-# ----------------------------------------------------------------------------
-# read_tdms
-
-@pytest.mark.skip
-def test_read_tdms_returns_correct_dfs_mass_0_duty_1(mock_TdmsFile):
+@pytest.mark.parametrize('duty', [0, 1])
+@pytest.mark.parametrize('is_mass', [0, 1])
+def test_build_temp_observation_drops_data_columns(
+        duty, is_mass, mock_TdmsFile
+        ):
     # Arrange
-    is_mass, duty = 0, 1
-    correct_setting_df = _build_correct_setting_df(
-        is_mass=0.0, avg_temp=300.0, avg_pres=80e3
-        )
+    dataframes = _configure_input_dataframes(is_mass=is_mass, duty=duty)
+    dataframes = anlys_eng._build_setting_df(dataframes)
+    dataframes = anlys_eng._build_observation_df(dataframes)
 
     # Act
-    dataframes = anlys_eng.read_tdms('test_path')
+    dataframes = anlys_eng._build_temp_observation_df(dataframes)
 
     # Assert
-    assert False
-    pd.testing.assert_frame_equal(
-        dataframes['setting'], 
-        _build_correct_setting_df(is_mass=0.0, avg_temp=300.0, avg_pres=80e3)
-        )
-
+    assert dataframes['data'].empty
 
 
 # ----------------------------------------------------------------------------
@@ -452,7 +392,7 @@ def test_read_tdms_returns_correct_dfs_mass_0_duty_1(mock_TdmsFile):
 
 
 def _configure_input_dataframes(is_mass, duty):
-    dataframes = anlys_eng._get_tdms_objs_as_df('test_path')
+    dataframes = anlys_eng._tdms_2_dict_of_df('test_path')
 
     dataframes['setting'].loc[0, 'IsMass'] = is_mass
     dataframes['setting'].loc[0, 'Duty'] = duty
@@ -478,47 +418,19 @@ def _build_correct_setting_df(is_mass, duty):
 
 def _build_correct_observation_df(is_mass, duty):
     correct_observation_df = _DATA_OBJ_AS_DF.copy()
-
-    tc_cols = ['TC{}'.format(tc_num) for tc_num in range(0, 14)]
-    correct_observation_df.drop(columns=tc_cols, inplace=True)
+    # This is required to match the order columns are added in production.
+    # Also drops all 'TC' columns as they are not in new_col_order.
+    new_col_order = [
+        'CapManOk', 'DewPoint', 'Idx', 'OptidewOk', 'Pressure',
+        'Mass', 'PowOut', 'PowRef'
+        ]
+    correct_observation_df = correct_observation_df.loc[:, new_col_order]
 
     if not is_mass:
         correct_observation_df.drop(columns=['Mass'], inplace=True)
     if not duty:
-         correct_observation_df.drop(
+        correct_observation_df.drop(
              columns=['PowOut', 'PowRef'], inplace=True
              )
 
     return correct_observation_df
-
-# def _setup_observation_sets(is_mass=None, duty=None):
-#     obs_col_set = set(_BASE_OBS_COL_SET)
-#     dropped_col_set = set(obs_col_set)
-#     dropped_col_set.add('Mass')  # Mass is dropped wither way
-
-#     if is_mass:
-#         obs_col_set.add('Mass')
-
-#     if duty:
-#         obs_col_set.add('PowOut')
-#         obs_col_set.add('PowRef')
-
-#         dropped_col_set.add('PowOut')
-#         dropped_col_set.add('PowRef')
-
-#     return obs_col_set, dropped_col_set
-
-
-# def _obs_has_correct_cols(dataframes, correct_col_set):
-#     observation_cols_set = set(dataframes['observation'].columns)
-#     if observation_cols_set == correct_col_set:
-#         return True
-#     return False
-
-
-# def _correct_data_tables_dropped(dataframes, dropped_col_set):
-#     data_cols_set = set(dataframes['data'].columns)
-#     intersection = (data_cols_set & dropped_col_set)
-#     if not intersection:  # No intersection: correct dropped tables
-#         return True
-#     return False

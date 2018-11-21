@@ -1,10 +1,12 @@
 """Analysis engine module."""
 
+import re
+
 import nptdms
 import pandas as pd
 
 
-def _get_tdms_objs_as_df(filepath):
+def _tdms_2_dict_of_df(filepath):
     """
     Convert tdms file to a dictionary of pandas DataFrames.
 
@@ -20,7 +22,7 @@ def _get_tdms_objs_as_df(filepath):
 
     Examples
     --------
-    >>> dataframes = tdms_2_dict_of_df('path')
+    >>> dataframes = _tdms_2_dict_of_df('path')
 
     """
     tdms_file = nptdms.TdmsFile(filepath)
@@ -48,9 +50,15 @@ def _build_setting_df(dataframes):
     """
     Add `Temperature` and `Pressure` keys to `setting` dataframe.
 
-    Use `data` dataframe to calculate averave values of temperature and
-    pressure over the course of the experiment. Average temperature and
-    pressure are then rounded to the nearest 5 K and 5000 Pa, respectively.
+    Calculate averave experimental values of temperature and pressure using
+    all observations. Average temperature and pressure are then rounded to the
+    nearest 5 K and 5000 Pa, respectively.
+
+    If `Duty` is zero in settings, `PowOut` and `PowRef` columns are
+    dropped from `data` dataframe.
+
+    If `IsMass` is truthy in settings, TC0-3 are dropped from `data`
+    dataframe. Else, `Mass` is dropped from `data` dataframe.
 
     Parameters
     ----------
@@ -64,7 +72,7 @@ def _build_setting_df(dataframes):
 
     Examples
     --------
-    >>> dataframes = _get_tdms_objs_as_df(filepath)
+    >>> dataframes = _tdms_2_dict_of_df('path')
     >>> dataframes = _build_setting_df(dataframes)
 
     """
@@ -93,11 +101,10 @@ def _build_setting_df(dataframes):
 
 def _build_observation_df(dataframes):
     """
-    Add columns to observation and drop columns from data.
+    Convert `data` dataframe into `observation` dataframe.
 
-    In order to manage resources, when a columns is moved to
-    `dataframes['observation'] is is immediately dropped from
-    `databases['data']`.
+    Columns are 'popped' off of `data` an inserted into `observation` one at a
+    time to avoid creating a full copy.
 
     Parameters
     ----------
@@ -111,34 +118,32 @@ def _build_observation_df(dataframes):
 
     Examples
     --------
-    >>> dataframes = _get_tdms_objs_as_df(filepath)
+    >>> dataframes = _tdms_2_dict_of_df(filepath)
     >>> dataframes = _build_setting_df(dataframes)
     >>> dataframes = _build_observation_df(dataframes)
 
     """
-    columns_to_move = ['CapManOk', 'DewPoint', 'OptidewOk', 'Pressure']
+    columns_to_keep = ['CapManOk', 'DewPoint', 'Idx', 'OptidewOk', 'Pressure']
 
-    #if dataframes['setting'].loc[0, 'IsMass']:
-    ##columns_to_move.append('Mass')
-    #else:
-        #dataframes['data'].drop(columns=['Mass'], inplace=True)
+    if dataframes['setting'].loc[0, 'IsMass']:
+        columns_to_keep.append('Mass')
 
-    #if dataframes['setting'].loc[0, 'Duty']:
-    ##columns_to_move += ['PowRef', 'PowOut']
-    #else:
-        #dataframes['data'].drop(columns=['PowOut', 'PowRef'], inplace=True)
+    if dataframes['setting'].loc[0, 'Duty']:
+        columns_to_keep += ['PowOut', 'PowRef']
 
-    ##dataframes['observation'] = dataframes['data'][columns_to_move].copy()
-    #dataframes['data'].drop(columns=columns_to_move, inplace=True)
+    dataframes['observation'] = pd.DataFrame()
+    for col in columns_to_keep:
+        dataframes['observation'].loc[:, col] = dataframes['data'].pop(col)
 
     return dataframes
 
 
 def _build_temp_observation_df(dataframes):
     """
-    Reformat data table to temp observation format.
-
     Pivot remaining tc columns in `data` to the format required by database.
+
+    Columns are 'popped' off of `data` an inserted into `temp_observation` one
+    at a time to avoid creating a full copy.
 
     Parameters
     ----------
@@ -152,7 +157,7 @@ def _build_temp_observation_df(dataframes):
 
      Examples
     --------
-    >>> dataframes = _get_tdms_objs_as_df(filepath)
+    >>> dataframes = _tdms_2_dict_of_df(filepath)
     >>> dataframes = _build_setting_df(dataframes)
     >>> dataframes = _build_observation_df(dataframes)
     >>> dataframes = _build_temp_observation_df(dataframes)
@@ -160,23 +165,16 @@ def _build_temp_observation_df(dataframes):
     """
     tc_num, temp, idx = [], [], []
     elements = len(dataframes['data'].index)
-
-    initial_tc = 0
-
     if dataframes['setting'].loc[0, 'IsMass']:
         initial_tc = 4
+    else:
+        initial_tc = 0
 
     for tc in range(initial_tc, 14):
         tc_num += [tc]*elements
-
         col = 'TC{}'.format(tc)
-        temp += list(dataframes['data'].loc[:, col])
-        dataframes['data'].drop(columns=[col], inplace=True)
-
-        idx += list(dataframes['data'].loc[:, 'Idx'])
-
-    dataframes['observation'].loc[:, 'Idx'] = dataframes['data'].loc[:, 'Idx']
-    dataframes['data'].drop(columns=['Idx'], inplace=True)
+        temp += list(dataframes['data'].pop(col))
+        idx += list(dataframes['observation'].loc[:, 'Idx'])
 
     dataframes['temp_observation'] = pd.DataFrame(
         dict(
@@ -186,14 +184,6 @@ def _build_temp_observation_df(dataframes):
             )
         )
 
-    return dataframes
-
-
-def read_tdms(filepath):
-    dataframes = _get_tdms_objs_as_df(filepath)
-    dataframes = _build_setting_df(dataframes)
-    # dataframes = _build_observation_df(dataframes)
-    # dataframes = _build_temp_observation_df(dataframes)
     return dataframes
 
 
