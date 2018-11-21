@@ -160,6 +160,19 @@ def mock_tk(monkeypatch):
     return mock_tk
 
 
+@pytest.fixture()
+def mock_engine(monkeypatch):
+    mock_engine = mock.MagicMock()
+    read_tdms = mock_engine.read_tdms
+    read_tdms.return_value = 'databases'
+
+    monkeypatch.setattr(
+        'chamber.manager.crud.anlys_eng.read_tdms', read_tdms
+        )
+
+    return mock_engine
+
+
 # ----------------------------------------------------------------------------
 # _get_credentials
 
@@ -383,9 +396,11 @@ def test_add_tube_returns_correct_message(
 # get_experimental_data
 
 
-def test_get_experimental_data_calls_askopenfilename(mock_tk):
+def test_get_experimental_data_calls_askopenfilename(mock_tk, mock_engine):
+    # Act
     crud_mngr._get_experimental_data()
 
+    # Assert
     correct_calls = [
         mock.call.Tk(),
         mock.call.root.withdraw(),
@@ -394,6 +409,16 @@ def test_get_experimental_data_calls_askopenfilename(mock_tk):
 
     mock_tk.assert_has_calls(correct_calls)
 
+
+def test_get_experimental_data_calls_analysis_engine(mock_tk, mock_engine):
+    # Arrange
+    path = mock_tk.filedialog.askopenfilename.return_value
+
+    # Act
+    crud_mngr._get_experimental_data()
+
+    # Assert
+    mock_engine.read_tdms.assert_called_once_with(path)
 
 # ----------------------------------------------------------------------------
 # helpers

@@ -21,6 +21,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 import chamber.utility.ddl as util_ddl
+import chamber.engine.analysis as anlys_eng
 
 
 DEFAULT_TUBE = pd.DataFrame(
@@ -112,15 +113,9 @@ def _get_engine(database, creds):
 def _get_experimental_data():
     root = tk.Tk()
     root.withdraw()
-    fp = filedialog.askopenfilename(title='Select Experiment')
-    return fp
+    filepath = filedialog.askopenfilename(title='Select Experiment')
 
-    # tdms_file = nptdms.TdmsFile(fp)
-    # You need some helper functions here. namely get settings df
-    # However, this may belong in an engine. The question is, should
-    # CRUD manager be responsible for knowing how to get the data out
-    # of nptdms files? Probably not. So who should know how to do this?
-    # Well an engine. but What engine?
+    anlys_eng.read_tdms(filepath)
 
 
 def create_tables(table_group, database):
