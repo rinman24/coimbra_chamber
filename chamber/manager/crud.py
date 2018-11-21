@@ -111,11 +111,14 @@ def _get_engine(database, creds):
 
 
 def _get_experimental_data():
+    """Ask user for filename and get databases dict."""
     root = tk.Tk()
     root.withdraw()
     filepath = filedialog.askopenfilename(title='Select Experiment')
 
-    anlys_eng.read_tdms(filepath)
+    databases = anlys_eng.read_tdms(filepath)
+
+    return databases
 
 
 def create_tables(table_group, database):
