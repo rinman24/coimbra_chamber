@@ -22,6 +22,8 @@ _TEST_FILEPATH = 'C:/Users/Me/test_experiment.tdms'
 
 _LAST_ROW_ID = 924
 
+_DATABASE = 'test_schema'
+
 
 @pytest.fixture()
 def mock_ConfigParser(monkeypatch):
@@ -303,16 +305,18 @@ def test_execute_drop_returns_success(mock_mysql, mock_utility):  # noqa: D103
 
 
 def test_get_engine_calls_create_engine(mock_sqlalchemy):  # noqa: D103
-    crud_mngr._get_engine('test_schema', _CORRECT_CREDS)
+    crud_mngr._get_engine(_DATABASE, _CORRECT_CREDS)
 
-    correct_url = 'mysql+mysqlconnector://me:secret@address:3306/test_schema'
+    correct_url = (
+        'mysql+mysqlconnector://me:secret@address:3306/{}'.format(_DATABASE)
+        )
     mock_sqlalchemy.create_engine.assert_called_once_with(
         correct_url
         )
 
 
 def test_get_engine_returns_correct_value(mock_sqlalchemy):  # noqa: D103
-    engine = crud_mngr._get_engine('test_schema', _CORRECT_CREDS)
+    engine = crud_mngr._get_engine(_DATABASE, _CORRECT_CREDS)
 
     assert engine == _ENGINE_INSTANCE
 
@@ -506,7 +510,7 @@ def test_add_tube_calls_to_sql_with_correct_inputs(
         )
 
     # Act
-    crud_mngr.add_tube('test_schema')
+    crud_mngr.add_tube(_DATABASE)
 
     # Assert
     mock_pd.DataFrame.to_sql.assert_called_once_with(**correct_params)
@@ -515,10 +519,13 @@ def test_add_tube_calls_to_sql_with_correct_inputs(
 def test_add_tube_returns_correct_message(
         mock_ConfigParser, mock_sqlalchemy, mock_pd
         ):  # noqa: D103
+    correct_message = (
+        'Sucessfully added default tube to `{}`.'.format(_DATABASE)
+        )
 
-    message = crud_mngr.add_tube('test_schema')
+    message = crud_mngr.add_tube(_DATABASE)
 
-    assert message == 'Sucessfully added default tube to `test_schema`.'
+    assert message == correct_message
 
 
 # ----------------------------------------------------------------------------
@@ -561,10 +568,9 @@ def test_add_experiment_call_stack(
             col_to_add=('TestId', _LAST_ROW_ID)
             )
         ]
-    database = 'test_schema'
 
     # Act
-    crud_mngr.add_experiment(database)
+    crud_mngr.add_experiment(_DATABASE)
 
     # Assert
     mock_update_table.assert_has_calls(correct_calls)
@@ -574,13 +580,12 @@ def test_add_experiment_returns_message(
         mock_ConfigParser, mock_sqlalchemy, mock_pd, mock_engine, mock_tk
         ):  # noqa: D103
     # Arange
-    database = 'test_schema'
     correct_message = (
-        'Successfully added experiment to `{}`.'.format(database)
+        'Successfully added experiment to `{}`.'.format(_DATABASE)
         )
 
     # Act
-    message = crud_mngr.add_experiment(database)
+    message = crud_mngr.add_experiment(_DATABASE)
 
     # Assert
     assert (message == correct_message)
