@@ -126,7 +126,7 @@ def mock_sqlalchemy(monkeypatch):
 def mock_pd(monkeypatch):
     """Mock of pandas package."""
     mock_pd = mock.MagicMock()
-    
+
     mock_pd.read_sql_query.return_value.iloc.__getitem__.return_value = 924
     monkeypatch.setattr(
         'chamber.manager.crud.pd.read_sql_query',
@@ -168,11 +168,10 @@ def mock_tk(monkeypatch):
 @pytest.fixture()
 def mock_engine(monkeypatch):
     mock_engine = mock.MagicMock()
-    read_tdms = mock_engine.read_tdms
-    read_tdms.return_value = 'databases'
+    mock_engine.read_tdms.return_value = 'databases'
 
     monkeypatch.setattr(
-        'chamber.manager.crud.anlys_eng.read_tdms', read_tdms
+        'chamber.manager.crud.anlys_eng.read_tdms', mock_engine.read_tdms
         )
 
     return mock_engine
@@ -351,15 +350,17 @@ def test_get_experimental_data_returns_correct(mock_tk, mock_engine):
 # ----------------------------------------------------------------------------
 # _get_last_row_id
 
-def test_can_call_get_lastrow_id(mock_pd):
+
+def test_get_lastrow_id_returns_correct_value(mock_pd):
     # Arange
     correct_return_value = 924
-    
+
     # Act
-    last_row_id = crud_mngr._get_last_row_id('Setting', 'SettingId', 'engine')
+    last_row_id = crud_mngr._get_last_row_id('Test', 'SettingId', 'engine')
 
     # Assert
     assert (last_row_id == correct_return_value)
+
 
 # ----------------------------------------------------------------------------
 # create_tables
@@ -434,7 +435,7 @@ def test_add_tube_calls_to_sql_with_correct_inputs(
     correct_params = dict(
         name='Tube', con=_ENGINE_INSTANCE, if_exists='append', index=False
         )
-    
+
     # Act
     crud_mngr.add_tube('test_schema')
 
