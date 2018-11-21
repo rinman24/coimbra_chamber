@@ -167,6 +167,7 @@ def mock_tk(monkeypatch):
 
 @pytest.fixture()
 def mock_engine(monkeypatch):
+    """Mock chamber.engine."""
     mock_engine = mock.MagicMock()
     mock_engine.read_tdms.return_value = 'databases'
 
@@ -181,13 +182,13 @@ def mock_engine(monkeypatch):
 # _get_credentials
 
 
-def test_can_call_get_credentials(mock_ConfigParser):
+def test_can_call_get_credentials(mock_ConfigParser):  # noqa: D103
     crud_mngr._get_credentials()
 
     mock_ConfigParser.configparser.read.assert_called_once_with('config.ini')
 
 
-def test_get_credentials_returns_correct_dict(mock_ConfigParser):
+def test_get_credentials_returns_correct_dict(mock_ConfigParser):  # noqa: D103
     creds = crud_mngr._get_credentials()
 
     assert creds == _CORRECT_CREDS
@@ -195,7 +196,7 @@ def test_get_credentials_returns_correct_dict(mock_ConfigParser):
 
 def test_get_credentials_exception_knows_the_name_missing_key(
         mock_ConfigParser
-        ):
+        ):  # noqa: D103
     _configparser_key_setter(
         mock_ConfigParser.configparser, ['user', 'password']
         )
@@ -208,7 +209,7 @@ def test_get_credentials_exception_knows_the_name_missing_key(
         crud_mngr._get_credentials()
 
 
-def test_get_credentials_raises_file_not_found_error(mock_ConfigParser):
+def test_get_credentials_raises_file_not_found_error(mock_ConfigParser):  # noqa: D103
     mock_ConfigParser.configparser.read.return_value = []
 
     error_message = ('FileNotFoundError: config.ini does not exits.')
@@ -219,7 +220,7 @@ def test_get_credentials_raises_file_not_found_error(mock_ConfigParser):
 # ----------------------------------------------------------------------------
 # _connect
 
-def test_connect_calls_connect_before_cursor(mock_mysql):
+def test_connect_calls_connect_before_cursor(mock_mysql):  # noqa: D103
     crud_mngr._connect(_CORRECT_CREDS)
 
     correct_calls = [
@@ -229,20 +230,20 @@ def test_connect_calls_connect_before_cursor(mock_mysql):
     mock_mysql.assert_has_calls(correct_calls)
 
 
-def test_connect_returns_cnx_and_cur(mock_mysql):
+def test_connect_returns_cnx_and_cur(mock_mysql):  # noqa: D103
     cnx, cur = crud_mngr._connect(_CORRECT_CREDS)
 
     assert cnx == mock_mysql.cnx
     assert cur == mock_mysql.cur
 
 
-def test_connect_executes_use_database_when_given(mock_mysql):
+def test_connect_executes_use_database_when_given(mock_mysql):  # noqa: D103
     crud_mngr._connect(_CORRECT_CREDS, database='schema')
 
     mock_mysql.cur.execute.assert_called_once_with('USE schema;')
 
 
-def test_connect_does_not_execute_use_database_by_default(mock_mysql):
+def test_connect_does_not_execute_use_database_by_default(mock_mysql):  # noqa: D103
     crud_mngr._connect(_CORRECT_CREDS)
 
     mock_mysql.cur.execute.assert_not_called()
@@ -254,14 +255,14 @@ def test_connect_does_not_execute_use_database_by_default(mock_mysql):
 
 def test_execute_build_executes_calls_in_correct_order(
         mock_mysql, mock_utility
-        ):
+        ):  # noqa: D103
     crud_mngr._execute_build(mock_mysql.cur, 'group')
 
     correct_calls = [mock.call('foo'), mock.call('bar'), mock.call('bacon!')]
     mock_mysql.cur.execute.assert_has_calls(correct_calls)
 
 
-def test_execute_build_returns_success(mock_mysql, mock_utility):
+def test_execute_build_returns_success(mock_mysql, mock_utility):  # noqa: D103
     message = crud_mngr._execute_build(mock_mysql.cur, 'group')
     assert message == _SETUP_MESSAGE
 
@@ -272,7 +273,7 @@ def test_execute_build_returns_success(mock_mysql, mock_utility):
 
 def test_execute_drop_executes_calls_in_correct_order(
         mock_mysql, mock_utility
-        ):
+        ):  # noqa: D103
     crud_mngr._execute_drop(mock_mysql.cur, 'group')
 
     correct_calls = [
@@ -283,7 +284,7 @@ def test_execute_drop_executes_calls_in_correct_order(
     mock_mysql.cur.execute.assert_has_calls(correct_calls)
 
 
-def test_execute_drop_returns_success(mock_mysql, mock_utility):
+def test_execute_drop_returns_success(mock_mysql, mock_utility):  # noqa: D103
     message = crud_mngr._execute_drop(mock_mysql.cur, 'group')
     assert message == _TEARDOWN_MESSAGE
 
@@ -292,7 +293,7 @@ def test_execute_drop_returns_success(mock_mysql, mock_utility):
 # _get_engine
 
 
-def test_get_engine_calls_create_engine(mock_sqlalchemy):
+def test_get_engine_calls_create_engine(mock_sqlalchemy):  # noqa: D103
     crud_mngr._get_engine('test_schema', _CORRECT_CREDS)
 
     correct_url = 'mysql+mysqlconnector://me:secret@address:3306/test_schema'
@@ -301,7 +302,7 @@ def test_get_engine_calls_create_engine(mock_sqlalchemy):
         )
 
 
-def test_get_engine_returns_correct_value(mock_sqlalchemy):
+def test_get_engine_returns_correct_value(mock_sqlalchemy):  # noqa: D103
     engine = crud_mngr._get_engine('test_schema', _CORRECT_CREDS)
 
     assert engine == _ENGINE_INSTANCE
@@ -311,7 +312,7 @@ def test_get_engine_returns_correct_value(mock_sqlalchemy):
 # _get_experimental_data
 
 
-def test_get_experimental_data_calls_askopenfilename(mock_tk, mock_engine):
+def test_get_experimental_data_calls_askopenfilename(mock_tk, mock_engine):  # noqa: D103
     # Act
     crud_mngr._get_experimental_data()
 
@@ -325,7 +326,7 @@ def test_get_experimental_data_calls_askopenfilename(mock_tk, mock_engine):
     mock_tk.assert_has_calls(correct_calls)
 
 
-def test_get_experimental_data_calls_analysis_engine(mock_tk, mock_engine):
+def test_get_experimental_data_calls_analysis_engine(mock_tk, mock_engine):  # noqa: D103
     # Arrange
     path = mock_tk.filedialog.askopenfilename.return_value
 
@@ -336,7 +337,7 @@ def test_get_experimental_data_calls_analysis_engine(mock_tk, mock_engine):
     mock_engine.read_tdms.assert_called_once_with(path)
 
 
-def test_get_experimental_data_returns_correct(mock_tk, mock_engine):
+def test_get_experimental_data_returns_correct(mock_tk, mock_engine):  # noqa: D103
     # Arange
     correct_return_value = mock_engine.read_tdms.return_value
 
@@ -351,7 +352,7 @@ def test_get_experimental_data_returns_correct(mock_tk, mock_engine):
 # _get_last_row_id
 
 
-def test_get_lastrow_id_returns_correct_value(mock_pd):
+def test_get_lastrow_id_returns_correct_value(mock_pd):  # noqa: D103
     # Arange
     correct_return_value = 924
 
@@ -363,19 +364,41 @@ def test_get_lastrow_id_returns_correct_value(mock_pd):
 
 
 # ----------------------------------------------------------------------------
+# _update_table
+
+
+def test_update_table_calls_to_sql_correctly(mock_pd):  # noqa: D103
+    # Arange
+    correct_params = dict(
+        name='test_table', con=_ENGINE_INSTANCE, if_exists='append',
+        index=False
+        )
+
+    # Act
+    crud_mngr._update_table(
+        table='test_table',
+        dataframe=mock_pd.DataFrame,
+        engine=_ENGINE_INSTANCE
+        )
+
+    # Assert
+    mock_pd.DataFrame.to_sql.assert_called_once_with(**correct_params)
+
+
+# ----------------------------------------------------------------------------
 # create_tables
 
 
 def test_create_tables_returns_success(
         mock_ConfigParser, mock_mysql, mock_utility
-        ):
+        ):  # noqa: D103
     message = crud_mngr.create_tables('group', 'schema')
     assert message == _FULL_SETUP_MESSAGE
 
 
 def test_create_tables_creates_db_if_does_not_exists(
         mock_ConfigParser, mock_mysql, mock_utility
-        ):
+        ):  # noqa: D103
     crud_mngr.create_tables('group', 'schema')
     mock_mysql.cur.execute.assert_any_call(
         'CREATE DATABASE IF NOT EXISTS schema DEFAULT CHARACTER SET latin1 ;'
@@ -384,7 +407,7 @@ def test_create_tables_creates_db_if_does_not_exists(
 
 def test_create_tables_catches_mysql_errors_during_connect_call(
         mock_ConfigParser, mock_mysql
-        ):
+        ):  # noqa: D103
     mock_mysql.connect.side_effect = mysql_Error('Test error.')
     mock_mysql.connect.return_value = None
 
@@ -399,14 +422,14 @@ def test_create_tables_catches_mysql_errors_during_connect_call(
 
 def test_drop_tables_returns_success(
         mock_ConfigParser, mock_mysql, mock_utility
-        ):
+        ):  # noqa: D103
     message = crud_mngr.drop_tables('group', 'schema')
     assert message == _FULL_TEARDOWN_MESSAGE
 
 
 def test_drop_tables_drops_db_if_drop_db_is_true(
         mock_ConfigParser, mock_mysql, mock_utility
-        ):
+        ):  # noqa: D103
     crud_mngr.drop_tables('group', 'schema', drop_db=True)
     mock_mysql.cur.execute.assert_called_with(
         'DROP DATABASE schema;'
@@ -415,7 +438,7 @@ def test_drop_tables_drops_db_if_drop_db_is_true(
 
 def test_drop_tables_with_drop_db_true_has_extended_message(
         mock_ConfigParser, mock_mysql, mock_utility
-        ):
+        ):  # noqa: D103
     message = crud_mngr.drop_tables('group', 'schema', drop_db=True)
     assert message == (
         _FULL_TEARDOWN_MESSAGE + ' Database `schema` also dropped.'
@@ -430,7 +453,7 @@ def test_add_tube_calls_to_sql_with_correct_inputs(
         mock_ConfigParser,
         mock_sqlalchemy,
         mock_pd
-        ):
+        ):  # noqa: D103
     # Arange
     correct_params = dict(
         name='Tube', con=_ENGINE_INSTANCE, if_exists='append', index=False
@@ -447,12 +470,34 @@ def test_add_tube_returns_correct_message(
         mock_ConfigParser,
         mock_sqlalchemy,
         mock_pd
-        ):
+        ):  # noqa: D103
 
     message = crud_mngr.add_tube('test_schema')
 
     assert message == 'Sucessfully added default tube to `test_schema`.'
 
+
+# ----------------------------------------------------------------------------
+# add_experiment
+
+@pytest.mark.skip
+def test_can_call_add_experiment():
+    # You just wrote _get_last_row_id
+    # The next step is to 
+    # [x] enter_setting, get setting id
+    # [x] add setting id to test, enter test, get test id
+    # [x] add test id to obs, enter obs, keep test id
+    # [x] add test id to temp obs, enter temp obs, message
+
+    # This looks like it could be a simple call signature
+    # update_table(data_frame, row_to_get, row_to_add)
+
+    # for example
+    # setting_id = update_table(dataframes['setting'], row_to_get='SettingId')
+    # test_id = update_table(dataframes['test'], row_to_add=('SettingId', setting_id), row_to_get='TestId')
+    # update_table(dataframes['observations'], row_to_add=('TestId', test_id)))
+    # update_table(dataframes['temp_observation'], row_to_add=('TestId, test_id)))
+    assert False
 
 # ----------------------------------------------------------------------------
 # helpers

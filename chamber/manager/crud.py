@@ -127,6 +127,15 @@ def _get_last_row_id(table, column, engine):
     return pd.read_sql_query(dml, con=engine).iloc[0, 0]
 
 
+def _update_table(table, dataframe, engine):
+    dataframe.to_sql(
+        name=table,
+        con=engine,
+        if_exists='append',
+        index=False
+        )
+
+
 def create_tables(table_group, database):
     """
     Manage construction of a group of tables for a given database.
