@@ -327,3 +327,63 @@ def add_tube(database):
 
     message = 'Sucessfully added default tube to `{}`.'.format(database)
     return message
+
+
+def add_experiment(database):
+    """
+    Add experiment from a tdms file to specifies database.
+
+    Function propmts user to select a tdms file then insertes the file into
+    the specifiec sql database.
+
+    Parameters
+    ----------
+    database : str
+        Name of the database (or schema)
+
+    Returns
+    -------
+    str
+        Message confirming experiment was added.
+
+    Examples
+    --------
+    >>> add_experiment('schema')
+    'Successfully added experiment to `schema`.'
+
+    """
+    dataframes = _get_experimental_data()
+
+    creds = _get_credentials()
+    engine = _get_engine(database, creds)
+
+    setting_id = _update_table(
+        'Setting',
+        dataframes['setting'],
+        engine,
+        id_to_get='SettingId'
+        )
+
+    test_id = _update_table(
+        'Test',
+        dataframes['test'],
+        engine,
+        col_to_add=('SettingId', setting_id),
+        id_to_get='TestId'
+        )
+
+    _update_table(
+        'Observation',
+        dataframes['observation'],
+        engine,
+        col_to_add=('TestId', test_id)
+        )
+
+    _update_table(
+        'TempObservation',
+        dataframes['temp_observation'],
+        engine,
+        col_to_add=('TestId', test_id)
+        )
+
+    return 'Successfully added experiment to `{}`.'.format(database)

@@ -170,10 +170,15 @@ def mock_tk(monkeypatch):
 
 
 @pytest.fixture()
-def mock_engine(monkeypatch):
+def mock_engine(mock_pd, monkeypatch):
     """Mock chamber.engine."""
     mock_engine = mock.MagicMock()
-    mock_engine.read_tdms.return_value = 'databases'
+    mock_engine.read_tdms.return_value = dict(
+        setting=mock_pd.DataFrame,
+        test=mock_pd.DataFrame,
+        observation=mock_pd.DataFrame,
+        temp_observation=mock_pd.DataFrame
+        )
 
     monkeypatch.setattr(
         'chamber.manager.crud.anlys_eng.read_tdms', mock_engine.read_tdms
@@ -519,46 +524,66 @@ def test_add_tube_returns_correct_message(
 # ----------------------------------------------------------------------------
 # add_experiment
 
-@pytest.mark.skip
+
 def test_add_experiment_call_stack(
-        mock_ConfigParser, mock_sqlalchemy, mock_pd, monkeypatch
+        mock_ConfigParser, mock_sqlalchemy, mock_pd, mock_engine, mock_tk,
+        monkeypatch
         ):  # noqa: D103
     # Arange
     mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)
-    monkeypatch.setattr('chamber.manager.crud._update_table', mock_update_table)
+    monkeypatch.setattr(
+        'chamber.manager.crud._update_table', mock_update_table
+        )
     correct_calls = [
         mock.call(
             'Setting',
-            mock_pd.DataFrame.__getitem__('setting'),
+            mock_engine.read_tdms.return_value['setting'],
             _ENGINE_INSTANCE,
             id_to_get='SettingId'
             ),
         mock.call(
             'Test',
-            mock_pd.DataFrame.__getitem__('test'),
+            mock_engine.read_tdms.return_value['test'],
             _ENGINE_INSTANCE,
             col_to_add=('SettingId', _LAST_ROW_ID),
             id_to_get='TestId'
             ),
         mock.call(
             'Observation',
-            mock_pd.DataFrame.__getitem__('observation'),
+            mock_engine.read_tdms.return_value['observation'],
             _ENGINE_INSTANCE,
             col_to_add=('TestId', _LAST_ROW_ID)
             ),
         mock.call(
             'TempObservation',
-            mock_pd.DataFrame.__getitem__('temp_observation'),
+            mock_engine.read_tdms.return_value['temp_observation'],
             _ENGINE_INSTANCE,
             col_to_add=('TestId', _LAST_ROW_ID)
             )
         ]
+    database = 'test_schema'
 
     # Act
-    crud_mngr.add_experiment()
+    crud_mngr.add_experiment(database)
 
     # Assert
     mock_update_table.assert_has_calls(correct_calls)
+
+
+def test_add_experiment_returns_message(
+        mock_ConfigParser, mock_sqlalchemy, mock_pd, mock_engine, mock_tk
+        ):  # noqa: D103
+    # Arange
+    database = 'test_schema'
+    correct_message = (
+        'Successfully added experiment to `{}`.'.format(database)
+        )
+
+    # Act
+    message = crud_mngr.add_experiment(database)
+
+    # Assert
+    assert (message == correct_message)
 
 
 # ----------------------------------------------------------------------------
