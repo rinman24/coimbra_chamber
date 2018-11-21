@@ -189,12 +189,12 @@ def mock_TdmsFile(monkeypatch):
 
 def test_get_tdms_objs_as_df_returns_correct_dicts(mock_TdmsFile):
     # Act
-    result = anlys_eng._tdms_2_dict_of_df('test_path')
+    dataframes = anlys_eng._tdms_2_dict_of_df('test_path')
 
     # Assert
-    pd.testing.assert_frame_equal(result['setting'], _SETTINGS_OBJ_AS_DF)
-    pd.testing.assert_frame_equal(result['data'], _DATA_OBJ_AS_DF)
-    pd.testing.assert_frame_equal(result['test'], _TEST_PROPS_AS_DF)
+    pd.testing.assert_frame_equal(dataframes['setting'], _SETTINGS_OBJ_AS_DF)
+    pd.testing.assert_frame_equal(dataframes['data'], _DATA_OBJ_AS_DF)
+    pd.testing.assert_frame_equal(dataframes['test'], _TEST_PROPS_AS_DF)
 
 # ----------------------------------------------------------------------------
 # _build_setting_df
@@ -203,7 +203,7 @@ def test_get_tdms_objs_as_df_returns_correct_dicts(mock_TdmsFile):
 @pytest.mark.parametrize('duty', [0, 1])
 @pytest.mark.parametrize('is_mass', [0, 1])
 def test_build_setting_df_returns_correct_df(duty, is_mass, mock_TdmsFile):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
     correct_setting_df = _build_correct_setting_df(duty=duty, is_mass=is_mass)
 
@@ -216,7 +216,7 @@ def test_build_setting_df_returns_correct_df(duty, is_mass, mock_TdmsFile):
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_drops_mass_from_data_when_ismass_0(duty, mock_TdmsFile):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=0)
 
     # Act
@@ -228,7 +228,7 @@ def test_build_setting_drops_mass_from_data_when_ismass_0(duty, mock_TdmsFile):
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_keeps_mass_in_data_when_ismass_1(duty, mock_TdmsFile):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=1)
 
     # Act
@@ -240,7 +240,7 @@ def test_build_setting_keeps_mass_in_data_when_ismass_1(duty, mock_TdmsFile):
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_drops_tcs_0_to_3_when_ismass_1(duty, mock_TdmsFile):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=1)
 
     # Act
@@ -254,7 +254,7 @@ def test_build_setting_drops_tcs_0_to_3_when_ismass_1(duty, mock_TdmsFile):
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_keeps_tcs_0_to_3_when_ismass_0(duty, mock_TdmsFile):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=0)
 
     # Act
@@ -270,7 +270,7 @@ def test_build_setting_keeps_tcs_0_to_3_when_ismass_0(duty, mock_TdmsFile):
 def test_build_setting_drops_powout_powref_from_data_when_duty_is_0(
         is_mass, mock_TdmsFile
         ):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(duty=0, is_mass=is_mass)
 
     # Act
@@ -284,7 +284,7 @@ def test_build_setting_drops_powout_powref_from_data_when_duty_is_0(
 def test_build_setting_keeps_powout_powref_in_data_when_duty_is_1(
         is_mass, mock_TdmsFile
         ):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(duty=1, is_mass=is_mass)
 
     # Act
@@ -301,7 +301,7 @@ def test_build_setting_keeps_powout_powref_in_data_when_duty_is_1(
 @pytest.mark.parametrize('duty', [0, 1])
 @pytest.mark.parametrize('is_mass', [0, 1])
 def test_build_observation_df_returns_correct_df(duty, is_mass, mock_TdmsFile):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
     correct_observation_df = _build_correct_observation_df(
         duty=duty, is_mass=is_mass
@@ -321,7 +321,7 @@ def test_build_observation_df_returns_correct_df(duty, is_mass, mock_TdmsFile):
 def test_build_observation_removes_keys_from_data(
         duty, is_mass, mock_TdmsFile
         ):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
 
     # Act
@@ -340,7 +340,7 @@ def test_build_observation_removes_keys_from_data(
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_temp_observation_with_is_mass_1(duty, mock_TdmsFile):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(is_mass=1, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
@@ -356,7 +356,7 @@ def test_build_temp_observation_with_is_mass_1(duty, mock_TdmsFile):
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_temp_observation_with_is_mass_0(duty, mock_TdmsFile):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(is_mass=0, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
@@ -375,7 +375,7 @@ def test_build_temp_observation_with_is_mass_0(duty, mock_TdmsFile):
 def test_build_temp_observation_drops_data_columns(
         duty, is_mass, mock_TdmsFile
         ):
-    # Arrange
+    # Arange
     dataframes = _configure_input_dataframes(is_mass=is_mass, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
@@ -385,6 +385,33 @@ def test_build_temp_observation_drops_data_columns(
 
     # Assert
     assert dataframes['data'].empty
+
+
+# ----------------------------------------------------------------------------
+# read_tdms
+
+
+def test_call_read_tdms_returns_correct_dfs(mock_TdmsFile):
+    # Arange
+    duty, is_mass = 0, 1
+    correct_setting_df = _build_correct_setting_df(duty=duty, is_mass=is_mass)
+    correct_observation_df = _build_correct_observation_df(
+        duty=duty, is_mass=is_mass
+        )
+
+    # Act
+    dataframes = anlys_eng.read_tdms('test_path')
+
+    # Assert
+    assert 'data' not in dataframes.keys()
+    pd.testing.assert_frame_equal(dataframes['setting'], correct_setting_df)
+    pd.testing.assert_frame_equal(dataframes['test'], _TEST_PROPS_AS_DF)
+    pd.testing.assert_frame_equal(
+        dataframes['observation'], correct_observation_df
+        )
+    pd.testing.assert_frame_equal(
+        dataframes['temp_observation'], _CORRECT_TEMP_OBSERVATION_DF_MASS_1
+        )
 
 
 # ----------------------------------------------------------------------------

@@ -150,7 +150,7 @@ def _build_temp_observation_df(dataframes):
     dataframes : dict of {str: pandas.DataFrame}
         Keys include `setting`, `data`, `test`, and `observation`.
 
-     Returns
+    Returns
     -------
     dict of {str: pandas.DataFrame}
         Keys same as input plus `temp_observation`.
@@ -184,6 +184,38 @@ def _build_temp_observation_df(dataframes):
             )
         )
 
+    return dataframes
+
+# ----------------------------------------------------------------------------
+# read_tdms
+
+
+def read_tdms(filepath):
+    """
+    Convert tdms file to several pandas dataframes.
+
+    Dataframes mirror the database schema and are ready to be sent to sql.
+
+    Parameters
+    ----------
+    filepath : str
+        filepath to the tdms file.
+
+    Returns
+    -------
+    dataframes : dict of {str: pandas.DataFrame}
+        Keys include `setting`, `test`, `observation` and `temp_observation`.
+
+    Examples
+    --------
+    >>> dataframes = read_tdms('path')
+
+    """
+    dataframes = _tdms_2_dict_of_df(filepath)
+    dataframes = _build_setting_df(dataframes)
+    dataframes = _build_observation_df(dataframes)
+    dataframes = _build_temp_observation_df(dataframes)
+    del dataframes['data']
     return dataframes
 
 
