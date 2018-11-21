@@ -20,6 +20,8 @@ _ENGINE_INSTANCE = (
 
 _TEST_FILEPATH = 'C:/Users/Me/test_experiment.tdms'
 
+_LAST_ROW_ID = 924
+
 
 @pytest.fixture()
 def mock_ConfigParser(monkeypatch):
@@ -127,7 +129,9 @@ def mock_pd(monkeypatch):
     """Mock of pandas package."""
     mock_pd = mock.MagicMock()
 
-    mock_pd.read_sql_query.return_value.iloc.__getitem__.return_value = 924
+    mock_pd.read_sql_query.return_value.iloc.__getitem__.return_value = (
+        _LAST_ROW_ID
+        )
     monkeypatch.setattr(
         'chamber.manager.crud.pd.read_sql_query',
         mock_pd.read_sql_query
@@ -354,7 +358,7 @@ def test_get_experimental_data_returns_correct(mock_tk, mock_engine):  # noqa: D
 
 def test_get_lastrow_id_returns_correct_value(mock_pd):  # noqa: D103
     # Arange
-    correct_return_value = 924
+    correct_return_value = _LAST_ROW_ID
 
     # Act
     last_row_id = crud_mngr._get_last_row_id('Test', 'SettingId', 'engine')
@@ -367,6 +371,26 @@ def test_get_lastrow_id_returns_correct_value(mock_pd):  # noqa: D103
 # _update_table
 
 
+def test_update_table_adds_col_if_necessary(mock_pd):  # noqa: D103
+    # Arange
+    dataframe = pd.DataFrame(index=range(10))
+    column, value = 'test_row', 123
+
+    # Act
+    return_value = crud_mngr.update_table(
+        table='test_table',
+        dataframe=dataframe,
+        engine=_ENGINE_INSTANCE,
+        col_to_add=(column, value)
+        )
+
+    # Assert
+    unique_values = set(dataframe.loc[:, column])
+    assert unique_values.pop() == value
+    assert not unique_values
+    assert not return_value
+
+
 def test_update_table_calls_to_sql_correctly(mock_pd):  # noqa: D103
     # Arange
     correct_params = dict(
@@ -375,7 +399,7 @@ def test_update_table_calls_to_sql_correctly(mock_pd):  # noqa: D103
         )
 
     # Act
-    crud_mngr._update_table(
+    return_value = crud_mngr.update_table(
         table='test_table',
         dataframe=mock_pd.DataFrame,
         engine=_ENGINE_INSTANCE
@@ -383,6 +407,23 @@ def test_update_table_calls_to_sql_correctly(mock_pd):  # noqa: D103
 
     # Assert
     mock_pd.DataFrame.to_sql.assert_called_once_with(**correct_params)
+    assert not return_value
+
+
+def test_update_table_returns_last_row_id_if_necessary(mock_pd):  # noqa: D103
+    # Arange
+    table, column = 'test_table', 'table_id'
+
+    # Act
+    requested_id = crud_mngr.update_table(
+        table=table,
+        dataframe=mock_pd.DataFrame,
+        engine=_ENGINE_INSTANCE,
+        id_to_get=column
+        )
+
+    # Assert
+    assert requested_id == _LAST_ROW_ID
 
 
 # ----------------------------------------------------------------------------
@@ -490,13 +531,13 @@ def test_can_call_add_experiment():
     # [x] add test id to temp obs, enter temp obs, message
 
     # This looks like it could be a simple call signature
-    # update_table(data_frame, row_to_get, row_to_add)
+    # update_table(data_frame, id_to_get, col_to_add)
 
     # for example
-    # setting_id = update_table(dataframes['setting'], row_to_get='SettingId')
-    # test_id = update_table(dataframes['test'], row_to_add=('SettingId', setting_id), row_to_get='TestId')
-    # update_table(dataframes['observations'], row_to_add=('TestId', test_id)))
-    # update_table(dataframes['temp_observation'], row_to_add=('TestId, test_id)))
+    # setting_id = update_table(dataframes['setting'], id_to_get='SettingId')
+    # test_id = update_table(dataframes['test'], col_to_add=('SettingId', setting_id), id_to_get='TestId')
+    # update_table(dataframes['observations'], col_to_add=('TestId', test_id)))
+    # update_table(dataframes['temp_observation'], col_to_add=('TestId, test_id)))
     assert False
 
 # ----------------------------------------------------------------------------
