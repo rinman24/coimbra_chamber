@@ -127,6 +127,69 @@ def _get_last_row_id(table, column, engine):
     return pd.read_sql_query(dml, con=engine).iloc[0, 0]
 
 
+def _update_table(table, dataframe, engine, col_to_add=None, id_to_get=None):
+    """
+    Upload a `dataframe` into sql `table` using provided `engine`.
+
+    Parameters
+    ----------
+    table : str
+        Name of the sql table to insert `dataframe`.
+    dataframe : pandas.DataFrame
+        Format must mirror the sql tables
+    engine : sqlalchemy.engine.base.Engine
+        Typically build using `_get_engine` funciton.
+    col_to_add : tuple of (str, int), optional
+        str: name of column
+        int: value to add
+    id_to_get : str, optional
+        Name of the column to get after the update.
+
+    Returns
+    -------
+    int
+        Last row id if `id_to_get` is truthy.
+
+    Examples
+    --------
+    Get credentials and engine before starting:
+
+    >>> creds = _get_credentials()
+    >>> engine = _get_engine('test_schema', creds)
+
+    If you want to update the dataframe as is:
+
+    >>> _update_table('table', dataframe, engine)
+
+    You can also add a column called `table_id` with a value of 1
+    to the dataframe before inserting:
+
+    >>> col_to_add = ('table_id', 1)
+    >>> _update_table('table', dataframe, engine, col_to_add=col_to_add)
+
+
+    You can also retreive the last row id as well:
+
+    >>> id_to_get = 'table_id'
+    >>> id = _update_table('table', dataframe, engine, id_to_get=id_to_get)
+
+    """
+    if col_to_add:
+        column, value = col_to_add
+        dataframe.loc[:, column] = value
+
+    dataframe.to_sql(
+        name=table,
+        con=engine,
+        if_exists='append',
+        index=False
+        )
+
+    if id_to_get:
+        last_row_id = _get_last_row_id(table, id_to_get, engine)
+        return last_row_id
+
+
 def create_tables(table_group, database):
     """
     Manage construction of a group of tables for a given database.
@@ -264,66 +327,3 @@ def add_tube(database):
 
     message = 'Sucessfully added default tube to `{}`.'.format(database)
     return message
-
-
-def _update_table(table, dataframe, engine, col_to_add=None, id_to_get=None):
-    """
-    Upload a `dataframe` into sql `table` using provided `engine`.
-
-    Parameters
-    ----------
-    table : str
-        Name of the sql table to insert `dataframe`.
-    dataframe : pandas.DataFrame
-        Format must mirror the sql tables
-    engine : sqlalchemy.engine.base.Engine
-        Typically build using `_get_engine` funciton.
-    col_to_add : tuple of (str, int), optional
-        str: name of column
-        int: value to add
-    id_to_get : str, optional
-        Name of the column to get after the update.
-
-    Returns
-    -------
-    int
-        Last row id if `id_to_get` is truthy.
-
-    Examples
-    --------
-    Get credentials and engine before starting:
-
-    >>> creds = _get_credentials()
-    >>> engine = _get_engine('test_schema', creds)
-
-    If you want to update the dataframe as is:
-
-    >>> _update_table('table', dataframe, engine)
-
-    You can also add a column called `table_id` with a value of 1
-    to the dataframe before inserting:
-
-    >>> col_to_add = ('table_id', 1)
-    >>> _update_table('table', dataframe, engine, col_to_add=col_to_add)
-
-
-    You can also retreive the last row id as well:
-
-    >>> id_to_get = 'table_id'
-    >>> id = _update_table('table', dataframe, engine, id_to_get=id_to_get)
-
-    """
-    if col_to_add:
-        column, value = col_to_add
-        dataframe.loc[:, column] = value
-
-    dataframe.to_sql(
-        name=table,
-        con=engine,
-        if_exists='append',
-        index=False
-        )
-
-    if id_to_get:
-        last_row_id = _get_last_row_id(table, id_to_get, engine)
-        return last_row_id
