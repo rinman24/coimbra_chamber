@@ -304,6 +304,46 @@ def test_get_engine_returns_correct_value(mock_sqlalchemy):
 
 
 # ----------------------------------------------------------------------------
+# _get_experimental_data
+
+
+def test_get_experimental_data_calls_askopenfilename(mock_tk, mock_engine):
+    # Act
+    crud_mngr._get_experimental_data()
+
+    # Assert
+    correct_calls = [
+        mock.call.Tk(),
+        mock.call.root.withdraw(),
+        mock.call.filedialog.askopenfilename(title='Select Experiment')
+        ]
+
+    mock_tk.assert_has_calls(correct_calls)
+
+
+def test_get_experimental_data_calls_analysis_engine(mock_tk, mock_engine):
+    # Arrange
+    path = mock_tk.filedialog.askopenfilename.return_value
+
+    # Act
+    crud_mngr._get_experimental_data()
+
+    # Assert
+    mock_engine.read_tdms.assert_called_once_with(path)
+
+
+def test_get_experimental_data_returns_correct(mock_tk, mock_engine):
+    # Arange
+    correct_return_value = mock_engine.read_tdms.return_value
+
+    # Act
+    databases = crud_mngr._get_experimental_data()
+
+    # Assert
+    assert databases == correct_return_value
+
+
+# ----------------------------------------------------------------------------
 # create_tables
 
 
@@ -390,46 +430,6 @@ def test_add_tube_returns_correct_message(
     message = crud_mngr.add_tube('test_schema')
 
     assert message == 'Sucessfully added default tube to `test_schema`.'
-
-
-# ----------------------------------------------------------------------------
-# get_experimental_data
-
-
-def test_get_experimental_data_calls_askopenfilename(mock_tk, mock_engine):
-    # Act
-    crud_mngr._get_experimental_data()
-
-    # Assert
-    correct_calls = [
-        mock.call.Tk(),
-        mock.call.root.withdraw(),
-        mock.call.filedialog.askopenfilename(title='Select Experiment')
-        ]
-
-    mock_tk.assert_has_calls(correct_calls)
-
-
-def test_get_experimental_data_calls_analysis_engine(mock_tk, mock_engine):
-    # Arrange
-    path = mock_tk.filedialog.askopenfilename.return_value
-
-    # Act
-    crud_mngr._get_experimental_data()
-
-    # Assert
-    mock_engine.read_tdms.assert_called_once_with(path)
-
-
-def test_get_experimental_data_returns_correct(mock_tk, mock_engine):
-    # Arange
-    correct_return_value = mock_engine.read_tdms.return_value
-
-    # Act
-    databases = crud_mngr._get_experimental_data()
-
-    # Assert
-    assert databases == correct_return_value
 
 
 # ----------------------------------------------------------------------------
