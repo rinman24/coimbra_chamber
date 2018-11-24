@@ -11,6 +11,7 @@ Functions
 """
 
 import configparser
+import datetime
 import pathlib
 
 import mysql.connector
@@ -117,6 +118,11 @@ def _get_experimental_data():
     filepath = filedialog.askopenfilename(title='Select Experiment')
 
     databases = anlys_eng.read_tdms(filepath)
+
+    d = databases['test'].loc[0, 'DateTime']
+    databases['test'].loc[0, 'DateTime'] = datetime.datetime(
+        d.year, d.month, d.day, d.hour, d.minute, d.second
+        )
 
     return databases
 
