@@ -12,10 +12,25 @@ def test_can_create_experiment_tables():
     assert message == 'Successfully built `experiment` tables in `test`.'
 
 
+# ----------------------------------------------------------------------------
+# add_tube
+
+
 def test_can_add_tube():
     message = crud_mngr.add_tube('test')
     print(message)
     assert message == 'Sucessfully added default tube to `test`.'
+
+
+# ----------------------------------------------------------------------------
+# add_experiment
+
+
+def test_can_add_experiment():
+    message = crud_mngr.add_experiment('test')
+    print(message)
+    assert message == 'Successfully added experiment to `test`.'
+
 
 # ----------------------------------------------------------------------------
 # drop_tables
