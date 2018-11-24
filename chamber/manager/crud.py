@@ -124,7 +124,7 @@ def _get_experimental_data():
 
 def _get_last_row_id(table, column, engine):
     """Get the last row id for foreign key constraints."""
-    dml = 'SELECT IFNULL(MAX({0}), 0) + 1 FROM {1};'.format(column, table)
+    dml = 'SELECT IFNULL(MAX({0}), 0) FROM {1};'.format(column, table)
     return pd.read_sql_query(dml, con=engine).iloc[0, 0]
 
 
