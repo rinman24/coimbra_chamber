@@ -1,19 +1,10 @@
-"""
-CRUD manager module.
-
-Functions
----------
-
-- `create_tables` -- Manage construction of tables for a given database.
-- `drop_tables` -- Manage destuction of tables for a given database.
-- `add_tube` -- Manage addition of tube into a given database.
-
-"""
+"""CRUD manager module."""
 
 import configparser
 import datetime
 import pathlib
 
+import matplotlib.pyplot as plt
 import mysql.connector
 import nptdms
 import pandas as pd
@@ -35,6 +26,9 @@ DEFAULT_TUBE = pd.DataFrame(
             ),
         index=[0]
         )
+
+# ----------------------------------------------------------------------------
+# Internal logic
 
 
 def _get_credentials():
@@ -196,6 +190,10 @@ def _update_table(table, dataframe, engine, col_to_add=None, id_to_get=None):
         return last_row_id
 
 
+# ----------------------------------------------------------------------------
+# Public functions
+
+
 def create_tables(table_group, database):
     """
     Manage construction of a group of tables for a given database.
@@ -337,7 +335,7 @@ def add_tube(database):
 
 def add_experiment(database):
     """
-    Add experiment from a tdms file to specifies database.
+    Manage addition of experiment from a tdms file to a specified database.
 
     Function propmts user to select a tdms file then insertes the file into
     the specifiec sql database.
@@ -354,7 +352,11 @@ def add_experiment(database):
 
     Examples
     --------
+    Enter y when asked to proceed.
+
     >>> add_experiment('schema')
+    Loading TDMS file...
+    Proceed ([y]/n)? y
     Inserting `Setting`...
     Inserting `Test`...
     Inserting `Observation`...
@@ -365,40 +367,55 @@ def add_experiment(database):
     print('Loading TDMS file...')
     dataframes = _get_experimental_data()
 
-    creds = _get_credentials()
-    engine = _get_engine(database, creds)
-
-    print('Inserting `Setting`...')
-    setting_id = _update_table(
-        'Setting',
-        dataframes['setting'],
-        engine,
-        id_to_get='SettingId'
+    _, axes = plt.subplots(nrows=3, ncols=1)
+    dataframes['observation'].plot(x='Idx', y='Mass', ax=axes[0])
+    dataframes['observation'].plot(x='Idx', y='Pressure', ax=axes[1])
+    dataframes['temp_observation'].plot.scatter(
+        x='Idx', y='Temperature', s=1, ax=axes[2]
         )
+    plt.show()
 
-    print('Inserting `Test`...')
-    test_id = _update_table(
-        'Test',
-        dataframes['test'],
-        engine,
-        col_to_add=('SettingId', setting_id),
-        id_to_get='TestId'
-        )
+    response = input('Proceed ([y]/n)? ').lower()
 
-    print('Inserting `Observation`...')
-    _update_table(
-        'Observation',
-        dataframes['observation'],
-        engine,
-        col_to_add=('TestId', test_id)
-        )
+    if (not response) or ('y' in response):
+        creds = _get_credentials()
+        engine = _get_engine(database, creds)
 
-    print('Inserting `TempObservation`...')
-    _update_table(
-        'TempObservation',
-        dataframes['temp_observation'],
-        engine,
-        col_to_add=('TestId', test_id)
-        )
+        print('Inserting `Setting`...')
+        setting_id = _update_table(
+            'Setting',
+            dataframes['setting'],
+            engine,
+            id_to_get='SettingId'
+            )
 
-    return 'Successfully added experiment to `{}`.'.format(database)
+        print('Inserting `Test`...')
+        test_id = _update_table(
+            'Test',
+            dataframes['test'],
+            engine,
+            col_to_add=('SettingId', setting_id),
+            id_to_get='TestId'
+            )
+
+        print('Inserting `Observation`...')
+        _update_table(
+            'Observation',
+            dataframes['observation'],
+            engine,
+            col_to_add=('TestId', test_id)
+            )
+
+        print('Inserting `TempObservation`...')
+        _update_table(
+            'TempObservation',
+            dataframes['temp_observation'],
+            engine,
+            col_to_add=('TestId', test_id)
+            )
+
+        return 'Successfully added experiment to `{}`.'.format(database)
+    elif 'n' in response:
+        return 'Experiment not loaded.'
+    else:
+        return 'Unrecognized response.'

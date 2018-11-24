@@ -5,6 +5,9 @@ import re
 import nptdms
 import pandas as pd
 
+# ----------------------------------------------------------------------------
+# Internal logic
+
 
 def _tdms_2_dict_of_df(filepath):
     """
@@ -187,7 +190,7 @@ def _build_temp_observation_df(dataframes):
     return dataframes
 
 # ----------------------------------------------------------------------------
-# read_tdms
+# Public functions
 
 
 def read_tdms(filepath):

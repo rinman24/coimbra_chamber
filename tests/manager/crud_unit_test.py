@@ -189,6 +189,26 @@ def mock_engine(mock_pd, monkeypatch):
     return mock_engine
 
 
+@pytest.fixture()
+def mock_input(monkeypatch):
+    """Mock builtin input wrapper."""
+    mock_input = mock.MagicMock(return_value='y')
+
+    monkeypatch.setattr('builtins.input', mock_input)
+
+    return mock_input
+
+
+@pytest.fixture()
+def mock_plt(monkeypatch):
+    """Mock plotting."""
+    mock_plt = mock.MagicMock()
+    mock_plt.subplots.return_value = ('fig', [0, 1, 2])
+
+    monkeypatch.setattr('chamber.manager.crud.plt', mock_plt)
+
+    return mock_plt
+
 # ----------------------------------------------------------------------------
 # _get_credentials
 
@@ -534,7 +554,7 @@ def test_add_tube_returns_correct_message(
 
 def test_add_experiment_call_stack(
         mock_ConfigParser, mock_sqlalchemy, mock_pd, mock_engine, mock_tk,
-        monkeypatch
+        mock_input, mock_plt, monkeypatch
         ):  # noqa: D103
     # Arange
     mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)
@@ -576,19 +596,27 @@ def test_add_experiment_call_stack(
     mock_update_table.assert_has_calls(correct_calls)
 
 
-def test_add_experiment_returns_message(
-        mock_ConfigParser, mock_sqlalchemy, mock_pd, mock_engine, mock_tk
+@pytest.mark.parametrize(
+    'user_input, expected_message',
+    [
+        ('', 'Successfully added experiment to `{}`.'.format(_DATABASE)),
+        ('y', 'Successfully added experiment to `{}`.'.format(_DATABASE)),
+        ('n', 'Experiment not loaded.'),
+        ('foobar', 'Unrecognized response.')
+        ]
+    )
+def test_add_experiment_returns_correct(
+        user_input, expected_message, mock_ConfigParser, mock_sqlalchemy,
+        mock_pd, mock_engine, mock_tk, mock_input, mock_plt
         ):  # noqa: D103
     # Arange
-    correct_message = (
-        'Successfully added experiment to `{}`.'.format(_DATABASE)
-        )
+    mock_input.return_value = user_input
 
     # Act
     message = crud_mngr.add_experiment(_DATABASE)
 
     # Assert
-    assert (message == correct_message)
+    assert (message == expected_message)
 
 
 # ----------------------------------------------------------------------------
