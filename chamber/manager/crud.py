@@ -116,6 +116,7 @@ def _get_experimental_data():
     root.withdraw()
     filepath = filedialog.askopenfilename(title='Select Experiment')
 
+    print('Loading TDMS file...')
     databases = anlys_eng.read_tdms(filepath)
 
     return databases
