@@ -116,7 +116,6 @@ def _get_experimental_data():
     root.withdraw()
     filepath = filedialog.askopenfilename(title='Select Experiment')
 
-    print('Loading TDMS file...')
     databases = anlys_eng.read_tdms(filepath)
 
     return databases
@@ -350,14 +349,20 @@ def add_experiment(database):
     Examples
     --------
     >>> add_experiment('schema')
+    Inserting `Setting`...
+    Inserting `Test`...
+    Inserting `Observation`...
+    Inserting `TempObservation`...
     'Successfully added experiment to `schema`.'
 
     """
+    print('Loading TDMS file...')
     dataframes = _get_experimental_data()
 
     creds = _get_credentials()
     engine = _get_engine(database, creds)
 
+    print('Inserting `Setting`...')
     setting_id = _update_table(
         'Setting',
         dataframes['setting'],
@@ -365,6 +370,7 @@ def add_experiment(database):
         id_to_get='SettingId'
         )
 
+    print('Inserting `Test`...')
     test_id = _update_table(
         'Test',
         dataframes['test'],
@@ -373,6 +379,7 @@ def add_experiment(database):
         id_to_get='TestId'
         )
 
+    print('Inserting `Observation`...')
     _update_table(
         'Observation',
         dataframes['observation'],
@@ -380,6 +387,7 @@ def add_experiment(database):
         col_to_add=('TestId', test_id)
         )
 
+    print('Inserting `TempObservation`...')
     _update_table(
         'TempObservation',
         dataframes['temp_observation'],
