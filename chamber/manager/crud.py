@@ -111,6 +111,7 @@ def _get_experimental_data():
     root.withdraw()
     filepath = filedialog.askopenfilename(title='Select Experiment')
 
+    print('Loading TDMS file...')
     databases = anlys_eng.read_tdms(filepath)
 
     d = databases['test'].loc[0, 'DateTime']
@@ -188,6 +189,39 @@ def _update_table(table, dataframe, engine, col_to_add=None, id_to_get=None):
     if id_to_get:
         last_row_id = _get_last_row_id(table, id_to_get, engine)
         return last_row_id
+
+
+def _setting_exists(dataframes, engine):
+    """Return setting id if exists, else False."""
+    df = dataframes['setting']
+
+    setting_dict = dict(
+        duty=df.loc[0, 'Duty'],
+        pressure=df.loc[0, 'Pressure'],
+        temp=df.loc[0, 'Temperature'],
+        is_mass=df.loc[0, 'IsMass'],
+        reservoir=df.loc[0, 'Reservoir'],
+        time_step=df.loc[0, 'TimeStep'],
+        tube_id=df.loc[0, 'TubeID']
+        )
+
+    sql = (
+        "SELECT SettingID FROM Setting WHERE "
+        "  Duty = {duty} AND"
+        "  Pressure = {pressure} AND"
+        "  Temperature = {temp} AND"
+        "  IsMass = {is_mass} AND"
+        "  Reservoir = {reservoir} AND"
+        "  TimeStep = {time_step} AND"
+        "  TubeId = {tube_id}".format(**setting_dict)
+        )
+
+    result = pd.read_sql_query(sql, con=engine)
+
+    if not result.empty:
+        return result.iloc[0, 0]
+    else:
+        return False
 
 
 # ----------------------------------------------------------------------------
@@ -364,7 +398,6 @@ def add_experiment(database):
     'Successfully added experiment to `schema`.'
 
     """
-    print('Loading TDMS file...')
     dataframes = _get_experimental_data()
 
     _, axes = plt.subplots(nrows=4, ncols=1, figsize=(10, 8))

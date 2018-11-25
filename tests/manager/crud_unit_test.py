@@ -455,6 +455,41 @@ def test_update_table_returns_last_row_id_if_necessary(mock_pd):  # noqa: D103
     assert requested_id == _LAST_ROW_ID
 
 
+# -----------------------------------------------------------------------------
+# _setting_exists
+
+@pytest.mark.parametrize(
+    'query_results, expected',
+    [
+        (pd.DataFrame(data=[1]), 1),
+        (pd.DataFrame(), False)
+        ]
+    )
+def test_setting_exists_returns_correct_value(
+        query_results, expected, mock_pd):  # noqa: D103
+    # Arange
+    setting_df = pd.DataFrame(
+        data=dict(
+            Duty=[1],
+            Pressure=[int(80e3)],
+            Temperature=[300],
+            IsMass=[1],
+            Reservoir=[1],
+            TimeStep=[1],
+            TubeID=[1]
+            )
+        )
+    dataframes = dict(setting=setting_df)
+
+    mock_pd.read_sql_query.return_value = query_results
+
+    # Act
+    setting_id = crud_mngr._setting_exists(dataframes, _ENGINE_INSTANCE)
+
+    # Assert
+    assert setting_id == expected
+
+
 # ----------------------------------------------------------------------------
 # create_tables
 
