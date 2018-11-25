@@ -1,12 +1,13 @@
 """Analysis engine module."""
 
+import math
 import re
 
 import nptdms
 import pandas as pd
 
 # ----------------------------------------------------------------------------
-# Internal logic
+# Internal logic (adding experiment)
 
 
 def _tdms_2_dict_of_df(filepath):
@@ -188,6 +189,24 @@ def _build_temp_observation_df(dataframes):
         )
 
     return dataframes
+
+
+# ----------------------------------------------------------------------------
+# Internal logic (processing data)
+
+
+def _calc_avg_te(temp_data):
+    N = len(temp_data.columns)
+
+    average = temp_data.mean(axis=1)
+    average.name = 'average'
+
+    delta = temp_data.std(axis=1)/math.sqrt(N)*3  # factor of 3 for 99%
+    delta.name = 'delta'
+
+    temp_data = pd.concat([average, delta], axis=1).reset_index()
+    return temp_data
+
 
 # ----------------------------------------------------------------------------
 # Public functions

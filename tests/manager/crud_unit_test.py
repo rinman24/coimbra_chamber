@@ -203,7 +203,7 @@ def mock_input(monkeypatch):
 def mock_plt(monkeypatch):
     """Mock plotting."""
     mock_plt = mock.MagicMock()
-    mock_plt.subplots.return_value = ('fig', [0, 1, 2])
+    mock_plt.subplots.return_value = ('fig', [0, 1, 2, 3])
 
     monkeypatch.setattr('chamber.manager.crud.plt', mock_plt)
 

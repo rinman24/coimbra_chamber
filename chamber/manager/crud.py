@@ -367,11 +367,12 @@ def add_experiment(database):
     print('Loading TDMS file...')
     dataframes = _get_experimental_data()
 
-    _, axes = plt.subplots(nrows=3, ncols=1)
+    _, axes = plt.subplots(nrows=4, ncols=1, figsize=(10, 8))
     dataframes['observation'].plot(x='Idx', y='Mass', ax=axes[0])
     dataframes['observation'].plot(x='Idx', y='Pressure', ax=axes[1])
+    dataframes['observation'].plot(x='Idx', y='DewPoint', ax=axes[2])
     dataframes['temp_observation'].plot.scatter(
-        x='Idx', y='Temperature', s=1, ax=axes[2]
+        x='Idx', y='Temperature', s=1, ax=axes[3]
         )
     plt.show()
 
