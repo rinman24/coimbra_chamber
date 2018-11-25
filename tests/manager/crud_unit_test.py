@@ -640,7 +640,7 @@ def test_add_experiment_call_stack(
         ('foobar', 'Unrecognized response.')
         ]
     )
-def test_add_experiment_returns_correct(
+def test_add_experiment_returns_correct_with_user_input(
         user_input, expected_message, mock_ConfigParser, mock_sqlalchemy,
         mock_pd, mock_engine, mock_tk, mock_input, mock_plt
         ):  # noqa: D103
