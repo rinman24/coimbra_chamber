@@ -215,13 +215,45 @@ def _setting_exists(dataframes, engine):
         "  TimeStep = {time_step} AND"
         "  TubeId = {tube_id}".format(**setting_dict)
         )
-
+    print('Checking if setting exists...')
     result = pd.read_sql_query(sql, con=engine)
 
     if not result.empty:
-        return result.iloc[0, 0]
+        setting_id = result.iloc[0, 0]
+        print('    Setting id: {}'.format(setting_id))
+        return setting_id
     else:
+        print('    Setting does not exist.')
         return False
+
+
+def _test_exists(dataframes, engine):
+    """Return test id if exists, else False."""
+    df = dataframes['test']
+
+    test_dict = dict(
+        author=df.loc[0, 'Author'],
+        datetime=df.loc[0, 'DateTime'],
+        description=df.loc[0, 'Description'],
+        )
+
+    sql = (
+        "SELECT TestID FROM Setting WHERE "
+        "  Author = {author} AND"
+        "  DateTime = {datetime} AND"
+        "  Description = {description}".format(**test_dict)
+        )
+    print('Checking if test exists...')
+    result = pd.read_sql_query(sql, con=engine)
+
+    if not result.empty:
+        test_id = result.iloc[0, 0]
+        print('    Test id: {}'.format(test_id))
+        return test_id
+    else:
+        print('    Test does not exist.')
+        return False
+
 
 
 # ----------------------------------------------------------------------------
@@ -415,13 +447,15 @@ def add_experiment(database):
         creds = _get_credentials()
         engine = _get_engine(database, creds)
 
-        print('Inserting `Setting`...')
-        setting_id = _update_table(
-            'Setting',
-            dataframes['setting'],
-            engine,
-            id_to_get='SettingId'
-            )
+        setting_id = _setting_exists(dataframes, engine)
+        if not setting_id:
+            print('Inserting `Setting`...')
+            setting_id = _update_table(
+                'Setting',
+                dataframes['setting'],
+                engine,
+                id_to_get='SettingId'
+                )
 
         print('Inserting `Test`...')
         test_id = _update_table(

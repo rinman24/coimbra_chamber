@@ -490,6 +490,36 @@ def test_setting_exists_returns_correct_value(
     assert setting_id == expected
 
 
+# -----------------------------------------------------------------------------
+# _test_exists
+
+@pytest.mark.parametrize(
+    'query_results, expected',
+    [
+        (pd.DataFrame(data=[2]), 2),
+        (pd.DataFrame(), False)
+        ]
+    )
+def test_test_exists_returns_correct_value(
+        query_results, expected, mock_pd):  # noqa: D103
+    # Arange
+    test_df = pd.DataFrame(
+        data=dict(
+            Author=['Me'],
+            DateTime=['1/1/2018 0:0:0'],
+            Description=['Details...']
+            )
+        )
+    dataframes = dict(test=test_df)
+
+    mock_pd.read_sql_query.return_value = query_results
+
+    # Act
+    test_id = crud_mngr._test_exists(dataframes, _ENGINE_INSTANCE)
+
+    # Assert
+    assert test_id == expected
+
 # ----------------------------------------------------------------------------
 # create_tables
 
@@ -587,11 +617,68 @@ def test_add_tube_returns_correct_message(
 # add_experiment
 
 
-def test_add_experiment_call_stack(
+def test_add_experiment_call_stack_when_setting_exists(
         mock_ConfigParser, mock_sqlalchemy, mock_pd, mock_engine, mock_tk,
         mock_input, mock_plt, monkeypatch
         ):  # noqa: D103
     # Arange
+    setting_id = 1
+    _setting_exists = mock.MagicMock(return_value=setting_id)
+    monkeypatch.setattr(
+        'chamber.manager.crud._setting_exists', _setting_exists
+        )
+
+    mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)
+    monkeypatch.setattr(
+        'chamber.manager.crud._update_table', mock_update_table
+        )
+    correct_calls = [
+        mock.call(
+            'Test',
+            mock_engine.read_tdms.return_value['test'],
+            _ENGINE_INSTANCE,
+            col_to_add=('SettingId', setting_id),
+            id_to_get='TestId'
+            ),
+        mock.call(
+            'Observation',
+            mock_engine.read_tdms.return_value['observation'],
+            _ENGINE_INSTANCE,
+            col_to_add=('TestId', _LAST_ROW_ID)
+            ),
+        mock.call(
+            'TempObservation',
+            mock_engine.read_tdms.return_value['temp_observation'],
+            _ENGINE_INSTANCE,
+            col_to_add=('TestId', _LAST_ROW_ID)
+            )
+        ]
+    incorrect_call = mock.call(
+        'Setting',
+        mock_engine.read_tdms.return_value['setting'],
+        _ENGINE_INSTANCE,
+        id_to_get='SettingId'
+        )
+
+    # Act
+    crud_mngr.add_experiment(_DATABASE)
+
+    # Assert
+    mock_update_table.assert_has_calls(correct_calls)
+    assert incorrect_call not in mock_update_table.mock_calls
+
+
+def test_add_experiment_call_stack_when_not_setting_exists(
+        mock_ConfigParser, mock_sqlalchemy, mock_pd, mock_engine, mock_tk,
+        mock_input, mock_plt, monkeypatch
+        ):  # noqa: D103
+    # Arange
+    setting_id = False
+    _setting_exists = mock.MagicMock(return_value=setting_id)
+    monkeypatch.setattr(
+        'chamber.manager.crud._setting_exists', _setting_exists
+        )
+
     mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)
     monkeypatch.setattr(
         'chamber.manager.crud._update_table', mock_update_table
