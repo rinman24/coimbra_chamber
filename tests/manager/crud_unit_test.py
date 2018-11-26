@@ -493,6 +493,7 @@ def test_setting_exists_returns_correct_value(
 # -----------------------------------------------------------------------------
 # _test_exists
 
+
 @pytest.mark.parametrize(
     'query_results, expected',
     [
@@ -519,6 +520,7 @@ def test_test_exists_returns_correct_value(
 
     # Assert
     assert test_id == expected
+
 
 # ----------------------------------------------------------------------------
 # create_tables
@@ -716,6 +718,52 @@ def test_add_experiment_call_stack_when_not_setting_exists(
 
     # Assert
     mock_update_table.assert_has_calls(correct_calls)
+
+
+def test_add_experiment_call_stack_when_test_exists(
+        mock_ConfigParser, mock_sqlalchemy, mock_pd, mock_engine, mock_tk,
+        mock_input, mock_plt, monkeypatch
+        ):  # noqa: D103
+    # Arange
+    test_id = 2
+    _test_exists = mock.MagicMock(return_value=test_id)
+    monkeypatch.setattr(
+        'chamber.manager.crud._test_exists', _test_exists
+        )
+
+    mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)
+    monkeypatch.setattr(
+        'chamber.manager.crud._update_table', mock_update_table
+        )
+    correct_calls = [
+        mock.call(
+            'Observation',
+            mock_engine.read_tdms.return_value['observation'],
+            _ENGINE_INSTANCE,
+            col_to_add=('TestId', _LAST_ROW_ID)
+            ),
+        mock.call(
+            'TempObservation',
+            mock_engine.read_tdms.return_value['temp_observation'],
+            _ENGINE_INSTANCE,
+            col_to_add=('TestId', _LAST_ROW_ID)
+            )
+        ]
+
+    incorrect_call = mock.call(
+            'Test',
+            mock_engine.read_tdms.return_value['test'],
+            _ENGINE_INSTANCE,
+            col_to_add=('SettingId', setting_id),
+            id_to_get='TestId'
+            )
+
+    # Act
+    crud_mngr.add_experiment(_DATABASE)
+
+    # Assert
+    mock_update_table.assert_has_calls(correct_calls)
+    assert incorrect_call not in mock_update_table.mock_calls
 
 
 @pytest.mark.parametrize(
