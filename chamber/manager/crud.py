@@ -253,7 +253,7 @@ def _test_exists(dataframes, engine):
         return False
 
 
-def _get_temp_obs_and_pivot(test_id, engine):  # pragma: no cover
+def _query_temp_obs_and_pivot(test_id, engine):  # pragma: no cover
     dml = "SELECT * FROM TempObservation WHERE TestId={};".format(test_id)
     temp_data = pd.read_sql_query(dml, con=engine)
     temp_data = temp_data.pivot(
