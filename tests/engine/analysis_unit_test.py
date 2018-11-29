@@ -1,12 +1,14 @@
 """Analysis engine unit test suite."""
 
 import datetime
+import math
 import pdb
 import unittest.mock as mock
 
 import pandas as pd
 import pytest
 import pytz
+import uncertainties as un
 
 import chamber.engine.analysis as anlys_eng
 
@@ -186,12 +188,18 @@ _TEMP_DATA_QUERY = pd.DataFrame(
     )
 
 _CORRECT_AVERAGE_TEMP = pd.DataFrame(
-    dict(
-        Idx=[12, 13, 14, 15, 16],
-        average=[301.153, 301.158, 301.166, 301.160, 301.156],
-        delta=[0.442856, 0.445012, 0.444707, 0.450644, 0.451978]
-        )
+    data=dict(
+        t_e=[
+            un.ufloat(301.153, 0.4668106920607228), 
+            un.ufloat(301.158, 0.46908421418760887),
+            un.ufloat(301.166, 0.4687619628103208),
+            un.ufloat(301.16, 0.4750204673952965),
+            un.ufloat(301.15600000000006, 0.4764265129295566),
+            ]
+        ),
+    index=[12, 13, 14, 15, 16]
     )
+_CORRECT_AVERAGE_TEMP.index.name = 'Idx'
 
 # ----------------------------------------------------------------------------
 # fixtures
@@ -433,8 +441,52 @@ def test_calc_avg_te_returns_correct_df():  # noqa: D103
     avg_te = anlys_eng._calc_avg_te(temp_data)
 
     # Assert
-    pd.testing.assert_frame_equal(avg_te, _CORRECT_AVERAGE_TEMP)
+    for i in avg_te.index:
+        assert math.isclose(
+            avg_te.loc[i, 't_e'].nominal_value,
+            _CORRECT_AVERAGE_TEMP.loc[i, 't_e'].nominal_value
+            )
+        assert math.isclose(
+            avg_te.loc[i, 't_e'].std_dev,
+            _CORRECT_AVERAGE_TEMP.loc[i, 't_e'].std_dev
+            )
+    #pd.testing.assert_frame_equal(avg_te, _CORRECT_AVERAGE_TEMP)
 
+
+# ----------------------------------------------------------------------------
+# _filter_observations
+
+
+def test_filter_observations_has_correct_call_stack(monkeypatch):  # noqa: D103
+    # Arange
+    mock_df = mock.MagicMock()
+    df_getitem_calls = [
+        mock.call('DewPoint'), mock.call('Mass'), mock.call('Pressure')
+        ]
+
+    mock_signal = mock.MagicMock()
+    monkeypatch.setattr('chamber.engine.analysis.signal', mock_signal)
+    savgol_calls = [
+        mock.call(mock_df['DewPoint'], 1801, 2),
+        mock.call(mock_df['Mass'], 301, 2),
+        mock.call(mock_df['Pressure'], 3601, 1)
+        ]
+
+    mock_pd = mock.MagicMock()
+    monkeypatch.setattr('chamber.engine.analysis.pd', mock_pd)
+
+    # Act
+    anlys_eng._filter_observations(mock_df)
+
+    # Assert
+    mock_signal.savgol_filter.assert_has_calls(savgol_calls)
+    mock_df.__getitem__.assert_has_calls(df_getitem_calls)
+
+
+@pytest.mark.skip
+def test_filter_observation_adds_undertainty():
+    """I need to make sure that filter_observation also adds undertainty correctly."""
+    assert False
 
 # ----------------------------------------------------------------------------
 # read_tdms

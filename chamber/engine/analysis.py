@@ -5,6 +5,8 @@ import re
 
 import nptdms
 import pandas as pd
+from scipy import signal
+from uncertainties import unumpy as unp
 
 # ----------------------------------------------------------------------------
 # Internal logic (adding experiment)
@@ -196,16 +198,37 @@ def _build_temp_observation_df(dataframes):
 
 
 def _calc_avg_te(temp_data):
-    N = len(temp_data.columns)
+    """Calculate average temperature."""
+    # Manager is responsible for pivoting the table before calling.
+    mean = temp_data.mean(axis=1)
+    std = temp_data.std(axis=1)
 
-    average = temp_data.mean(axis=1)
-    average.name = 'average'
+    avg_te = pd.DataFrame(unp.uarray(mean, std), columns=['t_e'], index=temp_data.index)
 
-    delta = temp_data.std(axis=1)/math.sqrt(N)*3  # factor of 3 for 99%
-    delta.name = 'delta'
+    return avg_te
 
-    temp_data = pd.concat([average, delta], axis=1).reset_index()
-    return temp_data
+
+def _filter_observations(obs_data):
+    """Apply Savitzky-Golay filter to observation data."""
+    filtered_dp = pd.Series(
+        signal.savgol_filter(obs_data['DewPoint'], 1801, 2)
+        )
+    filtered_dp.name = 'dew_point'
+
+    filtered_mass = pd.Series(
+        signal.savgol_filter(obs_data['Mass'], 301, 2)
+        )
+    filtered_mass.name = 'mass'
+
+    filtered_pres = pd.Series(
+        signal.savgol_filter(obs_data['Pressure'], 3601, 1)
+        )   
+    filtered_pres.name = 'pressure'
+
+    filtered_data = pd.concat(
+        [filtered_dp, filtered_mass, filtered_pres],
+        axis=1
+        ).reset_index()
 
 
 # ----------------------------------------------------------------------------
