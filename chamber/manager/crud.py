@@ -213,14 +213,14 @@ def _setting_exists(dataframes, engine):
         "  IsMass = {is_mass} AND"
         "  Reservoir = {reservoir} AND"
         "  TimeStep = {time_step} AND"
-        "  TubeId = {tube_id}".format(**setting_dict)
+        "  TubeId = {tube_id};".format(**setting_dict)
         )
     print('Checking if setting exists...')
     result = pd.read_sql_query(sql, con=engine)
 
     if not result.empty:
         setting_id = result.iloc[0, 0]
-        print('    Setting id: {}'.format(setting_id))
+        print('    SettingId: {}'.format(setting_id))
         return setting_id
     else:
         print('    Setting does not exist.')
@@ -233,27 +233,24 @@ def _test_exists(dataframes, engine):
 
     test_dict = dict(
         author=df.loc[0, 'Author'],
-        datetime=df.loc[0, 'DateTime'],
-        description=df.loc[0, 'Description'],
+        datetime=str(df.loc[0, 'DateTime']),
         )
 
     sql = (
-        "SELECT TestID FROM Setting WHERE "
-        "  Author = {author} AND"
-        "  DateTime = {datetime} AND"
-        "  Description = {description}".format(**test_dict)
+        "SELECT TestId FROM Test WHERE "
+        "  Author = '{author}' AND"
+        "  DateTime = '{datetime}';".format(**test_dict)
         )
     print('Checking if test exists...')
     result = pd.read_sql_query(sql, con=engine)
 
     if not result.empty:
         test_id = result.iloc[0, 0]
-        print('    Test id: {}'.format(test_id))
+        print('    TestId: {}'.format(test_id))
         return test_id
     else:
         print('    Test does not exist.')
         return False
-
 
 
 # ----------------------------------------------------------------------------
@@ -457,32 +454,37 @@ def add_experiment(database):
                 id_to_get='SettingId'
                 )
 
-        print('Inserting `Test`...')
-        test_id = _update_table(
-            'Test',
-            dataframes['test'],
-            engine,
-            col_to_add=('SettingId', setting_id),
-            id_to_get='TestId'
-            )
+        test_id = _test_exists(dataframes, engine)
+        if not test_id:
+            print('Inserting `Test`...')
+            test_id = _update_table(
+                'Test',
+                dataframes['test'],
+                engine,
+                col_to_add=('SettingId', setting_id),
+                id_to_get='TestId'
+                )
 
-        print('Inserting `Observation`...')
-        _update_table(
-            'Observation',
-            dataframes['observation'],
-            engine,
-            col_to_add=('TestId', test_id)
-            )
+            print('Inserting `Observation`...')
+            _update_table(
+                'Observation',
+                dataframes['observation'],
+                engine,
+                col_to_add=('TestId', test_id)
+                )
 
-        print('Inserting `TempObservation`...')
-        _update_table(
-            'TempObservation',
-            dataframes['temp_observation'],
-            engine,
-            col_to_add=('TestId', test_id)
-            )
+            print('Inserting `TempObservation`...')
+            _update_table(
+                'TempObservation',
+                dataframes['temp_observation'],
+                engine,
+                col_to_add=('TestId', test_id)
+                )
 
-        return 'Successfully added experiment to `{}`.'.format(database)
+            return 'Successfully added experiment to `{}`.'.format(database)
+        else:
+            return 'Halting execution.'
+
     elif 'n' in response:
         return 'Experiment not loaded.'
     else:

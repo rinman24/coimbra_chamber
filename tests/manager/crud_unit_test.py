@@ -737,16 +737,10 @@ def test_add_experiment_call_stack_when_test_exists(
         )
     correct_calls = [
         mock.call(
-            'Observation',
-            mock_engine.read_tdms.return_value['observation'],
+            'Setting',
+            mock_engine.read_tdms.return_value['setting'],
             _ENGINE_INSTANCE,
-            col_to_add=('TestId', _LAST_ROW_ID)
-            ),
-        mock.call(
-            'TempObservation',
-            mock_engine.read_tdms.return_value['temp_observation'],
-            _ENGINE_INSTANCE,
-            col_to_add=('TestId', _LAST_ROW_ID)
+            id_to_get='SettingId'
             )
         ]
 
@@ -754,7 +748,7 @@ def test_add_experiment_call_stack_when_test_exists(
             'Test',
             mock_engine.read_tdms.return_value['test'],
             _ENGINE_INSTANCE,
-            col_to_add=('SettingId', setting_id),
+            col_to_add=('SettingId', _LAST_ROW_ID),
             id_to_get='TestId'
             )
 
