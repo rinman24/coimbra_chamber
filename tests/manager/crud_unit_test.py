@@ -382,15 +382,15 @@ def test_get_experimental_data_returns_correct(mock_tk, mock_engine):  # noqa: D
 
 
 # ----------------------------------------------------------------------------
-# _get_last_row_id
+# _query_last_row_id
 
 
-def test_get_lastrow_id_returns_correct_value(mock_pd):  # noqa: D103
+def test_query_lastrow_id_returns_correct_value(mock_pd):  # noqa: D103
     # Arange
     correct_return_value = _LAST_ROW_ID
 
     # Act
-    last_row_id = crud_mngr._get_last_row_id('Test', 'SettingId', 'engine')
+    last_row_id = crud_mngr._query_last_row_id('Test', 'SettingId', 'engine')
 
     # Assert
     assert (last_row_id == correct_return_value)
@@ -456,7 +456,7 @@ def test_update_table_returns_last_row_id_if_necessary(mock_pd):  # noqa: D103
 
 
 # -----------------------------------------------------------------------------
-# _setting_exists
+# _query_setting_exists
 
 @pytest.mark.parametrize(
     'query_results, expected',
@@ -465,7 +465,7 @@ def test_update_table_returns_last_row_id_if_necessary(mock_pd):  # noqa: D103
         (pd.DataFrame(), False)
         ]
     )
-def test_setting_exists_returns_correct_value(
+def test_query_setting_exists_returns_correct_value(
         query_results, expected, mock_pd):  # noqa: D103
     # Arange
     setting_df = pd.DataFrame(
@@ -484,14 +484,14 @@ def test_setting_exists_returns_correct_value(
     mock_pd.read_sql_query.return_value = query_results
 
     # Act
-    setting_id = crud_mngr._setting_exists(dataframes, _ENGINE_INSTANCE)
+    setting_id = crud_mngr._query_setting_exists(dataframes, _ENGINE_INSTANCE)
 
     # Assert
     assert setting_id == expected
 
 
 # -----------------------------------------------------------------------------
-# _test_exists
+# _query_test_exists
 
 
 @pytest.mark.parametrize(
@@ -501,7 +501,7 @@ def test_setting_exists_returns_correct_value(
         (pd.DataFrame(), False)
         ]
     )
-def test_test_exists_returns_correct_value(
+def test_query_test_exists_returns_correct_value(
         query_results, expected, mock_pd):  # noqa: D103
     # Arange
     test_df = pd.DataFrame(
@@ -516,7 +516,7 @@ def test_test_exists_returns_correct_value(
     mock_pd.read_sql_query.return_value = query_results
 
     # Act
-    test_id = crud_mngr._test_exists(dataframes, _ENGINE_INSTANCE)
+    test_id = crud_mngr._query_test_exists(dataframes, _ENGINE_INSTANCE)
 
     # Assert
     assert test_id == expected
@@ -625,9 +625,9 @@ def test_add_experiment_call_stack_when_setting_exists(
         ):  # noqa: D103
     # Arange
     setting_id = 1
-    _setting_exists = mock.MagicMock(return_value=setting_id)
+    _query_setting_exists = mock.MagicMock(return_value=setting_id)
     monkeypatch.setattr(
-        'chamber.manager.crud._setting_exists', _setting_exists
+        'chamber.manager.crud._query_setting_exists', _query_setting_exists
         )
 
     mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)
@@ -676,9 +676,9 @@ def test_add_experiment_call_stack_when_not_setting_exists(
         ):  # noqa: D103
     # Arange
     setting_id = False
-    _setting_exists = mock.MagicMock(return_value=setting_id)
+    _query_setting_exists = mock.MagicMock(return_value=setting_id)
     monkeypatch.setattr(
-        'chamber.manager.crud._setting_exists', _setting_exists
+        'chamber.manager.crud._query_setting_exists', _query_setting_exists
         )
 
     mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)
@@ -726,9 +726,9 @@ def test_add_experiment_call_stack_when_test_exists(
         ):  # noqa: D103
     # Arange
     test_id = 2
-    _test_exists = mock.MagicMock(return_value=test_id)
+    _query_test_exists = mock.MagicMock(return_value=test_id)
     monkeypatch.setattr(
-        'chamber.manager.crud._test_exists', _test_exists
+        'chamber.manager.crud._query_test_exists', _query_test_exists
         )
 
     mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)

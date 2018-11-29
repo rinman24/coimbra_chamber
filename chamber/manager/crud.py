@@ -31,6 +31,9 @@ DEFAULT_TUBE = pd.DataFrame(
 # Internal logic
 
 
+# Connecting
+
+
 def _get_credentials():
     """Use configparser to obtain credentials."""
     config_parser = configparser.ConfigParser()
@@ -68,6 +71,22 @@ def _connect(creds, database=None):
     return cnx, cur
 
 
+def _get_engine(database, creds):
+    """Use database and creds to create an sqlalchemy engine."""
+    creds['database'] = database
+    engine_url = (
+        'mysql+mysqlconnector://{user}:{password}@{host}:3306/{database}'
+        .format(**creds)
+        )
+
+    engine = sqlalchemy.create_engine(engine_url)
+
+    return engine
+
+
+# Setup/teardown
+
+
 def _execute_build(cursor, table_group):
     """Use cursor and database name to build tables."""
     table_order = util_ddl.build_instructions[table_group, 'table_order']
@@ -92,17 +111,7 @@ def _execute_drop(cursor, table_group):
     return 'Successfully dropped `{}` tables.'.format(table_group)
 
 
-def _get_engine(database, creds):
-    """Use database and creds to create an sqlalchemy engine."""
-    creds['database'] = database
-    engine_url = (
-        'mysql+mysqlconnector://{user}:{password}@{host}:3306/{database}'
-        .format(**creds)
-        )
-
-    engine = sqlalchemy.create_engine(engine_url)
-
-    return engine
+# Read tdms
 
 
 def _get_experimental_data():
@@ -120,12 +129,6 @@ def _get_experimental_data():
         )
 
     return databases
-
-
-def _get_last_row_id(table, column, engine):
-    """Get the last row id for foreign key constraints."""
-    dml = 'SELECT IFNULL(MAX({0}), 0) FROM {1};'.format(column, table)
-    return pd.read_sql_query(dml, con=engine).iloc[0, 0]
 
 
 def _update_table(table, dataframe, engine, col_to_add=None, id_to_get=None):
@@ -187,11 +190,19 @@ def _update_table(table, dataframe, engine, col_to_add=None, id_to_get=None):
         )
 
     if id_to_get:
-        last_row_id = _get_last_row_id(table, id_to_get, engine)
+        last_row_id = _query_last_row_id(table, id_to_get, engine)
         return last_row_id
 
 
-def _setting_exists(dataframes, engine):
+# Queries
+
+def _query_last_row_id(table, column, engine):
+    """Get the last row id for foreign key constraints."""
+    dml = 'SELECT IFNULL(MAX({0}), 0) FROM {1};'.format(column, table)
+    return pd.read_sql_query(dml, con=engine).iloc[0, 0]
+
+
+def _query_setting_exists(dataframes, engine):
     """Return setting id if exists, else False."""
     df = dataframes['setting']
 
@@ -227,7 +238,7 @@ def _setting_exists(dataframes, engine):
         return False
 
 
-def _test_exists(dataframes, engine):
+def _query_test_exists(dataframes, engine):
     """Return test id if exists, else False."""
     df = dataframes['test']
 
@@ -464,7 +475,7 @@ def add_experiment(database):
         creds = _get_credentials()
         engine = _get_engine(database, creds)
 
-        setting_id = _setting_exists(dataframes, engine)
+        setting_id = _query_setting_exists(dataframes, engine)
         if not setting_id:
             print('Inserting `Setting`...')
             setting_id = _update_table(
@@ -474,7 +485,7 @@ def add_experiment(database):
                 id_to_get='SettingId'
                 )
 
-        test_id = _test_exists(dataframes, engine)
+        test_id = _query_test_exists(dataframes, engine)
         if not test_id:
             print('Inserting `Test`...')
             test_id = _update_table(
