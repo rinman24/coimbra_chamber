@@ -262,6 +262,17 @@ def _query_temp_obs_and_pivot(test_id, engine):  # pragma: no cover
     return temp_data
 
 
+def _query_obs(test_id, engine):  # pragma: no cover
+    dml = (
+        "SELECT Idx, DewPoint, Mass, Pressure"
+        "  FROM Observation"
+        "  WHERE TestId={}".format(test_id)
+        )
+    obs_data = pd.read_sql_query(dml, con=engine)
+
+    return obs_data
+
+
 # ----------------------------------------------------------------------------
 # Public functions
 
