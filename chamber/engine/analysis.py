@@ -210,7 +210,7 @@ def _calc_avg_te(temp_data):
     return avg_te
 
 
-def _filter_observations(obs_filt):
+def _filter_observations(obs_data):
     """
     Apply Savitzky-Golay filter to observation data.
 
@@ -222,7 +222,7 @@ def _filter_observations(obs_filt):
     with the calculation that was performed.
 
     """
-    obs_filt = obs_filt.copy()
+    obs_filt = obs_data.copy()
 
     obs_filt.DewPoint = signal.savgol_filter(obs_filt.DewPoint, 1801, 2)
     obs_filt.Mass = signal.savgol_filter(obs_filt.Mass, 301, 2)
@@ -230,6 +230,8 @@ def _filter_observations(obs_filt):
 
     return obs_filt
 
+
+# def _preprocess_onservations(temp_data, o)
 
 # ----------------------------------------------------------------------------
 # Public functions
