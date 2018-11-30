@@ -222,16 +222,19 @@ def _filter_observations(obs_data):
     with the calculation that was performed.
 
     """
-    obs_filt = obs_data.copy()
+    filt_obs = obs_data.copy()
 
-    obs_filt.DewPoint = signal.savgol_filter(obs_filt.DewPoint, 1801, 2)
-    obs_filt.Mass = signal.savgol_filter(obs_filt.Mass, 301, 2)
-    obs_filt.Pressure = signal.savgol_filter(obs_filt.Pressure, 3601, 1)
+    filt_obs.DewPoint = signal.savgol_filter(filt_obs.DewPoint, 1801, 2)
+    filt_obs.Mass = signal.savgol_filter(filt_obs.Mass, 301, 2)
+    filt_obs.Pressure = signal.savgol_filter(filt_obs.Pressure, 3601, 1)
 
-    return obs_filt
+    return filt_obs
 
 
-# def _preprocess_onservations(temp_data, o)
+#def _preprocess_onservations(temp_data, obs_data):
+#    """Preprocess and ask user to proceed."""
+#    avg_te = _calc_avg_te(temp_data)
+#    filt_obs = 
 
 # ----------------------------------------------------------------------------
 # Public functions
