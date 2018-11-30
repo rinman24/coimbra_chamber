@@ -203,32 +203,32 @@ def _calc_avg_te(temp_data):
     mean = temp_data.mean(axis=1)
     std = temp_data.std(axis=1)
 
-    avg_te = pd.DataFrame(unp.uarray(mean, std), columns=['t_e'], index=temp_data.index)
+    avg_te = pd.DataFrame(
+        unp.uarray(mean, std), columns=['t_e'], index=temp_data.index
+        )
 
     return avg_te
 
 
-def _filter_observations(obs_data):
-    """Apply Savitzky-Golay filter to observation data."""
-    filtered_dp = pd.Series(
-        signal.savgol_filter(obs_data['DewPoint'], 1801, 2)
-        )
-    filtered_dp.name = 'dew_point'
+def _filter_observations(obs_filt):
+    """
+    Apply Savitzky-Golay filter to observation data.
 
-    filtered_mass = pd.Series(
-        signal.savgol_filter(obs_data['Mass'], 301, 2)
-        )
-    filtered_mass.name = 'mass'
+    Notes
+    -----
+    No uncertainty yet as no calculations have been done. Conversion to
+    `ufloat` at this stage would be a poor use of resources. Unlike
+    `_calc_avg_temp` where we would like to propigate the error associated
+    with the calculation that was performed.
 
-    filtered_pres = pd.Series(
-        signal.savgol_filter(obs_data['Pressure'], 3601, 1)
-        )   
-    filtered_pres.name = 'pressure'
+    """
+    obs_filt = obs_filt.copy()
 
-    filtered_data = pd.concat(
-        [filtered_dp, filtered_mass, filtered_pres],
-        axis=1
-        ).reset_index()
+    obs_filt.DewPoint = signal.savgol_filter(obs_filt.DewPoint, 1801, 2)
+    obs_filt.Mass = signal.savgol_filter(obs_filt.Mass, 301, 2)
+    obs_filt.Pressure = signal.savgol_filter(obs_filt.Pressure, 3601, 1)
+
+    return obs_filt
 
 
 # ----------------------------------------------------------------------------

@@ -279,7 +279,10 @@ def _query_obs(test_id, engine):  # pragma: no cover
         "  FROM Observation"
         "  WHERE TestId={}".format(test_id)
         )
+
     obs_data = pd.read_sql_query(dml, con=engine)
+    obs_data.index = obs_data.Idx
+    obs_data.drop(columns=['Idx'], inplace=True)
 
     return obs_data
 
