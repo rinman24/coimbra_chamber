@@ -188,8 +188,8 @@ _TEMP_DATA_QUERY = pd.DataFrame(
     )
 _CORRECT_AVERAGE_TEMP_UNCERTAINTIES = pd.DataFrame(
     data=dict(
-        t_e=[
-            un.ufloat(301.153, 0.4668106920607228), 
+        AvgTe=[
+            un.ufloat(301.153, 0.4668106920607228),
             un.ufloat(301.158, 0.46908421418760887),
             un.ufloat(301.166, 0.4687619628103208),
             un.ufloat(301.16, 0.4750204673952965),
@@ -443,14 +443,13 @@ def test_calc_avg_te_returns_correct_df():  # noqa: D103
     # Assert
     for i in avg_te.index:
         assert math.isclose(
-            avg_te.loc[i, 't_e'].nominal_value,
-            _CORRECT_AVERAGE_TEMP_UNCERTAINTIES.loc[i, 't_e'].nominal_value
+            avg_te.loc[i, 'AvgTe'].nominal_value,
+            _CORRECT_AVERAGE_TEMP_UNCERTAINTIES.loc[i, 'AvgTe'].nominal_value
             )
         assert math.isclose(
-            avg_te.loc[i, 't_e'].std_dev,
-            _CORRECT_AVERAGE_TEMP_UNCERTAINTIES.loc[i, 't_e'].std_dev
+            avg_te.loc[i, 'AvgTe'].std_dev,
+            _CORRECT_AVERAGE_TEMP_UNCERTAINTIES.loc[i, 'AvgTe'].std_dev
             )
-    #pd.testing.assert_frame_equal(avg_te, _CORRECT_AVERAGE_TEMP)
 
 
 # ----------------------------------------------------------------------------
@@ -477,6 +476,48 @@ def test_filter_observations_has_correct_call_stack(monkeypatch):  # noqa: D103
 
     # Assert
     mock_signal.savgol_filter.assert_has_calls(savgol_calls)
+
+
+# ----------------------------------------------------------------------------
+# _preprocess_observations
+
+
+@pytest.mark.parametrize(
+    'user_input, expected',
+    [
+        ('n', 'Analysis canceled.'),
+        ('foobar', 'Unrecognized response.')
+        ]
+    )
+def test_preprocess_observations_returns_correct_result_when_not_y(
+        user_input, expected, monkeypatch
+        ):  # noqa: D103
+    # Arange
+    mock_input = mock.MagicMock()
+    monkeypatch.setattr('builtins.input', mock_input)
+    mock_input.return_value = user_input
+
+    mock_plt = mock.MagicMock()
+    monkeypatch.setattr('chamber.engine.analysis.plt', mock_plt)
+
+    _calc_avg_te = mock.MagicMock()
+    monkeypatch.setattr(
+        'chamber.engine.analysis._calc_avg_te', _calc_avg_te
+        )
+
+    _filter_observations = mock.MagicMock()
+    monkeypatch.setattr(
+        'chamber.engine.analysis._filter_observations', _filter_observations
+        )
+
+    temp_data = mock.MagicMock()
+    obs_data = mock.MagicMock()
+
+    # Act
+    result = anlys_eng._preprocess_observations(obs_data, temp_data)
+
+    # Assert
+    assert (result == expected)
 
 
 # ----------------------------------------------------------------------------

@@ -3,7 +3,9 @@
 import math
 import re
 
+import matplotlib.pyplot as plt
 import nptdms
+import numpy as np
 import pandas as pd
 from scipy import signal
 from uncertainties import unumpy as unp
@@ -204,7 +206,7 @@ def _calc_avg_te(temp_data):
     std = temp_data.std(axis=1)
 
     avg_te = pd.DataFrame(
-        unp.uarray(mean, std), columns=['t_e'], index=temp_data.index
+        unp.uarray(mean, std), columns=['AvgTe'], index=temp_data.index
         )
 
     return avg_te
@@ -231,10 +233,86 @@ def _filter_observations(obs_data):
     return filt_obs
 
 
-#def _preprocess_onservations(temp_data, obs_data):
-#    """Preprocess and ask user to proceed."""
-#    avg_te = _calc_avg_te(temp_data)
-#    filt_obs = 
+def _preprocess_observations(obs_data, temp_data):
+    """Preprocess and ask user to proceed."""
+    avg_te = _calc_avg_te(temp_data)
+    nominal_temps = np.array(
+        [avg_te.loc[i, 'AvgTe'].nominal_value for i in avg_te.index]
+        )
+    temp_std = np.array(
+        [avg_te.loc[i, 'AvgTe'].std_dev for i in avg_te.index]
+        )
+
+    filt_obs = _filter_observations(obs_data)
+
+    fig = plt.figure(figsize=(10, 8))
+
+    # Temperature ------------------------------------------------------------
+    ax = fig.add_subplot(2, 2, 1)
+    ax.plot(avg_te.index, nominal_temps, label='Nominal $T_e$')
+    ax.fill_between(
+        avg_te.index, nominal_temps-temp_std, nominal_temps+temp_std,
+        color='gray', alpha=0.2
+        )
+    ax.legend()
+    ax.set_xlabel('$t$/s')
+    ax.set_ylabel('$T_e$/K')
+    ax.grid()
+
+    # DewPoint ---------------------------------------------------------------
+    ax = fig.add_subplot(2, 2, 2)
+    obs_data.DewPoint.plot(ax=ax, label='Observed')
+    filt_obs.DewPoint.plot(ax=ax, label='Filtered')
+    ax.fill_between(
+        filt_obs.index,
+        filt_obs.DewPoint-0.2, filt_obs.DewPoint+0.2,
+        color='gray', alpha=0.2
+        )
+    ax.legend()
+    ax.set_xlabel('$t$/s')
+    ax.set_ylabel('$T_{DP}}$/K')
+    ax.grid()
+
+    # Mass -------------------------------------------------------------------
+    ax = fig.add_subplot(2, 2, 3)
+    obs_data.Mass.plot(ax=ax, label='Observed')
+    filt_obs.Mass.plot(ax=ax, label='Filtered')
+    ax.fill_between(
+        filt_obs.index,
+        filt_obs.Mass-1e-7, filt_obs.Mass+1e-7,
+        color='gray', alpha=0.2
+        )
+    ax.legend()
+    ax.set_xlabel('$t$/s')
+    ax.set_ylabel('$m$/kg')
+    ax.grid()
+
+    # Pressure ---------------------------------------------------------------
+    ax = fig.add_subplot(2, 2, 4)
+    yerr = [p*0.0015 for p in obs_data.Pressure]
+    obs_data.Pressure.plot(ax=ax, label='Observed')
+    filt_obs.Pressure.plot(ax=ax, label='Filtered')
+    ax.fill_between(
+        filt_obs.index,
+        filt_obs.Pressure-yerr, filt_obs.Pressure+yerr,
+        color='gray', alpha=0.2
+        )
+    ax.legend()
+    ax.set_xlabel('$t$/s')
+    ax.set_ylabel('$P$/Pa')
+    ax.grid()
+
+    plt.show()
+
+    response = input('Proceed ([y]/n)? ').lower()
+
+    if (not response) or ('y' in response):  # pragma: no cover
+        return obs_data.join(avg_te)
+    elif 'n' in response:
+        return 'Analysis canceled.'
+    else:
+        return 'Unrecognized response.'
+
 
 # ----------------------------------------------------------------------------
 # Public functions
