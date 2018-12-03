@@ -578,9 +578,13 @@ def test_get_valid_phi_targets():  # noqa: D103
 def test_get_valid_phi_indexes():  # noqa: D103
     # Arrange
     correct_result = [
-        (0.1, 13), (0.15, 14), (0.2, 15), (0.25, 16), (0.3, 17), (0.35, 17),
-        (0.4, 18), (0.45, 19), (0.5, 20), (0.55, 21), (0.6, 22), (0.65, 22),
-        (0.7, 23)
+        dict(target=0.1, idx=13), dict(target=0.15, idx=14),
+        dict(target=0.2, idx=15), dict(target=0.25, idx=16),
+        dict(target=0.3, idx=17), dict(target=0.35, idx=17),
+        dict(target=0.4, idx=18), dict(target=0.45, idx=19),
+        dict(target=0.5, idx=20), dict(target=0.55, idx=21),
+        dict(target=0.6, idx=22), dict(target=0.65, idx=22),
+        dict(target=0.7, idx=23)
         ]
 
     # Act
@@ -588,6 +592,23 @@ def test_get_valid_phi_indexes():  # noqa: D103
 
     # Assert
     assert result == correct_result
+
+
+# ----------------------------------------------------------------------------
+# _get_max_window_length
+
+@pytest.mark.skip
+def test_get_max_window_lengths():  # noqa: D103
+    # Arrange
+    # You can calculate the max window length by counting by hand
+    # The result will look like [dict(target=0.5, idx=22, max_window=100)]
+
+    # Act
+    result = anlys_eng._get_max_window_lengths(_PHI_TESTING_DF)
+
+    # Assert
+    # you need to set this up
+
 
 # ----------------------------------------------------------------------------
 # read_tdms

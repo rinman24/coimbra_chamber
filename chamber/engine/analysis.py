@@ -395,7 +395,7 @@ def _get_valid_phi_indexes(data):
         phi = data.phi.copy()
         phi = phi - target
         target_idx = min(phi[phi > 0].index)
-        result.append((target, target_idx))
+        result.append(dict(target=target, idx=target_idx))
     return result
 
 
