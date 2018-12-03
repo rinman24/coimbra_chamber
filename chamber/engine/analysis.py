@@ -365,6 +365,27 @@ def _calc_multi_phi(data):  # pragma: no cover
     return data
 
 
+def _get_valid_phi_targets(data, phi_step_pct=5):
+    # Multipy by 100 to get into percent
+    phi_min = data.phi.min() * 100
+    phi_max = data.phi.max() * 100
+
+    phi_min_valid = int(
+        math.ceil(phi_min.nominal_value/phi_step_pct)
+        ) * phi_step_pct
+    phi_max_valid = int(
+        math.floor(phi_max.nominal_value/phi_step_pct)
+        ) * phi_step_pct
+
+    # Devide by 100 to get back to dimensionless phi
+    my_map = map(
+        lambda x: x/100,
+        range(phi_min_valid, phi_max_valid + 5, phi_step_pct)
+    )
+
+    return list(my_map)
+
+
 # ----------------------------------------------------------------------------
 # Public functions
 

@@ -543,6 +543,34 @@ def test_calc_single_phi_returns_correct_result():  # noqa: D103
 
 
 # ----------------------------------------------------------------------------
+# _get_valid_phi_targets
+
+
+def test_get_valid_phi_targets():  # noqa: D103
+    # Arrange
+    input_df = pd.DataFrame(
+        data=[
+            un.ufloat(0.06, 0.01), un.ufloat(0.12, 0.01),
+            un.ufloat(0.18, 0.01), un.ufloat(0.24, 0.01),
+            un.ufloat(0.30, 0.01), un.ufloat(0.36, 0.01),
+            un.ufloat(0.42, 0.01), un.ufloat(0.48, 0.01),
+            un.ufloat(0.54, 0.01), un.ufloat(0.60, 0.01),
+            un.ufloat(0.66, 0.01), un.ufloat(0.72, 0.01)
+            ],
+        index=[12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+        columns=['phi']
+        )
+    correct_targets = [
+        0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7
+        ]
+
+    # Act
+    result = anlys_eng._get_valid_phi_targets(input_df)
+
+    # Assert
+    assert result == correct_targets
+
+# ----------------------------------------------------------------------------
 # read_tdms
 
 
