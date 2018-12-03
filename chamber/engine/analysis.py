@@ -365,7 +365,8 @@ def _calc_multi_phi(data):  # pragma: no cover
     return data
 
 
-def _get_valid_phi_targets(data, phi_step_pct=5):
+def _get_valid_phi_targets(data):
+    phi_step_pct = 5
     # Multipy by 100 to get into percent
     phi_min = data.phi.min() * 100
     phi_max = data.phi.max() * 100
@@ -384,6 +385,18 @@ def _get_valid_phi_targets(data, phi_step_pct=5):
     )
 
     return list(my_map)
+
+
+def _get_valid_phi_indexes(data):
+    valid_phi_targets = _get_valid_phi_targets(data)
+    result = []
+
+    for target in valid_phi_targets:
+        phi = data.phi.copy()
+        phi = phi - target
+        target_idx = min(phi[phi > 0].index)
+        result.append(target_idx)
+    return result
 
 
 # ----------------------------------------------------------------------------
