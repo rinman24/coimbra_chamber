@@ -524,18 +524,23 @@ def test_preprocess_observations_returns_correct_result_when_not_y(
 # _calc_rh
 
 
-def test_calc_single_phi_returns_correct_result():
+def test_calc_single_phi_returns_correct_result():  # noqa: D103
     # Arrange
     correct_rh = 0.517
-    rh_std = 0.0087
-    p, t, tdp = 1e5, un.ufloat(290, 0.15), 280
+    correct_rh_std = 0.0087
+
+    p, t, dp = 1e5, un.ufloat(290, 0.15), 280
+    row = pd.Series(
+        [dp, 'mass', p, t], index=['DewPoint', 'Mass', 'Pressure', 'AvgTe']
+        )
 
     # Act
-    rh = anlys_eng._calc_single_phi(p, t, tdp)
+    rh, rh_std = anlys_eng._calc_single_phi(row)
 
     # Assert
-    assert math.isclose(rh.nominal_value, correct_rh, rel_tol=1e-3)
-    assert math.isclose(rh.std_dev, rh_std, rel_tol=1e-2)
+    assert math.isclose(rh, correct_rh, rel_tol=1e-3)
+    assert math.isclose(rh_std, correct_rh_std, rel_tol=1e-2)
+
 
 # ----------------------------------------------------------------------------
 # read_tdms

@@ -3,6 +3,8 @@
 import math
 import re
 
+import dask.dataframe as dd
+from dask.multiprocessing import get
 import CoolProp.HumidAirProp as hap
 import matplotlib.pyplot as plt
 import nptdms
@@ -324,18 +326,43 @@ def _preprocess_observations(obs_data, temp_data):
 # ----------------------------------------------------------------------------
 # Internal logic (locating target indexes)
 
-def _calc_single_phi(p, t, tdp):
-    t, del_t = t.nominal_value, t.std_dev
+def _calc_single_phi(row):
+    t, del_t = row.AvgTe.nominal_value, row.AvgTe.std_dev
 
-    phi = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', tdp)
+    phi = hap.HAPropsSI('RH', 'P', row.Pressure, 'T', t, 'Tdp', row.DewPoint)
 
-    del_p = hap.HAPropsSI('RH', 'P', un_util.pct_p*p, 'T', t, 'Tdp', tdp) - phi
-    del_t = hap.HAPropsSI('RH', 'P', p, 'T', t+del_t, 'Tdp', tdp) - phi
-    del_tdp = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', tdp+un_util.del_tdp) - phi
+    del_p = hap.HAPropsSI(
+        'RH',
+        'P', un_util.pct_p * row.Pressure,
+        'T', t,
+        'Tdp', row.DewPoint) - phi
+    del_t = hap.HAPropsSI(
+        'RH',
+        'P', row.Pressure,
+        'T', t + del_t,
+        'Tdp', row.DewPoint) - phi
+    del_tdp = hap.HAPropsSI(
+        'RH',
+        'P', row.Pressure,
+        'T', t,
+        'Tdp', row.DewPoint + un_util.del_tdp) - phi
 
     phi_std = math.sqrt(del_p**2 + del_t**2 + del_tdp**2)
 
-    return un.ufloat(phi, phi_std)
+    return (phi, phi_std)
+
+
+def _calc_multi_phi(data):  # pragma: no cover
+    ddata = dd.from_pandas(data, npartitions=8)
+
+    res = ddata.map_partitions(
+        lambda df: df.apply((lambda row: _calc_single_phi(row)), axis=1),
+        meta=('float', 'float')
+        ).compute(get=get)
+
+    data['phi'] = res.apply(lambda x: un.ufloat(x[0], x[1]))
+
+    return data
 
 
 # ----------------------------------------------------------------------------
