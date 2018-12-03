@@ -1,3 +1,4 @@
+cloudpickle==0.5.5
 CoolProp==6.0.0
 dask==0.19.2
 matplotlib==2.2.3
