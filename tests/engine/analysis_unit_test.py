@@ -527,8 +527,8 @@ def test_preprocess_observations_returns_correct_result_when_not_y(
 def test_calc_single_phi_returns_correct_result():
     # Arrange
     correct_rh = 0.517
-    rh_std = 0.0097
-    p, t, tdp = 1e5, 290, 280
+    rh_std = 0.0087
+    p, t, tdp = 1e5, un.ufloat(290, 0.15), 280
 
     # Act
     rh = anlys_eng._calc_single_phi(p, t, tdp)

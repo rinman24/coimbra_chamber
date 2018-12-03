@@ -12,6 +12,8 @@ from scipy import signal
 import uncertainties as un
 from uncertainties import unumpy as unp
 
+import chamber.utility.uncert as un_util
+
 
 # ----------------------------------------------------------------------------
 # Internal logic (adding experiment)
@@ -268,7 +270,8 @@ def _preprocess_observations(obs_data, temp_data):
     filt_obs.DewPoint.plot(ax=ax, label='Filtered')
     ax.fill_between(
         filt_obs.index,
-        filt_obs.DewPoint-0.2, filt_obs.DewPoint+0.2,
+        filt_obs.DewPoint - un_util.del_tdp,
+        filt_obs.DewPoint + un_util.del_tdp,
         color='gray', alpha=0.2
         )
     ax.legend()
@@ -282,7 +285,8 @@ def _preprocess_observations(obs_data, temp_data):
     filt_obs.Mass.plot(ax=ax, label='Filtered')
     ax.fill_between(
         filt_obs.index,
-        filt_obs.Mass-1e-7, filt_obs.Mass+1e-7,
+        filt_obs.Mass - un_util.del_m,
+        filt_obs.Mass + un_util.del_m,
         color='gray', alpha=0.2
         )
     ax.legend()
@@ -292,12 +296,12 @@ def _preprocess_observations(obs_data, temp_data):
 
     # Pressure ---------------------------------------------------------------
     ax = fig.add_subplot(2, 2, 4)
-    yerr = [p*0.0015 for p in obs_data.Pressure]
+    p_err = [p * un_util.pct_p for p in obs_data.Pressure]
     obs_data.Pressure.plot(ax=ax, label='Observed')
     filt_obs.Pressure.plot(ax=ax, label='Filtered')
     ax.fill_between(
         filt_obs.index,
-        filt_obs.Pressure-yerr, filt_obs.Pressure+yerr,
+        filt_obs.Pressure - p_err, filt_obs.Pressure + p_err,
         color='gray', alpha=0.2
         )
     ax.legend()
@@ -321,11 +325,13 @@ def _preprocess_observations(obs_data, temp_data):
 # Internal logic (locating target indexes)
 
 def _calc_single_phi(p, t, tdp):
+    t, del_t = t.nominal_value, t.std_dev
+
     phi = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', tdp)
 
-    del_p = hap.HAPropsSI('RH', 'P', 1.0015*p, 'T', t, 'Tdp', tdp) - phi
-    del_t = hap.HAPropsSI('RH', 'P', p, 'T', t+0.2, 'Tdp', tdp) - phi
-    del_tdp = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', tdp+0.2) - phi
+    del_p = hap.HAPropsSI('RH', 'P', un_util.pct_p*p, 'T', t, 'Tdp', tdp) - phi
+    del_t = hap.HAPropsSI('RH', 'P', p, 'T', t+del_t, 'Tdp', tdp) - phi
+    del_tdp = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', tdp+un_util.del_tdp) - phi
 
     phi_std = math.sqrt(del_p**2 + del_t**2 + del_tdp**2)
 
