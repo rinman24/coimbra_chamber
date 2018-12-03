@@ -371,7 +371,7 @@ def test_get_experimental_data_calls_analysis_engine(mock_tk, mock_engine):  # n
 
 
 def test_get_experimental_data_returns_correct(mock_tk, mock_engine):  # noqa: D103
-    # Arange
+    # Arrange
     correct_return_value = mock_engine.read_tdms.return_value
 
     # Act
@@ -386,7 +386,7 @@ def test_get_experimental_data_returns_correct(mock_tk, mock_engine):  # noqa: D
 
 
 def test_query_lastrow_id_returns_correct_value(mock_pd):  # noqa: D103
-    # Arange
+    # Arrange
     correct_return_value = _LAST_ROW_ID
 
     # Act
@@ -401,7 +401,7 @@ def test_query_lastrow_id_returns_correct_value(mock_pd):  # noqa: D103
 
 
 def test_update_table_adds_col_if_necessary(mock_pd):  # noqa: D103
-    # Arange
+    # Arrange
     dataframe = pd.DataFrame(index=range(10))
     column, value = 'test_row', 123
 
@@ -421,7 +421,7 @@ def test_update_table_adds_col_if_necessary(mock_pd):  # noqa: D103
 
 
 def test_update_table_calls_to_sql_correctly(mock_pd):  # noqa: D103
-    # Arange
+    # Arrange
     correct_params = dict(
         name='test_table', con=_ENGINE_INSTANCE, if_exists='append',
         index=False
@@ -440,7 +440,7 @@ def test_update_table_calls_to_sql_correctly(mock_pd):  # noqa: D103
 
 
 def test_update_table_returns_last_row_id_if_necessary(mock_pd):  # noqa: D103
-    # Arange
+    # Arrange
     table, column = 'test_table', 'table_id'
 
     # Act
@@ -467,7 +467,7 @@ def test_update_table_returns_last_row_id_if_necessary(mock_pd):  # noqa: D103
     )
 def test_query_setting_exists_returns_correct_value(
         query_results, expected, mock_pd):  # noqa: D103
-    # Arange
+    # Arrange
     setting_df = pd.DataFrame(
         data=dict(
             Duty=[1],
@@ -503,7 +503,7 @@ def test_query_setting_exists_returns_correct_value(
     )
 def test_query_test_exists_returns_correct_value(
         query_results, expected, mock_pd):  # noqa: D103
-    # Arange
+    # Arrange
     test_df = pd.DataFrame(
         data=dict(
             Author=['Me'],
@@ -591,7 +591,7 @@ def test_add_tube_calls_to_sql_with_correct_inputs(
         mock_sqlalchemy,
         mock_pd
         ):  # noqa: D103
-    # Arange
+    # Arrange
     correct_params = dict(
         name='Tube', con=_ENGINE_INSTANCE, if_exists='append', index=False
         )
@@ -623,7 +623,7 @@ def test_add_experiment_call_stack_when_setting_exists(
         mock_ConfigParser, mock_sqlalchemy, mock_pd, mock_engine, mock_tk,
         mock_input, mock_plt, monkeypatch
         ):  # noqa: D103
-    # Arange
+    # Arrange
     setting_id = 1
     _query_setting_exists = mock.MagicMock(return_value=setting_id)
     monkeypatch.setattr(
@@ -674,7 +674,7 @@ def test_add_experiment_call_stack_when_not_setting_exists(
         mock_ConfigParser, mock_sqlalchemy, mock_pd, mock_engine, mock_tk,
         mock_input, mock_plt, monkeypatch
         ):  # noqa: D103
-    # Arange
+    # Arrange
     setting_id = False
     _query_setting_exists = mock.MagicMock(return_value=setting_id)
     monkeypatch.setattr(
@@ -724,7 +724,7 @@ def test_add_experiment_call_stack_when_test_exists(
         mock_ConfigParser, mock_sqlalchemy, mock_pd, mock_engine, mock_tk,
         mock_input, mock_plt, monkeypatch
         ):  # noqa: D103
-    # Arange
+    # Arrange
     test_id = 2
     _query_test_exists = mock.MagicMock(return_value=test_id)
     monkeypatch.setattr(
@@ -773,7 +773,7 @@ def test_add_experiment_returns_correct_with_user_input(
         user_input, expected_message, mock_ConfigParser, mock_sqlalchemy,
         mock_pd, mock_engine, mock_tk, mock_input, mock_plt
         ):  # noqa: D103
-    # Arange
+    # Arrange
     mock_input.return_value = user_input
 
     # Act

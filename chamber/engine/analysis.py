@@ -3,12 +3,15 @@
 import math
 import re
 
+import CoolProp.HumidAirProp as hap
 import matplotlib.pyplot as plt
 import nptdms
 import numpy as np
 import pandas as pd
 from scipy import signal
+import uncertainties as un
 from uncertainties import unumpy as unp
+
 
 # ----------------------------------------------------------------------------
 # Internal logic (adding experiment)
@@ -312,6 +315,21 @@ def _preprocess_observations(obs_data, temp_data):
         return 'Analysis canceled.'
     else:
         return 'Unrecognized response.'
+
+
+# ----------------------------------------------------------------------------
+# Internal logic (locating target indexes)
+
+def _calc_single_phi(p, t, tdp):
+    phi = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', tdp)
+
+    del_p = hap.HAPropsSI('RH', 'P', 1.0015*p, 'T', t, 'Tdp', tdp) - phi
+    del_t = hap.HAPropsSI('RH', 'P', p, 'T', t+0.2, 'Tdp', tdp) - phi
+    del_tdp = hap.HAPropsSI('RH', 'P', p, 'T', t, 'Tdp', tdp+0.2) - phi
+
+    phi_std = math.sqrt(del_p**2 + del_t**2 + del_tdp**2)
+
+    return un.ufloat(phi, phi_std)
 
 
 # ----------------------------------------------------------------------------

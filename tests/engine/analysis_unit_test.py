@@ -244,7 +244,7 @@ def test_get_tdms_objs_as_df_returns_correct_dicts(mock_TdmsFile):  # noqa: D103
 @pytest.mark.parametrize('duty', [0, 1])
 @pytest.mark.parametrize('is_mass', [0, 1])
 def test_build_setting_df_returns_correct_df(duty, is_mass, mock_TdmsFile):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
     correct_setting_df = _build_correct_setting_df(duty=duty, is_mass=is_mass)
 
@@ -257,7 +257,7 @@ def test_build_setting_df_returns_correct_df(duty, is_mass, mock_TdmsFile):  # n
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_drops_mass_from_data_when_ismass_0(duty, mock_TdmsFile):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=0)
 
     # Act
@@ -269,7 +269,7 @@ def test_build_setting_drops_mass_from_data_when_ismass_0(duty, mock_TdmsFile): 
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_keeps_mass_in_data_when_ismass_1(duty, mock_TdmsFile):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=1)
 
     # Act
@@ -281,7 +281,7 @@ def test_build_setting_keeps_mass_in_data_when_ismass_1(duty, mock_TdmsFile):  #
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_drops_tcs_0_to_3_when_ismass_1(duty, mock_TdmsFile):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=1)
 
     # Act
@@ -295,7 +295,7 @@ def test_build_setting_drops_tcs_0_to_3_when_ismass_1(duty, mock_TdmsFile):  # n
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_keeps_tcs_0_to_3_when_ismass_0(duty, mock_TdmsFile):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=0)
 
     # Act
@@ -311,7 +311,7 @@ def test_build_setting_keeps_tcs_0_to_3_when_ismass_0(duty, mock_TdmsFile):  # n
 def test_build_setting_drops_powout_powref_from_data_when_duty_is_0(
         is_mass, mock_TdmsFile
         ):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(duty=0, is_mass=is_mass)
 
     # Act
@@ -325,7 +325,7 @@ def test_build_setting_drops_powout_powref_from_data_when_duty_is_0(
 def test_build_setting_keeps_powout_powref_in_data_when_duty_is_1(
         is_mass, mock_TdmsFile
         ):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(duty=1, is_mass=is_mass)
 
     # Act
@@ -342,7 +342,7 @@ def test_build_setting_keeps_powout_powref_in_data_when_duty_is_1(
 @pytest.mark.parametrize('duty', [0, 1])
 @pytest.mark.parametrize('is_mass', [0, 1])
 def test_build_observation_df_returns_correct_df(duty, is_mass, mock_TdmsFile):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
     correct_observation_df = _build_correct_observation_df(
         duty=duty, is_mass=is_mass
@@ -362,7 +362,7 @@ def test_build_observation_df_returns_correct_df(duty, is_mass, mock_TdmsFile): 
 def test_build_observation_removes_keys_from_data(
         duty, is_mass, mock_TdmsFile
         ):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
 
     # Act
@@ -381,7 +381,7 @@ def test_build_observation_removes_keys_from_data(
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_temp_observation_with_is_mass_1(duty, mock_TdmsFile):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(is_mass=1, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
@@ -397,7 +397,7 @@ def test_build_temp_observation_with_is_mass_1(duty, mock_TdmsFile):  # noqa: D1
 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_temp_observation_with_is_mass_0(duty, mock_TdmsFile):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(is_mass=0, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
@@ -416,7 +416,7 @@ def test_build_temp_observation_with_is_mass_0(duty, mock_TdmsFile):  # noqa: D1
 def test_build_temp_observation_drops_data_columns(
         duty, is_mass, mock_TdmsFile
         ):  # noqa: D103
-    # Arange
+    # Arrange
     dataframes = _configure_input_dataframes(is_mass=is_mass, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
@@ -432,7 +432,7 @@ def test_build_temp_observation_drops_data_columns(
 # _calc_avg_te
 
 def test_calc_avg_te_returns_correct_df():  # noqa: D103
-    # Arange
+    # Arrange
     temp_data = _TEMP_DATA_QUERY.pivot(
         index='Idx', columns='ThermocoupleNum', values='Temperature'
         )
@@ -457,7 +457,7 @@ def test_calc_avg_te_returns_correct_df():  # noqa: D103
 
 
 def test_filter_observations_has_correct_call_stack(monkeypatch):  # noqa: D103
-    # Arange
+    # Arrange
     mock_df = mock.MagicMock()
 
     mock_signal = mock.MagicMock()
@@ -492,7 +492,7 @@ def test_filter_observations_has_correct_call_stack(monkeypatch):  # noqa: D103
 def test_preprocess_observations_returns_correct_result_when_not_y(
         user_input, expected, monkeypatch
         ):  # noqa: D103
-    # Arange
+    # Arrange
     mock_input = mock.MagicMock()
     monkeypatch.setattr('builtins.input', mock_input)
     mock_input.return_value = user_input
@@ -521,11 +521,28 @@ def test_preprocess_observations_returns_correct_result_when_not_y(
 
 
 # ----------------------------------------------------------------------------
+# _calc_rh
+
+
+def test_calc_single_phi_returns_correct_result():
+    # Arrange
+    correct_rh = 0.517
+    rh_std = 0.0097
+    p, t, tdp = 1e5, 290, 280
+
+    # Act
+    rh = anlys_eng._calc_single_phi(p, t, tdp)
+
+    # Assert
+    assert math.isclose(rh.nominal_value, correct_rh, rel_tol=1e-3)
+    assert math.isclose(rh.std_dev, rh_std, rel_tol=1e-2)
+
+# ----------------------------------------------------------------------------
 # read_tdms
 
 
 def test_call_read_tdms_returns_correct_dfs(mock_TdmsFile):  # noqa: D103
-    # Arange
+    # Arrange
     duty, is_mass = 0, 1
     correct_setting_df = _build_correct_setting_df(duty=duty, is_mass=is_mass)
     correct_observation_df = _build_correct_observation_df(
