@@ -577,15 +577,17 @@ def test_get_valid_phi_targets():  # noqa: D103
 
 def test_get_valid_phi_indexes():  # noqa: D103
     # Arrange
-    correct_indexes = [
-        13, 14, 15, 16, 17, 17, 18, 19, 20, 21, 22, 22, 23
+    correct_result = [
+        (0.1, 13), (0.15, 14), (0.2, 15), (0.25, 16), (0.3, 17), (0.35, 17),
+        (0.4, 18), (0.45, 19), (0.5, 20), (0.55, 21), (0.6, 22), (0.65, 22),
+        (0.7, 23)
         ]
 
     # Act
     result = anlys_eng._get_valid_phi_indexes(_PHI_TESTING_DF)
 
     # Assert
-    assert result == correct_indexes
+    assert result == correct_result
 
 # ----------------------------------------------------------------------------
 # read_tdms
