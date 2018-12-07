@@ -399,8 +399,62 @@ def _get_valid_phi_indexes(data):
     return result
 
 
+def _get_max_window_lengths(data):
+    indexes = _get_valid_phi_indexes(data)
+    for _dict in indexes:
+        to_the_left = _dict['idx'] - data.index[0]
+        to_the_right = data.index[-1] - _dict['idx']
+        _dict.update({'max_hl': min(to_the_left, to_the_right)})
+
+    return indexes
+
+
+def _perform_single_chi2(sample_of_data):
+    """
+    Perform a chi2 analysis on the sample data.
+    
+    Parameters
+    ----------
+    It needs the Idx and mass columns, but only the ones currently being used.
+    Once it has this sample it can perform the chi2 analysis
+
+    Return
+    ------
+    chi2 stats in a dict(a, b, sig_b, Q)
+    """
+    raise NotImplementedError
+
+
+def _select_best_fit(data):
+    """
+    Use _get_max_window_lengths and _perform_single_chi2 to loop
+    through the all of the window lengths. You want to start with
+    the max window, use a while loop that stops at the first Q <= 0.01
+    or when the window length is gone.
+
+    Parameters
+    ----------
+    All inputs to _get_max_window_length and _perform_single_chi2
+
+    Returns
+    -------
+    best fit chi2 stats in a dict(a, b, sig_b, Q)
+    """
+    raise NotImplementedError
+
+
 # ----------------------------------------------------------------------------
 # Public functions
+
+def perform_chi2_analysis():
+    """
+    This is the workhorse of the fitting.
+    You will use _select_best_fit for each of the targets.
+
+    You will also need to make this function show the plot of the fit and ask
+    the user if he/she would like to proceed.
+    """
+    raise NotImplementedError
 
 
 def read_tdms(filepath):

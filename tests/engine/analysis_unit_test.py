@@ -595,19 +595,22 @@ def test_get_valid_phi_indexes():  # noqa: D103
 
 
 # ----------------------------------------------------------------------------
-# _get_max_window_length
+# _get_max_window_lengths
 
-@pytest.mark.skip
+
 def test_get_max_window_lengths():  # noqa: D103
     # Arrange
-    # You can calculate the max window length by counting by hand
-    # The result will look like [dict(target=0.5, idx=22, max_window=100)]
+    indexes = anlys_eng._get_valid_phi_indexes(_PHI_TESTING_DF)
+    max_half_lengths = [1, 2, 3, 4, 5, 5, 5, 4, 3, 2, 1, 1, 0]
+    for idx, _dict in enumerate(indexes):
+        _dict.update({'max_hl': max_half_lengths[idx]})
+    correct_result = indexes
 
     # Act
     result = anlys_eng._get_max_window_lengths(_PHI_TESTING_DF)
 
     # Assert
-    # you need to set this up
+    assert result == correct_result
 
 
 # ----------------------------------------------------------------------------
