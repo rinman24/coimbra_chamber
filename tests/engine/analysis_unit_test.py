@@ -660,7 +660,8 @@ def test_perform_single_chi2_fit():  # noqa: D103
     result = anlys_eng._perform_single_chi2_fit(_CHI2_TEST_DATA)
 
     # Assert
-    assert result == correct_result
+    for key in result.keys():
+        assert math.isclose(result[key], correct_result[key])
 
 
 # ----------------------------------------------------------------------------
