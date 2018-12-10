@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import nptdms
 import numpy as np
 import pandas as pd
-from scipy import signal
+from scipy import signal, stats
 import uncertainties as un
 from uncertainties import unumpy as unp
 
@@ -316,7 +316,7 @@ def _preprocess_observations(obs_data, temp_data):
     response = input('Proceed ([y]/n)? ').lower()
 
     if (not response) or ('y' in response):  # pragma: no cover
-        return obs_data.join(avg_te)
+        return filt_obs.join(avg_te)
     elif 'n' in response:
         return 'Analysis canceled.'
     else:
@@ -409,24 +409,45 @@ def _get_max_window_lengths(data):
     return indexes
 
 
-def _perform_single_chi2(sample_of_data):
-    """
-    Perform a chi2 analysis on the sample data.
-    
-    Parameters
-    ----------
-    It needs the Idx and mass columns, but only the ones currently being used.
-    Once it has this sample it can perform the chi2 analysis
+def _perform_single_chi2_fit(sample):
+    # constants
+    n = len(sample)
+    sig_coef = 1/un_util.del_m**2
 
-    Return
-    ------
-    chi2 stats in a dict(a, b, sig_b, Q)
-    """
-    raise NotImplementedError
+    # chi2 variables
+    s = n*sig_coef
+    s_x = sig_coef*sample.index.values.sum()
+    s_y = sig_coef*sample.Mass.sum()
+    s_xx = sig_coef*sample.index.values.dot(
+        sample.index.values)
+    s_xy = sig_coef*sample.index.values.dot(
+        sample.Mass)
+    delta = s*s_xx - s_x**2
+
+    # fit params
+    a = (s_xx*s_y - s_x*s_xy)/delta
+    b = (s*s_xy - s_x*s_y)/delta
+    sig_a = math.sqrt(s_xx/delta)
+    sig_b = math.sqrt(s/delta)
+
+    # p-value
+    model = a + b*sample.index.values
+    chi2 = ((sample.Mass-model)/un_util.del_m).pow(2).sum()
+    p_val = stats.chi2.cdf(chi2, len(sample)-2)
+
+    # r-squared
+    ss_res = (sample.Mass-model).pow(2).sum()
+    ss_tot = (sample.Mass-sample.Mass.mean()).pow(2).sum()
+    r2 = 1 - ss_res/ss_tot
+
+    result = dict(a=a, sig_a=sig_a, b=b, sig_b=sig_b, r2=r2, p_val=p_val)
+    return result
 
 
 def _select_best_fit(data):
     """
+    Description.
+
     Use _get_max_window_lengths and _perform_single_chi2 to loop
     through the all of the window lengths. You want to start with
     the max window, use a while loop that stops at the first Q <= 0.01
@@ -439,6 +460,7 @@ def _select_best_fit(data):
     Returns
     -------
     best fit chi2 stats in a dict(a, b, sig_b, Q)
+
     """
     raise NotImplementedError
 
@@ -448,6 +470,8 @@ def _select_best_fit(data):
 
 def perform_chi2_analysis():
     """
+    Description.
+
     This is the workhorse of the fitting.
     You will use _select_best_fit for each of the targets.
 
