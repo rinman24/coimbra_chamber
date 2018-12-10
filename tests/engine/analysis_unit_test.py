@@ -741,7 +741,7 @@ def test_perform_single_chi2_fit():  # noqa: D103
 
     # Assert
     for key in result.keys():
-        assert math.isclose(result[key], correct_result[key], rel_tol=1e-3)
+        assert math.isclose(result[key], correct_result[key], rel_tol=1e-4)
 
 
 # ----------------------------------------------------------------------------
