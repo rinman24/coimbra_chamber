@@ -725,7 +725,7 @@ def test_get_max_window_lengths():  # noqa: D103
 # ----------------------------------------------------------------------------
 # _perform_single_chi2
 
-def test_perform_single_chi2_fit():  # noqa: D103
+def test_perform_single_chi2_fit_returns_correct_result():  # noqa: D103
     # Arrange
     correct_result = dict(
         a=0.09882587052278162,
@@ -742,6 +742,30 @@ def test_perform_single_chi2_fit():  # noqa: D103
     # Assert
     for key in result.keys():
         assert math.isclose(result[key], correct_result[key], rel_tol=1e-3)
+
+
+# -----------------------------------------------------------------------------
+# _select_best_fit
+
+def test_select_best_fit_returns_correct_result():  # noqa: D103
+    # Arrange
+    target_idx = 30000
+    max_hl = 250
+    correct_result = dict(
+        a=0.09882345459664288,
+        sig_a=1.7414949252793581e-06,
+        b=-5.819486165995094e-09,
+        sig_b=5.804953995067947e-11,
+        r2=0.9999238006300767,
+        p_val=0.0,
+        )
+
+    # Act
+    result = anlys_eng._select_best_fit(_CHI2_TEST_DATA, target_idx, max_hl)
+
+    # Assert
+    for key in result.keys():
+        assert math.isclose(result[key], correct_result[key], rel_tol=1e-4)
 
 
 # ----------------------------------------------------------------------------

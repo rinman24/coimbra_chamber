@@ -444,25 +444,24 @@ def _perform_single_chi2_fit(sample):
     return result
 
 
-def _select_best_fit(data):
-    """
-    Description.
+def _select_best_fit(data, target_idx, max_hl):
+    for hl in range(1, max_hl):
+        # Grab a sample
+        start, end = target_idx-hl, target_idx+hl
+        sample = data.loc[start: end, :]
+        result_dict = _perform_single_chi2_fit(sample)
 
-    Use _get_max_window_lengths and _perform_single_chi2 to loop
-    through the all of the window lengths. You want to start with
-    the max window, use a while loop that stops at the first Q <= 0.01
-    or when the window length is gone.
+        # check if stop condition is satisfied
+        percent_error = abs(result_dict['sig_b']/result_dict['b']*100)
+        error_satisfied = (percent_error <= 1)
+        r2_satisfied = (result_dict['r2'] >= 0.999)
+        p_val_satisfied = (result_dict['p_val'] <= 0.01)
 
-    Parameters
-    ----------
-    All inputs to _get_max_window_length and _perform_single_chi2
+        if error_satisfied and r2_satisfied and p_val_satisfied:
+            return result_dict
 
-    Returns
-    -------
-    best fit chi2 stats in a dict(a, b, sig_b, Q)
-
-    """
-    raise NotImplementedError
+    # No stop criteria was not found
+    return None
 
 
 # ----------------------------------------------------------------------------
