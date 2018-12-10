@@ -766,7 +766,7 @@ def test_select_best_fit_returns_correct_result():  # noqa: D103
 
     # Assert
     for key in result.keys():
-        assert math.isclose(result[key], correct_result[key])
+        assert math.isclose(result[key], correct_result[key], rel_tol=1e-6)
 
 
 def test_select_best_fit_returns_resunt_none_when_no_fit_is_found():  # noqa: D103
