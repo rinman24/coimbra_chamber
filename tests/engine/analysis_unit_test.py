@@ -747,6 +747,7 @@ def test_perform_single_chi2_fit_returns_correct_result():  # noqa: D103
 # -----------------------------------------------------------------------------
 # _select_best_fit
 
+
 def test_select_best_fit_returns_correct_result():  # noqa: D103
     # Arrange
     target_idx = 30000
@@ -767,6 +768,18 @@ def test_select_best_fit_returns_correct_result():  # noqa: D103
     for key in result.keys():
         assert math.isclose(result[key], correct_result[key], rel_tol=1e-4)
 
+
+def test_select_best_fit_returns_resunt_none_when_no_fit_is_found():  # noqa: D103
+    # Arrange
+    target_idx = 30000
+    max_hl = 2
+    correct_result = None
+
+    # Act
+    result = anlys_eng._select_best_fit(_CHI2_TEST_DATA, target_idx, max_hl)
+
+    # Assert
+    assert result is correct_result
 
 # ----------------------------------------------------------------------------
 # read_tdms
