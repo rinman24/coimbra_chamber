@@ -10,7 +10,7 @@ import pytest
 import pytz
 import uncertainties as un
 
-import chamber.engine.analysis as anlys_eng
+import chamber.engine.analysis.service as anlys_eng
 
 # ----------------------------------------------------------------------------
 # globals
@@ -331,7 +331,7 @@ def mock_TdmsFile(monkeypatch):
     """Mock of nptdms.TdmsFile class."""
     mock_TdmsFile = mock.MagicMock()
     monkeypatch.setattr(
-        'chamber.engine.analysis.nptdms.TdmsFile', mock_TdmsFile
+        'chamber.engine.analysis.service.nptdms.TdmsFile', mock_TdmsFile
         )
 
     mock_tdms = mock_TdmsFile.return_value
@@ -582,7 +582,7 @@ def test_filter_observations_has_correct_call_stack(monkeypatch):  # noqa: D103
     mock_df = mock.MagicMock()
 
     mock_signal = mock.MagicMock()
-    monkeypatch.setattr('chamber.engine.analysis.signal', mock_signal)
+    monkeypatch.setattr('chamber.engine.analysis.service.signal', mock_signal)
     savgol_calls = [
         mock.call(mock_df.copy().DewPoint, 1801, 2),
         mock.call(mock_df.copy().Mass, 301, 2),
@@ -590,7 +590,7 @@ def test_filter_observations_has_correct_call_stack(monkeypatch):  # noqa: D103
         ]
 
     mock_pd = mock.MagicMock()
-    monkeypatch.setattr('chamber.engine.analysis.pd', mock_pd)
+    monkeypatch.setattr('chamber.engine.analysis.service.pd', mock_pd)
 
     # Act
     anlys_eng._filter_observations(mock_df)
@@ -619,16 +619,16 @@ def test_preprocess_observations_returns_correct_result_when_not_y(
     mock_input.return_value = user_input
 
     mock_plt = mock.MagicMock()
-    monkeypatch.setattr('chamber.engine.analysis.plt', mock_plt)
+    monkeypatch.setattr('chamber.engine.analysis.service.plt', mock_plt)
 
     _calc_avg_te = mock.MagicMock()
     monkeypatch.setattr(
-        'chamber.engine.analysis._calc_avg_te', _calc_avg_te
+        'chamber.engine.analysis.service._calc_avg_te', _calc_avg_te
         )
 
     _filter_observations = mock.MagicMock()
     monkeypatch.setattr(
-        'chamber.engine.analysis._filter_observations', _filter_observations
+        'chamber.engine.analysis.service._filter_observations', _filter_observations
         )
 
     temp_data = mock.MagicMock()

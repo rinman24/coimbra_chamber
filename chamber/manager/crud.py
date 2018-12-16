@@ -13,7 +13,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 import chamber.utility.ddl as util_ddl
-import chamber.engine.analysis as anlys_eng
+import chamber.engine.analysis.service as anlys_eng
 
 
 DEFAULT_TUBE = pd.DataFrame(
