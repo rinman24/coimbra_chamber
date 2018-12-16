@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from chamber.analysis import chi2
+import chamber.analysis.chi2 as chi2
 
 REF = os.path.join('tests', 'analysis', 'csv_test_files')
 DF11 = pd.read_csv(os.path.join(REF, 'points11.csv'))

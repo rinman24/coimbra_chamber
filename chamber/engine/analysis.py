@@ -467,17 +467,31 @@ def _select_best_fit(data, target_idx, max_hl):
 # ----------------------------------------------------------------------------
 # Public functions
 
-def perform_chi2_analysis():
-    """
-    Description.
 
-    This is the workhorse of the fitting.
-    You will use _select_best_fit for each of the targets.
+def perform_chi2_analysis(obs_data, temp_data):
+    data = _preprocess_observations(obs_data, temp_data)
+    data = _calc_multi_phi(data)
+    target_info = _get_max_window_lengths(data)
+    a, b, r2, p_val, phi, target_phi = [], [], [], [], [], []
+    for dict_ in target_info:
+        print('target phi:', dict_['target'])
+        result = _select_best_fit(
+            data, dict_['idx'], dict_['max_hl']
+            )
+        a.append(un.ufloat(result['a'], result['sig_a']))
+        b.append(un.ufloat(-result['b'], result['sig_b']))
+        r2.append(result['r2'])
+        p_val.append(result['p_val'])
+        phi.append(data.loc[dict_['idx'], 'phi'])
+        target_phi.append(dict_['target'])
 
-    You will also need to make this function show the plot of the fit and ask
-    the user if he/she would like to proceed.
-    """
-    raise NotImplementedError
+    result = pd.DataFrame(
+        data=dict(
+            a=a, b=b, r2=r2, p_val=p_val, phi=phi
+            )
+        )
+
+    return result
 
 
 def read_tdms(filepath):

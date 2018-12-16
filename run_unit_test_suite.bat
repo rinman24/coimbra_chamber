@@ -1,5 +1,5 @@
 @echo off
 echo Running unit test suite...
-python -m pytest -k "unit" -x --cov-report html --cov=chamber --ignore=tests_depreciated\ --pdb -p no:warnings
+python -m pytest -k "unit" -x --cov-config .coveragerc --cov=chamber chamber/tests --cov-report html -p no:warnings --ignore=tests_depreciated\
 echo Testing complete.
  
