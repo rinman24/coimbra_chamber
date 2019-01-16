@@ -468,7 +468,7 @@ def _select_best_fit(data, target_idx, max_hl):
 # Public functions
 
 
-def perform_chi2_analysis(obs_data, temp_data):
+def perform_chi2_analysis(obs_data, temp_data):  # noqa: D103
     data = _preprocess_observations(obs_data, temp_data)
     data = _calc_multi_phi(data)
     target_info = _get_max_window_lengths(data)
