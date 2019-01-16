@@ -1,6 +1,6 @@
 """CRUD manager unit test suite."""
 
-import chamber.manager.crud as crud_mngr
+import chamber.manager.crud.service as crud_mngr
 
 # ----------------------------------------------------------------------------
 # build_tables

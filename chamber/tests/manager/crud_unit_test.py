@@ -6,7 +6,7 @@ from mysql.connector import Error as mysql_Error
 import pandas as pd
 import pytest
 
-import chamber.manager.crud as crud_mngr
+import chamber.manager.crud.service as crud_mngr
 
 _CORRECT_CREDS = dict(host='address', user='me', password='secret')
 _SETUP_MESSAGE = 'Successfully built `group` tables.'
@@ -31,7 +31,7 @@ def mock_ConfigParser(monkeypatch):
     configparser = mock.MagicMock()
     configparser.read = mock.MagicMock()
     monkeypatch.setattr(
-        'chamber.manager.crud.configparser.ConfigParser.read',
+        'chamber.manager.crud.service.configparser.ConfigParser.read',
         configparser.read
         )
 
@@ -46,7 +46,7 @@ def mock_ConfigParser(monkeypatch):
     mock_ConfigParser = mock.MagicMock(return_value=configparser)
     mock_ConfigParser.configparser = configparser
     monkeypatch.setattr(
-        'chamber.manager.crud.configparser.ConfigParser',
+        'chamber.manager.crud.service.configparser.ConfigParser',
         mock_ConfigParser
         )
     return mock_ConfigParser
@@ -72,17 +72,17 @@ def mock_mysql(monkeypatch):
 
     # Patch calls now that mock_mysql is setup.
     monkeypatch.setattr(
-        'chamber.manager.crud.mysql.connector.connect', connect_method
+        'chamber.manager.crud.service.mysql.connector.connect', connect_method
         )
     monkeypatch.setattr(
         (
-            'chamber.manager.crud.mysql.connector.connection.MySQLConnection'
+            'chamber.manager.crud.service.mysql.connector.connection.MySQLConnection'
             '.cursor'
             ),
         cursor_method
         )
     monkeypatch.setattr(
-        'chamber.manager.crud.mysql.connector.cursor.MySQLCursor.execute',
+        'chamber.manager.crud.service.mysql.connector.cursor.MySQLCursor.execute',
         execute_method
         )
 
@@ -119,7 +119,7 @@ def mock_sqlalchemy(monkeypatch):
         'Engine(mysql+mysqlconnector://me:***@address:3306/test_schema)'
         )
     monkeypatch.setattr(
-        'chamber.manager.crud.sqlalchemy.create_engine',
+        'chamber.manager.crud.service.sqlalchemy.create_engine',
         create_engine
         )
 
@@ -135,12 +135,12 @@ def mock_pd(monkeypatch):
         _LAST_ROW_ID
         )
     monkeypatch.setattr(
-        'chamber.manager.crud.pd.read_sql_query',
+        'chamber.manager.crud.service.pd.read_sql_query',
         mock_pd.read_sql_query
         )
 
     monkeypatch.setattr(
-        'chamber.manager.crud.pd.core.frame.DataFrame.to_sql',
+        'chamber.manager.crud.service.pd.core.frame.DataFrame.to_sql',
         mock_pd.DataFrame.to_sql
         )
 
@@ -157,13 +157,13 @@ def mock_tk(monkeypatch):
     withdraw.return_value = ''
 
     Tk = mock_tk.Tk
-    monkeypatch.setattr('chamber.manager.crud.tk.Tk', Tk)
+    monkeypatch.setattr('chamber.manager.crud.service.tk.Tk', Tk)
     Tk.return_value = root
 
     filedialog = mock_tk.filedialog
     askopenfilename = filedialog.askopenfilename
     monkeypatch.setattr(
-        'chamber.manager.crud.filedialog.askopenfilename',
+        'chamber.manager.crud.service.filedialog.askopenfilename',
         askopenfilename
         )
     askopenfilename.return_value = 'C:/Users/Me/test_experiment.tdms'
@@ -183,7 +183,7 @@ def mock_engine(mock_pd, monkeypatch):
         )
 
     monkeypatch.setattr(
-        'chamber.manager.crud.anlys_eng.read_tdms', mock_engine.read_tdms
+        'chamber.manager.crud.service.anlys_eng.read_tdms', mock_engine.read_tdms
         )
 
     return mock_engine
@@ -205,7 +205,7 @@ def mock_plt(monkeypatch):
     mock_plt = mock.MagicMock()
     mock_plt.subplots.return_value = ('fig', [0, 1, 2, 3])
 
-    monkeypatch.setattr('chamber.manager.crud.plt', mock_plt)
+    monkeypatch.setattr('chamber.manager.crud.service.plt', mock_plt)
 
     return mock_plt
 
@@ -627,12 +627,12 @@ def test_add_experiment_call_stack_when_setting_exists(
     setting_id = 1
     _query_setting_exists = mock.MagicMock(return_value=setting_id)
     monkeypatch.setattr(
-        'chamber.manager.crud._query_setting_exists', _query_setting_exists
+        'chamber.manager.crud.service._query_setting_exists', _query_setting_exists
         )
 
     mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)
     monkeypatch.setattr(
-        'chamber.manager.crud._update_table', mock_update_table
+        'chamber.manager.crud.service._update_table', mock_update_table
         )
     correct_calls = [
         mock.call(
@@ -678,12 +678,12 @@ def test_add_experiment_call_stack_when_not_setting_exists(
     setting_id = False
     _query_setting_exists = mock.MagicMock(return_value=setting_id)
     monkeypatch.setattr(
-        'chamber.manager.crud._query_setting_exists', _query_setting_exists
+        'chamber.manager.crud.service._query_setting_exists', _query_setting_exists
         )
 
     mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)
     monkeypatch.setattr(
-        'chamber.manager.crud._update_table', mock_update_table
+        'chamber.manager.crud.service._update_table', mock_update_table
         )
     correct_calls = [
         mock.call(
@@ -728,12 +728,12 @@ def test_add_experiment_call_stack_when_test_exists(
     test_id = 2
     _query_test_exists = mock.MagicMock(return_value=test_id)
     monkeypatch.setattr(
-        'chamber.manager.crud._query_test_exists', _query_test_exists
+        'chamber.manager.crud.service._query_test_exists', _query_test_exists
         )
 
     mock_update_table = mock.MagicMock(return_value=_LAST_ROW_ID)
     monkeypatch.setattr(
-        'chamber.manager.crud._update_table', mock_update_table
+        'chamber.manager.crud.service._update_table', mock_update_table
         )
     correct_calls = [
         mock.call(
