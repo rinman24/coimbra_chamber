@@ -1,7 +1,7 @@
 """Helper functions for analysis engine unit testing."""
 
 import chamber.engine.analysis.service as anlys_eng
-import chamber.tests.engine.analysis.resources.constants as constants
+import chamber.tests.engine.analysis.constants as constants
 
 
 def configure_input_dataframes(is_mass, duty):  # noqa: D103

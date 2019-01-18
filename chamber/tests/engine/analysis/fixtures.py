@@ -4,7 +4,7 @@ import unittest.mock as mock
 
 import pytest
 
-import chamber.tests.engine.analysis.resources.constants as constants
+import chamber.tests.engine.analysis.constants as constants
 
 @pytest.fixture
 def mock_TdmsFile(monkeypatch):

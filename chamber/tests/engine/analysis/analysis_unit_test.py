@@ -9,9 +9,9 @@ import pytest
 import uncertainties as un
 
 import chamber.engine.analysis.service as anlys_eng
-import chamber.tests.engine.analysis.resources.constants as constants
-import chamber.tests.engine.analysis.resources.helpers as helpers
-from chamber.tests.engine.analysis.resources.fixtures import mock_TdmsFile
+import chamber.tests.engine.analysis.constants as constants
+import chamber.tests.engine.analysis.helpers as helpers
+from chamber.tests.engine.analysis.fixtures import mock_TdmsFile
 
 
 # ----------------------------------------------------------------------------
