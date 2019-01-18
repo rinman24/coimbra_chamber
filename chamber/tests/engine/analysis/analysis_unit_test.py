@@ -58,8 +58,8 @@ def test_get_tdms_objs_as_df_returns_correct_dicts(tdms_file):  # noqa: D103
 @pytest.mark.parametrize('is_mass', [0, 1])
 def test_build_setting_df_returns_correct_df(duty, is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(duty=duty, is_mass=is_mass)
-    correct_setting_df = build_correct_setting_df(duty=duty, is_mass=is_mass)
+    dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
+    correct_setting_df = _build_correct_setting_df(duty=duty, is_mass=is_mass)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -71,7 +71,7 @@ def test_build_setting_df_returns_correct_df(duty, is_mass, tdms_file):  # noqa:
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_drops_mass_from_data_when_ismass_0(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(duty=duty, is_mass=0)
+    dataframes = _configure_input_dataframes(duty=duty, is_mass=0)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -83,7 +83,7 @@ def test_build_setting_drops_mass_from_data_when_ismass_0(duty, tdms_file):  # n
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_keeps_mass_in_data_when_ismass_1(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(duty=duty, is_mass=1)
+    dataframes = _configure_input_dataframes(duty=duty, is_mass=1)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -95,7 +95,7 @@ def test_build_setting_keeps_mass_in_data_when_ismass_1(duty, tdms_file):  # noq
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_drops_tcs_0_to_3_when_ismass_1(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(duty=duty, is_mass=1)
+    dataframes = _configure_input_dataframes(duty=duty, is_mass=1)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -108,7 +108,7 @@ def test_build_setting_drops_tcs_0_to_3_when_ismass_1(duty, tdms_file):  # noqa:
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_setting_keeps_tcs_0_to_3_when_ismass_0(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(duty=duty, is_mass=0)
+    dataframes = _configure_input_dataframes(duty=duty, is_mass=0)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -121,7 +121,7 @@ def test_build_setting_keeps_tcs_0_to_3_when_ismass_0(duty, tdms_file):  # noqa:
 @pytest.mark.parametrize('is_mass', [0, 1])
 def test_build_setting_drops_powout_powref_from_data_when_duty_is_0(is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(duty=0, is_mass=is_mass)
+    dataframes = _configure_input_dataframes(duty=0, is_mass=is_mass)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -134,7 +134,7 @@ def test_build_setting_drops_powout_powref_from_data_when_duty_is_0(is_mass, tdm
 @pytest.mark.parametrize('is_mass', [0, 1])
 def test_build_setting_keeps_powout_powref_in_data_when_duty_is_1(is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(duty=1, is_mass=is_mass)
+    dataframes = _configure_input_dataframes(duty=1, is_mass=is_mass)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -152,8 +152,8 @@ def test_build_setting_keeps_powout_powref_in_data_when_duty_is_1(is_mass, tdms_
 @pytest.mark.parametrize('is_mass', [0, 1])
 def test_build_observation_df_returns_correct_df(duty, is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(duty=duty, is_mass=is_mass)
-    correct_observation_df = build_correct_observation_df(duty=duty, is_mass=is_mass)
+    dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
+    correct_observation_df = _build_correct_observation_df(duty=duty, is_mass=is_mass)
 
     # Act
     dataframes = anlys_eng._build_observation_df(dataframes)
@@ -168,7 +168,7 @@ def test_build_observation_df_returns_correct_df(duty, is_mass, tdms_file):  # n
 @pytest.mark.parametrize('is_mass', [0, 1])
 def test_build_observation_removes_keys_from_data(duty, is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(duty=duty, is_mass=is_mass)
+    dataframes = _configure_input_dataframes(duty=duty, is_mass=is_mass)
 
     # Act
     dataframes = anlys_eng._build_observation_df(dataframes)
@@ -186,7 +186,7 @@ def test_build_observation_removes_keys_from_data(duty, is_mass, tdms_file):  # 
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_temp_observation_with_is_mass_1(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(is_mass=1, duty=duty)
+    dataframes = _configure_input_dataframes(is_mass=1, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
 
@@ -202,7 +202,7 @@ def test_build_temp_observation_with_is_mass_1(duty, tdms_file):  # noqa: D103
 @pytest.mark.parametrize('duty', [0, 1])
 def test_build_temp_observation_with_is_mass_0(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(is_mass=0, duty=duty)
+    dataframes = _configure_input_dataframes(is_mass=0, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
 
@@ -219,7 +219,7 @@ def test_build_temp_observation_with_is_mass_0(duty, tdms_file):  # noqa: D103
 @pytest.mark.parametrize('is_mass', [0, 1])
 def test_build_temp_observation_drops_data_columns(duty, is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = configure_input_dataframes(is_mass=is_mass, duty=duty)
+    dataframes = _configure_input_dataframes(is_mass=is_mass, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
 
@@ -456,9 +456,9 @@ def test_select_best_fit_returns_resunt_none_when_no_fit_is_found():  # noqa: D1
 def test_call_read_tdms_returns_correct_dfs(tdms_file):  # noqa: D103
     # Arrange
     duty, is_mass = 0, 1
-    correct_setting_df = build_correct_setting_df(
+    correct_setting_df = _build_correct_setting_df(
         duty=duty, is_mass=is_mass)
-    correct_observation_df = build_correct_observation_df(
+    correct_observation_df = _build_correct_observation_df(
         duty=duty, is_mass=is_mass)
 
     # Act
@@ -481,7 +481,7 @@ def test_call_read_tdms_returns_correct_dfs(tdms_file):  # noqa: D103
 # Helpers
 
 
-def configure_input_dataframes(is_mass, duty):  # noqa: D103
+def _configure_input_dataframes(is_mass, duty):
     dataframes = anlys_eng._tdms_2_dict_of_df('test_path')
 
     dataframes['setting'].loc[0, 'IsMass'] = is_mass
@@ -490,7 +490,7 @@ def configure_input_dataframes(is_mass, duty):  # noqa: D103
     return dataframes
 
 
-def build_correct_setting_df(is_mass, duty):  # noqa: D103
+def _build_correct_setting_df(is_mass, duty):
     correct_setting_df = const.setting_obj_as_df.copy()
 
     correct_setting_df.loc[0, 'IsMass'] = is_mass
@@ -506,7 +506,7 @@ def build_correct_setting_df(is_mass, duty):  # noqa: D103
     return correct_setting_df
 
 
-def build_correct_observation_df(is_mass, duty):  # noqa: D103
+def _build_correct_observation_df(is_mass, duty):
     correct_observation_df = const.data_obj_as_df.copy()
     # This is required to match the order columns are added in production.
     # Also drops all 'TC' columns as they are not in new_col_order.
