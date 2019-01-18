@@ -7,15 +7,10 @@ import pytz
 import uncertainties as un
 
 
-setting_obj_as_df = pd.DataFrame(
-    dict(
-            Duty=[0.0],
-            IsMass=[1.0],
-            TimeStep=[1.0],
-            Reservoir=[1.0],
-            TubeID=[1.0],
-        )
-    )
+settings_dict = dict(
+    Duty=[0.0], IsMass=[1.0], TimeStep=[1.0], Reservoir=[1.0], TubeID=[1.0])
+
+setting_obj_as_df = pd.DataFrame(settings_dict)
 
 data_obj_as_df = pd.DataFrame(
     dict(
@@ -313,3 +308,6 @@ chi2_test_data = pd.DataFrame(
         ],
     columns=['Mass']
     )
+
+tube_tc_set = {'TC0', 'TC1', 'TC2', 'TC3'}
+c20_pow_set = {'PowOut', 'PowRef'}

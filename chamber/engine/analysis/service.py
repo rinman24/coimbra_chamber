@@ -259,8 +259,7 @@ def _preprocess_observations(obs_data, temp_data):
     ax.plot(avg_te.index, nominal_temps, label='Nominal $T_e$')
     ax.fill_between(
         avg_te.index, nominal_temps-temp_std, nominal_temps+temp_std,
-        color='gray', alpha=0.2
-        )
+        color='gray', alpha=0.2)
     ax.legend()
     ax.set_xlabel('$t$/s')
     ax.set_ylabel('$T_e$/K')
@@ -274,8 +273,7 @@ def _preprocess_observations(obs_data, temp_data):
         filt_obs.index,
         filt_obs.DewPoint - un_util.del_tdp,
         filt_obs.DewPoint + un_util.del_tdp,
-        color='gray', alpha=0.2
-        )
+        color='gray', alpha=0.2)
     ax.legend()
     ax.set_xlabel('$t$/s')
     ax.set_ylabel('$T_{DP}}$/K')
@@ -289,8 +287,7 @@ def _preprocess_observations(obs_data, temp_data):
         filt_obs.index,
         filt_obs.Mass - un_util.del_m,
         filt_obs.Mass + un_util.del_m,
-        color='gray', alpha=0.2
-        )
+        color='gray', alpha=0.2)
     ax.legend()
     ax.set_xlabel('$t$/s')
     ax.set_ylabel('$m$/kg')
@@ -304,8 +301,7 @@ def _preprocess_observations(obs_data, temp_data):
     ax.fill_between(
         filt_obs.index,
         filt_obs.Pressure - p_err, filt_obs.Pressure + p_err,
-        color='gray', alpha=0.2
-        )
+        color='gray', alpha=0.2)
     ax.legend()
     ax.set_xlabel('$t$/s')
     ax.set_ylabel('$P$/Pa')
@@ -381,8 +377,7 @@ def _get_valid_phi_targets(data):
     # Devide by 100 to get back to dimensionless phi
     my_map = map(
         lambda x: x/100,
-        range(phi_min_valid, phi_max_valid + 5, phi_step_pct)
-    )
+        range(phi_min_valid, phi_max_valid + 5, phi_step_pct))
 
     return list(my_map)
 
@@ -418,10 +413,8 @@ def _perform_single_chi2_fit(sample):
     s = n*sig_coef
     s_x = sig_coef*sample.index.values.sum()
     s_y = sig_coef*sample.Mass.sum()
-    s_xx = sig_coef*sample.index.values.dot(
-        sample.index.values)
-    s_xy = sig_coef*sample.index.values.dot(
-        sample.Mass)
+    s_xx = sig_coef*sample.index.values.dot(sample.index.values)
+    s_xy = sig_coef*sample.index.values.dot(sample.Mass)
     delta = s*s_xx - s_x**2
 
     # fit params
