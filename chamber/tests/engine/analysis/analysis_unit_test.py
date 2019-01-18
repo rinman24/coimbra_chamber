@@ -9,28 +9,50 @@ import pytest
 import uncertainties as un
 
 import chamber.engine.analysis.service as anlys_eng
-import chamber.tests.engine.analysis.constants as constants
-import chamber.tests.engine.analysis.helpers as helpers
-from chamber.tests.engine.analysis.fixtures import mock_TdmsFile
+import chamber.tests.engine.analysis.constants as const
+
+
+# ----------------------------------------------------------------------------
+# Fixtures
+
+
+@pytest.fixture
+def tdms_file(monkeypatch):
+    """Mock of nptdms.TdmsFile class."""
+    mock_TdmsFile = mock.MagicMock()
+    monkeypatch.setattr(
+        'chamber.engine.analysis.service.nptdms.TdmsFile', mock_TdmsFile
+        )
+
+    mock_tdms = mock_TdmsFile.return_value
+    mock_tdms.object.return_value.as_dataframe.side_effect = [
+        const.setting_obj_as_df.copy(), const.data_obj_as_df.copy()
+        ]
+
+    mock_tdms.object.return_value.properties.__getitem__.side_effect = [
+        'me', const.datetime, 'test description.'
+        ]
+
+    return mock_TdmsFile
 
 
 # ----------------------------------------------------------------------------
 # _get_tdms_objs_as_df
 
 
-def test_get_tdms_objs_as_df_returns_correct_dicts(mock_TdmsFile):  # noqa: D103
+def test_get_tdms_objs_as_df_returns_correct_dicts(tdms_file):  # noqa: D103
     # Act
     dataframes = anlys_eng._tdms_2_dict_of_df('test_path')
 
     # Assert
     pd.testing.assert_frame_equal(
-        dataframes['setting'], constants.setting_obj_as_df
+        dataframes['setting'], const.setting_obj_as_df
         )
     pd.testing.assert_frame_equal(
-        dataframes['data'], constants.data_obj_as_df
+        dataframes['data'], const.data_obj_as_df
         )
     pd.testing.assert_frame_equal(
-        dataframes['test'], constants.test_props_as_df
+        dataframes['test'], const.test_props_as_df
         )
 
 # ----------------------------------------------------------------------------
@@ -39,10 +61,10 @@ def test_get_tdms_objs_as_df_returns_correct_dicts(mock_TdmsFile):  # noqa: D103
 
 @pytest.mark.parametrize('duty', [0, 1])
 @pytest.mark.parametrize('is_mass', [0, 1])
-def test_build_setting_df_returns_correct_df(duty, is_mass, mock_TdmsFile):  # noqa: D103
+def test_build_setting_df_returns_correct_df(duty, is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(duty=duty, is_mass=is_mass)
-    correct_setting_df = helpers.build_correct_setting_df(
+    dataframes = configure_input_dataframes(duty=duty, is_mass=is_mass)
+    correct_setting_df = build_correct_setting_df(
         duty=duty, is_mass=is_mass
         )
 
@@ -54,9 +76,9 @@ def test_build_setting_df_returns_correct_df(duty, is_mass, mock_TdmsFile):  # n
 
 
 @pytest.mark.parametrize('duty', [0, 1])
-def test_build_setting_drops_mass_from_data_when_ismass_0(duty, mock_TdmsFile):  # noqa: D103
+def test_build_setting_drops_mass_from_data_when_ismass_0(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(duty=duty, is_mass=0)
+    dataframes = configure_input_dataframes(duty=duty, is_mass=0)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -66,9 +88,9 @@ def test_build_setting_drops_mass_from_data_when_ismass_0(duty, mock_TdmsFile): 
 
 
 @pytest.mark.parametrize('duty', [0, 1])
-def test_build_setting_keeps_mass_in_data_when_ismass_1(duty, mock_TdmsFile):  # noqa: D103
+def test_build_setting_keeps_mass_in_data_when_ismass_1(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(duty=duty, is_mass=1)
+    dataframes = configure_input_dataframes(duty=duty, is_mass=1)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -78,9 +100,9 @@ def test_build_setting_keeps_mass_in_data_when_ismass_1(duty, mock_TdmsFile):  #
 
 
 @pytest.mark.parametrize('duty', [0, 1])
-def test_build_setting_drops_tcs_0_to_3_when_ismass_1(duty, mock_TdmsFile):  # noqa: D103
+def test_build_setting_drops_tcs_0_to_3_when_ismass_1(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(duty=duty, is_mass=1)
+    dataframes = configure_input_dataframes(duty=duty, is_mass=1)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -92,9 +114,9 @@ def test_build_setting_drops_tcs_0_to_3_when_ismass_1(duty, mock_TdmsFile):  # n
 
 
 @pytest.mark.parametrize('duty', [0, 1])
-def test_build_setting_keeps_tcs_0_to_3_when_ismass_0(duty, mock_TdmsFile):  # noqa: D103
+def test_build_setting_keeps_tcs_0_to_3_when_ismass_0(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(duty=duty, is_mass=0)
+    dataframes = configure_input_dataframes(duty=duty, is_mass=0)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -106,11 +128,9 @@ def test_build_setting_keeps_tcs_0_to_3_when_ismass_0(duty, mock_TdmsFile):  # n
 
 
 @pytest.mark.parametrize('is_mass', [0, 1])
-def test_build_setting_drops_powout_powref_from_data_when_duty_is_0(
-        is_mass, mock_TdmsFile
-        ):  # noqa: D103
+def test_build_setting_drops_powout_powref_from_data_when_duty_is_0(is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(duty=0, is_mass=is_mass)
+    dataframes = configure_input_dataframes(duty=0, is_mass=is_mass)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -120,11 +140,9 @@ def test_build_setting_drops_powout_powref_from_data_when_duty_is_0(
 
 
 @pytest.mark.parametrize('is_mass', [0, 1])
-def test_build_setting_keeps_powout_powref_in_data_when_duty_is_1(
-        is_mass, mock_TdmsFile
-        ):  # noqa: D103
+def test_build_setting_keeps_powout_powref_in_data_when_duty_is_1(is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(duty=1, is_mass=is_mass)
+    dataframes = configure_input_dataframes(duty=1, is_mass=is_mass)
 
     # Act
     dataframes = anlys_eng._build_setting_df(dataframes)
@@ -139,10 +157,10 @@ def test_build_setting_keeps_powout_powref_in_data_when_duty_is_1(
 
 @pytest.mark.parametrize('duty', [0, 1])
 @pytest.mark.parametrize('is_mass', [0, 1])
-def test_build_observation_df_returns_correct_df(duty, is_mass, mock_TdmsFile):  # noqa: D103
+def test_build_observation_df_returns_correct_df(duty, is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(duty=duty, is_mass=is_mass)
-    correct_observation_df = helpers.build_correct_observation_df(
+    dataframes = configure_input_dataframes(duty=duty, is_mass=is_mass)
+    correct_observation_df = build_correct_observation_df(
         duty=duty, is_mass=is_mass
         )
 
@@ -157,20 +175,17 @@ def test_build_observation_df_returns_correct_df(duty, is_mass, mock_TdmsFile): 
 
 @pytest.mark.parametrize('duty', [0, 1])
 @pytest.mark.parametrize('is_mass', [0, 1])
-def test_build_observation_removes_keys_from_data(
-        duty, is_mass, mock_TdmsFile
-        ):  # noqa: D103
+def test_build_observation_removes_keys_from_data(duty, is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(duty=duty, is_mass=is_mass)
+    dataframes = configure_input_dataframes(duty=duty, is_mass=is_mass)
 
     # Act
     dataframes = anlys_eng._build_observation_df(dataframes)
 
     # Assert
-    assert not (
-        set(dataframes['observation'].columns)
-        & set(dataframes['data'].columns)
-        ) 
+    obs_col_set = set(dataframes['observation'].columns)
+    data_col_set = set(dataframes['data'].columns)
+    assert not (obs_col_set & data_col_set)
 
 
 # ----------------------------------------------------------------------------
@@ -178,9 +193,9 @@ def test_build_observation_removes_keys_from_data(
 
 
 @pytest.mark.parametrize('duty', [0, 1])
-def test_build_temp_observation_with_is_mass_1(duty, mock_TdmsFile):  # noqa: D103
+def test_build_temp_observation_with_is_mass_1(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(is_mass=1, duty=duty)
+    dataframes = configure_input_dataframes(is_mass=1, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
 
@@ -190,14 +205,14 @@ def test_build_temp_observation_with_is_mass_1(duty, mock_TdmsFile):  # noqa: D1
     # Assert
     pd.testing.assert_frame_equal(
         dataframes['temp_observation'],
-        constants.correct_temp_observation_df_mass_1
+        const.correct_temp_observation_df_mass_1
         )
 
 
 @pytest.mark.parametrize('duty', [0, 1])
-def test_build_temp_observation_with_is_mass_0(duty, mock_TdmsFile):  # noqa: D103
+def test_build_temp_observation_with_is_mass_0(duty, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(is_mass=0, duty=duty)
+    dataframes = configure_input_dataframes(is_mass=0, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
 
@@ -207,17 +222,15 @@ def test_build_temp_observation_with_is_mass_0(duty, mock_TdmsFile):  # noqa: D1
     # Assert
     pd.testing.assert_frame_equal(
         dataframes['temp_observation'],
-        constants.correct_temp_observation_df_mass_0
+        const.correct_temp_observation_df_mass_0
         )
 
 
 @pytest.mark.parametrize('duty', [0, 1])
 @pytest.mark.parametrize('is_mass', [0, 1])
-def test_build_temp_observation_drops_data_columns(
-        duty, is_mass, mock_TdmsFile
-        ):  # noqa: D103
+def test_build_temp_observation_drops_data_columns(duty, is_mass, tdms_file):  # noqa: D103
     # Arrange
-    dataframes = helpers.configure_input_dataframes(is_mass=is_mass, duty=duty)
+    dataframes = configure_input_dataframes(is_mass=is_mass, duty=duty)
     dataframes = anlys_eng._build_setting_df(dataframes)
     dataframes = anlys_eng._build_observation_df(dataframes)
 
@@ -233,7 +246,7 @@ def test_build_temp_observation_drops_data_columns(
 
 def test_calc_avg_te_returns_correct_df():  # noqa: D103
     # Arrange
-    temp_data = constants.temp_data_query.pivot(
+    temp_data = const.temp_data_query.pivot(
         index='Idx', columns='ThermocoupleNum', values='Temperature'
         )
 
@@ -244,11 +257,11 @@ def test_calc_avg_te_returns_correct_df():  # noqa: D103
     for i in avg_te.index:
         assert math.isclose(
             avg_te.loc[i, 'AvgTe'].nominal_value,
-            constants.correct_average_temp_uncertainties.loc[i, 'AvgTe'].nominal_value  # noqa: E501
+            const.correct_average_temp_uncertainties.loc[i, 'AvgTe'].nominal_value  # noqa: E501
             )
         assert math.isclose(
             avg_te.loc[i, 'AvgTe'].std_dev,
-            constants.correct_average_temp_uncertainties.loc[i, 'AvgTe'].std_dev  # noqa: E501
+            const.correct_average_temp_uncertainties.loc[i, 'AvgTe'].std_dev  # noqa: E501
             )
 
 
@@ -354,7 +367,7 @@ def test_get_valid_phi_targets():  # noqa: D103
         ]
 
     # Act
-    result = anlys_eng._get_valid_phi_targets(constants.phi_testing_df)
+    result = anlys_eng._get_valid_phi_targets(const.phi_testing_df)
 
     # Assert
     assert result == correct_targets
@@ -377,7 +390,7 @@ def test_get_valid_phi_indexes():  # noqa: D103
         ]
 
     # Act
-    result = anlys_eng._get_valid_phi_indexes(constants.phi_testing_df)
+    result = anlys_eng._get_valid_phi_indexes(const.phi_testing_df)
 
     # Assert
     assert result == correct_result
@@ -389,14 +402,14 @@ def test_get_valid_phi_indexes():  # noqa: D103
 
 def test_get_max_window_lengths():  # noqa: D103
     # Arrange
-    indexes = anlys_eng._get_valid_phi_indexes(constants.phi_testing_df)
+    indexes = anlys_eng._get_valid_phi_indexes(const.phi_testing_df)
     max_half_lengths = [1, 2, 3, 4, 5, 5, 5, 4, 3, 2, 1, 1, 0]
     for idx, _dict in enumerate(indexes):
         _dict.update({'max_hl': max_half_lengths[idx]})
     correct_result = indexes
 
     # Act
-    result = anlys_eng._get_max_window_lengths(constants.phi_testing_df)
+    result = anlys_eng._get_max_window_lengths(const.phi_testing_df)
 
     # Assert
     assert result == correct_result
@@ -417,7 +430,7 @@ def test_perform_single_chi2_fit_returns_correct_result():  # noqa: D103
         )
 
     # Act
-    result = anlys_eng._perform_single_chi2_fit(constants.chi2_test_data)
+    result = anlys_eng._perform_single_chi2_fit(const.chi2_test_data)
 
     # Assert
     for key in result.keys():
@@ -443,7 +456,7 @@ def test_select_best_fit_returns_correct_result():  # noqa: D103
 
     # Act
     result = anlys_eng._select_best_fit(
-        constants.chi2_test_data, target_idx, max_hl
+        const.chi2_test_data, target_idx, max_hl
         )
 
     # Assert
@@ -459,7 +472,7 @@ def test_select_best_fit_returns_resunt_none_when_no_fit_is_found():  # noqa: D1
 
     # Act
     result = anlys_eng._select_best_fit(
-        constants.chi2_test_data, target_idx, max_hl
+        const.chi2_test_data, target_idx, max_hl
         )
 
     # Assert
@@ -469,13 +482,13 @@ def test_select_best_fit_returns_resunt_none_when_no_fit_is_found():  # noqa: D1
 # read_tdms
 
 
-def test_call_read_tdms_returns_correct_dfs(mock_TdmsFile):  # noqa: D103
+def test_call_read_tdms_returns_correct_dfs(tdms_file):  # noqa: D103
     # Arrange
     duty, is_mass = 0, 1
-    correct_setting_df = helpers.build_correct_setting_df(
+    correct_setting_df = build_correct_setting_df(
         duty=duty, is_mass=is_mass
         )
-    correct_observation_df = helpers.build_correct_observation_df(
+    correct_observation_df = build_correct_observation_df(
         duty=duty, is_mass=is_mass
         )
 
@@ -487,7 +500,7 @@ def test_call_read_tdms_returns_correct_dfs(mock_TdmsFile):  # noqa: D103
     pd.testing.assert_frame_equal(dataframes['setting'], correct_setting_df)
     pd.testing.assert_frame_equal(
         dataframes['test'],
-        constants.test_props_as_df
+        const.test_props_as_df
         )
     pd.testing.assert_frame_equal(
         dataframes['observation'],
@@ -495,5 +508,54 @@ def test_call_read_tdms_returns_correct_dfs(mock_TdmsFile):  # noqa: D103
         )
     pd.testing.assert_frame_equal(
         dataframes['temp_observation'],
-        constants.correct_temp_observation_df_mass_1
+        const.correct_temp_observation_df_mass_1
         )
+
+
+# ----------------------------------------------------------------------------
+# Helpers
+
+
+def configure_input_dataframes(is_mass, duty):  # noqa: D103
+    dataframes = anlys_eng._tdms_2_dict_of_df('test_path')
+
+    dataframes['setting'].loc[0, 'IsMass'] = is_mass
+    dataframes['setting'].loc[0, 'Duty'] = duty
+
+    return dataframes
+
+
+def build_correct_setting_df(is_mass, duty):  # noqa: D103
+    correct_setting_df = const.setting_obj_as_df.copy()
+
+    correct_setting_df.loc[0, 'IsMass'] = is_mass
+    correct_setting_df.loc[0, 'Duty'] = duty
+
+    correct_setting_df['Pressure'] = 80e3
+
+    if is_mass:
+        correct_setting_df['Temperature'] = 300.0
+    else:
+        correct_setting_df['Temperature'] = 950.0
+
+    return correct_setting_df
+
+
+def build_correct_observation_df(is_mass, duty):  # noqa: D103
+    correct_observation_df = const.data_obj_as_df.copy()
+    # This is required to match the order columns are added in production.
+    # Also drops all 'TC' columns as they are not in new_col_order.
+    new_col_order = [
+        'CapManOk', 'DewPoint', 'Idx', 'OptidewOk', 'Pressure',
+        'Mass', 'PowOut', 'PowRef'
+        ]
+    correct_observation_df = correct_observation_df.loc[:, new_col_order]
+
+    if not is_mass:
+        correct_observation_df.drop(columns=['Mass'], inplace=True)
+    if not duty:
+        correct_observation_df.drop(
+             columns=['PowOut', 'PowRef'], inplace=True
+             )
+
+    return correct_observation_df
