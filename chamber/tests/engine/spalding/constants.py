@@ -18,3 +18,5 @@ exp_state = dict(
     T_e=un.ufloat(290, 0.2),
     T_dp=un.ufloat(280, 0.2),
     )
+
+properties = ['film_guide', 'exp_state', 't_s_guess', 's_state']

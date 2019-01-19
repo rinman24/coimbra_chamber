@@ -36,16 +36,10 @@ def test_spalding_constructor(spald):  # noqa: D103
     assert _compare_ufloats(spald._exp_state['T_dp'], const.exp_state['T_dp'])
 
 
-def test_spalding_film_guide_raises_error(spald):  # noqa: D103
-    with pytest.raises(AttributeError) as err:
-        spald.film_guide = 'hitchhiker'
-    assert "can't set attribute" in str(err.value)
-
-
-def test_Spalding_exp_state(spald):  # noqa: D103
-    with pytest.raises(AttributeError) as err:
-        spald.exp_state = 300
-    assert "can't set attribute" in str(err.value)
+@pytest.mark.parametrize('name', const.properties)
+def test_properties(spald, name):  # noqa: D103
+    with pytest.raises(AttributeError):
+        setattr(spald, name, 'foo')
 
 
 # ----------------------------------------------------------------------------

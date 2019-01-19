@@ -96,3 +96,26 @@ class Spalding(object):
         'T_dp' : Dew point temperature in K.
         """
         return self._exp_state
+
+    @property
+    def t_s_guess(self):
+        """Guess at the surface temperature in K."""
+        return self._t_s_guess
+
+    @property
+    def s_state(self):
+        """Dictonary of s-state, based on guess at surface temperature.
+
+        Keys include an '_g' suffix to indicate that each value is based on
+        t_s_guess.
+
+        Keys
+        ----
+        'm_1s_g' : Mass fraction of water vapor in the s-state (saturated vapor
+            mixture) in [0, 1].
+        'h_s_g' : Mixture enthalpy at the s-state (saturated vapor mixture) in
+            J/kg.
+        'h_fgs_g' : Specific enthalpy of vaporization for pure water at t_s in
+            J/kg.
+        """
+        return self._s_state
