@@ -36,6 +36,14 @@ def test_spalding_constructor(spald):  # noqa: D103
     assert _compare_ufloats(spald._exp_state['T_dp'], const.exp_state['T_dp'])
 
 
+# film_guide property
+def test_spalding_film_guide_raises_error(spald):
+    """Test _film_guide."""
+    with pytest.raises(AttributeError) as err:
+        spald.film_guide = 'hitchhiker'
+    assert "can't set attribute" in str(err.value)
+
+
 # ----------------------------------------------------------------------------
 # Helpers
 

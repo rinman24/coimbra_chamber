@@ -66,3 +66,18 @@ class Spalding(object):
             T_e=un.ufloat(t_e, uncert.del_t),
             T_dp=un.ufloat(t_dp, uncert.del_tdp),
             )
+
+    # ----------------------------------------------------------------------- #
+    # Properties
+
+
+    @property
+    def film_guide(self):
+        """Persist information for the calculation of film props.
+
+        Keys
+        ----
+        'ref' : Reference for binary species diffusiity.
+        'rule' : Rule for calculating the film properties
+        """
+        return self._film_guide
