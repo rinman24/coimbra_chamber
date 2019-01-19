@@ -20,4 +20,11 @@ exp_state = dict(
     T_dp=un.ufloat(280, 0.2),
     )
 
-properties = ['film_guide', 'exp_state']
+initial_s_state = dict(
+    h=0,
+    h_fg=2460974.1659213207,
+    m_1=0.011919754919993641,
+    T=290,
+    )
+
+properties = ['film_guide', 'exp_state', 's_state']

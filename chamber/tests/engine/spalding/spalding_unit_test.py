@@ -26,6 +26,12 @@ def test_spalding_constructor(spald):  # noqa: D103
     assert _compare_ufloats(spald._exp_state['T_e'], const.exp_state['T_e'])
     assert _compare_ufloats(spald._exp_state['T_dp'], const.exp_state['T_dp'])
 
+    # Test states
+    assert math.isclose(spald._s_state['h'], const.initial_s_state['h'])
+    assert math.isclose(spald._s_state['h_fg'], const.initial_s_state['h_fg'])
+    assert math.isclose(spald._s_state['m_1'], const.initial_s_state['m_1'])
+    assert math.isclose(spald._s_state['T'], const.initial_s_state['T'])
+
 
 @pytest.mark.parametrize('name', const.properties)
 def test_properties(spald, name):  # noqa: D103
