@@ -70,7 +70,6 @@ class Spalding(object):
     # ----------------------------------------------------------------------- #
     # Properties
 
-
     @property
     def film_guide(self):
         """Persist information for the calculation of film props.
@@ -81,3 +80,19 @@ class Spalding(object):
         'rule' : Rule for calculating the film properties
         """
         return self._film_guide
+
+    @property
+    def exp_state(self):
+        """Dictonary of variables for the experimental state.
+
+        This should not be confused with the e-state which contains
+        'm_1e' and 'h_e' and requires a guess at the surface temperature.
+
+        Keys
+        ----
+        'L' : Length of Stefan tube.
+        'P' : Pressure in Pa.
+        'T_e' : Ambient temperature in K.
+        'T_dp' : Dew point temperature in K.
+        """
+        return self._exp_state
