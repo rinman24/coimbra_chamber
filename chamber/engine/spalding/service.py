@@ -46,9 +46,9 @@ class Spalding(object):
     """
 
     def __init__(self, m, p, t_e, t_dp, ref, rule):  # noqa: D107
-        self._film_guide = None
-        # self._film_guide = dict(ref=ref, rule=rule)
-        self._exp_state = None
+        self._film_guide = dict(ref=ref, rule=rule)
+        self._calculate_exp_state(m, p, t_e, t_dp)
+
         self._s_state = None
         self._u_state = None
         self._t_state = None
@@ -70,14 +70,22 @@ class Spalding(object):
     # ------------------------------------------------------------------------
     # Internal methods
 
-    def _calc_length_from_mass(self):
-        # rho_liq = 997  # kg/m^3
-        # radius = 0.015  # m
-        # len_tube = 0.06  # m
-        # m_tube = un.ufloat(8.73832e-2, 8.73832e-4)  # default tube
-        # liq_height = (m-m_tube)/(rho_liq*math.pi*pow(radius, 2))
-        # len_eff = len_tube - liq_height
-        pass
+    def _calculate_exp_state(self, mass, press, amb_temp, dew_point):
+        rho_liq = 997  # kg/m^3
+        radius = 0.015  # m
+        len_tube = 0.06  # m
+        m_tube = un.ufloat(8.73832e-2, 8.73832e-4)  # default tube
+        liq_height = (mass-m_tube) / (rho_liq*math.pi*pow(radius, 2))
+        len_eff = len_tube - liq_height
+
+        press = un.ufloat(press, press*uncert.pct_p)
+
+        amb_temp = un.ufloat(amb_temp, uncert.del_t)
+
+        dew_point = un.ufloat(dew_point, uncert.del_tdp)
+
+        self._exp_state = dict(
+            L=len_eff, P=press, T_e=amb_temp, T_dp=dew_point)
 
     def _set_states(self):
         """Set the various states (s, u, T, e) in that order."""
@@ -109,28 +117,26 @@ class Spalding(object):
 
     @property
     def film_guide(self):
-        """Persist information for the calculation of film props.
+        """Get the film guide.
 
-        Keys
-        ----
-        'ref' : Reference for binary species diffusiity.
-        'rule' : Rule for calculating the film properties
+        `film_guide` has the following keys:
+            `ref` : Reference for binary species diffusiity.
+            `rule` : Rule for calculating the film properties
         """
         return self._film_guide
 
     @property
     def exp_state(self):
-        """Dictonary of variables for the experimental state.
+        """Get the experimental state.
 
         This should not be confused with the e-state which contains
-        'm_1e' and 'h_e' and requires a guess at the surface temperature.
+        `m_1e` and `h_e` and requires a guess at the surface temperature.
 
-        Keys
-        ----
-        'L' : Length of Stefan tube.
-        'P' : Pressure in Pa.
-        'T_e' : Ambient temperature in K.
-        'T_dp' : Dew point temperature in K.
+        `exp_state` has the following keys:
+            `L` : Length of Stefan tube.
+            `P` : Pressure in Pa.
+            `T_e` : Ambient temperature in K.
+            `T_dp` : Dew point temperature in K.
         """
         return self._exp_state
 

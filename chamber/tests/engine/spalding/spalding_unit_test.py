@@ -16,10 +16,17 @@ def spald():
 
 
 def test_spalding_constructor(spald):  # noqa: D103
-    pass
+    # Test the _film_guide in constructor
+    assert spald._film_guide['ref'] == const.ref
+    assert spald._film_guide['rule'] == const.rule
+
+    # Test the _exp_state in constructor
+    assert _compare_ufloats(spald._exp_state['L'], const.exp_state['L'])
+    assert _compare_ufloats(spald._exp_state['P'], const.exp_state['P'])
+    assert _compare_ufloats(spald._exp_state['T_e'], const.exp_state['T_e'])
+    assert _compare_ufloats(spald._exp_state['T_dp'], const.exp_state['T_dp'])
 
 
-@pytest.mark.skip
 @pytest.mark.parametrize('name', const.properties)
 def test_properties(spald, name):  # noqa: D103
     with pytest.raises(AttributeError):
