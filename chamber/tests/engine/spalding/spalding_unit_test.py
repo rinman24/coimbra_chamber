@@ -17,8 +17,9 @@ def spald():
 
 def test_spalding_constructor(spald):  # noqa: D103
     # Test internal attributes
-    assert spald._t_s_guess is None
-    assert spald._s_state is None
+    assert _compare_ufloats(spald._t_s_guess, const.t_s_guess)
+    assert _compare_ufloats(spald._s_state['m_1s_g'], const.m_1s_g)
+#    assert spald._s_state is None
     assert spald._u_state is None
     assert spald._liq_props is None
     assert spald._t_state is None

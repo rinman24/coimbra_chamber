@@ -2,9 +2,13 @@
 
 import math
 
+import CoolProp.HumidAirProp as hap
 import uncertainties as un
 
 import chamber.utility.uncert as uncert
+
+M1 = 18.015
+M2 = 28.946
 
 
 class Spalding(object):
@@ -42,8 +46,8 @@ class Spalding(object):
     """
 
     def __init__(self, m, p, t_e, t_dp, ref, rule):  # noqa: D107
-        self._t_s_guess = None
-        self._s_state = None
+        self._t_s_guess = un.ufloat(t_e, uncert.del_t)
+        # self._s_state = None
         self._u_state = None
         self._liq_props = None
         self._t_state = None
@@ -67,7 +71,8 @@ class Spalding(object):
             T_dp=un.ufloat(t_dp, uncert.del_tdp),
             )
 
-    # ----------------------------------------------------------------------- #
+        self._set_s_state()
+    # ------------------------------------------------------------------------
     # Properties
 
     @property
@@ -119,3 +124,33 @@ class Spalding(object):
             J/kg.
         """
         return self._s_state
+
+    # ------------------------------------------------------------------------
+    # Internal methods
+
+    def _set_s_state(self):
+        press = self.exp_state['P']
+        temp = self.t_s_guess
+        x_1s_g = hap.HAPropsSI(
+            'Y',
+            'P', press.nominal_value,
+            'T', temp.nominal_value,
+            'RH', 1)
+
+        worst_x_1s_g = hap.HAPropsSI(
+            'Y',
+            'P', press.nominal_value + press.std_dev,
+            'T', temp.nominal_value + temp.std_dev,
+            'RH', 1)
+
+        x_1s_g_std = abs(x_1s_g - worst_x_1s_g)
+        x_1s_g = un.ufloat(x_1s_g, x_1s_g_std)  # Reassign `x_1s_g`
+
+        num = x_1s_g*M1
+        den = x_1s_g*M1 + (1-x_1s_g)*M2
+        m_1s_g = num/den
+
+        # h_fgs_g = props.get_h_fg_sat(self.t_s_guess)
+        # h_s_g = 0
+        # self._s_state = dict(m_1s_g=m_1s_g, h_fgs_g=h_fgs_g, h_s_g=h_s_g)
+        self._s_state = dict(m_1s_g=m_1s_g)

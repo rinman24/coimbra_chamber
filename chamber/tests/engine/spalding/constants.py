@@ -8,6 +8,8 @@ amb_temp = 290
 dew_point = 280
 # TS_VALUE = 285
 
+t_s_guess = un.ufloat(290, 0.2)
+
 spald_input = dict(
     m=mass, p=press, t_e=amb_temp, t_dp=dew_point,
     ref='Mills', rule='1/2')
@@ -20,3 +22,5 @@ exp_state = dict(
     )
 
 properties = ['film_guide', 'exp_state', 't_s_guess', 's_state']
+
+m_1s_g = un.ufloat(0.01192707878398699, 0.00013523614304376794)
