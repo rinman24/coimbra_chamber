@@ -21,16 +21,19 @@ def test_spalding_constructor(spald):  # noqa: D103
     assert spald._film_guide['rule'] == const.rule
 
     # Test the _exp_state in constructor
-    assert _compare_ufloats(spald._exp_state['L'], const.exp_state['L'])
-    assert _compare_ufloats(spald._exp_state['P'], const.exp_state['P'])
-    assert _compare_ufloats(spald._exp_state['T_e'], const.exp_state['T_e'])
-    assert _compare_ufloats(spald._exp_state['T_dp'], const.exp_state['T_dp'])
+    assert _compare_ufloats(spald.exp_state['L'], const.exp_state['L'])
+    assert _compare_ufloats(spald.exp_state['P'], const.exp_state['P'])
+    assert _compare_ufloats(spald.exp_state['T_e'], const.exp_state['T_e'])
+    assert _compare_ufloats(spald.exp_state['T_dp'], const.exp_state['T_dp'])
 
     # Test states
-    assert math.isclose(spald._s_state['h'], const.initial_s_state['h'])
-    assert math.isclose(spald._s_state['h_fg'], const.initial_s_state['h_fg'])
-    assert math.isclose(spald._s_state['m_1'], const.initial_s_state['m_1'])
-    assert math.isclose(spald._s_state['T'], const.initial_s_state['T'])
+    assert math.isclose(spald.s_state['h'], const.initial_s_state['h'])
+    assert math.isclose(spald.s_state['h_fg'], const.initial_s_state['h_fg'])
+    assert math.isclose(spald.s_state['m_1'], const.initial_s_state['m_1'])
+    assert math.isclose(spald.s_state['T'], const.initial_s_state['T'])
+
+    assert math.isclose(spald.u_state['h'], const.initial_u_state['h'])
+    assert math.isclose(spald.u_state['T'], const.initial_u_state['T'])
 
 
 @pytest.mark.parametrize('name', const.properties)

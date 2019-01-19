@@ -27,4 +27,9 @@ initial_s_state = dict(
     T=290,
     )
 
-properties = ['film_guide', 'exp_state', 's_state']
+initial_u_state = dict(
+    T=290,
+    h=-2460974.1659213207,
+    )
+
+properties = ['film_guide', 'exp_state', 's_state', 'u_state']

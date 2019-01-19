@@ -49,7 +49,7 @@ class Spalding(object):
         self._calculate_exp_state(m, p, t_e, t_dp)
 
         self._s_state = dict()
-        self._u_state = None
+        self._u_state = dict()
         self._t_state = None
         self._e_state = None
         self._liq_props = None
@@ -57,6 +57,7 @@ class Spalding(object):
         self._solution = None
 
         self._set_s_state(t_e)
+        self._set_u_state()
 
     # ------------------------------------------------------------------------
     # Public methods
@@ -99,6 +100,10 @@ class Spalding(object):
         self._s_state['m_1'] = num/den
         self._s_state['T'] = t_guess
 
+    def _set_u_state(self):
+        self._u_state['h'] = -self.s_state['h_fg']
+        self._u_state['T'] = self.s_state['T']
+
     # ------------------------------------------------------------------------
     # Properties
 
@@ -135,8 +140,8 @@ class Spalding(object):
         In addition, it is assumed that the enthalpy at the s-state is zero.
 
         An `s_state` has the following keys:
-            'h' : Mixture enthalpy at the s-state (saturated vapor mixture)
-                in J/kg.
+            'h' : Specific enthalpy of the mixture at the s-state (saturated
+                vapor mixture) in J/kg.
             'h_fg' : Specific enthalpy of vaporization for pure water at t_s
                 in J/kg.
             'm_1' : Mass fraction of water vapor in the s-state (saturated
@@ -147,7 +152,18 @@ class Spalding(object):
 
     @property
     def u_state(self):
-        """Dictonary of u-state based on guess at surface temperature."""
+        """Get the u-state.
+
+        The `u_state` is based on a guess at the surface temperature.
+        In addition, the `u_state` is assumed to be in thermodynamic
+        equilibrium with the `s_state`. Finally the specific enthalpy is
+        equal and opposite to `s_state['h_fg']` because the enthalpy datum
+        is set at the `s_state`.
+
+        A `u_state` has the following keys:
+            'h': Specific enthalpy of pure water at t_s in J/kg.
+            'T': Temperature in K.
+        """
         return self._u_state
 
     @property
