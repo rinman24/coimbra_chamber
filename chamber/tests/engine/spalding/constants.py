@@ -16,7 +16,7 @@ spald_input = dict(
 exp_state = dict(
     L=un.ufloat(0.04351613825556731, 0.0012399392152624728),
     P=un.ufloat(101325.0, 151.9875),
-    T_e=un.ufloat(amb_temp, 0.2),
+    T=un.ufloat(amb_temp, 0.2),
     T_dp=un.ufloat(280, 0.2),
     )
 

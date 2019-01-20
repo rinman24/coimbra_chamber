@@ -23,7 +23,7 @@ def test_spalding_constructor(spald):  # noqa: D103
     # Test the _exp_state in constructor
     assert _compare_ufloats(spald.exp_state['L'], const.exp_state['L'])
     assert _compare_ufloats(spald.exp_state['P'], const.exp_state['P'])
-    assert _compare_ufloats(spald.exp_state['T_e'], const.exp_state['T_e'])
+    assert _compare_ufloats(spald.exp_state['T'], const.exp_state['T'])
     assert _compare_ufloats(spald.exp_state['T_dp'], const.exp_state['T_dp'])
 
     # Test states
@@ -39,7 +39,7 @@ def test_spalding_constructor(spald):  # noqa: D103
     # assert math.isclose(spald.liq_props['T'], const.initial_liq_props['T'])
 
 
-def test_spalding_constructor_checks_ref_and_rule():
+def test_spalding_constructor_checks_ref_and_rule():  # noqa: D103
     spald_input = dict(const.spald_input)
     spald_input['rule'] = '1/4'
     with pytest.raises(ValueError) as err:
@@ -53,6 +53,7 @@ def test_spalding_constructor_checks_ref_and_rule():
         dbs.Spalding(**spald_input)
     err_msg = ("'Inman' is not a valid ref; try 'Mills' or 'Marrero'.")
     assert err_msg in str(err.value)
+
 
 @pytest.mark.parametrize('name', const.properties)
 def test_properties(spald, name):  # noqa: D103

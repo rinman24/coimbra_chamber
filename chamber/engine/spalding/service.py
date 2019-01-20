@@ -93,7 +93,7 @@ class Spalding(object):
         dew_point = un.ufloat(dew_point, uncert.del_tdp)
 
         self._exp_state = dict(
-            L=len_eff, P=press, T_e=amb_temp, T_dp=dew_point)
+            L=len_eff, P=press, T=amb_temp, T_dp=dew_point)
 
     def _set_s_state(self, t_guess):
         h_g = cp.PropsSI('H', 'T', t_guess, 'Q', 1, 'water')
@@ -114,7 +114,7 @@ class Spalding(object):
         self._u_state['T'] = self.s_state['T']
 
     def _set_liq_props(self):
-        #temp = 
+        #temp = self._use_rule(self.exp_state['T']) 
         self._liq_props['c_p'] = cp.PropsSI('Cpmass', 'T', t, 'Q', 0, 'water')
 
     def _use_rule(self, e_value, s_value):
