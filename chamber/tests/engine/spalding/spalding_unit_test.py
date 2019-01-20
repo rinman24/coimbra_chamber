@@ -35,11 +35,43 @@ def test_spalding_constructor(spald):  # noqa: D103
     assert math.isclose(spald.u_state['h'], const.initial_u_state['h'])
     assert math.isclose(spald.u_state['T'], const.initial_u_state['T'])
 
+    # assert math.isclose(spald.liq_props['c_p'], const.initial_liq_props['c_p'])
+    # assert math.isclose(spald.liq_props['T'], const.initial_liq_props['T'])
+
+
+def test_spalding_constructor_checks_ref_and_rule():
+    spald_input = dict(const.spald_input)
+    spald_input['rule'] = '1/4'
+    with pytest.raises(ValueError) as err:
+        dbs.Spalding(**spald_input)
+    err_msg = "'1/4' is not a valid rule; try '1/2' or '1/3'."
+    assert err_msg in str(err.value)
+
+    spald_input = dict(const.spald_input)
+    spald_input['ref'] = 'Inman'
+    with pytest.raises(ValueError) as err:
+        dbs.Spalding(**spald_input)
+    err_msg = ("'Inman' is not a valid ref; try 'Mills' or 'Marrero'.")
+    assert err_msg in str(err.value)
 
 @pytest.mark.parametrize('name', const.properties)
 def test_properties(spald, name):  # noqa: D103
     with pytest.raises(AttributeError):
         setattr(spald, name, 'foo')
+
+
+
+@pytest.mark.parametrize('rule,expected', [
+    ('1/2', 1/2),
+    ('1/3', 1/3),
+    ])
+def test_use_rule(spald, rule, expected):  # noqa: D103
+    e_value = 1
+    s_value = 0
+    spald._film_guide['rule'] = rule
+
+    assert math.isclose(
+        spald._use_rule(e_value, s_value), expected)
 
 
 # ----------------------------------------------------------------------------

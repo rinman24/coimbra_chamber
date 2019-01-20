@@ -45,14 +45,23 @@ class Spalding(object):
     M2 = 28.964
 
     def __init__(self, m, p, t_e, t_dp, ref, rule):  # noqa: D107
+        if rule not in ['1/2', '1/3']:
+            err_msg = (
+                "'{0}' is not a valid rule; try '1/2' or '1/3'.".format(rule))
+            raise ValueError(err_msg)
+        if ref not in ['Mills', 'Marrero']:
+            err_msg = (
+                "'{0}' is not a valid ref; try 'Mills' or 'Marrero'.".format(ref))
+            raise ValueError(err_msg)
+
         self._film_guide = dict(ref=ref, rule=rule)
         self._calculate_exp_state(m, p, t_e, t_dp)
-
+        
         self._s_state = dict()
         self._u_state = dict()
+        self._liq_props = dict()
         self._t_state = None
         self._e_state = None
-        self._liq_props = None
         self._film_props = None
         self._solution = None
 
@@ -103,6 +112,17 @@ class Spalding(object):
     def _set_u_state(self):
         self._u_state['h'] = -self.s_state['h_fg']
         self._u_state['T'] = self.s_state['T']
+
+    def _set_liq_props(self):
+        #temp = 
+        self._liq_props['c_p'] = cp.PropsSI('Cpmass', 'T', t, 'Q', 0, 'water')
+
+    def _use_rule(self, e_value, s_value):
+        if self.film_guide['rule'] == '1/2':
+            film_prop = (e_value+s_value)/2
+        else:
+            film_prop = s_value + (e_value-s_value)/3
+        return film_prop
 
     # ------------------------------------------------------------------------
     # Properties
@@ -167,6 +187,20 @@ class Spalding(object):
         return self._u_state
 
     @property
+    def liq_props(self):
+        """Get the liquid properties.
+
+        The properties of the liquid depend on the temperature of the
+        `s_state` and the `t_state`. It is assumed that the `t_state`
+        is at the same temperature at the `exp_state`.
+
+        A `liq_prop` dict has the following keys:
+            'c_p': Specific heat of pure liquid water in J/kg K.
+            'T': Temperature in K.
+        """
+        return self._liq_props
+
+    @property
     def t_state(self):
         """Dictonary of T-state based on guess at surface temperature."""
         return self._t_state
@@ -174,11 +208,6 @@ class Spalding(object):
     @property
     def e_state(self):
         """Dictonary of e-state based on guess at surface temperature."""
-        return self._e_state
-
-    @property
-    def liq_props(self):
-        """Dictonary of liquid properties based on guess at surface temperature."""
         return self._e_state
 
     @property
