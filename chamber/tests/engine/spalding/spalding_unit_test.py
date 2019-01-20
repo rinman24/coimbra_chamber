@@ -35,8 +35,8 @@ def test_spalding_constructor(spald):  # noqa: D103
     assert math.isclose(spald.u_state['h'], const.initial_u_state['h'])
     assert math.isclose(spald.u_state['T'], const.initial_u_state['T'])
 
-    # assert math.isclose(spald.liq_props['c_p'], const.initial_liq_props['c_p'])
-    # assert math.isclose(spald.liq_props['T'], const.initial_liq_props['T'])
+    assert math.isclose(spald.liq_props['c_p'], const.initial_liq_props['c_p'])
+    assert math.isclose(spald.liq_props['T'], const.initial_liq_props['T'])
 
 
 def test_spalding_constructor_checks_ref_and_rule():  # noqa: D103
@@ -59,7 +59,6 @@ def test_spalding_constructor_checks_ref_and_rule():  # noqa: D103
 def test_properties(spald, name):  # noqa: D103
     with pytest.raises(AttributeError):
         setattr(spald, name, 'foo')
-
 
 
 @pytest.mark.parametrize('rule,expected', [

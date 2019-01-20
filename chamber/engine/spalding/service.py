@@ -51,12 +51,13 @@ class Spalding(object):
             raise ValueError(err_msg)
         if ref not in ['Mills', 'Marrero']:
             err_msg = (
-                "'{0}' is not a valid ref; try 'Mills' or 'Marrero'.".format(ref))
+                "'{0}' is not a valid ref; try 'Mills' or 'Marrero'."
+                .format(ref))
             raise ValueError(err_msg)
 
         self._film_guide = dict(ref=ref, rule=rule)
         self._calculate_exp_state(m, p, t_e, t_dp)
-        
+
         self._s_state = dict()
         self._u_state = dict()
         self._liq_props = dict()
@@ -67,6 +68,7 @@ class Spalding(object):
 
         self._set_s_state(t_e)
         self._set_u_state()
+        self._set_liq_props()
 
     # ------------------------------------------------------------------------
     # Public methods
@@ -114,8 +116,10 @@ class Spalding(object):
         self._u_state['T'] = self.s_state['T']
 
     def _set_liq_props(self):
-        #temp = self._use_rule(self.exp_state['T']) 
-        self._liq_props['c_p'] = cp.PropsSI('Cpmass', 'T', t, 'Q', 0, 'water')
+        self._liq_props['T'] = self._use_rule(
+            self.exp_state['T'].nominal_value, self.s_state['T'])
+        self._liq_props['c_p'] = cp.PropsSI(
+            'Cpmass', 'T', self._liq_props['T'], 'Q', 0, 'water')
 
     def _use_rule(self, e_value, s_value):
         if self.film_guide['rule'] == '1/2':
