@@ -37,4 +37,11 @@ initial_liq_props = dict(
     T=amb_temp,
     )
 
-properties = ['film_guide', 'exp_state', 's_state', 'u_state', 'liq_props']
+initial_t_state = dict(
+    T=amb_temp,
+    h=-2460974.1659213207,
+    )
+
+properties = [
+    'film_guide', 'exp_state', 's_state', 'u_state', 'liq_props', 't_state',
+    ]

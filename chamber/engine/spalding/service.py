@@ -61,7 +61,7 @@ class Spalding(object):
         self._s_state = dict()
         self._u_state = dict()
         self._liq_props = dict()
-        self._t_state = None
+        self._t_state = dict()
         self._e_state = None
         self._film_props = None
         self._solution = None
@@ -69,6 +69,7 @@ class Spalding(object):
         self._set_s_state(t_e)
         self._set_u_state()
         self._set_liq_props()
+        self._set_t_state()
 
     # ------------------------------------------------------------------------
     # Public methods
@@ -120,6 +121,13 @@ class Spalding(object):
             self.exp_state['T'].nominal_value, self.s_state['T'])
         self._liq_props['c_p'] = cp.PropsSI(
             'Cpmass', 'T', self._liq_props['T'], 'Q', 0, 'water')
+
+    def _set_t_state(self):
+        self._t_state['T'] = self.exp_state['T'].nominal_value
+        self._t_state['h'] = (
+            self.liq_props['c_p'] * (self.t_state['T'] - self.s_state['T'])
+            + self.u_state['h']
+            )
 
     def _use_rule(self, e_value, s_value):
         if self.film_guide['rule'] == '1/2':
@@ -206,7 +214,16 @@ class Spalding(object):
 
     @property
     def t_state(self):
-        """Dictonary of T-state based on guess at surface temperature."""
+        """Get the T-state.
+
+        The `t_state` is based on a guess at the surface temperature.
+        In addition, the `t_state` is assumed to be at the same temperature
+        as the experimental state.
+
+        A `t_state` has the following keys:
+            'h': Specific enthalpy of pure water at t_s in J/kg.
+            'T': Temperature in K.
+        """
         return self._t_state
 
     @property

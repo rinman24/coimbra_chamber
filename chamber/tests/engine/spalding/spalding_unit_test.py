@@ -26,7 +26,7 @@ def test_spalding_constructor(spald):  # noqa: D103
     assert _compare_ufloats(spald.exp_state['T'], const.exp_state['T'])
     assert _compare_ufloats(spald.exp_state['T_dp'], const.exp_state['T_dp'])
 
-    # Test states
+    # Test states and props
     assert math.isclose(spald.s_state['h'], const.initial_s_state['h'])
     assert math.isclose(spald.s_state['h_fg'], const.initial_s_state['h_fg'])
     assert math.isclose(spald.s_state['m_1'], const.initial_s_state['m_1'])
@@ -37,6 +37,9 @@ def test_spalding_constructor(spald):  # noqa: D103
 
     assert math.isclose(spald.liq_props['c_p'], const.initial_liq_props['c_p'])
     assert math.isclose(spald.liq_props['T'], const.initial_liq_props['T'])
+
+    assert math.isclose(spald.t_state['h'], const.initial_t_state['h'])
+    assert math.isclose(spald.t_state['T'], const.initial_t_state['T'])
 
 
 def test_spalding_constructor_checks_ref_and_rule():  # noqa: D103
