@@ -53,6 +53,8 @@ def test_spalding_constructor(spald):  # noqa: D103
         spald.film_props['D_12'], const.initial_film_props['D_12'])
 
     assert math.isclose(spald.e_state['m_1'], const.initial_e_state['m_1'])
+    assert math.isclose(spald.e_state['T'], const.initial_e_state['T'])
+    assert math.isclose(spald.e_state['h'], const.initial_e_state['h'])
 
 
 def test_spalding_constructor_checks_ref_and_rule():  # noqa: D103

@@ -199,6 +199,12 @@ class Spalding(object):
         den = x_1*self.M1 + (1-x_1)*self.M2
         self._e_state['m_1'] = num/den
 
+        self._e_state['T'] = self.exp_state['T'].nominal_value
+
+        self._e_state['h'] = (
+            self.film_props['c_p'] * (self.e_state['T'] - self.s_state['T'])
+            + self.s_state['h'])
+
     def _use_rule(self, e_value, s_value):
         if self.film_guide['rule'] == '1/2':
             film_prop = (e_value+s_value)/2

@@ -60,3 +60,39 @@ properties = [
     'film_guide', 'exp_state', 's_state', 'u_state', 'liq_props', 't_state',
     'film_props',
     ]
+
+updated_s_state = dict(
+    h=0,
+    h_fg=2464523.5469389744,
+    m_1=0.010823709872538528,
+    T=288.5,
+    )
+
+# updated_u_state = dict(
+#     T=amb_temp,
+#     h=-2460974.1659213207,
+#     )
+
+# updated_liq_props = dict(
+#     c_p=4186.928150136838,
+#     T=amb_temp,
+#     )
+
+# updated_t_state = dict(
+#     T=amb_temp,
+#     h=-2460974.1659213207,
+#     )
+
+# updated_film_props = dict(
+#     c_p=1023.2477857653178,
+#     rho=1.2111339491009243,
+#     k=0.025631483785807277,
+#     alpha=2.0682391580900012e-05,
+#     D_12=2.4306504684558495e-05,
+#     )
+
+# updated_e_state = dict(
+#     m_1=.0061357476021502095,
+#     T=amb_temp,
+#     h=0,
+#     )
