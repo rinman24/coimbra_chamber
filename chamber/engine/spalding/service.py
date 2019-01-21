@@ -63,7 +63,7 @@ class Spalding(object):
         self._liq_props = dict()
         self._t_state = dict()
         self._film_props = dict()
-        self._e_state = None
+        self._e_state = dict()
         self._solution = None
 
         self._set_s_state(t_e)
@@ -71,6 +71,7 @@ class Spalding(object):
         self._set_liq_props()
         self._set_t_state()
         self._set_film_props()
+        self._set_e_state()
 
     # ------------------------------------------------------------------------
     # Public methods
@@ -187,6 +188,16 @@ class Spalding(object):
         self._film_props['k'] = k
         self._film_props['alpha'] = alpha
         self._film_props['D_12'] = d_12
+
+    def _set_e_state(self):
+        x_1 = hap.HAPropsSI(
+            'Y',
+            'P', self.exp_state['P'].nominal_value,
+            'T', self.exp_state['T'].nominal_value,
+            'Tdp', self.exp_state['T_dp'].nominal_value)
+        num = x_1 * self.M1
+        den = x_1*self.M1 + (1-x_1)*self.M2
+        self._e_state['m_1'] = num/den
 
     def _use_rule(self, e_value, s_value):
         if self.film_guide['rule'] == '1/2':

@@ -50,6 +50,12 @@ initial_film_props = dict(
     D_12=2.4306504684558495e-05,
     )
 
+initial_e_state = dict(
+    m_1=.0061357476021502095,
+    T=amb_temp,
+    h=0,
+    )
+
 properties = [
     'film_guide', 'exp_state', 's_state', 'u_state', 'liq_props', 't_state',
     'film_props',
