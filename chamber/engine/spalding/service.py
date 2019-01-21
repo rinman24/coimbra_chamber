@@ -62,14 +62,15 @@ class Spalding(object):
         self._u_state = dict()
         self._liq_props = dict()
         self._t_state = dict()
+        self._film_props = dict()
         self._e_state = None
-        self._film_props = None
         self._solution = None
 
         self._set_s_state(t_e)
         self._set_u_state()
         self._set_liq_props()
         self._set_t_state()
+        self._set_film_props()
 
     # ------------------------------------------------------------------------
     # Public methods
@@ -128,6 +129,64 @@ class Spalding(object):
             self.liq_props['c_p'] * (self.t_state['T'] - self.s_state['T'])
             + self.u_state['h']
             )
+
+    def _set_film_props(self):
+        c_pe = hap.HAPropsSI(
+            'cp_ha',
+            'P', self.exp_state['P'].nominal_value,
+            'T', self.exp_state['T'].nominal_value,
+            'Tdp', self.exp_state['T_dp'].nominal_value,
+            )
+        c_ps = hap.HAPropsSI(
+            'cp_ha',
+            'P', self.exp_state['P'].nominal_value,
+            'T', self.s_state['T'],
+            'RH', 1,
+            )
+        c_p = self._use_rule(c_pe, c_ps)
+        vha_e = hap.HAPropsSI(
+            'Vha', 'P', self.exp_state['P'].nominal_value,
+            'T', self.exp_state['T'].nominal_value,
+            'Tdp', self.exp_state['T_dp'].nominal_value,
+            )
+        vha_s = hap.HAPropsSI(
+            'Vha', 'P', self.exp_state['P'].nominal_value,
+            'T', self.s_state['T'],
+            'RH', 1,
+            )
+        rho_e = 1/vha_e
+        rho_s = 1/vha_s
+        rho = self._use_rule(rho_e, rho_s)
+        k_e = hap.HAPropsSI(
+            'k', 'P', self.exp_state['P'].nominal_value,
+            'T', self.exp_state['T'].nominal_value,
+            'Tdp', self.exp_state['T_dp'].nominal_value,
+            )
+        k_s = hap.HAPropsSI(
+            'k', 'P', self.exp_state['P'].nominal_value,
+            'T', self.s_state['T'],
+            'RH', 1,
+            )
+        k = self._use_rule(k_e, k_s)
+        alpha = k/(rho*c_p)
+
+        p_norm = self.exp_state['P'].nominal_value/101325
+        ref = self.film_guide['ref']
+        if ref == 'Mills':
+            d_12_e = 1.97e-5*(1/p_norm)*pow(
+                self.exp_state['T'].nominal_value/256, 1.685)
+            d_12_s = 1.97e-5*(1/p_norm)*pow(
+                self.s_state['T']/256, 1.685)
+        elif ref == 'Marrero':
+            d_12_e = 1.87e-10*pow(self.exp_state['T'], 2.072)/p_norm
+            d_12_e = 1.87e-10*pow(self.exp_state['T'], 2.072)/p_norm
+        d_12 = self._use_rule(d_12_e, d_12_s)
+
+        self._film_props['c_p'] = c_p
+        self._film_props['rho'] = rho
+        self._film_props['k'] = k
+        self._film_props['alpha'] = alpha
+        self._film_props['D_12'] = d_12
 
     def _use_rule(self, e_value, s_value):
         if self.film_guide['rule'] == '1/2':
@@ -225,6 +284,21 @@ class Spalding(object):
             'T': Temperature in K.
         """
         return self._t_state
+
+    @property
+    def film_props(self):
+        """Get film properties.
+
+        The `film_props` are based on a guess at the surface temperature.
+
+        A `film_props` attribute has the following keys:
+            'c_p': Specific heat of the vapor mixture in J/kg K.
+            'rho' : Specific mass of the vapor mixture in kg/m^3.
+            'k' : Thermal conductivity of the vapor mixture in W/m K.
+            'alpha' : Thermal diffusivity in m^2/s.
+            'D_12' : Binary diffusion coefficient in m^2/s.
+        """
+        return self._film_props
 
     @property
     def e_state(self):

@@ -42,6 +42,15 @@ initial_t_state = dict(
     h=-2460974.1659213207,
     )
 
+initial_film_props = dict(
+    c_p=1023.2477857653178,
+    rho=1.2111339491009243,
+    k=0.025631483785807277,
+    alpha=2.0682391580900012e-05,
+    D_12=2.4306504684558495e-05,
+    )
+
 properties = [
     'film_guide', 'exp_state', 's_state', 'u_state', 'liq_props', 't_state',
+    'film_props',
     ]

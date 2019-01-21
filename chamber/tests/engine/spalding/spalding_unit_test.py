@@ -41,6 +41,17 @@ def test_spalding_constructor(spald):  # noqa: D103
     assert math.isclose(spald.t_state['h'], const.initial_t_state['h'])
     assert math.isclose(spald.t_state['T'], const.initial_t_state['T'])
 
+    assert math.isclose(
+        spald.film_props['c_p'], const.initial_film_props['c_p'])
+    assert math.isclose(
+        spald.film_props['rho'], const.initial_film_props['rho'])
+    assert math.isclose(
+        spald.film_props['k'], const.initial_film_props['k'])
+    assert math.isclose(
+        spald.film_props['alpha'], const.initial_film_props['alpha'])
+    assert math.isclose(
+        spald.film_props['D_12'], const.initial_film_props['D_12'])
+
 
 def test_spalding_constructor_checks_ref_and_rule():  # noqa: D103
     spald_input = dict(const.spald_input)
