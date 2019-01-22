@@ -56,6 +56,7 @@ initial_e_state = dict(
     m_1=.0061357476021502095,
     T=amb_temp,
     h=0,
+    c_p=1017.6419108408694,
     )
 
 properties = [
@@ -98,5 +99,6 @@ updated_film_props = dict(
 updated_e_state = dict(
     m_1=.0061357476021502095,
     T=amb_temp,
-    h=1535.456292526313,
+    h=1526.462866261304,
+    c_p=1017.6419108408694,
     )

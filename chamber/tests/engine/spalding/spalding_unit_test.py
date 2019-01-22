@@ -67,6 +67,7 @@ def test_spalding_constructor(spald):  # noqa: D103
     assert math.isclose(spald.e_state['m_1'], const.initial_e_state['m_1'])
     assert math.isclose(spald.e_state['T'], const.initial_e_state['T'])
     assert math.isclose(spald.e_state['h'], const.initial_e_state['h'])
+    assert math.isclose(spald.e_state['c_p'], const.initial_e_state['c_p'])
 
 
 def test_update_model(spald):  # noqa: D103
@@ -107,6 +108,7 @@ def test_update_model(spald):  # noqa: D103
     assert math.isclose(spald.e_state['m_1'], const.updated_e_state['m_1'])
     assert math.isclose(spald.e_state['T'], const.updated_e_state['T'])
     assert math.isclose(spald.e_state['h'], const.updated_e_state['h'])
+    assert math.isclose(spald.e_state['c_p'], const.updated_e_state['c_p'])
 
 
 def test_spalding_constructor_checks_ref_and_rule():  # noqa: D103

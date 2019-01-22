@@ -193,8 +193,14 @@ class Spalding(object):
 
         self._e_state['T'] = self.exp_state['T'].nominal_value
 
+        self._e_state['c_p'] = hap.HAPropsSI(
+            'cp_ha',
+            'P', self.exp_state['P'].nominal_value,
+            'T', self.e_state['T'],
+            'Y', x_1,
+            )
         self._e_state['h'] = (
-            self.film_props['c_p'] * (self.e_state['T'] - self.s_state['T'])
+            self.e_state['c_p'] * (self.e_state['T'] - self.s_state['T'])
             + self.s_state['h'])
 
     def _use_rule(self, e_value, s_value):
