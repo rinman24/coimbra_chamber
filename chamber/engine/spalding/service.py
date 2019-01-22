@@ -106,12 +106,11 @@ class Spalding(object):
 
         pressure = self.exp_state['P'].nominal_value
         x_1 = hap.HAPropsSI('Y', 'P', pressure, 'T', t_guess, 'RH', 1)
-        num = x_1 * self.M1
-        den = x_1*self.M1 + (1-x_1)*self.M2
+        m_1 = self._x1_2_m1(x_1)
 
         self._s_state['h'] = 0
         self._s_state['h_fg'] = h_g - h_f
-        self._s_state['m_1'] = num/den
+        self._s_state['m_1'] = m_1
         self._s_state['T'] = t_guess
 
     def _set_u_state(self):
@@ -132,57 +131,51 @@ class Spalding(object):
             )
 
     def _set_film_props(self):
-        c_pe = hap.HAPropsSI(
+        film_temp = self._use_rule(
+            self.exp_state['T'].nominal_value, self.s_state['T'])
+
+        x_1s = hap.HAPropsSI(
+            'Y',
+            'T', self.s_state['T'],
+            'P', self.exp_state['P'].nominal_value,
+            'RH', 1)
+        x_1e = hap.HAPropsSI(
+            'Y',
+            'T', self.exp_state['T'].nominal_value,
+            'P', self.exp_state['P'].nominal_value,
+            'Tdp', self.exp_state['T_dp'].nominal_value)
+        x_1 = self._use_rule(x_1e, x_1s)
+        m_1 = self._x1_2_m1(x_1)
+
+        c_p = hap.HAPropsSI(
             'cp_ha',
             'P', self.exp_state['P'].nominal_value,
-            'T', self.exp_state['T'].nominal_value,
-            'Tdp', self.exp_state['T_dp'].nominal_value,
+            'T', film_temp,
+            'Y', x_1,
             )
-        c_ps = hap.HAPropsSI(
-            'cp_ha',
+        vha = hap.HAPropsSI(
+            'Vha',
             'P', self.exp_state['P'].nominal_value,
-            'T', self.s_state['T'],
-            'RH', 1,
+            'T', film_temp,
+            'Y', x_1,
             )
-        c_p = self._use_rule(c_pe, c_ps)
-        vha_e = hap.HAPropsSI(
-            'Vha', 'P', self.exp_state['P'].nominal_value,
-            'T', self.exp_state['T'].nominal_value,
-            'Tdp', self.exp_state['T_dp'].nominal_value,
+        rho = 1/vha
+        k = hap.HAPropsSI(
+            'k',
+            'P', self.exp_state['P'].nominal_value,
+            'T', film_temp,
+            'Y', x_1,
             )
-        vha_s = hap.HAPropsSI(
-            'Vha', 'P', self.exp_state['P'].nominal_value,
-            'T', self.s_state['T'],
-            'RH', 1,
-            )
-        rho_e = 1/vha_e
-        rho_s = 1/vha_s
-        rho = self._use_rule(rho_e, rho_s)
-        k_e = hap.HAPropsSI(
-            'k', 'P', self.exp_state['P'].nominal_value,
-            'T', self.exp_state['T'].nominal_value,
-            'Tdp', self.exp_state['T_dp'].nominal_value,
-            )
-        k_s = hap.HAPropsSI(
-            'k', 'P', self.exp_state['P'].nominal_value,
-            'T', self.s_state['T'],
-            'RH', 1,
-            )
-        k = self._use_rule(k_e, k_s)
         alpha = k/(rho*c_p)
 
-        p_norm = self.exp_state['P'].nominal_value/101325
         ref = self.film_guide['ref']
         if ref == 'Mills':
-            d_12_e = 1.97e-5*(1/p_norm)*pow(
-                self.exp_state['T'].nominal_value/256, 1.685)
-            d_12_s = 1.97e-5*(1/p_norm)*pow(
-                self.s_state['T']/256, 1.685)
+            d_12 = 1.97e-5*(101325/self.exp_state['P'].nominal_value)*pow(film_temp/256, 1.685)
         elif ref == 'Marrero':
-            d_12_e = 1.87e-10*pow(self.exp_state['T'], 2.072)/p_norm
-            d_12_e = 1.87e-10*pow(self.exp_state['T'], 2.072)/p_norm
-        d_12 = self._use_rule(d_12_e, d_12_s)
+            d_12 = 1.87e-10*pow(film_temp, 2.072)/(self.exp_state['P'].nominal_value/101325)
 
+        self._film_props['T'] = film_temp
+        self._film_props['m_1'] = m_1
         self._film_props['c_p'] = c_p
         self._film_props['rho'] = rho
         self._film_props['k'] = k
@@ -195,9 +188,8 @@ class Spalding(object):
             'P', self.exp_state['P'].nominal_value,
             'T', self.exp_state['T'].nominal_value,
             'Tdp', self.exp_state['T_dp'].nominal_value)
-        num = x_1 * self.M1
-        den = x_1*self.M1 + (1-x_1)*self.M2
-        self._e_state['m_1'] = num/den
+        m_1 = self._x1_2_m1(x_1)
+        self._e_state['m_1'] = m_1
 
         self._e_state['T'] = self.exp_state['T'].nominal_value
 
@@ -211,6 +203,19 @@ class Spalding(object):
         else:
             film_prop = s_value + (e_value-s_value)/3
         return film_prop
+
+    def _x1_2_m1(self, x_1):
+        num = x_1 * self.M1
+        den = x_1*self.M1 + (1-x_1)*self.M2
+        return num/den
+
+    def _update_model(self, t_guess):
+        self._set_s_state(t_guess)
+        self._set_u_state()
+        self._set_liq_props()
+        self._set_t_state()
+        self._set_film_props()
+        self._set_e_state()
 
     # ------------------------------------------------------------------------
     # Properties

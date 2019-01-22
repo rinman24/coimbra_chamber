@@ -9,10 +9,18 @@ import chamber.engine.spalding.service as dbs
 import chamber.tests.engine.spalding.constants as const
 
 
+# ----------------------------------------------------------------------------
+# Fixtures
+
+
 @pytest.fixture(scope='function')
 def spald():
     """Instance of a Spalding model object."""
     return dbs.Spalding(**const.spald_input)
+
+
+# ----------------------------------------------------------------------------
+# Tests
 
 
 def test_spalding_constructor(spald):  # noqa: D103
@@ -42,6 +50,10 @@ def test_spalding_constructor(spald):  # noqa: D103
     assert math.isclose(spald.t_state['T'], const.initial_t_state['T'])
 
     assert math.isclose(
+        spald.film_props['T'], const.initial_film_props['T'])
+    assert math.isclose(
+        spald.film_props['m_1'], const.initial_film_props['m_1'])
+    assert math.isclose(
         spald.film_props['c_p'], const.initial_film_props['c_p'])
     assert math.isclose(
         spald.film_props['rho'], const.initial_film_props['rho'])
@@ -55,6 +67,46 @@ def test_spalding_constructor(spald):  # noqa: D103
     assert math.isclose(spald.e_state['m_1'], const.initial_e_state['m_1'])
     assert math.isclose(spald.e_state['T'], const.initial_e_state['T'])
     assert math.isclose(spald.e_state['h'], const.initial_e_state['h'])
+
+
+def test_update_model(spald):  # noqa: D103
+    spald._film_guide['ref'] = 'Marrero'
+    spald._film_guide['rule'] = '1/3'
+    spald._update_model(t_guess=288.5)
+
+    # Test states and props
+    assert math.isclose(spald.s_state['h'], const.updated_s_state['h'])
+    assert math.isclose(spald.s_state['h_fg'], const.updated_s_state['h_fg'])
+    assert math.isclose(spald.s_state['m_1'], const.updated_s_state['m_1'])
+    assert math.isclose(spald.s_state['T'], const.updated_s_state['T'])
+
+    assert math.isclose(spald.u_state['h'], const.updated_u_state['h'])
+    assert math.isclose(spald.u_state['T'], const.updated_u_state['T'])
+
+    assert math.isclose(spald.liq_props['c_p'], const.updated_liq_props['c_p'])
+    assert math.isclose(spald.liq_props['T'], const.updated_liq_props['T'])
+
+    assert math.isclose(spald.t_state['h'], const.updated_t_state['h'])
+    assert math.isclose(spald.t_state['T'], const.updated_t_state['T'])
+
+    assert math.isclose(
+        spald.film_props['T'], const.updated_film_props['T'])
+    assert math.isclose(
+        spald.film_props['m_1'], const.updated_film_props['m_1'])
+    assert math.isclose(
+        spald.film_props['c_p'], const.updated_film_props['c_p'])
+    assert math.isclose(
+        spald.film_props['rho'], const.updated_film_props['rho'])
+    assert math.isclose(
+        spald.film_props['k'], const.updated_film_props['k'])
+    assert math.isclose(
+        spald.film_props['alpha'], const.updated_film_props['alpha'])
+    assert math.isclose(
+        spald.film_props['D_12'], const.updated_film_props['D_12'])
+
+    assert math.isclose(spald.e_state['m_1'], const.updated_e_state['m_1'])
+    assert math.isclose(spald.e_state['T'], const.updated_e_state['T'])
+    assert math.isclose(spald.e_state['h'], const.updated_e_state['h'])
 
 
 def test_spalding_constructor_checks_ref_and_rule():  # noqa: D103
