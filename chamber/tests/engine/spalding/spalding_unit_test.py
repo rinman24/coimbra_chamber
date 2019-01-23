@@ -147,13 +147,13 @@ def test_use_rule(spald, rule, expected):  # noqa: D103
 
 
 def test_solve_model(spald):  # noqa: D103
-    res = spald._solve(3.3e-6, 0.018, 7.3, 0.011, 288.7)
+    spald.solve()
 
-    assert math.isclose(res['mddp'], const.solution['mddp'])
-    assert math.isclose(res['T_s'], const.solution['T_s'])
-    assert math.isclose(res['q_cu'], const.solution['q_cu'])
-    assert math.isclose(res['q_rs'], const.solution['q_rs'])
-    assert math.isclose(res['m_1s'], const.solution['m_1s'])
+    assert _compare_ufloats(spald.solution['mddp'], const.solution['mddp'])
+    assert _compare_ufloats(spald.solution['T_s'], const.solution['T_s'])
+    assert _compare_ufloats(spald.solution['q_cu'], const.solution['q_cu'])
+    assert _compare_ufloats(spald.solution['q_rs'], const.solution['q_rs'])
+    assert _compare_ufloats(spald.solution['m_1s'], const.solution['m_1s'])
 
 
 # ----------------------------------------------------------------------------

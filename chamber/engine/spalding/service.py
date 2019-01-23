@@ -81,7 +81,37 @@ class Spalding(object):
     # Public methods
 
     def solve(self):
-        pass
+        """Solve the model and return result as ufloats."""
+        t_dp = self.exp_state['T_dp'].nominal_value
+        result_best = self._solve(2e-7, 0.01, 0.1, 0.01, t_dp)
+        old_exp_state = self.exp_state
+        self._exp_state['L'] = un.ufloat(
+            old_exp_state['L'].nominal_value + old_exp_state['L'].std_dev,
+            old_exp_state['L'].std_dev)
+        self._exp_state['P'] = un.ufloat(
+            old_exp_state['P'].nominal_value + old_exp_state['P'].std_dev,
+            old_exp_state['P'].std_dev)
+        self._exp_state['T'] = un.ufloat(
+            old_exp_state['T'].nominal_value + old_exp_state['T'].std_dev,
+            old_exp_state['T'].std_dev)
+        self._exp_state['T_dp'] = un.ufloat(
+            old_exp_state['T_dp'].nominal_value + old_exp_state['T_dp'].std_dev,
+            old_exp_state['T_dp'].std_dev)
+        self._update_model(t_dp)
+        result_delta = self._solve(2e-7, 0.01, 0.1, 0.01, t_dp)
+        self._exp_state = old_exp_state
+        self._update_model(t_dp)
+        mddp_del = abs(result_best['mddp'] - result_delta['mddp'])
+        t_s_del = abs(result_best['T_s'] - result_delta['T_s'])
+        q_cu_del = abs(result_best['q_cu'] - result_delta['q_cu'])
+        q_rs_del = abs(result_best['q_rs'] - result_delta['q_rs'])
+        m_1s_del = abs(result_best['m_1s'] - result_delta['m_1s'])
+
+        self.solution['mddp'] = un.ufloat(result_best['mddp'], mddp_del)
+        self.solution['T_s'] = un.ufloat(result_best['T_s'], t_s_del)
+        self.solution['q_cu'] = un.ufloat(result_best['q_cu'], q_cu_del)
+        self.solution['q_rs'] = un.ufloat(result_best['q_rs'], q_rs_del)
+        self.solution['m_1s'] = un.ufloat(result_best['m_1s'], m_1s_del)
 
     # ------------------------------------------------------------------------
     # Internal methods
