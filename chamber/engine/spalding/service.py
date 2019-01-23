@@ -4,6 +4,8 @@ import math
 
 import CoolProp.CoolProp as cp
 import CoolProp.HumidAirProp as hap
+import pandas as pd
+import scipy.optimize as opt
 import uncertainties as un
 
 import chamber.utility.uncert as uncert
@@ -44,6 +46,8 @@ class Spalding(object):
     M1 = 18.015
     M2 = 28.964
 
+    SIGMA = 5.67036713e-8
+
     def __init__(self, m, p, t_e, t_dp, ref, rule):  # noqa: D107
         if rule not in ['1/2', '1/3']:
             err_msg = (
@@ -64,7 +68,7 @@ class Spalding(object):
         self._t_state = dict()
         self._film_props = dict()
         self._e_state = dict()
-        self._solution = None
+        self._solution = dict()
 
         self._set_s_state(t_e)
         self._set_u_state()
@@ -77,7 +81,6 @@ class Spalding(object):
     # Public methods
 
     def solve(self):
-        """Solve the model."""
         pass
 
     # ------------------------------------------------------------------------
@@ -170,9 +173,17 @@ class Spalding(object):
 
         ref = self.film_guide['ref']
         if ref == 'Mills':
-            d_12 = 1.97e-5*(101325/self.exp_state['P'].nominal_value)*pow(film_temp/256, 1.685)
+            d_12 = (
+                1.97e-5 *
+                (101325/self.exp_state['P'].nominal_value) *
+                pow(film_temp/256, 1.685)
+                )
         elif ref == 'Marrero':
-            d_12 = 1.87e-10*pow(film_temp, 2.072)/(self.exp_state['P'].nominal_value/101325)
+            d_12 = (
+                1.87e-10 *
+                pow(film_temp, 2.072) /
+                (self.exp_state['P'].nominal_value/101325)
+                )
 
         self._film_props['T'] = film_temp
         self._film_props['m_1'] = m_1
@@ -222,6 +233,83 @@ class Spalding(object):
         self._set_t_state()
         self._set_film_props()
         self._set_e_state()
+
+    def _eval_model(self, guess):
+        mddp_g = guess[0]
+        q_cu_g = guess[1]
+        q_rs_g = guess[2]
+        t_s_g = guess[3]
+        m_1s_g = guess[4]
+
+        res = [0]*5
+
+        rho_m_g = self.film_props['rho']
+        d_12_g = self.film_props['D_12']
+        len_ = self.exp_state['L'].nominal_value
+        m_1e = self.e_state['m_1']
+        alpha_m_g = self.film_props['alpha']
+        h_e_g = self.e_state['h']
+        h_fgs_g = self.s_state['h_fg']
+        h_t_g = self.t_state['h']
+        t_e = self.e_state['T']
+        sigma = self.SIGMA
+        pressure = self.exp_state['P'].nominal_value
+        x_1_s_calc = hap.HAPropsSI('Y', 'T', t_s_g, 'P', pressure, 'RH', 1)
+        m_1_s_calc = self._x1_2_m1(x_1_s_calc)
+
+        res[0] = (
+            mddp_g - (rho_m_g * d_12_g / len_) * (m_1s_g - m_1e) / (1 - m_1s_g)
+            )
+
+        res[1] = (
+            mddp_g -
+            (rho_m_g * alpha_m_g / len_) *
+            h_e_g / (h_fgs_g - (q_cu_g + q_rs_g) / mddp_g)
+            )
+
+        res[2] = q_cu_g - mddp_g * (h_t_g + h_fgs_g)
+
+        res[3] = q_rs_g - sigma * (pow(t_e, 4) - pow(t_s_g, 4))
+
+        res[4] = m_1s_g - m_1_s_calc
+
+        return res
+
+    def _solve(self, mddp_g, q_cu_g, q_rs_g, m_1s_g, t_s_g):
+        """Solve the model."""
+        results = dict(mddp=[], q_cu=[], q_rs=[], t_s_g=[], t_s=[], m_1s_g=[])
+
+        delta = 1
+        alpha = 5e-3
+        initial_guess = [
+            mddp_g, q_cu_g, q_rs_g, t_s_g, m_1s_g
+            ]
+        self._update_model(t_s_g)
+        while abs(delta) > 1e-9:
+            if not results['mddp']:
+                guess = initial_guess
+            res = opt.fsolve(self._eval_model, guess)
+            results['mddp'].append(res[0])
+            results['q_cu'].append(res[1])
+            results['q_rs'].append(res[2])
+            results['t_s'].append(res[3])
+            results['m_1s_g'].append(res[4])
+            results['t_s_g'].append(guess[3])
+            delta = results['t_s'][-1] - results['t_s_g'][-1]
+            t_s_g = self.s_state['T'] + delta * alpha
+            t_s_g = t_s_g if t_s_g > 273.07 else 273.07
+            guess = [results['mddp'][-1], results['q_cu'][-1],
+                     results['q_rs'][-1], t_s_g,
+                     results['m_1s_g'][-1]
+                     ]
+            self._update_model(t_s_g)
+        results['mddp'] = results['mddp'][-1]
+        results['T_s'] = results['t_s'][-1]
+        results['q_cu'] = results['q_cu'][-1]
+        results['q_rs'] = results['q_rs'][-1]
+        results['m_1s'] = results['m_1s_g'][-1]
+
+        return results
 
     # ------------------------------------------------------------------------
     # Properties
@@ -330,10 +418,29 @@ class Spalding(object):
 
     @property
     def e_state(self):
-        """Dictonary of e-state based on guess at surface temperature."""
+        """Get e-state.
+
+        The `e_state` is based on a guess at the surface temperature.
+
+        An `e_state` has the following keys:
+            'm_1': Mass fraction of water vapor in [0, 1].
+            'c_p': Specific heat of the vapor mixture in J/kg K.
+            'h': Specific enthalpy of pure water at t_s in J/kg.
+            'T': Temperature in K.
+        """
         return self._e_state
 
     @property
     def solution(self):
-        """Solution of the model with uncertainties."""
-        return self._e_state
+        """Get the solution.
+
+        The `solution` is based on a diffusion dominated assumption.
+
+        A `solution` has the following keys:
+            'mddp': Mass flux of species 1 in kg/m^2s.
+            'T_s': Surface temperature in K.
+            'q_cu': Conduction flux at the u surface in W/m^2.
+            'q_rs': Radiative flux at the s surface in W/m^2.
+            'm_1s': Mass fraction of water vapor at the s surface in [0-1].
+        """
+        return self._solution
