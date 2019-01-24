@@ -83,6 +83,7 @@ class Spalding(object):
     def solve(self):
         """Solve the model and return result as ufloats."""
         t_dp = self.exp_state['T_dp'].nominal_value
+        t_dp = t_dp if t_dp > 273.07 else 273.07
         result_best = self._solve(2e-7, 0.01, 0.1, 0.01, t_dp)
         old_exp_state = self.exp_state
         self._exp_state['L'] = un.ufloat(
