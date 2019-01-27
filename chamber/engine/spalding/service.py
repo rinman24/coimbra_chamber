@@ -231,7 +231,8 @@ class Spalding(object):
             )
         nu = mu/rho
         mol_wght = m_1*self.M1 + (1-m_1)*self.M2
-        beta_h = 1/film_temp
+        beta = 1/film_temp
+        gamma_1 = (mol_wght/self.M1 - 1)/rho
 
         ref = self.film_guide['ref']
         if ref == 'Mills':
@@ -256,7 +257,8 @@ class Spalding(object):
         self._film_props['D_12'] = d_12
         self._film_props['nu'] = nu
         self._film_props['M'] = mol_wght
-        self._film_props['beta_h'] = beta_h
+        self._film_props['beta'] = beta
+        self._film_props['gamma_1'] = gamma_1
 
     def _set_e_state(self):
         x_1 = hap.HAPropsSI(
