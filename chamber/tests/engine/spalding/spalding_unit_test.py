@@ -67,6 +67,8 @@ def test_spalding_constructor(spald):  # noqa: D103
         spald.film_props['nu'], const.initial_film_props['nu'])
     assert math.isclose(
         spald.film_props['M'], const.initial_film_props['M'])
+    assert math.isclose(
+        spald.film_props['beta_h'], const.initial_film_props['beta_h'])
 
     assert math.isclose(spald.e_state['m_1'], const.initial_e_state['m_1'])
     assert math.isclose(spald.e_state['T'], const.initial_e_state['T'])
@@ -112,6 +114,8 @@ def test_update_model(spald):  # noqa: D103
         spald.film_props['nu'], const.updated_film_props['nu'])
     assert math.isclose(
         spald.film_props['M'], const.updated_film_props['M'])
+    assert math.isclose(
+        spald.film_props['beta_h'], const.updated_film_props['beta_h'])
 
     assert math.isclose(spald.e_state['m_1'], const.updated_e_state['m_1'])
     assert math.isclose(spald.e_state['T'], const.updated_e_state['T'])
