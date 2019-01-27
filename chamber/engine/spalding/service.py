@@ -82,37 +82,55 @@ class Spalding(object):
 
     def solve(self):
         """Solve the model and return result as ufloats."""
+        # Solve the best guess
         t_dp = self.exp_state['T_dp'].nominal_value
         t_dp = t_dp if t_dp > 273.07 else 273.07
         result_best = self._solve(2e-7, 0.01, 0.1, 0.01, t_dp)
-        old_exp_state = self.exp_state
+        exp_state_best = dict(self.exp_state)  # Keep the original
+        
+        # Set up a guess with the uncertainties
         self._exp_state['L'] = un.ufloat(
-            old_exp_state['L'].nominal_value + old_exp_state['L'].std_dev,
-            old_exp_state['L'].std_dev)
+            exp_state_best['L'].nominal_value + exp_state_best['L'].std_dev,
+            exp_state_best['L'].std_dev)
         self._exp_state['P'] = un.ufloat(
-            old_exp_state['P'].nominal_value + old_exp_state['P'].std_dev,
-            old_exp_state['P'].std_dev)
+            exp_state_best['P'].nominal_value + exp_state_best['P'].std_dev,
+            exp_state_best['P'].std_dev)
         self._exp_state['T'] = un.ufloat(
-            old_exp_state['T'].nominal_value + old_exp_state['T'].std_dev,
-            old_exp_state['T'].std_dev)
+            exp_state_best['T'].nominal_value + exp_state_best['T'].std_dev,
+            exp_state_best['T'].std_dev)
         self._exp_state['T_dp'] = un.ufloat(
-            old_exp_state['T_dp'].nominal_value + old_exp_state['T_dp'].std_dev,
-            old_exp_state['T_dp'].std_dev)
+            exp_state_best['T_dp'].nominal_value + exp_state_best['T_dp'].std_dev,
+            exp_state_best['T_dp'].std_dev)
+        
+        # Solve the delta system
         self._update_model(t_dp)
         result_delta = self._solve(2e-7, 0.01, 0.1, 0.01, t_dp)
-        self._exp_state = old_exp_state
-        self._update_model(t_dp)
+        exp_state_best = dict(self.exp_state)
+        self._exp_state = exp_state_best  # reset the original
+
+        # Calculate undertainties
         mddp_del = abs(result_best['mddp'] - result_delta['mddp'])
         t_s_del = abs(result_best['T_s'] - result_delta['T_s'])
         q_cu_del = abs(result_best['q_cu'] - result_delta['q_cu'])
         q_rs_del = abs(result_best['q_rs'] - result_delta['q_rs'])
         m_1s_del = abs(result_best['m_1s'] - result_delta['m_1s'])
+        m_1e_del = abs(result_best['m_1e'] - result_delta['m_1e'])
+        b_m1_del = abs(result_best['B_m1'] - result_delta['B_m1'])
+        b_h_del = abs(result_best['B_h'] - result_delta['B_h'])
+        g_m1_del = abs(result_best['g_m1'] - result_delta['g_m1'])
+        g_h_del = abs(result_best['g_h'] - result_delta['g_h'])
 
+        # Set the solution attribute
         self.solution['mddp'] = un.ufloat(result_best['mddp'], mddp_del)
         self.solution['T_s'] = un.ufloat(result_best['T_s'], t_s_del)
         self.solution['q_cu'] = un.ufloat(result_best['q_cu'], q_cu_del)
         self.solution['q_rs'] = un.ufloat(result_best['q_rs'], q_rs_del)
         self.solution['m_1s'] = un.ufloat(result_best['m_1s'], m_1s_del)
+        self.solution['m_1e'] = un.ufloat(result_best['m_1e'], m_1e_del)
+        self.solution['B_m1'] = un.ufloat(result_best['B_m1'], b_m1_del)
+        self.solution['B_h'] = un.ufloat(result_best['B_h'], b_h_del)
+        self.solution['g_m1'] = un.ufloat(result_best['g_m1'], g_m1_del)
+        self.solution['g_h'] = un.ufloat(result_best['g_h'], g_h_del)
 
     # ------------------------------------------------------------------------
     # Internal methods
@@ -339,6 +357,22 @@ class Spalding(object):
         results['q_cu'] = results['q_cu'][-1]
         results['q_rs'] = results['q_rs'][-1]
         results['m_1s'] = results['m_1s_g'][-1]
+        
+        results['m_1e'] = self.e_state['m_1']
+
+        results['B_m1'] = (
+            (self.s_state['m_1'] - self.e_state['m_1'])
+            / (1-self.s_state['m_1'])
+            )
+
+        results['B_h'] = (
+            (self.s_state['h'] - self.e_state['h'])
+            / (self.u_state['h']
+               + ((results['q_cu']+results['q_rs']) / results['mddp'])
+               - self.s_state['h'])
+            )
+        results['g_m1'] = results['mddp']/results['B_m1']
+        results['g_h'] = results['mddp']/results['B_h']
 
         return results
 
