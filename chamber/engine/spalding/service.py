@@ -87,7 +87,7 @@ class Spalding(object):
         t_dp = t_dp if t_dp > 273.07 else 273.07
         result_best = self._solve(2e-7, 0.01, 0.1, 0.01, t_dp)
         exp_state_best = dict(self.exp_state)  # Keep the original
-        
+
         # Set up a guess with the uncertainties
         self._exp_state['L'] = un.ufloat(
             exp_state_best['L'].nominal_value + exp_state_best['L'].std_dev,
@@ -101,7 +101,7 @@ class Spalding(object):
         self._exp_state['T_dp'] = un.ufloat(
             exp_state_best['T_dp'].nominal_value + exp_state_best['T_dp'].std_dev,
             exp_state_best['T_dp'].std_dev)
-        
+
         # Solve the delta system
         self._update_model(t_dp)
         result_delta = self._solve(2e-7, 0.01, 0.1, 0.01, t_dp)
@@ -119,6 +119,7 @@ class Spalding(object):
         b_h_del = abs(result_best['B_h'] - result_delta['B_h'])
         g_m1_del = abs(result_best['g_m1'] - result_delta['g_m1'])
         g_h_del = abs(result_best['g_h'] - result_delta['g_h'])
+        sh_del = abs(result_best['Sh_L'] - result_delta['Sh_L'])
 
         # Set the solution attribute
         self.solution['mddp'] = un.ufloat(result_best['mddp'], mddp_del)
@@ -131,6 +132,7 @@ class Spalding(object):
         self.solution['B_h'] = un.ufloat(result_best['B_h'], b_h_del)
         self.solution['g_m1'] = un.ufloat(result_best['g_m1'], g_m1_del)
         self.solution['g_h'] = un.ufloat(result_best['g_h'], g_h_del)
+        self.solution['Sh_L'] = un.ufloat(result_best['Sh_L'], g_h_del)
 
     # ------------------------------------------------------------------------
     # Internal methods
@@ -381,6 +383,11 @@ class Spalding(object):
             )
         results['g_m1'] = results['mddp']/results['B_m1']
         results['g_h'] = results['mddp']/results['B_h']
+
+        results['Sh_L'] = (
+            (results['g_m1'] * self.exp_state['L'].nominal_value)
+            / (self.film_props['rho'] * self.film_props['D_12'])
+            )
 
         return results
 
