@@ -120,6 +120,7 @@ class Spalding(object):
         g_m1_del = abs(result_best['g_m1'] - result_delta['g_m1'])
         g_h_del = abs(result_best['g_h'] - result_delta['g_h'])
         sh_del = abs(result_best['Sh_L'] - result_delta['Sh_L'])
+        nu_del = abs(result_best['Nu_L'] - result_delta['Nu_L'])
 
         # Set the solution attribute
         self.solution['mddp'] = un.ufloat(result_best['mddp'], mddp_del)
@@ -132,7 +133,8 @@ class Spalding(object):
         self.solution['B_h'] = un.ufloat(result_best['B_h'], b_h_del)
         self.solution['g_m1'] = un.ufloat(result_best['g_m1'], g_m1_del)
         self.solution['g_h'] = un.ufloat(result_best['g_h'], g_h_del)
-        self.solution['Sh_L'] = un.ufloat(result_best['Sh_L'], g_h_del)
+        self.solution['Sh_L'] = un.ufloat(result_best['Sh_L'], sh_del)
+        self.solution['Nu_L'] = un.ufloat(result_best['Nu_L'], nu_del)
 
     # ------------------------------------------------------------------------
     # Internal methods
@@ -387,6 +389,10 @@ class Spalding(object):
         results['Sh_L'] = (
             (results['g_m1'] * self.exp_state['L'].nominal_value)
             / (self.film_props['rho'] * self.film_props['D_12'])
+            )
+        results['Nu_L'] = (
+            (results['g_h'] * self.exp_state['L'].nominal_value)
+            / (self.film_props['rho'] * self.film_props['alpha'])
             )
 
         return results
