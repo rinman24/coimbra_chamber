@@ -193,8 +193,8 @@ def _compare_ufloats(u1, u2):
     std_2 = u2.std_dev
 
     try:
-        assert math.isclose(value_1, value_2)
-        assert math.isclose(std_1, std_2)
+        assert math.isclose(value_1, value_2, rel_tol=1e-6)
+        assert math.isclose(std_1, std_2, rel_tol=1e-6)
     except AssertionError:
         return False
     else:
