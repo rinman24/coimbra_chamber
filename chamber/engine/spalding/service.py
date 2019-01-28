@@ -123,6 +123,7 @@ class Spalding(object):
         nu_del = abs(result_best['Nu_L'] - result_delta['Nu_L'])
         gr_m_del = abs(result_best['Gr_mR'] - result_delta['Gr_mR'])
         gr_h_del = abs(result_best['Gr_hR'] - result_delta['Gr_hR'])
+        gr_del = abs(result_best['Gr_R'] - result_delta['Gr_R'])
 
         # Set the solution attribute
         self.solution['mddp'] = un.ufloat(result_best['mddp'], mddp_del)
@@ -139,6 +140,7 @@ class Spalding(object):
         self.solution['Nu_L'] = un.ufloat(result_best['Nu_L'], nu_del)
         self.solution['Gr_mR'] = un.ufloat(result_best['Gr_mR'], gr_m_del)
         self.solution['Gr_hR'] = un.ufloat(result_best['Gr_hR'], gr_h_del)
+        self.solution['Gr_R'] = un.ufloat(result_best['Gr_R'], gr_del)
 
     # ------------------------------------------------------------------------
     # Internal methods
@@ -417,6 +419,10 @@ class Spalding(object):
             * self.film_props['beta']*(self.s_state['T'] - self.e_state['T'])
             / pow(self.film_props['nu'], 2)
             )
+        if results['Gr_hR'] < 0:
+            results['Gr_R'] = results['Gr_mR']
+        else:
+            results['Gr_R'] = results['Gr_mR'] + results['Gr_hR']
 
         return results
 
