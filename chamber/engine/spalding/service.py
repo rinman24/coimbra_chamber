@@ -42,10 +42,10 @@ class Spalding(object):
     0.099
 
     """
-
+    ACC_G = 9.81
     M1 = 18.015
     M2 = 28.964
-
+    R = 0.015
     SIGMA = 5.67036713e-8
 
     def __init__(self, m, p, t_e, t_dp, ref, rule):  # noqa: D107
@@ -121,6 +121,7 @@ class Spalding(object):
         g_h_del = abs(result_best['g_h'] - result_delta['g_h'])
         sh_del = abs(result_best['Sh_L'] - result_delta['Sh_L'])
         nu_del = abs(result_best['Nu_L'] - result_delta['Nu_L'])
+        gr_m_del = abs(result_best['Gr_mR'] - result_delta['Gr_mR'])
 
         # Set the solution attribute
         self.solution['mddp'] = un.ufloat(result_best['mddp'], mddp_del)
@@ -135,6 +136,7 @@ class Spalding(object):
         self.solution['g_h'] = un.ufloat(result_best['g_h'], g_h_del)
         self.solution['Sh_L'] = un.ufloat(result_best['Sh_L'], sh_del)
         self.solution['Nu_L'] = un.ufloat(result_best['Nu_L'], nu_del)
+        self.solution['Gr_mR'] = un.ufloat(result_best['Gr_mR'], gr_m_del)
 
     # ------------------------------------------------------------------------
     # Internal methods
@@ -399,6 +401,13 @@ class Spalding(object):
         results['Nu_L'] = (
             (results['g_h'] * self.exp_state['L'].nominal_value)
             / (self.film_props['rho'] * self.film_props['alpha'])
+            )
+        results['Gr_mR'] = (
+            self.ACC_G
+            * pow(self.R, 3)
+            * self.film_props['gamma_1']*self.film_props['rho']*(self.s_state['m_1']
+                                                                 - self.e_state['m_1'])
+            / pow(self.film_props['nu'], 2)
             )
 
         return results
