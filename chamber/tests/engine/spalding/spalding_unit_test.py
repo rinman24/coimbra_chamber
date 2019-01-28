@@ -180,6 +180,9 @@ def test_solve_model(spald):  # noqa: D103
     assert _compare_ufloats(spald.solution['Gr_mR'], const.solution['Gr_mR'])
     assert _compare_ufloats(spald.solution['Gr_hR'], const.solution['Gr_hR'])
     assert _compare_ufloats(spald.solution['Gr_R'], const.solution['Gr_R'])
+    assert _compare_ufloats(spald.solution['rho'], const.solution['rho'])
+    assert _compare_ufloats(spald.solution['D_12'], const.solution['D_12'])
+    assert _compare_ufloats(spald.solution['alpha'], const.solution['alpha'])
 
 
 # ----------------------------------------------------------------------------

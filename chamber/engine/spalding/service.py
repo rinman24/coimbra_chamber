@@ -42,6 +42,7 @@ class Spalding(object):
     0.099
 
     """
+
     ACC_G = 9.81
     M1 = 18.015
     M2 = 28.964
@@ -124,6 +125,9 @@ class Spalding(object):
         gr_m_del = abs(result_best['Gr_mR'] - result_delta['Gr_mR'])
         gr_h_del = abs(result_best['Gr_hR'] - result_delta['Gr_hR'])
         gr_del = abs(result_best['Gr_R'] - result_delta['Gr_R'])
+        rho_del = abs(result_best['rho'] - result_delta['rho'])
+        d_12_del = abs(result_best['D_12'] - result_delta['D_12'])
+        alpha_del = abs(result_best['alpha'] - result_delta['alpha'])
 
         # Set the solution attribute
         self.solution['mddp'] = un.ufloat(result_best['mddp'], mddp_del)
@@ -141,6 +145,9 @@ class Spalding(object):
         self.solution['Gr_mR'] = un.ufloat(result_best['Gr_mR'], gr_m_del)
         self.solution['Gr_hR'] = un.ufloat(result_best['Gr_hR'], gr_h_del)
         self.solution['Gr_R'] = un.ufloat(result_best['Gr_R'], gr_del)
+        self.solution['rho'] = un.ufloat(result_best['rho'], rho_del)
+        self.solution['D_12'] = un.ufloat(result_best['D_12'], d_12_del)
+        self.solution['alpha'] = un.ufloat(result_best['alpha'], alpha_del)
 
     # ------------------------------------------------------------------------
     # Internal methods
@@ -424,6 +431,9 @@ class Spalding(object):
         else:
             results['Gr_R'] = results['Gr_mR'] + results['Gr_hR']
 
+        results['rho'] = self.film_props['rho']
+        results['D_12'] = self.film_props['D_12']
+        results['alpha'] = self.film_props['alpha']
         return results
 
     # ------------------------------------------------------------------------
