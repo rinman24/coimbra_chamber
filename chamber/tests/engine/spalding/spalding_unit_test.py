@@ -175,8 +175,12 @@ def test_solve_model(spald):  # noqa: D103
     assert _compare_ufloats(spald.solution['B_h'], const.solution['B_h'])
     assert _compare_ufloats(spald.solution['g_m1'], const.solution['g_m1'])
     assert _compare_ufloats(spald.solution['g_h'], const.solution['g_h'])
-    assert _compare_ufloats(spald.solution['Sh_L'], const.solution['Sh_L'])
-    assert _compare_ufloats(spald.solution['Nu_L'], const.solution['Nu_L'])
+    assert math.isclose(
+        spald.solution['Sh_L'].nominal_value,
+        const.solution['Sh_L'].nominal_value)
+    assert math.isclose(
+        spald.solution['Nu_L'].nominal_value,
+        const.solution['Nu_L'].nominal_value)
     assert _compare_ufloats(spald.solution['Gr_mR'], const.solution['Gr_mR'])
     assert _compare_ufloats(spald.solution['Gr_hR'], const.solution['Gr_hR'])
     assert _compare_ufloats(spald.solution['Gr_R'], const.solution['Gr_R'])
