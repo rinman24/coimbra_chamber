@@ -15,6 +15,7 @@ import uncertainties as un
 from uncertainties import unumpy as unp
 
 import chamber.utility.uncert as un_util
+import chamber.engine.spalding.service as dbs
 
 
 # ----------------------------------------------------------------------------
@@ -461,30 +462,104 @@ def _select_best_fit(data, target_idx, max_hl):
 # Public functions
 
 
-def perform_chi2_analysis(obs_data, temp_data):  # noqa: D103
+def perform_chi2_analysis(obs_data, temp_data, ref='Marrero', rule='1/3'):  # noqa: D103
+    a = list()
+    sig_a = list()
+    b = list()
+    sig_b = list()
+    mddp = list()
+    sig_mddp = list()
+    r2 = list()
+    p_val = list()
+    phi = list()
+    target_phi = list()
+    g_m1 = list()
+    sig_g_m1 = list()
+    sh_l = list()
+    sig_sh_l = list()
+    g_h = list()
+    sig_g_h = list()
+    nu_l = list()
+    sig_nu_l = list()
+    film_cond = list()
+    gr_r = list()
+    sig_gr_r = list()
+
+    area = math.pi * pow(0.015, 2)
     data = _preprocess_observations(obs_data, temp_data)
     data = _calc_multi_phi(data)
     target_info = _get_max_window_lengths(data)
-    a, b, r2, p_val, phi, target_phi = [], [], [], [], [], []
+
     for dict_ in target_info:
         print('target phi:', dict_['target'])
         result = _select_best_fit(
             data, dict_['idx'], dict_['max_hl']
             )
-        a.append(un.ufloat(result['a'], result['sig_a']))
-        b.append(un.ufloat(-result['b'], result['sig_b']))
+        a.append(result['a'])
+        sig_a.append(result['sig_a'])
+        b.append(result['b'])
+        sig_b.append(result['sig_b'])
+        mddp.append(-result['b']/area)
+        sig_mddp.append(result['sig_b']/area)
         r2.append(result['r2'])
         p_val.append(result['p_val'])
         phi.append(data.loc[dict_['idx'], 'phi'])
         target_phi.append(dict_['target'])
 
+        # --------------------------------------------------------------------
+        # Set up the film conductance model and solve
+        spald_input = dict(
+            m=data.Mass[dict_['idx']],
+            p=data.Pressure[dict_['idx']],
+            t_e=data.AvgTe[dict_['idx']].nominal_value,
+            t_dp=data.DewPoint[dict_['idx']],
+            ref=ref, rule=rule)
+        spald = dbs.Spalding(**spald_input)
+        spald.solve()
+        film_cond.append(spald.solution)
+
+        # --------------------------------------------------------------------
+        # Now use the film potential to estimate parameters
+        g_m1_temp = mddp[-1]/spald.solution['B_m1']
+        g_m1.append(g_m1_temp.nominal_value)
+        sig_g_m1.append(g_m1_temp.std_dev)
+
+        sh_l_temp = (
+            (g_m1_temp*spald.exp_state['L'])
+            / (spald.solution['rho']*spald.solution['D_12'])
+            )
+        sh_l.append(sh_l_temp.nominal_value)
+        sig_sh_l.append(sh_l_temp.std_dev)
+
+        g_h_temp = mddp[-1]/spald.solution['B_h']
+        g_h.append(g_h_temp.nominal_value)
+        sig_g_h.append(g_h_temp.std_dev)
+
+        nu_l_temp = (
+            (g_h_temp*spald.exp_state['L'])
+            / (spald.solution['rho']*spald.solution['alpha'])
+            )
+        nu_l.append(nu_l_temp.nominal_value)
+        sig_nu_l.append(nu_l_temp.std_dev)
+
+        gr_r.append(spald.solution['Gr_R'].nominal_value)
+        sig_gr_r.append(spald.solution['Gr_R'].std_dev)
+
     result = pd.DataFrame(
         data=dict(
-            a=a, b=b, r2=r2, p_val=p_val, phi=phi
+            a=a, sig_a=sig_a,
+            b=b, sig_b=sig_b,
+            mddp=mddp, sig_mddp=sig_mddp,
+            r2=r2, p_val=p_val, phi=phi,
+            g_m1=g_m1, sig_g_m1=sig_g_m1,
+            Sh_L=sh_l, sig_Sh_L=sig_sh_l,
+            g_h=g_h, sig_g_h=sig_g_h,
+            Nu_L=nu_l, sig_Nu_L=sig_nu_l,
+            Gr_R=gr_r, sig_Gr_R=sig_gr_r,
             )
         )
 
-    return result
+    return result, film_cond
 
 
 def read_tdms(filepath):

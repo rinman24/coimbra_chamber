@@ -368,7 +368,7 @@ class Spalding(object):
         while abs(delta) > 1e-9:
             if not results['mddp']:
                 guess = initial_guess
-            res = opt.fsolve(self._eval_model, guess)
+            res = opt.fsolve(self._eval_model, guess, maxfev=2000)
             results['mddp'].append(res[0])
             results['q_cu'].append(res[1])
             results['q_rs'].append(res[2])
