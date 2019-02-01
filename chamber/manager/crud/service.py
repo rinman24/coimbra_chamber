@@ -3,7 +3,10 @@
 import configparser
 import datetime
 import pathlib
+import time
 
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import mysql.connector
 import nptdms
@@ -119,6 +122,9 @@ def _get_experimental_data():
     root = tk.Tk()
     root.withdraw()
     filepath = filedialog.askopenfilename(title='Select Experiment')
+    time.sleep(0.5)
+    root.update()
+    root.destroy()
 
     print('Loading TDMS file...')
     databases = anlys_eng.read_tdms(filepath)
