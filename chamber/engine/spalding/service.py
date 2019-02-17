@@ -383,19 +383,22 @@ class Spalding(object):
                      results['m_1s_g'][-1]
                      ]
             self._update_model(t_s_g)
+        
+        # Keep only the last one
         results['mddp'] = results['mddp'][-1]
         results['T_s'] = results['t_s'][-1]
         results['q_cu'] = results['q_cu'][-1]
         results['q_rs'] = results['q_rs'][-1]
         results['m_1s'] = results['m_1s_g'][-1]
         
+        # Get the e-state
         results['m_1e'] = self.e_state['m_1']
 
+        # Calculate B-numbers and g-conductances
         results['B_m1'] = (
             (self.s_state['m_1'] - self.e_state['m_1'])
             / (1-self.s_state['m_1'])
             )
-
         results['B_h'] = (
             (self.s_state['h'] - self.e_state['h'])
             / (self.u_state['h']
@@ -405,6 +408,7 @@ class Spalding(object):
         results['g_m1'] = results['mddp']/results['B_m1']
         results['g_h'] = results['mddp']/results['B_h']
 
+        # Calculate the film conductance Sherwood and Nusselt numbers
         results['Sh_L'] = (
             (results['g_m1'] * self.exp_state['L'].nominal_value)
             / (self.film_props['rho'] * self.film_props['D_12'])
@@ -413,6 +417,8 @@ class Spalding(object):
             (results['g_h'] * self.exp_state['L'].nominal_value)
             / (self.film_props['rho'] * self.film_props['alpha'])
             )
+
+        # Calculate the chemical and thermal Grashof numbers
         results['Gr_mR'] = (
             self.ACC_G
             * pow(self.R, 3)

@@ -339,7 +339,7 @@ def test_calc_single_phi_returns_correct_result():  # noqa: D103
 
 def test_get_valid_phi_targets():  # noqa: D103
     # Arrange
-    correct_targets = [x/100 for x in range(10, 70+1, 5)]
+    correct_targets = [x/100 for x in range(6, 76+1, 1)]
 
     # Act
     result = anlys_eng._get_valid_phi_targets(const.phi_testing_df)
@@ -355,13 +355,39 @@ def test_get_valid_phi_targets():  # noqa: D103
 def test_get_valid_phi_indexes():  # noqa: D103
     # Arrange
     correct_result = [
-        dict(target=0.1, idx=13), dict(target=0.15, idx=14),
-        dict(target=0.2, idx=15), dict(target=0.25, idx=16),
-        dict(target=0.3, idx=17), dict(target=0.35, idx=17),
-        dict(target=0.4, idx=18), dict(target=0.45, idx=19),
-        dict(target=0.5, idx=20), dict(target=0.55, idx=21),
-        dict(target=0.6, idx=22), dict(target=0.65, idx=22),
-        dict(target=0.7, idx=23)
+        dict(idx=13, target=0.06), dict(idx=13, target=0.07),
+        dict(idx=13, target=0.08), dict(idx=13, target=0.09),
+        dict(idx=13, target=0.1), dict(idx=13, target=0.11),
+        dict(idx=14, target=0.12), dict(idx=14, target=0.13),
+        dict(idx=14, target=0.14), dict(idx=14, target=0.15),
+        dict(idx=14, target=0.16), dict(idx=14, target=0.17),
+        dict(idx=15, target=0.18), dict(idx=15, target=0.19),
+        dict(idx=15, target=0.2), dict(idx=15, target=0.21),
+        dict(idx=15, target=0.22), dict(idx=15, target=0.23), 
+        dict(idx=16, target=0.24), dict(idx=16, target=0.25),
+        dict(idx=16, target=0.26), dict(idx=16, target=0.27),
+        dict(idx=16, target=0.28), dict(idx=16, target=0.29),
+        dict(idx=17, target=0.3), dict(idx=17, target=0.31),
+        dict(idx=17, target=0.32), dict(idx=17, target=0.33),
+        dict(idx=17, target=0.34), dict(idx=17, target=0.35),
+        dict(idx=18, target=0.36), dict(idx=18, target=0.37),
+        dict(idx=18, target=0.38), dict(idx=18, target=0.39),
+        dict(idx=18, target=0.4), dict(idx=18, target=0.41),
+        dict(idx=19, target=0.42), dict(idx=19, target=0.43),
+        dict(idx=19, target=0.44), dict(idx=19, target=0.45),
+        dict(idx=19, target=0.46), dict(idx=19, target=0.47),
+        dict(idx=20, target=0.48), dict(idx=20, target=0.49),
+        dict(idx=20, target=0.5), dict(idx=20, target=0.51),
+        dict(idx=20, target=0.52), dict(idx=20, target=0.53),
+        dict(idx=21, target=0.54), dict(idx=21, target=0.55),
+        dict(idx=21, target=0.56), dict(idx=21, target=0.57),
+        dict(idx=21, target=0.58), dict(idx=21, target=0.59),
+        dict(idx=22, target=0.6), dict(idx=22, target=0.61),
+        dict(idx=22, target=0.62), dict(idx=22, target=0.63),
+        dict(idx=22, target=0.64), dict(idx=22, target=0.65),
+        dict(idx=23, target=0.66), dict(idx=23, target=0.67),
+        dict(idx=23, target=0.68), dict(idx=23, target=0.69),
+        dict(idx=23, target=0.7), dict(idx=23, target=0.71),
         ]
 
     # Act
@@ -378,7 +404,11 @@ def test_get_valid_phi_indexes():  # noqa: D103
 def test_get_max_window_lengths():  # noqa: D103
     # Arrange
     indexes = anlys_eng._get_valid_phi_indexes(const.phi_testing_df)
-    max_half_lengths = [1, 2, 3, 4, 5, 5, 5, 4, 3, 2, 1, 1, 0]
+    max_half_lengths = [
+        1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4,
+        4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3,
+        3, 3, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+        ]
     for idx, _dict in enumerate(indexes):
         _dict.update({'max_hl': max_half_lengths[idx]})
     correct_result = indexes
