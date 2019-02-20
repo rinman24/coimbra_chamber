@@ -351,7 +351,7 @@ class Spalding(object):
 
         res[2] = q_cu_g - mddp_g * (h_t_g + h_fgs_g)
 
-        res[3] = q_rs_g - 0 #sigma * (pow(t_e, 4) - pow(t_s_g, 4))
+        res[3] = q_rs_g - sigma * (pow(t_e, 4) - pow(t_s_g, 4))
 
         res[4] = m_1s_g - m_1_s_calc
 
