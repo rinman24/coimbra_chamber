@@ -11,6 +11,7 @@ import nptdms
 import numpy as np
 import pandas as pd
 from scipy import signal, stats
+import scipy.ndimage.filters as filt
 import uncertainties as un
 from uncertainties import unumpy as unp
 
@@ -234,7 +235,8 @@ def _filter_observations(obs_data):
     """
     filt_obs = obs_data.copy()
 
-    filt_obs.DewPoint = signal.savgol_filter(filt_obs.DewPoint, 1801, 2)
+    filt_dp = filt.median_filter(filt_obs.DewPoint, mode='nearest', size=10000)
+    filt_obs.DewPoint = signal.savgol_filter(filt_dp, 1801, 2)
     filt_obs.Mass = signal.savgol_filter(filt_obs.Mass, 301, 2)
     filt_obs.Pressure = signal.savgol_filter(filt_obs.Pressure, 3601, 1)
 
@@ -483,6 +485,10 @@ def perform_chi2_analysis(obs_data, temp_data, ref='Marrero', rule='1/3'):  # no
     nu_l = list()
     sig_nu_l = list()
     film_cond = list()
+    gr_c = list()
+    sig_gr_c = list()
+    gr_t = list()
+    sig_gr_t = list()
     gr_r = list()
     sig_gr_r = list()
 
@@ -544,6 +550,12 @@ def perform_chi2_analysis(obs_data, temp_data, ref='Marrero', rule='1/3'):  # no
             nu_l.append(nu_l_temp.nominal_value)
             sig_nu_l.append(nu_l_temp.std_dev)
 
+            gr_c.append(spald.solution['Gr_mR'].nominal_value)
+            sig_gr_c.append(spald.solution['Gr_mR'].nominal_value)
+
+            gr_t.append(spald.solution['Gr_hR'].nominal_value)
+            sig_gr_t.append(spald.solution['Gr_hR'].nominal_value)
+
             gr_r.append(spald.solution['Gr_R'].nominal_value)
             sig_gr_r.append(spald.solution['Gr_R'].std_dev)
 
@@ -557,6 +569,8 @@ def perform_chi2_analysis(obs_data, temp_data, ref='Marrero', rule='1/3'):  # no
             Sh_L=sh_l, sig_Sh_L=sig_sh_l,
             g_h=g_h, sig_g_h=sig_g_h,
             Nu_L=nu_l, sig_Nu_L=sig_nu_l,
+            Gr_C=gr_c, sig_Gr_C=sig_gr_c,
+            Gr_T=gr_t, sig_Gr_T=sig_gr_t,
             Gr_R=gr_r, sig_Gr_R=sig_gr_r,
             )
         )

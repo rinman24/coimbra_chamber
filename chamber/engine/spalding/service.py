@@ -128,6 +128,7 @@ class Spalding(object):
         rho_del = abs(result_best['rho'] - result_delta['rho'])
         d_12_del = abs(result_best['D_12'] - result_delta['D_12'])
         alpha_del = abs(result_best['alpha'] - result_delta['alpha'])
+        nu_del = abs(result_best['nu'] - result_delta['nu'])
 
         # Set the solution attribute
         self.solution['mddp'] = un.ufloat(result_best['mddp'], mddp_del)
@@ -148,6 +149,7 @@ class Spalding(object):
         self.solution['rho'] = un.ufloat(result_best['rho'], rho_del)
         self.solution['D_12'] = un.ufloat(result_best['D_12'], d_12_del)
         self.solution['alpha'] = un.ufloat(result_best['alpha'], alpha_del)
+        self.solution['nu'] = un.ufloat(result_best['nu'], nu_del)
 
     # ------------------------------------------------------------------------
     # Internal methods
@@ -349,7 +351,7 @@ class Spalding(object):
 
         res[2] = q_cu_g - mddp_g * (h_t_g + h_fgs_g)
 
-        res[3] = q_rs_g - sigma * (pow(t_e, 4) - pow(t_s_g, 4))
+        res[3] = q_rs_g - 0 #sigma * (pow(t_e, 4) - pow(t_s_g, 4))
 
         res[4] = m_1s_g - m_1_s_calc
 
@@ -419,27 +421,50 @@ class Spalding(object):
             )
 
         # Calculate the chemical and thermal Grashof numbers
+        vha_s = hap.HAPropsSI(
+            'Vha',
+            'T', results['T_s'],
+            'P', self.exp_state['P'].nominal_value,
+            'RH', 1)
+        rho_s = 1/vha_s
+        rho_1s = rho_s * results['m_1s']
+        
+        vha_e = hap.HAPropsSI(
+            'Vha',
+            'T', self.exp_state['T'].nominal_value,
+            'P', self.exp_state['P'].nominal_value,
+            'Tdp', self.exp_state['T_dp'].nominal_value
+            )
+        rho_e = 1/vha_e
+        rho_1e = rho_e * results['m_1e']
+        
         results['Gr_mR'] = (
-            self.ACC_G
-            * pow(self.R, 3)
-            * self.film_props['gamma_1']*self.film_props['rho']*(self.s_state['m_1']
-                                                                 - self.e_state['m_1'])
-            / pow(self.film_props['nu'], 2)
+            Spalding.ACC_G
+            * Spalding.R**3
+            * self.film_props['gamma_1']
+            * (rho_1s-rho_1e)
+            / self.film_props['nu']**2
             )
         results['Gr_hR'] = (
-            self.ACC_G
-            * pow(self.R, 3)
-            * self.film_props['beta']*(self.s_state['T'] - self.e_state['T'])
-            / pow(self.film_props['nu'], 2)
+            Spalding.ACC_G
+            * Spalding.R**3
+            * self.film_props['beta']
+            * (results['T_s'] - self.exp_state['T'].nominal_value)
+            / self.film_props['nu']**2
             )
-        if results['Gr_hR'] < 0:
-            results['Gr_R'] = results['Gr_mR']
+        
+        Gr_R = results['Gr_mR'] + results['Gr_hR']
+
+        if Gr_R <= 0:
+            results['Gr_R'] = 0
         else:
-            results['Gr_R'] = results['Gr_mR'] + results['Gr_hR']
+            results['Gr_R'] = Gr_R
 
         results['rho'] = self.film_props['rho']
         results['D_12'] = self.film_props['D_12']
         results['alpha'] = self.film_props['alpha']
+        results['nu'] = self.film_props['nu']
+
         return results
 
     # ------------------------------------------------------------------------
