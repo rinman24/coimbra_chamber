@@ -551,10 +551,10 @@ def perform_chi2_analysis(obs_data, temp_data, ref='Marrero', rule='1/3'):  # no
             sig_nu_l.append(nu_l_temp.std_dev)
 
             gr_c.append(spald.solution['Gr_mR'].nominal_value)
-            sig_gr_c.append(spald.solution['Gr_mR'].nominal_value)
+            sig_gr_c.append(spald.solution['Gr_mR'].std_dev)
 
             gr_t.append(spald.solution['Gr_hR'].nominal_value)
-            sig_gr_t.append(spald.solution['Gr_hR'].nominal_value)
+            sig_gr_t.append(spald.solution['Gr_hR'].std_dev)
 
             gr_r.append(spald.solution['Gr_R'].nominal_value)
             sig_gr_r.append(spald.solution['Gr_R'].std_dev)
