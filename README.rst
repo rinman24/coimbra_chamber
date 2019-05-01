@@ -77,7 +77,7 @@ Back to `Table of Contents`_
 Setting up the initial state of the MySQL Server is handled by the
 setup_sqldb.py file.
 Simply run the following command from the root directory; e.g., ucsd_ch:
-::
+.. code-block:: bash
 
   $ python setup/setup_sqldb.py <database_name>
 
@@ -90,31 +90,6 @@ The database schema is described below:
 
 .. image:: images/mysql_schema.png
 
-
-Preferred Way to Run Tests
----------------------------
-
-Back to `Table of Contents`_
-
-1. From the repo directory; i.e., chamber
-::
-
-    $ python -m pytest tests -xv  --cov=chamber --cov-report html tests
-
-The above line requires both `pytest` and `pytest-cov` are installed.
-
-
-Preferred Way to Run Scripts
-----------------------------
-
-Back to `Table of Contents`_
-
-1. From the repo directory; i.e., chamber
-::
-
-    $ python -m chamber.scripts.<yout-script-name>
-
-It should also be noted that the `.py` is not required at the end of this line.
 
 NOTE: In order to run the integration tests, a local version of mySQL must be
 installed and running.
@@ -138,6 +113,31 @@ Restart the MySQL service:
 
     $ sudo /usr/local/mysql/support-files/mysql.server restart
 
+
+Preferred Way to Run Tests
+---------------------------
+
+Back to `Table of Contents`_
+
+1. From the repo directory; i.e., chamber
+.. code-block:: bash
+
+    $ python -m pytest tests -xv  --cov=chamber --cov-report html tests
+
+The above line requires both `pytest` and `pytest-cov` are installed.
+
+
+Preferred Way to Run Scripts
+----------------------------
+
+Back to `Table of Contents`_
+
+1. From the repo directory; i.e., chamber
+.. code-block:: bash
+
+    $ python -m chamber.scripts.<yout-script-name>
+
+It should also be noted that the `.py` is not required at the end of this line.
 
 
 Images
