@@ -122,21 +122,21 @@ installed and running.
 On OSX you can run the following line to start the mySQL service after
 installing from LINK
 
-.. code-block:: console
+.. code-block:: bash
 
-    sudo /usr/local/mysql/support-files/mysql.server start
+    $ sudo /usr/local/mysql/support-files/mysql.server start
 
 Stopping the mySQL service:
 
-.. code-block:: console
+.. code-block:: bash
 
-    sudo /usr/local/mysql/support-files/mysql.server stop
+    $ sudo /usr/local/mysql/support-files/mysql.server stop
 
 Restart the MySQL service:
 
-.. code-block:: console
+.. code-block:: bash
 
-    sudo /usr/local/mysql/support-files/mysql.server restart
+    $ sudo /usr/local/mysql/support-files/mysql.server restart
 
 
 
