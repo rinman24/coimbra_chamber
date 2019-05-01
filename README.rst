@@ -24,9 +24,11 @@ Back to `Table of Contents`_
 
 Description will go here.
 
-The host, username, and password used to acces the server are all stored in config.ini in the root of the repository. Make sure to edit this file so 
-that it contains your information.
+The host, username, and password used to acces the server are all stored in
+config.ini in the root of the repository. Make sure to edit this file so that
+it contains your information.
 ::
+
   [MySQL-Server]
   host = your-host
   user = your-username
@@ -103,7 +105,7 @@ The above line requires both `pytest` and `pytest-cov` are installed.
 
 
 Preferred Way to Run Scripts
----------------------------
+----------------------------
 
 Back to `Table of Contents`_
 
@@ -113,6 +115,29 @@ Back to `Table of Contents`_
     $ python -m chamber.scripts.<yout-script-name>
 
 It should also be noted that the `.py` is not required at the end of this line.
+
+NOTE: In order to run the integration tests, a local version of mySQL must be
+installed and running.
+
+On OSX you can run the following line to start the mySQL service after
+installing from LINK
+
+.. code-block:: console
+
+    sudo /usr/local/mysql/support-files/mysql.server start
+
+Stopping the mySQL service:
+
+.. code-block:: console
+
+    sudo /usr/local/mysql/support-files/mysql.server stop
+
+Restart the MySQL service:
+
+.. code-block:: console
+
+    sudo /usr/local/mysql/support-files/mysql.server restart
+
 
 
 Images
