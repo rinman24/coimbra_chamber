@@ -99,19 +99,13 @@ installing from LINK
 
 .. code-block:: bash
 
-    $ sudo /usr/local/mysql/support-files/mysql.server start
+    $ sudo launchctl load -F /Library/LaunchDaemons/com.oracle.oss.mysql.mysqld.plist
 
 Stopping the mySQL service:
 
 .. code-block:: bash
 
-    $ sudo /usr/local/mysql/support-files/mysql.server stop
-
-Restart the MySQL service:
-
-.. code-block:: bash
-
-    $ sudo /usr/local/mysql/support-files/mysql.server restart
+    $ sudo launchctl unload -F /Library/LaunchDaemons/com.oracle.oss.mysql.mysqld.plist
 
 
 Preferred Way to Run Tests
