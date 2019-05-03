@@ -8,7 +8,7 @@ from mysql.connector import errorcode
 import chamber.ifx.configuration as config
 
 
-class SQLTestHelper(object):
+class MySQLTestHelper(object):
     """Test helper for MySQL database."""
 
     def __init__(self):
@@ -24,8 +24,8 @@ class SQLTestHelper(object):
 
         Examples
         --------
-        >>> from chamber.ifx.testing import SQLTestHelper
-        >>> helper = SQLTestHelper
+        >>> from chamber.ifx.testing import MySQLTestHelper
+        >>> helper = MySQLTestHelper()
 
         """
         self._database = config.get_value('database', 'MySQL-Server')
@@ -54,8 +54,8 @@ class SQLTestHelper(object):
 
         Examples
         --------
-        >>> from chamber.ifx.testing import SQLTestHelper
-        >>> helper = SQLTestHelper()
+        >>> from chamber.ifx.testing import MySQLTestHelper
+        >>> helper = MySQLTestHelper()
         >>> helper.run_script('createdb.sql')
 
         """
@@ -94,8 +94,8 @@ class SQLTestHelper(object):
 
         Examples
         --------
-        >>> from chamber.ifx.testing import SQLTestHelper
-        >>> helper = SQLTestHelper()
+        >>> from chamber.ifx.testing import MySQLTestHelper
+        >>> helper = MySQLTestHelper()
         >>> helper.clear_db()
 
         """
