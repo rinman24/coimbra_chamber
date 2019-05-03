@@ -15,15 +15,11 @@ USE `chamber` ;
 CREATE TABLE IF NOT EXISTS `chamber`.`Pools` (
   `PoolId` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `InnerDiameter` DECIMAL(7,7) UNSIGNED NOT NULL,
-  `OutterDiameter` DECIMAL(7,7) UNSIGNED NOT NULL,
+  `OuterDiameter` DECIMAL(7,7) UNSIGNED NOT NULL,
   `Height` DECIMAL(7,7) UNSIGNED NOT NULL,
   `Material` VARCHAR(50) NOT NULL,
   `Mass` DECIMAL(7,7) NOT NULL,
-  PRIMARY KEY (`PoolId`),
-  UNIQUE INDEX `InnerDiameter_UNIQUE` (`InnerDiameter` ASC) VISIBLE,
-  UNIQUE INDEX `OutterDiameter_UNIQUE` (`OutterDiameter` ASC) VISIBLE,
-  UNIQUE INDEX `Height_UNIQUE` (`Height` ASC) VISIBLE,
-  UNIQUE INDEX `Material_UNIQUE` (`Material` ASC) VISIBLE)
+  PRIMARY KEY (`PoolId`))
 ENGINE = InnoDB;
 
 
@@ -36,11 +32,7 @@ CREATE TABLE IF NOT EXISTS `chamber`.`Settings` (
   `Pressure` MEDIUMINT UNSIGNED NOT NULL,
   `Temperature` DECIMAL(4,1) UNSIGNED NOT NULL,
   `TimeStep` DECIMAL(4,2) UNSIGNED NOT NULL,
-  PRIMARY KEY (`SettingId`),
-  UNIQUE INDEX `Duty_UNIQUE` (`Duty` ASC) VISIBLE,
-  UNIQUE INDEX `Pressure_UNIQUE` (`Pressure` ASC) VISIBLE,
-  UNIQUE INDEX `Temperature_UNIQUE` (`Temperature` ASC) VISIBLE,
-  UNIQUE INDEX `TimeStep_UNIQUE` (`TimeStep` ASC) VISIBLE)
+  PRIMARY KEY (`SettingId`))
 ENGINE = InnoDB;
 
 
