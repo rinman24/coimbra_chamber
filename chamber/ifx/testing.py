@@ -9,12 +9,26 @@ import chamber.ifx.configuration as config
 
 
 class SQLTestHelper(object):
-    """Class for handling setup and teardown of mySQL testing resources."""
+    """Test helper for MySQL database."""
 
     def __init__(self):
-        """Set up mySQL for tests."""
-        self._database = config.get_value('database', 'MySQL-Server')
+        """
+        Set up mySQL for tests.
 
+        A databse is created based on configuration in config.ini when the
+        helper is instantiated.
+
+        See Also
+        --------
+        chamber.ifx.configuration.get_value : Gets a configuration setting
+
+        Examples
+        --------
+        >>> from chamber.ifx.testing import SQLTestHelper
+        >>> helper = SQLTestHelper
+
+        """
+        self._database = config.get_value('database', 'MySQL-Server')
         self._create_db()
 
     # ------------------------------------------------------------------------
@@ -73,7 +87,18 @@ class SQLTestHelper(object):
                             statement = ''
 
     def clear_db(self):
-        """Clean up sql from tests."""
+        """
+        Clean up sql from tests.
+
+        Completely drops the database ignoring all foreign key checks.
+
+        Examples
+        --------
+        >>> from chamber.ifx.testing import SQLTestHelper
+        >>> helper = SQLTestHelper()
+        >>> helper.clear_db()
+
+        """
         # TODO: Docsring
         cursor = self.cnx.cursor()
 
