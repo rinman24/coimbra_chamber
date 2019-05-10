@@ -24,7 +24,7 @@ class ExperimentalAccess(object):
 
         Examples
         --------
-        >>> from chamber.access.experimental import ExperimentalAccess
+        >>> from chamber.access.experimental.service import ExperimentalAccess
         >>> exp_acc = ExperimentalAccess()
         >>> exp_acc.engine
         Engine(mysql+mysqlconnector://root:***@127.0.0.1/experimental)
@@ -53,6 +53,27 @@ class ExperimentalAccess(object):
         -------
         int
             Primary key for the pool that was added.
+
+        Examples
+        --------
+        >>> from decimal import Decimal
+        >>> from dacite import from_dict
+        >>> from chamber.access.experimental.service import ExperimentalAccess
+        >>> from chamber.access.experimental.contracts import PoolSpecs
+        Specify the pool to add:
+        >>> data = dict(
+        ...     inner_diameter=Decimal('0.1'),
+        ...     outer_diameter=Decimal('0.2'),
+        ...     height=Decimal('0.3'),
+        ...     material='Delrin',
+        ...     mass=Decimal('0.4'))
+        Use dacite to perform type checking:
+        >>> pool_spec = from_dict(PoolSpecs, data)
+        Finally, add the pool:
+        >>> exp_acc = ExperimentalAccess()
+        >>> pool_id = exp_acc.add_pool(pool_spec)
+        >>> pool_id
+        1
 
         """
         # Create session
