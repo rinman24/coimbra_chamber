@@ -1,5 +1,6 @@
 """Integration test suite for ExperimentalAccess."""
 
+from datetime import datetime
 from decimal import Decimal
 
 import pytest
@@ -7,8 +8,8 @@ from dacite import from_dict
 from sqlalchemy.orm import sessionmaker
 
 from chamber.access.chamber.service import ExperimentalAccess
-from chamber.access.chamber.models import Pool, Setting
-from chamber.access.chamber.contracts import PoolSpec, SettingSpec
+from chamber.access.chamber.models import Experiment, Pool, Setting
+from chamber.access.chamber.contracts import PoolSpec, SettingSpec, ExperimentSpec
 from chamber.ifx.testing import MySQLTestHelper
 
 # ----------------------------------------------------------------------------
@@ -71,7 +72,6 @@ def test_add_pool_that_does_not_exist_in_database(mysql):  # noqa: D103
         assert result.inner_diameter == Decimal('0.1000')
         assert result.outer_diameter == Decimal('0.2000')
         assert result.height == Decimal('0.3000')
-        assert result.material == 'test_material'
         assert result.mass == Decimal('0.4000000')
     finally:
         session.close()
@@ -120,9 +120,65 @@ def test_add_setting_that_does_not_exist_in_database(mysql):  # noqa: D103
     try:
         result = query.one()
         assert result.duty == Decimal('0.0')
-        assert result.pressure == 99000
         assert result.temperature == Decimal('290.0')
         assert result.time_step == Decimal('1.00')
+    finally:
+        session.close()
+    # Cleanup ----------------------------------------------------------------
+    session.delete(result)
+    session.commit()
+    assert not query.first()
+    session.close()
+
+
+# add_experiment -------------------------------------------------------------
+
+
+def test_add_experiment_that_already_exist_in_database(mysql):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    # The fixture has already added a test when it ran the experiment test
+    # data sql script. See script for details.
+    data = dict(
+        author='RHI',
+        date_time=datetime(2019, 9, 24, 7, 45, 0),
+        description='The description is descriptive.',
+        pool_id=1,
+        setting_id=1)
+    my_experiment = from_dict(ExperimentSpec, data)
+    # Act --------------------------------------------------------------------
+    access = ExperimentalAccess()
+    experiment_id = access.add_experiment(my_experiment)
+    # Assert -----------------------------------------------------------------
+    assert experiment_id == 1
+
+
+def test_add_experiment_that_does_not_exist_in_database(mysql):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    # Create the experiment to be added to database
+    data = dict(
+        author='RHI',
+        date_time=datetime(2019, 1, 1),
+        description='Tell me more about yourself.',
+        pool_id=1,
+        setting_id=1)
+    my_experiment = from_dict(ExperimentSpec, data)
+    # Act --------------------------------------------------------------------
+    access = ExperimentalAccess()
+    experiment_id = access.add_experiment(my_experiment)
+    # Assert -----------------------------------------------------------------
+    # experiment_id == 2 because mysql fixture added a experiment
+    assert experiment_id == 2
+    # Prepare query
+    Session = sessionmaker(bind=access.engine)
+    session = Session()
+    query = session.query(Experiment)
+    query = query.filter(Experiment.date_time == datetime(2019, 1, 1))
+    try:
+        result = query.one()
+        assert result.author == 'RHI'
+        assert result.description == 'Tell me more about yourself.'
+        assert result.pool_id == 1
+        assert result.setting_id == 1
     finally:
         session.close()
     # Cleanup ----------------------------------------------------------------

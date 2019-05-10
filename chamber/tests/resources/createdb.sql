@@ -40,25 +40,25 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `experimental`.`Tests`
+-- Table `experimental`.`Experiments`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `experimental`.`Tests` (
-  `TestId` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `experimental`.`Experiments` (
+  `ExperimentId` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
   `Author` TINYTEXT NOT NULL,
   `DateTime` DATETIME NOT NULL,
   `Description` TEXT NOT NULL,
   `Pools_PoolId` TINYINT(3) UNSIGNED NOT NULL,
   `Settings_SettingId` SMALLINT(5) UNSIGNED NOT NULL,
-  PRIMARY KEY (`TestId`),
+  PRIMARY KEY (`ExperimentId`),
   UNIQUE INDEX `DateTime_UNIQUE` (`DateTime` ASC) VISIBLE,
-  INDEX `fk_Tests_Pools_idx` (`Pools_PoolId` ASC) VISIBLE,
-  INDEX `fk_Tests_Settings_idx` (`Settings_SettingId` ASC) VISIBLE,
-  CONSTRAINT `fk_Tests_Pools`
+  INDEX `fk_Experiments_Pools_idx` (`Pools_PoolId` ASC) VISIBLE,
+  INDEX `fk_Experiments_Settings_idx` (`Settings_SettingId` ASC) VISIBLE,
+  CONSTRAINT `fk_Experiments_Pools`
     FOREIGN KEY (`Pools_PoolId`)
     REFERENCES `experimental`.`Pools` (`PoolId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Tests_Settings`
+  CONSTRAINT `fk_Experiments_Settings`
     FOREIGN KEY (`Settings_SettingId`)
     REFERENCES `experimental`.`Settings` (`SettingId`)
     ON DELETE NO ACTION
@@ -80,12 +80,12 @@ CREATE TABLE IF NOT EXISTS `experimental`.`Observations` (
   `PowOut` DECIMAL(6,4) NULL DEFAULT NULL,
   `PowRef` DECIMAL(6,4) NULL DEFAULT NULL,
   `Pressure` MEDIUMINT(8) UNSIGNED NOT NULL,
-  `Tests_TestId` SMALLINT(5) UNSIGNED NOT NULL,
+  `Experiments_ExperimentId` SMALLINT(5) UNSIGNED NOT NULL,
   PRIMARY KEY (`ObservationId`),
-  INDEX `fk_Observations_Tests_idx` (`Tests_TestId` ASC) VISIBLE,
-  CONSTRAINT `fk_Observations_Tests`
-    FOREIGN KEY (`Tests_TestId`)
-    REFERENCES `experimental`.`Tests` (`TestId`)
+  INDEX `fk_Observations_Experiments_idx` (`Experiments_ExperimentId` ASC) VISIBLE,
+  CONSTRAINT `fk_Observations_Experiments`
+    FOREIGN KEY (`Experiments_ExperimentId`)
+    REFERENCES `experimental`.`Experiments` (`ExperimentId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB 

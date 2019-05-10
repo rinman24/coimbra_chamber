@@ -3,7 +3,7 @@
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 
-from chamber.access.chamber.models import Pool, Setting
+from chamber.access.chamber.models import Experiment, Pool, Setting
 from chamber.ifx.configuration import get_value
 
 
@@ -177,7 +177,7 @@ class ExperimentalAccess(object):
             time_step=setting_spec.time_step)
 
         # Check if the setting exists
-        query = session.query(Pool.pool_id).filter(
+        query = session.query(Setting.setting_id).filter(
             and_(
                 Setting.duty == setting_spec.duty,
                 Setting.pressure == setting_spec.pressure,
@@ -200,3 +200,80 @@ class ExperimentalAccess(object):
             session.close()
 
             return setting_id
+
+    def add_experiment(self, experiment_spec):
+        """
+        Add an experiment to the database and return its primary key.
+
+        If the experiment already exists in the database, no new experiment is
+        added and the primary key for the existing experiment is returned.
+
+        Parameters
+        ----------
+        experiment_spec : chamber.access.chamber.models.ExperimentSpec
+            Specification for the experiment to be added.
+
+        Returns
+        -------
+        int
+            Primary key for the experiment that was added.
+
+        Examples
+        --------
+        >>> from decimal import Decimal
+        >>> from dacite import from_dict
+        >>> from datetime import datetime
+        >>> from chamber.access.chamber.service import ExperimentalAccess
+        >>> from chamber.access.chamber.contracts import ExperimentSpec
+        Specify the experiment to add (assuming that the corresponding pool
+        and setting exist):
+        >>> data = dict(
+        ...     author='RHI',
+        ...     date_time=datetime.now(),
+        ...     decsription='Tell me more about yourself.',
+        ...     pool_id=1,
+        ...     setting_id=1)
+        Use dacite to perform type checking:
+        >>> experiment_spec = from_dict(ExperimentSpec, data)
+        Finally, add the experiment:
+        >>> exp_acc = ExperimentalAccess()
+        >>> experiment_id = exp_acc.add_experiment(experiment_spec)
+        >>> experiment_id
+        1
+
+        If we try to add the experiment again, we get the same id:
+        >>> experiment_id = exp_acc.add_experiment(experiment_spec)
+        >>> experiment_id
+        1
+
+        """
+        # Create session
+        Session = sessionmaker(bind=self.engine)
+        session = Session()
+
+        # Create experiment
+        experiment_to_add = Experiment(
+            author=experiment_spec.author,
+            date_time=experiment_spec.date_time,
+            description=experiment_spec.description,
+            pool_id=experiment_spec.pool_id,
+            setting_id=experiment_spec.setting_id)
+
+        # Check if the experiment exists
+        query = session.query(Experiment.experiment_id)
+        query = query.filter(Experiment.date_time == experiment_spec.date_time)
+        experiment_id = query.first()
+
+        if experiment_id:
+            session.close()
+            return experiment_id[0]
+        else:
+            # Add experiment
+            session.add(experiment_to_add)
+            session.commit()
+
+            # Get experiment id
+            experiment_id = experiment_to_add.experiment_id
+            session.close()
+
+            return experiment_id

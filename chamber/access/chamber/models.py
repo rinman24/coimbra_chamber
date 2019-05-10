@@ -40,15 +40,15 @@ class Setting(Base):
     time_step = Column('TimeStep', Numeric(4, 2), nullable=False)
 
 
-class Test(Base):
-    """Test object definition."""
+class Experiment(Base):
+    """Experiment object definition."""
 
     # Metadata
-    __tablename__ = 'Tests'
+    __tablename__ = 'Experiments'
     __table_args__ = {'schema': 'experimental'}
 
     # Columns
-    test_id = Column('TestId', Integer, primary_key=True)
+    experiment_id = Column('ExperimentId', Integer, primary_key=True)
     author = Column('Author', String, nullable=False)
     date_time = Column('DateTime', DateTime, nullable=False)
     description = Column('Description', String, nullable=False)
@@ -62,8 +62,8 @@ class Test(Base):
         nullable=False)
 
     # Relationships
-    pool = relationship('Pool', backref=backref('Tests'), order_by=test_id)
-    setting = relationship('Setting', backref=backref('Tests'), order_by=test_id)
+    pool = relationship('Pool', backref=backref('Experiments'), order_by=experiment_id)
+    setting = relationship('Setting', backref=backref('Experiments'), order_by=experiment_id)
 
 
 class Observation(Base):
@@ -85,13 +85,13 @@ class Observation(Base):
     pressure = Column('Pressure', Integer, nullable=False)
 
     # Foreign keys
-    test_id = Column(
-        'Tests_TestId', Integer, ForeignKey('experimental.Tests.TestId'),
-        nullable=False)
+    experiment_id = Column(
+        'Experiments_ExperimentId', Integer,
+        ForeignKey('experimental.Experiments.ExperimentId'), nullable=False)
 
     # Relationships
-    test = relationship(
-        'Test', backref=backref('Onservations'), order_by=observation_id)
+    experiment = relationship(
+        'Experiment', backref=backref('Observations'), order_by=observation_id)
 
 
 class Temperature(Base):

@@ -29,9 +29,9 @@ VALUES      (0,
              1);
 
 -- -----------------------------------------------------
--- Table `experimental`.`Tests`
+-- Table `experimental`.`Experiments`
 -- -----------------------------------------------------
-INSERT INTO `experimental`.`Tests` 
+INSERT INTO `experimental`.`Experiments` 
             (`Author`,
              `DateTime`,
              `Description`,
@@ -39,7 +39,7 @@ INSERT INTO `experimental`.`Tests`
              `Settings_SettingId`) 
 VALUES      ('RHI',
              '2019-9-24 7:45:00',
-             'Test description.',
+             'The description is descriptive.',
              1,
              1);
 
@@ -53,7 +53,7 @@ INSERT INTO `experimental`.`Observations`
              `Mass`,
              `OptidewOk`,
              `Pressure`,
-             `Tests_TestId`)
+             `Experiments_ExperimentId`)
 VALUES      (1,
              280,
              0,
@@ -68,7 +68,7 @@ INSERT INTO `experimental`.`Observations`
              `Mass`,
              `OptidewOk`,
              `Pressure`,
-             `Tests_TestId`)
+             `Experiments_ExperimentId`)
 VALUES      (1,
              281,
              1,
@@ -83,7 +83,7 @@ INSERT INTO `experimental`.`Observations`
              `Mass`,
              `OptidewOk`,
              `Pressure`,
-             `Tests_TestId`)
+             `Experiments_ExperimentId`)
 VALUES      (1,
              282,
              2,
