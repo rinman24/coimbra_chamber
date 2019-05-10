@@ -83,8 +83,8 @@ Simply run the following command from the root directory; e.g., ucsd_ch:
 
 
 Where <database_name> is replaced with the name of the MySQL database schema.
-This will create all tables and populate the Unit table and add Tube 1
-(default tube used in experiments).
+This will create all tables and populate the Unit table and add pool 1
+(default pool used in experiments).
 
 The database schema is described below:
 

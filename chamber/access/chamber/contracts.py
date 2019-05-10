@@ -5,10 +5,10 @@ from decimal import Decimal
 
 
 # ----------------------------------------------------------------------------
-# Example
+# Experimental DTOs
 
 @dataclass(frozen=True)
-class PoolSpecs:
+class PoolSpec:
     """Experimental pool specification."""
 
     inner_diameter: Decimal
@@ -16,3 +16,13 @@ class PoolSpecs:
     height: Decimal
     material: str
     mass: Decimal
+
+
+@dataclass(frozen=True)
+class SettingSpec:
+    """Experimental settings specification."""
+
+    duty: Decimal
+    pressure: int
+    temperature: Decimal
+    time_step: Decimal

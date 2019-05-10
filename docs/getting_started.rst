@@ -13,7 +13,7 @@ a schema. The rest of the interaction with the database is handled
 programatically. For example, running the following line from the ternimal
 (or command prompt in Windows) from the root of the repository will create
 all the tables and set up the inital state of the database with units and
-a default tube:
+a default pool:
 
 .. code-block:: shell
 
