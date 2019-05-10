@@ -1,9 +1,9 @@
-USE `chamber`;
+USE `experimental`;
 
 -- -----------------------------------------------------
--- Table `chamber`.`Settings`
+-- Table `experimental`.`Settings`
 -- -----------------------------------------------------
-INSERT INTO `chamber`.`Settings` 
+INSERT INTO `experimental`.`Settings` 
             (`Duty`, 
              `Pressure`, 
              `Temperature`, 
@@ -14,9 +14,9 @@ VALUES      (0,
              1);
 
 -- -----------------------------------------------------
--- Table `chamber`.`Pools`
+-- Table `experimental`.`Pools`
 -- -----------------------------------------------------
-INSERT INTO `chamber`.`Pools` 
+INSERT INTO `experimental`.`Pools` 
             (`InnerDiameter`, 
              `OuterDiameter`, 
              `Height`, 
@@ -29,9 +29,9 @@ VALUES      (0.03,
              0.05678);
 
 -- -----------------------------------------------------
--- Table `chamber`.`Tests`
+-- Table `experimental`.`Tests`
 -- -----------------------------------------------------
-INSERT INTO `chamber`.`Tests` 
+INSERT INTO `experimental`.`Tests` 
             (`Author`,
              `DateTime`,
              `Description`,
@@ -44,9 +44,9 @@ VALUES      ('RHI',
              1);
 
 -- -----------------------------------------------------
--- Table `chamber`.`Observations`
+-- Table `experimental`.`Observations`
 -- -----------------------------------------------------
-INSERT INTO `chamber`.`Observations` 
+INSERT INTO `experimental`.`Observations` 
             (`CapManOk`,
              `DewPoint`,
              `Idx`,
@@ -61,7 +61,7 @@ VALUES      (1,
              1,
              101325,
              1);
-INSERT INTO `chamber`.`Observations` 
+INSERT INTO `experimental`.`Observations` 
             (`CapManOk`,
              `DewPoint`,
              `Idx`,
@@ -76,7 +76,7 @@ VALUES      (1,
              1,
              101324,
              1);
-INSERT INTO `chamber`.`Observations` 
+INSERT INTO `experimental`.`Observations` 
             (`CapManOk`,
              `DewPoint`,
              `Idx`,
@@ -93,44 +93,44 @@ VALUES      (1,
              1);
 
 -- -----------------------------------------------------
--- Table `chamber`.`Temperatures`
+-- Table `experimental`.`Temperatures`
 -- -----------------------------------------------------
-INSERT INTO `chamber`.`Temperatures` 
+INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
              `Observations_ObservationId`)
 VALUES      (0,
              290,
              1);
-INSERT INTO `chamber`.`Temperatures` 
+INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
              `Observations_ObservationId`)
 VALUES      (1,
              290.2,
              1);
-INSERT INTO `chamber`.`Temperatures` 
+INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
              `Observations_ObservationId`)
 VALUES      (0,
              291,
              2);
-INSERT INTO `chamber`.`Temperatures` 
+INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
              `Observations_ObservationId`)
 VALUES      (1,
              291.2,
              2);
-INSERT INTO `chamber`.`Temperatures` 
+INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
              `Observations_ObservationId`)
 VALUES      (0,
              292,
              3);
-INSERT INTO `chamber`.`Temperatures` 
+INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
              `Observations_ObservationId`)

@@ -1,4 +1,4 @@
-"""Module including all sql alchemy models for chamber database."""
+"""Module including all sql alchemy models for the database."""
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import relationship, backref
@@ -14,7 +14,7 @@ class Pool(Base):
 
     # Metadata
     __tablename__ = 'Pools'
-    __table_args__ = {'schema': 'chamber'}
+    __table_args__ = {'schema': 'experimental'}
 
     # Columns
     pool_id = Column('PoolId', Integer, primary_key=True)
@@ -30,7 +30,7 @@ class Setting(Base):
 
     # Metadata
     __tablename__ = 'Settings'
-    __table_args__ = {'schema': 'chamber'}
+    __table_args__ = {'schema': 'experimental'}
 
     # Columns
     setting_id = Column('SettingId', Integer, primary_key=True)
@@ -45,7 +45,7 @@ class Test(Base):
 
     # Metadata
     __tablename__ = 'Tests'
-    __table_args__ = {'schema': 'chamber'}
+    __table_args__ = {'schema': 'experimental'}
 
     # Columns
     test_id = Column('TestId', Integer, primary_key=True)
@@ -55,10 +55,10 @@ class Test(Base):
 
     # Foreign keys
     pool_id = Column(
-        'Pools_PoolId', Integer, ForeignKey('chamber.Pools.PoolId'),
+        'Pools_PoolId', Integer, ForeignKey('experimental.Pools.PoolId'),
         nullable=False)
     setting_id = Column(
-        'Settings_SettingId', Integer, ForeignKey('chamber.Settings.SettingId'),
+        'Settings_SettingId', Integer, ForeignKey('experimental.Settings.SettingId'),
         nullable=False)
 
     # Relationships
@@ -71,7 +71,7 @@ class Observation(Base):
 
     # Metadata
     __tablename__ = 'Observations'
-    __table_args__ = {'schema': 'chamber'}
+    __table_args__ = {'schema': 'experimental'}
 
     # Columns
     observation_id = Column('ObservationId', Integer, primary_key=True)
@@ -86,7 +86,7 @@ class Observation(Base):
 
     # Foreign keys
     test_id = Column(
-        'Tests_TestId', Integer, ForeignKey('chamber.Tests.TestId'),
+        'Tests_TestId', Integer, ForeignKey('experimental.Tests.TestId'),
         nullable=False)
 
     # Relationships
@@ -99,7 +99,7 @@ class Temperature(Base):
 
     # Metadata
     __tablename__ = 'Temperatures'
-    __table_args__ = {'schema': 'chamber'}
+    __table_args__ = {'schema': 'experimental'}
 
     # Columns
     temperature_id = Column('TemperatureId', Integer, primary_key=True)
@@ -109,7 +109,7 @@ class Temperature(Base):
     # Foreign keys
     observation_id = Column(
         'Observations_ObservationId', Integer,
-        ForeignKey('chamber.Observations.ObservationId'), nullable=False)
+        ForeignKey('experimental.Observations.ObservationId'), nullable=False)
 
     # Relationships
     observation = relationship(

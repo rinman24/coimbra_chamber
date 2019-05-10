@@ -79,6 +79,7 @@ class ExperimentalAccess(object):
         # Create session
         Session = sessionmaker(bind=self.engine)
         session = Session()
+
         # Create pool
         pool_to_add = Pool(
             inner_diameter=pool_spec.inner_diameter,
@@ -86,9 +87,11 @@ class ExperimentalAccess(object):
             height=pool_spec.height,
             material=pool_spec.material,
             mass=pool_spec.mass)
+
         # Add pool
         session.add(pool_to_add)
         session.commit()
+
         # Get pool Id
         pool_id = pool_to_add.pool_id
         session.close()

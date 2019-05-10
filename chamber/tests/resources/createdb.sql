@@ -5,15 +5,15 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
--- Schema chamber
+-- Schema experimental
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `chamber` DEFAULT CHARACTER SET utf8 ;
-USE `chamber` ;
+CREATE SCHEMA IF NOT EXISTS `experimental` DEFAULT CHARACTER SET utf8 ;
+USE `experimental` ;
 
 -- -----------------------------------------------------
--- Table `chamber`.`Pools`
+-- Table `experimental`.`Pools`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `chamber`.`Pools` (
+CREATE TABLE IF NOT EXISTS `experimental`.`Pools` (
   `PoolId` TINYINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,
   `InnerDiameter` DECIMAL(4,4) UNSIGNED NOT NULL,
   `OuterDiameter` DECIMAL(4,4) UNSIGNED NOT NULL,
@@ -26,9 +26,9 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `chamber`.`Settings`
+-- Table `experimental`.`Settings`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `chamber`.`Settings` (
+CREATE TABLE IF NOT EXISTS `experimental`.`Settings` (
   `SettingId` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
   `Duty` DECIMAL(4,1) UNSIGNED NOT NULL,
   `Pressure` MEDIUMINT(8) UNSIGNED NOT NULL,
@@ -40,9 +40,9 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `chamber`.`Tests`
+-- Table `experimental`.`Tests`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `chamber`.`Tests` (
+CREATE TABLE IF NOT EXISTS `experimental`.`Tests` (
   `TestId` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
   `Author` TINYTEXT NOT NULL,
   `DateTime` DATETIME NOT NULL,
@@ -55,12 +55,12 @@ CREATE TABLE IF NOT EXISTS `chamber`.`Tests` (
   INDEX `fk_Tests_Settings_idx` (`Settings_SettingId` ASC) VISIBLE,
   CONSTRAINT `fk_Tests_Pools`
     FOREIGN KEY (`Pools_PoolId`)
-    REFERENCES `chamber`.`Pools` (`PoolId`)
+    REFERENCES `experimental`.`Pools` (`PoolId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Tests_Settings`
     FOREIGN KEY (`Settings_SettingId`)
-    REFERENCES `chamber`.`Settings` (`SettingId`)
+    REFERENCES `experimental`.`Settings` (`SettingId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB 
@@ -68,9 +68,9 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `chamber`.`Observations`
+-- Table `experimental`.`Observations`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `chamber`.`Observations` (
+CREATE TABLE IF NOT EXISTS `experimental`.`Observations` (
   `ObservationId` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `CapManOk` BIT(1) NOT NULL,
   `DewPoint` DECIMAL(5,2) UNSIGNED NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `chamber`.`Observations` (
   INDEX `fk_Observations_Tests_idx` (`Tests_TestId` ASC) VISIBLE,
   CONSTRAINT `fk_Observations_Tests`
     FOREIGN KEY (`Tests_TestId`)
-    REFERENCES `chamber`.`Tests` (`TestId`)
+    REFERENCES `experimental`.`Tests` (`TestId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB 
@@ -93,9 +93,9 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `chamber`.`Temperatures`
+-- Table `experimental`.`Temperatures`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `chamber`.`Temperatures` (
+CREATE TABLE IF NOT EXISTS `experimental`.`Temperatures` (
   `TemperatureId` INT(12) NOT NULL AUTO_INCREMENT,
   `ThermocoupleNum` TINYINT(2) UNSIGNED NOT NULL,
   `Temperature` DECIMAL(5,2) UNSIGNED NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS `chamber`.`Temperatures` (
   INDEX `fk_Temperatures_Observations_idx` (`Observations_ObservationId` ASC) VISIBLE,
   CONSTRAINT `fk_Temperatures_Observations`
     FOREIGN KEY (`Observations_ObservationId`)
-    REFERENCES `chamber`.`Observations` (`ObservationId`)
+    REFERENCES `experimental`.`Observations` (`ObservationId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB 
