@@ -99,7 +99,6 @@ class MySQLTestHelper(object):
         >>> helper.clear_db()
 
         """
-        # TODO: Docsring
         cursor = self.cnx.cursor()
 
         cursor.execute('SET FOREIGN_KEY_CHECKS = 0;')

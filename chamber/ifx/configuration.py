@@ -7,7 +7,7 @@ from pathlib import Path
 
 def get_value(key, section):
     """
-    Get a configuration setting.
+    Get a configuration setting from a section.
 
     The setting can be stored in an environment variable or a local config.ini
     file.

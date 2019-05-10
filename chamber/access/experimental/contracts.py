@@ -1,18 +1,18 @@
 """Module including data contracts for an experiment."""
 
 from dataclasses import dataclass
-from numbers import Real
-from typing import List
+from decimal import Decimal
 
 
 # ----------------------------------------------------------------------------
 # Example
 
 @dataclass(frozen=True)
-class MyDataClass:
-    """Description of my dataclass."""
+class PoolSpecs:
+    """Experimental pool specification."""
 
-    attr_1: str
-    attr_2: float
-    attr_3: List[str]
-    attr_4: int
+    inner_diameter: Decimal
+    outer_diameter: Decimal
+    height: Decimal
+    material: str
+    mass: Decimal
