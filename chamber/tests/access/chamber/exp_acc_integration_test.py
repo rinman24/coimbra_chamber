@@ -6,9 +6,9 @@ import pytest
 from dacite import from_dict
 from sqlalchemy.orm import sessionmaker
 
-from chamber.access.experimental.service import ExperimentalAccess
-from chamber.access.experimental.models import Pool
-from chamber.access.experimental.contracts import PoolSpecs
+from chamber.access.chamber.service import ExperimentalAccess
+from chamber.access.chamber.models import Pool
+from chamber.access.chamber.contracts import PoolSpecs
 from chamber.ifx.testing import MySQLTestHelper
 
 # ----------------------------------------------------------------------------

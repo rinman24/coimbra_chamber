@@ -3,7 +3,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from chamber.access.experimental.models import Pool
+from chamber.access.chamber.models import Pool
 from chamber.ifx.configuration import get_value
 
 
@@ -24,7 +24,7 @@ class ExperimentalAccess(object):
 
         Examples
         --------
-        >>> from chamber.access.experimental.service import ExperimentalAccess
+        >>> from chamber.access.chamber.service import ExperimentalAccess
         >>> exp_acc = ExperimentalAccess()
         >>> exp_acc.engine
         Engine(mysql+mysqlconnector://root:***@127.0.0.1/experimental)
@@ -46,7 +46,7 @@ class ExperimentalAccess(object):
 
         Parameters
         ----------
-        pool_spec : chamber.access.experimental.models.Pool
+        pool_spec : chamber.access.chamber.models.Pool
             Specification for the pool to be added.
 
         Returns
@@ -58,8 +58,8 @@ class ExperimentalAccess(object):
         --------
         >>> from decimal import Decimal
         >>> from dacite import from_dict
-        >>> from chamber.access.experimental.service import ExperimentalAccess
-        >>> from chamber.access.experimental.contracts import PoolSpecs
+        >>> from chamber.access.chamber.service import ExperimentalAccess
+        >>> from chamber.access.chamber.contracts import PoolSpecs
         Specify the pool to add:
         >>> data = dict(
         ...     inner_diameter=Decimal('0.1'),
