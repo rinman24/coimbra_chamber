@@ -1,6 +1,6 @@
 """Module encapsulates access to experimental data."""
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 
 from chamber.access.chamber.models import Pool
@@ -42,7 +42,10 @@ class ExperimentalAccess(object):
 
     def add_pool(self, pool_spec):
         """
-        Add a pool to the database.
+        Add a pool to the database and return its primary key.
+
+        If the pool already exists in the database, no new pool is added and
+        the primary key for the existing tube is returned.
 
         Parameters
         ----------
@@ -75,6 +78,11 @@ class ExperimentalAccess(object):
         >>> pool_id
         1
 
+        If we try to add the pool again, we get the same id:
+        >>> pool_id = exp_acc.add_pool(pool_spec)
+        >>> pool_id
+        1
+
         """
         # Create session
         Session = sessionmaker(bind=self.engine)
@@ -88,12 +96,28 @@ class ExperimentalAccess(object):
             material=pool_spec.material,
             mass=pool_spec.mass)
 
-        # Add pool
-        session.add(pool_to_add)
-        session.commit()
+        # Check if the pool exists
+        query = session.query(Pool.pool_id).filter(
+            and_(
+                Pool.inner_diameter == pool_spec.inner_diameter,
+                Pool.outer_diameter == pool_spec.outer_diameter,
+                Pool.height == pool_spec.height,
+                Pool.material == pool_spec.material,
+                Pool.mass == pool_spec.mass
+                )
+            )
+        pool_id = query.first()
 
-        # Get pool Id
-        pool_id = pool_to_add.pool_id
-        session.close()
+        if pool_id:
+            session.close()
+            return pool_id[0]
+        else:
+            # Add pool
+            session.add(pool_to_add)
+            session.commit()
 
-        return pool_id
+            # Get pool Id
+            pool_id = pool_to_add.pool_id
+            session.close()
+
+            return pool_id

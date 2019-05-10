@@ -28,7 +28,23 @@ def mysql(request):
 
 
 # ----------------------------------------------------------------------------
-# Scenario Access
+# ExperimentalAccess
+
+
+def test_add_tube_that_already_exist_in_database(mysql):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    # The fixture has already added a tube when it ran the experiment test
+    # data sql script. See script for details.
+    data = dict(
+        inner_diameter=Decimal('0.03'), outer_diameter=Decimal('0.04'),
+        height=Decimal('0.06'), material='Delrin', mass=Decimal('0.05678'))
+    my_pool = from_dict(PoolSpecs, data)
+    # Act --------------------------------------------------------------------
+    access = ExperimentalAccess()
+    pool_id = access.add_pool(my_pool)
+    # Assert -----------------------------------------------------------------
+    assert pool_id == 1
+
 
 def test_add_tube_that_does_not_exist_in_database(mysql):  # noqa: D103
     # Arrange ----------------------------------------------------------------

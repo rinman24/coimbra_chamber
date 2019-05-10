@@ -1,6 +1,21 @@
 USE `experimental`;
 
 -- -----------------------------------------------------
+-- Table `experimental`.`Pools`
+-- -----------------------------------------------------
+INSERT INTO `experimental`.`Pools` 
+            (`InnerDiameter`, 
+             `OuterDiameter`, 
+             `Height`, 
+             `Material`, 
+             `Mass`) 
+VALUES      (0.03, 
+             0.04, 
+             0.06, 
+             'Delrin', 
+             0.05678);
+
+-- -----------------------------------------------------
 -- Table `experimental`.`Settings`
 -- -----------------------------------------------------
 INSERT INTO `experimental`.`Settings` 
@@ -12,21 +27,6 @@ VALUES      (0,
              101325, 
              300, 
              1);
-
--- -----------------------------------------------------
--- Table `experimental`.`Pools`
--- -----------------------------------------------------
-INSERT INTO `experimental`.`Pools` 
-            (`InnerDiameter`, 
-             `OuterDiameter`, 
-             `Height`, 
-             `Material`, 
-             `Mass`) 
-VALUES      (0.03, 
-             0.04, 
-             0.01, 
-             'Delrin', 
-             0.05678);
 
 -- -----------------------------------------------------
 -- Table `experimental`.`Tests`
