@@ -98,42 +98,54 @@ VALUES      (1,
 INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
-             `Observations_ObservationId`)
+             `Observations_Idx`,
+             `Observations_Experiments_ExperimentId`)
 VALUES      (0,
              290,
+             0,
              1);
 INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
-             `Observations_ObservationId`)
+             `Observations_Idx`,
+             `Observations_Experiments_ExperimentId`)
 VALUES      (1,
              290.2,
+             0,
              1);
 INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
-             `Observations_ObservationId`)
+             `Observations_Idx`,
+             `Observations_Experiments_ExperimentId`)
 VALUES      (0,
              291,
-             2);
+             1,
+             1);
 INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
-             `Observations_ObservationId`)
+             `Observations_Idx`,
+             `Observations_Experiments_ExperimentId`)
 VALUES      (1,
              291.2,
-             2);
+             1,
+             1);
 INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
-             `Observations_ObservationId`)
+             `Observations_Idx`,
+             `Observations_Experiments_ExperimentId`)
 VALUES      (0,
              292,
-             3);
+             2,
+             1);
 INSERT INTO `experimental`.`Temperatures` 
             (`ThermocoupleNum`,
              `Temperature`,
-             `Observations_ObservationId`)
+             `Observations_Idx`,
+             `Observations_Experiments_ExperimentId`)
 VALUES      (1,
              292.2,
-             3);
+             2,
+             1);

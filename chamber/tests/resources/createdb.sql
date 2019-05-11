@@ -71,7 +71,6 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `experimental`.`Observations`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `experimental`.`Observations` (
-  `ObservationId` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `CapManOk` BIT(1) NOT NULL,
   `DewPoint` DECIMAL(5,2) UNSIGNED NOT NULL,
   `Idx` MEDIUMINT(8) UNSIGNED NOT NULL,
@@ -81,13 +80,11 @@ CREATE TABLE IF NOT EXISTS `experimental`.`Observations` (
   `PowRef` DECIMAL(6,4) NULL DEFAULT NULL,
   `Pressure` MEDIUMINT(8) UNSIGNED NOT NULL,
   `Experiments_ExperimentId` SMALLINT(5) UNSIGNED NOT NULL,
-  PRIMARY KEY (`ObservationId`),
+  PRIMARY KEY (`Idx`, `Experiments_ExperimentId`),
   INDEX `fk_Observations_Experiments_idx` (`Experiments_ExperimentId` ASC) VISIBLE,
   CONSTRAINT `fk_Observations_Experiments`
     FOREIGN KEY (`Experiments_ExperimentId`)
-    REFERENCES `experimental`.`Experiments` (`ExperimentId`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    REFERENCES `experimental`.`experiments` (`ExperimentId`))
 ENGINE = InnoDB 
 DEFAULT CHARACTER SET = utf8;
 
@@ -96,15 +93,15 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `experimental`.`Temperatures`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `experimental`.`Temperatures` (
-  `TemperatureId` INT(12) NOT NULL AUTO_INCREMENT,
   `ThermocoupleNum` TINYINT(2) UNSIGNED NOT NULL,
   `Temperature` DECIMAL(5,2) UNSIGNED NOT NULL,
-  `Observations_ObservationId` INT(10) UNSIGNED NOT NULL,
-  PRIMARY KEY (`TemperatureId`),
-  INDEX `fk_Temperatures_Observations_idx` (`Observations_ObservationId` ASC) VISIBLE,
+  `Observations_Idx` MEDIUMINT(8) UNSIGNED NOT NULL,
+  `Observations_Experiments_ExperimentId` SMALLINT(5) UNSIGNED NOT NULL,
+  INDEX `fk_Temperatures_Observations_idx` (`Observations_Idx` ASC, `Observations_Experiments_ExperimentId` ASC) VISIBLE,
+  PRIMARY KEY (`ThermocoupleNum`, `Observations_Idx`, `Observations_Experiments_ExperimentId`),
   CONSTRAINT `fk_Temperatures_Observations`
-    FOREIGN KEY (`Observations_ObservationId`)
-    REFERENCES `experimental`.`Observations` (`ObservationId`)
+    FOREIGN KEY (`Observations_Idx` , `Observations_Experiments_ExperimentId`)
+    REFERENCES `experimental`.`Observations` (`Idx` , `Experiments_ExperimentId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB 

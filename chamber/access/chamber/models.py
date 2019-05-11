@@ -74,10 +74,9 @@ class Observation(Base):
     __table_args__ = {'schema': 'experimental'}
 
     # Columns
-    observation_id = Column('ObservationId', Integer, primary_key=True)
     cap_man_ok = Column('CapManOk', Boolean, nullable=False)
     dew_point = Column('DewPoint', Numeric(5, 2), nullable=False)
-    idx = Column('Idx', Integer, nullable=False)
+    idx = Column('Idx', Integer, primary_key=True)
     mass = Column('Mass', Numeric(7, 7), nullable=False)
     optidew_ok = Column('OptidewOk', Boolean, nullable=False)
     pow_out = Column('PowOut', Numeric(6, 4))
@@ -87,11 +86,11 @@ class Observation(Base):
     # Foreign keys
     experiment_id = Column(
         'Experiments_ExperimentId', Integer,
-        ForeignKey('experimental.Experiments.ExperimentId'), nullable=False)
+        ForeignKey('experimental.Experiments.ExperimentId'), primary_key=True)
 
     # Relationships
     experiment = relationship(
-        'Experiment', backref=backref('Observations'), order_by=observation_id)
+        'Experiment', backref=backref('Observations'), order_by=idx)
 
 
 class Temperature(Base):
@@ -102,15 +101,18 @@ class Temperature(Base):
     __table_args__ = {'schema': 'experimental'}
 
     # Columns
-    temperature_id = Column('TemperatureId', Integer, primary_key=True)
     thermocouple_num = Column('ThermocoupleNum', Integer, nullable=False)
     temperature = Column('Temperature', Numeric(5, 2), nullable=False)
 
     # Foreign keys
-    observation_id = Column(
-        'Observations_ObservationId', Integer,
-        ForeignKey('experimental.Observations.ObservationId'), nullable=False)
+    idx = Column(
+        'Observations_Idx', Integer,
+        ForeignKey('experimental.Observations.Idx'), primary_key=True)
+    experiment_id = Column(
+        'Observations_Experiments_ExperimentId', Integer,
+        ForeignKey('experimental.Observations.Experiments_ExperimentId'),
+        primary_key=True)
 
     # Relationships
-    observation = relationship(
-        'Observation', backref=backref('Temperatures'), order_by=temperature_id)
+    observation = relationship('Observation', foreign_keys=[idx])
+    experiment = relationship('Observation', foreign_keys=[experiment_id])
