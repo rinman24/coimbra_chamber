@@ -1,4 +1,4 @@
-"""Module encapsulates access to experimental data."""
+"""Module encapsulates access to unprocessed data."""
 
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
@@ -8,7 +8,7 @@ from chamber.access.sql.models import Setting, Temperature
 from chamber.ifx.configuration import get_value
 
 
-class ExperimentalAccess(object):
+class UnprocessedAccess(object):
     """
     Encapsulates all aspects of data access for an experiment.
 
@@ -31,7 +31,7 @@ class ExperimentalAccess(object):
         self._engine = create_engine(conn_string, echo=False)
 
         # Create the schema if it doesn't exist
-        self._schema = 'experimental'
+        self._schema = 'unprocessed'
         self._engine.execute(
             f'CREATE DATABASE IF NOT EXISTS `{self._schema}`;')
 
@@ -52,7 +52,7 @@ class ExperimentalAccess(object):
         # Drop all tables
         Base.metadata.drop_all(self._engine)
         # Remove the schema
-        self._engine.execute(f'DROP DATABASE IF EXISTS `experimental`;')
+        self._engine.execute(f'DROP DATABASE IF EXISTS `unprocessed`;')
         # Dispose of the engine
         self._engine.dispose()
 

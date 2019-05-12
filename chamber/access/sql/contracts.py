@@ -7,11 +7,11 @@ from typing import List
 
 
 # ----------------------------------------------------------------------------
-# Experimental DTOs
+# Unprocessed DTOs
 
 @dataclass(frozen=True)
 class PoolSpec:
-    """Experimental pool specification."""
+    """Unprocessed pool specification."""
 
     inner_diameter: Decimal
     outer_diameter: Decimal
@@ -22,7 +22,7 @@ class PoolSpec:
 
 @dataclass(frozen=True)
 class SettingSpec:
-    """Experimental setting specification."""
+    """Unprocessed setting specification."""
 
     duty: Decimal
     pressure: int
@@ -32,7 +32,7 @@ class SettingSpec:
 
 @dataclass(frozen=True)
 class ExperimentSpec:
-    """Experimental experiment specifications."""
+    """Unprocessed experiment specifications."""
 
     author: str
     datetime: datetime
@@ -43,7 +43,7 @@ class ExperimentSpec:
 
 @dataclass(frozen=True)
 class TemperatureSpec:
-    """Experimental temperature specification."""
+    """Unprocessed temperature specification."""
 
     thermocouple_num: int
     temperature: Decimal
@@ -52,7 +52,7 @@ class TemperatureSpec:
 
 @dataclass(frozen=True)
 class ObservationSpec:
-    """Experimental observation specification."""
+    """Unprocessed observation specification."""
 
     cap_man_ok: bool
     dew_point: Decimal
