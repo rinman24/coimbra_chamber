@@ -1,6 +1,7 @@
 """Module including all sql alchemy models for the database."""
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, ForeignKeyConstraint, Integer, Numeric, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey
+from sqlalchemy import ForeignKeyConstraint, Integer, Numeric, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 

@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from typing import List
 
 
 # ----------------------------------------------------------------------------
@@ -38,3 +39,27 @@ class ExperimentSpec:
     description: str
     pool_id: int
     setting_id: int
+
+
+@dataclass(frozen=True)
+class TemperatureSpec:
+    """Experimental temperature specification."""
+
+    thermocouple_num: int
+    temperature: Decimal
+    idx: int
+
+
+@dataclass(frozen=True)
+class ObservationSpec:
+    """Experimental observation specification."""
+
+    cap_man_ok: bool
+    dew_point: Decimal
+    idx: int
+    mass: Decimal
+    optidew_ok: bool
+    pow_out: Decimal
+    pow_ref: Decimal
+    pressure: int
+    temperatures: List[TemperatureSpec]

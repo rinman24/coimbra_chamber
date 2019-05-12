@@ -3,7 +3,8 @@
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 
-from chamber.access.chamber.models import Base, Experiment, Pool, Setting
+from chamber.access.chamber.models import Base, Experiment, Observation, Pool
+from chamber.access.chamber.models import Setting, Temperature
 from chamber.ifx.configuration import get_value
 
 
@@ -13,8 +14,8 @@ class ExperimentalAccess(object):
 
     Attributes
     ----------
-    engine : sqlalchemy.engine.base.Engine
-        The engine used to create sessions with the database.
+    Session : sqlalchemy.orm.session.sessionmaker
+        Session factory bound to the object's internal engine.
 
     """
 
@@ -191,6 +192,72 @@ class ExperimentalAccess(object):
                 return experiment_to_add.experiment_id
             else:
                 return experiment_id[0]
+        except:
+            session.rollback()
+        finally:
+            session.close()
+
+    def add_observations(self, observations, experiment_id):
+        """
+        Add several observations to the database.
+
+        If the experiment already exists in the database, no new observations
+        are added and the primary key for the existing experiment is returned.
+
+        Addition of the observations includes corresponding temperatures.
+
+        Parameters
+        ----------
+        observations : list of chamber.access.chamber.models.ObservationSpec
+            All the observations that correspond to a particular experiment.
+        experiment_id: int
+            ExperimentId for the observations being added.
+
+        Returns
+        -------
+        int
+            Primary key for the experiment whose data was added.
+
+        """
+        session = self.Session()
+
+        try:
+            # Check if the experiment exists
+            query = session.query(Observation.experiment_id)
+            query = query.filter(Observation.experiment_id == experiment_id)
+            returned_experiment_id = query.first()
+            # If not, insert it
+            if not returned_experiment_id:
+                objects = []
+                for observation in observations:
+                    # Construct the observation orm object
+                    this_observation = Observation(
+                        cap_man_ok=observation.cap_man_ok,
+                        dew_point=observation.dew_point,
+                        idx=observation.idx,
+                        mass=observation.mass,
+                        optidew_ok=observation.optidew_ok,
+                        pow_out=observation.pow_out,
+                        pow_ref=observation.pow_ref,
+                        pressure=observation.pressure,
+                        experiment_id=experiment_id)
+                    # Append
+                    objects.append(this_observation)
+                    for temperature in observation.temperatures:
+                        # Construct the temperature orm object
+                        this_temperature = Temperature(
+                            thermocouple_num=temperature.thermocouple_num,
+                            temperature=temperature.temperature,
+                            idx=temperature.idx,
+                            experiment_id=experiment_id)
+                        # Append
+                        objects.append(this_temperature)
+                # Perform a bulk insert
+                session.bulk_save_objects(objects)
+                session.commit()
+                return experiment_id
+            else:
+                return returned_experiment_id[0]
         except:
             session.rollback()
         finally:
