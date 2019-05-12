@@ -136,12 +136,12 @@ def observation_specs():
 # ChamberAccess
 
 
-# add_pool -------------------------------------------------------------------
+# _add_pool -------------------------------------------------------------------
 
 
 def test_add_pool_that_does_not_exist(access, pool_spec):  # noqa: D103
     # Act --------------------------------------------------------------------
-    pool_id = access.add_pool(pool_spec)
+    pool_id = access._add_pool(pool_spec)
     # Assert -----------------------------------------------------------------
     assert pool_id == 1
     # Now query result -------------------------------------------------------
@@ -162,18 +162,18 @@ def test_add_pool_that_already_exists(access, pool_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # NOTE: The test above already added the pool
     # NOTE: These tests are intended to be run sequently
-    access.add_pool(pool_spec)
+    access._add_pool(pool_spec)
     # Act --------------------------------------------------------------------
-    new_pool_id = access.add_pool(pool_spec)
+    new_pool_id = access._add_pool(pool_spec)
     # Assert -----------------------------------------------------------------
     assert new_pool_id == 1
 
-# add_setting ----------------------------------------------------------------
+# _add_setting ----------------------------------------------------------------
 
 
 def test_add_setting_that_does_not_exist(access, setting_spec):  # noqa: D103
     # Act --------------------------------------------------------------------
-    setting_id = access.add_setting(setting_spec)
+    setting_id = access._add_setting(setting_spec)
     # Assert -----------------------------------------------------------------
     assert setting_id == 1
     # Now query result -------------------------------------------------------
@@ -194,19 +194,19 @@ def test_add_setting_that_already_exists(access, setting_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # NOTE: The test above already added the setting
     # NOTE: These tests are intended to be run sequently
-    access.add_setting(setting_spec)
+    access._add_setting(setting_spec)
     # Act --------------------------------------------------------------------
-    new_setting_id = access.add_setting(setting_spec)
+    new_setting_id = access._add_setting(setting_spec)
     # Assert -----------------------------------------------------------------
     assert new_setting_id == 1
 
 
-# add_experiment -------------------------------------------------------------
+# _add_experiment -------------------------------------------------------------
 
 
 def test_add_experiment_that_does_not_exist(access, experiment_spec):  # noqa: D103
     # Act --------------------------------------------------------------------
-    experiment_id = access.add_experiment(experiment_spec)
+    experiment_id = access._add_experiment(experiment_spec)
     # Assert -----------------------------------------------------------------
     assert experiment_id == 1
     # Now query result -------------------------------------------------------
@@ -228,21 +228,21 @@ def test_add_experiment_that_already_exists(access, experiment_spec):  # noqa: D
     # Arrange ----------------------------------------------------------------
     # NOTE: The test above already added the experiment
     # NOTE: These tests are intended to be run sequently
-    access.add_experiment(experiment_spec)
+    access._add_experiment(experiment_spec)
     # Act --------------------------------------------------------------------
-    new_experiment_id = access.add_experiment(experiment_spec)
+    new_experiment_id = access._add_experiment(experiment_spec)
     # Assert -----------------------------------------------------------------
     assert new_experiment_id == 1
 
 
-# add_observations -----------------------------------------------------------
+# _add_observations -----------------------------------------------------------
 
 
 def test_add_observations_that_do_not_exist(access, observation_specs):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     experiment_id = 1
     #  Act --------------------------------------------------------------------
-    returned_experiment_id = access.add_observations(observation_specs, experiment_id)
+    returned_experiment_id = access._add_observations(observation_specs, experiment_id)
     # Assert -----------------------------------------------------------------
     assert returned_experiment_id == experiment_id
     # Now query result -------------------------------------------------------
@@ -298,6 +298,6 @@ def test_add_observations_that_already_exist(access, observation_specs):  # noqa
     # NOTE: These tests are intended to be run sequently
     experiment_id = 1
     # Act --------------------------------------------------------------------
-    returned_experiment_id = access.add_observations(observation_specs, experiment_id)
+    returned_experiment_id = access._add_observations(observation_specs, experiment_id)
     # Assert -----------------------------------------------------------------
     assert returned_experiment_id == experiment_id

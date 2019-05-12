@@ -41,6 +41,9 @@ class ChamberAccess(object):
         # Session factory
         self.Session = sessionmaker(bind=self._engine)
 
+    # ------------------------------------------------------------------------
+    # Public methods: included in the API
+
     def teardown(self):
         """
         Completely teardown database.
@@ -56,7 +59,10 @@ class ChamberAccess(object):
         # Dispose of the engine
         self._engine.dispose()
 
-    def add_pool(self, pool_spec):
+    # ------------------------------------------------------------------------
+    # Internal methods: not included in the API
+
+    def _add_pool(self, pool_spec):
         """
         Add a pool to the database and return its primary key.
 
@@ -106,7 +112,7 @@ class ChamberAccess(object):
         finally:
             session.close()
 
-    def add_setting(self, setting_spec):
+    def _add_setting(self, setting_spec):
         """
         Add a setting to the database and return its primary key.
 
@@ -154,7 +160,7 @@ class ChamberAccess(object):
         finally:
             session.close()
 
-    def add_experiment(self, experiment_spec):
+    def _add_experiment(self, experiment_spec):
         """
         Add an experiment to the database and return its primary key.
 
@@ -197,7 +203,7 @@ class ChamberAccess(object):
         finally:
             session.close()
 
-    def add_observations(self, observations, experiment_id):
+    def _add_observations(self, observations, experiment_id):
         """
         Add several observations to the database.
 
