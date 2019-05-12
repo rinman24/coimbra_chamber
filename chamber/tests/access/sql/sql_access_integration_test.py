@@ -28,7 +28,7 @@ def access():
     """Chamber access fixture."""
     access = ChamberAccess()
     yield access
-    access.teardown()
+    access._teardown()
 
 
 @pytest.fixture('module')

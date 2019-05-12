@@ -53,7 +53,7 @@ class ChamberAccess(object):
     # Public methods: included in the API
 
     def add_data(self, data_specs):
-        """TODO docstring"""
+        """TODO docstring."""
         pool_id = self._add_pool(data_specs.pool)
         setting_id = self._add_setting(data_specs.setting)
         experiment_id = self._add_experiment(data_specs.experiment)
@@ -66,19 +66,6 @@ class ChamberAccess(object):
             observations=observations_dict['observations'],
             temperatures=observations_dict['temperatures'])
         return result
-
-    def teardown(self):
-        """
-        Completely teardown database.
-
-        This drops all of the tables, delets the databse, and disposes of the
-        objects engine.
-
-        """
-        # Drop all tables
-        Base.metadata.drop_all(self._engine)
-        # Dispose of the engine
-        self._engine.dispose()
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
@@ -296,3 +283,16 @@ class ChamberAccess(object):
             session.close()
 
             return dict(observations=obs_count, temperatures=temp_count)
+
+    def _teardown(self):
+        """
+        Completely teardown database.
+
+        This drops all of the tables, delets the databse, and disposes of the
+        objects engine.
+
+        """
+        # Drop all tables
+        Base.metadata.drop_all(self._engine)
+        # Dispose of the engine
+        self._engine.dispose()
