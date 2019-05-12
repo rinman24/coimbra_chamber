@@ -3,8 +3,8 @@
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 
-from chamber.access.chamber.models import Base, Experiment, Observation, Pool
-from chamber.access.chamber.models import Setting, Temperature
+from chamber.access.sql.models import Base, Experiment, Observation, Pool
+from chamber.access.sql.models import Setting, Temperature
 from chamber.ifx.configuration import get_value
 
 

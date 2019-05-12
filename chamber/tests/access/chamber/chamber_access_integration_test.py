@@ -7,11 +7,11 @@ import pytest
 from dacite import from_dict
 from sqlalchemy.orm import sessionmaker
 
-from chamber.access.chamber.service import ExperimentalAccess
-from chamber.access.chamber.models import Experiment, Observation, Pool
-from chamber.access.chamber.models import Setting, Temperature
-from chamber.access.chamber.contracts import ExperimentSpec, ObservationSpec
-from chamber.access.chamber.contracts import PoolSpec, SettingSpec, TemperatureSpec
+from chamber.access.sql.service import ExperimentalAccess
+from chamber.access.sql.models import Experiment, Observation, Pool
+from chamber.access.sql.models import Setting, Temperature
+from chamber.access.sql.contracts import ExperimentSpec, ObservationSpec
+from chamber.access.sql.contracts import PoolSpec, SettingSpec, TemperatureSpec
 
 
 # ----------------------------------------------------------------------------
