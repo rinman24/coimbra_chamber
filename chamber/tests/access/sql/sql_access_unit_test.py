@@ -168,7 +168,7 @@ def observation_specs():
 # add_data -------------------------------------------------------------------
 
 
-def test_add_pool_that_does_not_exist(
+def test_add_data(
         pool_spec, setting_spec, experiment_spec, observation_specs, access,
         access_mock):  # noqa: D103
     # Arrange ----------------------------------------------------------------

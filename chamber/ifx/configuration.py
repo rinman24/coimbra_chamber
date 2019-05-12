@@ -5,7 +5,7 @@ from configparser import ConfigParser
 from pathlib import Path
 
 
-def get_value(key, section):
+def get_value(key, section='DEFAULT'):
     """
     Get a configuration setting from a section.
 

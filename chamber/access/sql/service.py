@@ -21,19 +21,27 @@ class ChamberAccess(object):
 
     def __init__(self):
         """Create the SQLAlchemy engine for the MySQL database."""
-        # Get server configuration
-        host = get_value('host', 'MySQL-Server')
-        user = get_value('user', 'MySQL-Server')
-        password = get_value('password', 'MySQL-Server')
+        # Get database specific connection string.
+        database_type = get_value('database_type')
+        if database_type.lower() == 'mysql':
+            # Configure MySQL server connection string
+            host = get_value('host', 'MySQL-Server')
+            user = get_value('user', 'MySQL-Server')
+            password = get_value('password', 'MySQL-Server')
+            conn_string = f'mysql+mysqlconnector://{user}:{password}@{host}/'
+        else:
+            # Use in memory database
+            conn_string = 'sqlite:///:memory:'
 
         # Create engine
-        conn_string = f'mysql+mysqlconnector://{user}:{password}@{host}/'
         self._engine = create_engine(conn_string, echo=False)
 
-        # Create the schema if it doesn't exist
-        self._schema = 'chamber'
-        self._engine.execute(
-            f'CREATE DATABASE IF NOT EXISTS `{self._schema}`;')
+        # Create the schema if it doesn't exist (MySQL only)
+        if database_type.lower() == 'mysql':
+            self._schema = 'chamber'
+            self._engine.execute(
+                f'CREATE DATABASE IF NOT EXISTS `{self._schema}`;')
+            self._engine.execute(f'USE `{self._schema}`;')
 
         # Create tables if they don't exist
         Base.metadata.create_all(self._engine)
@@ -69,8 +77,6 @@ class ChamberAccess(object):
         """
         # Drop all tables
         Base.metadata.drop_all(self._engine)
-        # Remove the schema
-        self._engine.execute(f'DROP DATABASE IF EXISTS `chamber`;')
         # Dispose of the engine
         self._engine.dispose()
 
