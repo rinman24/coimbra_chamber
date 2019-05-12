@@ -1,4 +1,4 @@
-"""Integration test suite for UnprocessedAccess."""
+"""Integration test suite for ChamberAccess."""
 
 from datetime import datetime
 from decimal import Decimal
@@ -7,7 +7,7 @@ import pytest
 from dacite import from_dict
 from sqlalchemy.orm import sessionmaker
 
-from chamber.access.sql.service import UnprocessedAccess
+from chamber.access.sql.service import ChamberAccess
 from chamber.access.sql.models import Experiment, Observation, Pool
 from chamber.access.sql.models import Setting, Temperature
 from chamber.access.sql.contracts import ExperimentSpec, ObservationSpec
@@ -20,8 +20,8 @@ from chamber.access.sql.contracts import PoolSpec, SettingSpec, TemperatureSpec
 
 @pytest.fixture('module')
 def access():
-    """Unprocessed access fixture."""
-    access = UnprocessedAccess()
+    """Chamber access fixture."""
+    access = ChamberAccess()
     yield access
     access.teardown()
 
@@ -133,7 +133,7 @@ def observation_specs():
 
 
 # ----------------------------------------------------------------------------
-# UnprocessedAccess
+# ChamberAccess
 
 
 # add_pool -------------------------------------------------------------------

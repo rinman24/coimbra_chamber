@@ -7,11 +7,11 @@ from typing import List
 
 
 # ----------------------------------------------------------------------------
-# Unprocessed DTOs
+# Chamber DTOs
 
 @dataclass(frozen=True)
 class PoolSpec:
-    """Unprocessed pool specification."""
+    """Chamber pool specification."""
 
     inner_diameter: Decimal
     outer_diameter: Decimal
@@ -22,7 +22,7 @@ class PoolSpec:
 
 @dataclass(frozen=True)
 class SettingSpec:
-    """Unprocessed setting specification."""
+    """Chamber setting specification."""
 
     duty: Decimal
     pressure: int
@@ -32,7 +32,7 @@ class SettingSpec:
 
 @dataclass(frozen=True)
 class ExperimentSpec:
-    """Unprocessed experiment specifications."""
+    """Chamber experiment specifications."""
 
     author: str
     datetime: datetime
@@ -43,7 +43,7 @@ class ExperimentSpec:
 
 @dataclass(frozen=True)
 class TemperatureSpec:
-    """Unprocessed temperature specification."""
+    """Chamber temperature specification."""
 
     thermocouple_num: int
     temperature: Decimal
@@ -52,7 +52,7 @@ class TemperatureSpec:
 
 @dataclass(frozen=True)
 class ObservationSpec:
-    """Unprocessed observation specification."""
+    """Chamber observation specification."""
 
     cap_man_ok: bool
     dew_point: Decimal

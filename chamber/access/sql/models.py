@@ -18,7 +18,7 @@ class Pool(Base):
 
     # Metadata
     __tablename__ = 'Pools'
-    __table_args__ = {'schema': 'unprocessed'}
+    __table_args__ = {'schema': 'chamber'}
 
     # Columns
     pool_id = Column(Integer, primary_key=True)
@@ -45,7 +45,7 @@ class Setting(Base):
 
     # Metadata
     __tablename__ = 'Settings'
-    __table_args__ = {'schema': 'unprocessed'}
+    __table_args__ = {'schema': 'chamber'}
 
     # Columns
     setting_id = Column(Integer, primary_key=True)
@@ -70,7 +70,7 @@ class Experiment(Base):
 
     # Metadata
     __tablename__ = 'Experiments'
-    __table_args__ = {'schema': 'unprocessed'}
+    __table_args__ = {'schema': 'chamber'}
 
     # Columns
     experiment_id = Column(Integer, primary_key=True)
@@ -79,8 +79,8 @@ class Experiment(Base):
     description = Column(Text, nullable=False)
 
     # Foreign keys
-    pool_id = Column(Integer, ForeignKey('unprocessed.Pools.pool_id'))
-    setting_id = Column(Integer, ForeignKey('unprocessed.Settings.setting_id'))
+    pool_id = Column(Integer, ForeignKey('chamber.Pools.pool_id'))
+    setting_id = Column(Integer, ForeignKey('chamber.Settings.setting_id'))
 
     # Parent relationships
     pool = relationship('Pool', back_populates='experiments')
@@ -106,7 +106,7 @@ class Observation(Base):
 
     # Metadata
     __tablename__ = 'Observations'
-    __table_args__ = {'schema': 'unprocessed'}
+    __table_args__ = {'schema': 'chamber'}
 
     # Columns
     cap_man_ok = Column(Boolean, nullable=False)
@@ -120,7 +120,7 @@ class Observation(Base):
 
     # Foreign keys
     experiment_id = Column(
-        Integer, ForeignKey('unprocessed.Experiments.experiment_id'),
+        Integer, ForeignKey('chamber.Experiments.experiment_id'),
         primary_key=True)
 
     # Parent relationship
@@ -156,7 +156,7 @@ class Temperature(Base):
         ForeignKeyConstraint(
             [idx, experiment_id],
             [Observation.idx, Observation.experiment_id]),
-        {'schema': 'unprocessed'})
+        {'schema': 'chamber'})
 
     def __repr__(self):  # noqa: D105
         return (
