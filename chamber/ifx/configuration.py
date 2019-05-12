@@ -44,3 +44,11 @@ def get_value(key, section='DEFAULT'):
 
     if parser.has_option(section, key):
         return parser.get(section, key)
+
+    # check local example_config.ini
+    parser = ConfigParser(delimiters='|')
+    path = Path('chamber/example_config.ini')
+    parser.read(path)
+
+    if parser.has_option(section, key):
+        return parser.get(section, key)
