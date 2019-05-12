@@ -34,7 +34,7 @@ class ExperimentSpec:
     """Experimental experiment specifications."""
 
     author: str
-    date_time: datetime
+    datetime: datetime
     description: str
     pool_id: int
     setting_id: int
