@@ -5,13 +5,18 @@ from decimal import Decimal
 
 import pytest
 from dacite import from_dict
-from sqlalchemy.orm import sessionmaker
 
 from chamber.access.sql.service import ChamberAccess
 from chamber.access.sql.models import Experiment, Observation, Pool
 from chamber.access.sql.models import Setting, Temperature
 from chamber.access.sql.contracts import ExperimentSpec, ObservationSpec
 from chamber.access.sql.contracts import PoolSpec, SettingSpec, TemperatureSpec
+
+# ----------------------------------------------------------------------------
+# Module level globals
+
+
+EXPECTED_DICT = dict(observations=2, temperatures=6)
 
 
 # ----------------------------------------------------------------------------
@@ -136,7 +141,7 @@ def observation_specs():
 # ChamberAccess
 
 
-# _add_pool -------------------------------------------------------------------
+# _add_pool ------------------------------------------------------------------
 
 
 def test_add_pool_that_does_not_exist(access, pool_spec):  # noqa: D103
@@ -168,7 +173,7 @@ def test_add_pool_that_already_exists(access, pool_spec):  # noqa: D103
     # Assert -----------------------------------------------------------------
     assert new_pool_id == 1
 
-# _add_setting ----------------------------------------------------------------
+# _add_setting ---------------------------------------------------------------
 
 
 def test_add_setting_that_does_not_exist(access, setting_spec):  # noqa: D103
@@ -201,7 +206,7 @@ def test_add_setting_that_already_exists(access, setting_spec):  # noqa: D103
     assert new_setting_id == 1
 
 
-# _add_experiment -------------------------------------------------------------
+# _add_experiment ------------------------------------------------------------
 
 
 def test_add_experiment_that_does_not_exist(access, experiment_spec):  # noqa: D103
@@ -235,16 +240,16 @@ def test_add_experiment_that_already_exists(access, experiment_spec):  # noqa: D
     assert new_experiment_id == 1
 
 
-# _add_observations -----------------------------------------------------------
+# _add_observations ----------------------------------------------------------
 
 
 def test_add_observations_that_do_not_exist(access, observation_specs):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     experiment_id = 1
     #  Act --------------------------------------------------------------------
-    returned_experiment_id = access._add_observations(observation_specs, experiment_id)
+    returned_dict = access._add_observations(observation_specs, experiment_id)
     # Assert -----------------------------------------------------------------
-    assert returned_experiment_id == experiment_id
+    assert returned_dict == EXPECTED_DICT
     # Now query result -------------------------------------------------------
     session = access.Session()
     try:
@@ -298,6 +303,6 @@ def test_add_observations_that_already_exist(access, observation_specs):  # noqa
     # NOTE: These tests are intended to be run sequently
     experiment_id = 1
     # Act --------------------------------------------------------------------
-    returned_experiment_id = access._add_observations(observation_specs, experiment_id)
+    returned_dict = access._add_observations(observation_specs, experiment_id)
     # Assert -----------------------------------------------------------------
-    assert returned_experiment_id == experiment_id
+    assert returned_dict == EXPECTED_DICT

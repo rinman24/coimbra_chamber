@@ -1,6 +1,6 @@
 """Module encapsulates access to chamber data."""
 
-from sqlalchemy import create_engine, and_
+from sqlalchemy import and_, create_engine, func
 from sqlalchemy.orm import sessionmaker
 
 from chamber.access.sql.models import Base, Experiment, Observation, Pool
@@ -43,6 +43,21 @@ class ChamberAccess(object):
 
     # ------------------------------------------------------------------------
     # Public methods: included in the API
+
+    def add_data(self, data_specs):
+        """TODO docstring"""
+        pool_id = self._add_pool(data_specs.pool)
+        setting_id = self._add_setting(data_specs.setting)
+        experiment_id = self._add_experiment(data_specs.experiment)
+        observations_dict = self._add_observations(
+            data_specs.observations, experiment_id)
+        result = dict(
+            pool_id=pool_id,
+            setting_id=setting_id,
+            experiment_id=experiment_id,
+            observations=observations_dict['observations'],
+            temperatures=observations_dict['temperatures'])
+        return result
 
     def teardown(self):
         """
@@ -221,8 +236,7 @@ class ChamberAccess(object):
 
         Returns
         -------
-        int
-            Primary key for the experiment whose data was added.
+        TODO Update
 
         """
         session = self.Session()
@@ -261,10 +275,18 @@ class ChamberAccess(object):
                 # Perform a bulk insert
                 session.bulk_save_objects(objects)
                 session.commit()
-                return experiment_id
-            else:
-                return returned_experiment_id[0]
         except:
             session.rollback()
         finally:
+            # Observation counts for the experiment
+            query = session.query(func.count(Observation.experiment_id))
+            query = query.filter(Observation.experiment_id == experiment_id)
+            obs_count = query.one()[0]
+            # Temperature counts for the experiment
+            query = session.query(func.count(Temperature.experiment_id))
+            query = query.filter(Temperature.experiment_id == experiment_id)
+            temp_count = query.one()[0]
+
             session.close()
+
+            return dict(observations=obs_count, temperatures=temp_count)

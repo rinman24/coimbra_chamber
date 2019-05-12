@@ -63,3 +63,13 @@ class ObservationSpec:
     pow_ref: Decimal
     pressure: int
     temperatures: List[TemperatureSpec]
+
+
+@dataclass(frozen=True)
+class DataSpec:
+    """Chamber data specification."""
+
+    pool: PoolSpec
+    setting: SettingSpec
+    experiment: ExperimentSpec
+    observations: List[ObservationSpec]
