@@ -15,8 +15,8 @@ coverage:
 ignore:
     - "chamber/tests/**"
     - "chamber/ifx/**"
-    - "**/*models.py"
-    - "**/*contracts.py"
+    - "**/contracts.py"
+    - "**/models.py"
     - "setup.py"
 
 parsers:
