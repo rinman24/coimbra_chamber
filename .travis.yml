@@ -1,14 +1,33 @@
+# Disable sudo to speed up the build
+sudo: false
+
+# Set the build language to Python
 language: python
+
+# Set dist to xenial for python 3.6 and above
 dist: xenial
+
+# Set the python version to 3.7
 python:
   - "3.7"
+
+# Turn off notifications
 notifications:
   email: false
-# command to install dependencies
+
+
+# Install dependencies
 install:
   - pip install -r requirements.txt
-# command to run tests
+
+# Run test suite
 script:
-  - python -m pytest -vvs -p no:warnings
+  - python -m pytest -vvs -p no:warnings pytest --cov=./
+
+# Environment variables
+env:
+    CODECOV_TOKEN="0cf6d2cd-ece6-4639-ac42-b514769a1a53"
+
+# Push the results back to codecov
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - codecov
