@@ -1,6 +1,7 @@
 language: python
+dist: xenial
 python:
-  - "3.5"
+  - "3.7"
 notifications:
   email: false
 # command to install dependencies
@@ -8,6 +9,6 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 script:
-  - python -m pytest -xv --cov=./ --ignore=tests/data/test_sqldb.py
+  - python -m pytest -vvs -p no:warnings
 after_success:
   - bash <(curl -s https://codecov.io/bash)

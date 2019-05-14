@@ -24,9 +24,11 @@ Back to `Table of Contents`_
 
 Description will go here.
 
-The host, username, and password used to acces the server are all stored in config.ini in the root of the repository. Make sure to edit this file so 
-that it contains your information.
+The host, username, and password used to acces the server are all stored in
+config.ini in the root of the repository. Make sure to edit this file so that
+it contains your information.
 ::
+
   [MySQL-Server]
   host = your-host
   user = your-username
@@ -75,18 +77,35 @@ Back to `Table of Contents`_
 Setting up the initial state of the MySQL Server is handled by the
 setup_sqldb.py file.
 Simply run the following command from the root directory; e.g., ucsd_ch:
-::
+.. code-block:: bash
 
   $ python setup/setup_sqldb.py <database_name>
 
 
 Where <database_name> is replaced with the name of the MySQL database schema.
-This will create all tables and populate the Unit table and add Tube 1
-(default tube used in experiments).
+This will create all tables and populate the Unit table and add pool 1
+(default pool used in experiments).
 
 The database schema is described below:
 
 .. image:: images/mysql_schema.png
+
+
+NOTE: In order to run the integration tests, a local version of mySQL must be
+installed and running.
+
+On OSX you can run the following line to start the mySQL service after
+installing from LINK
+
+.. code-block:: bash
+
+    $ sudo launchctl load -F /Library/LaunchDaemons/com.oracle.oss.mysql.mysqld.plist
+
+Stopping the mySQL service:
+
+.. code-block:: bash
+
+    $ sudo launchctl unload -F /Library/LaunchDaemons/com.oracle.oss.mysql.mysqld.plist
 
 
 Preferred Way to Run Tests
@@ -95,7 +114,7 @@ Preferred Way to Run Tests
 Back to `Table of Contents`_
 
 1. From the repo directory; i.e., chamber
-::
+.. code-block:: bash
 
     $ python -m pytest tests -xv  --cov=chamber --cov-report html tests
 
@@ -103,12 +122,12 @@ The above line requires both `pytest` and `pytest-cov` are installed.
 
 
 Preferred Way to Run Scripts
----------------------------
+----------------------------
 
 Back to `Table of Contents`_
 
 1. From the repo directory; i.e., chamber
-::
+.. code-block:: bash
 
     $ python -m chamber.scripts.<yout-script-name>
 
