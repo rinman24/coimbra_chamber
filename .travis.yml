@@ -22,7 +22,7 @@ install:
 
 # Run test suite
 script:
-  - python -m pytest -vvs -p no:warnings pytest --cov=./
+  - python -m pytest -vvs -p no:warnings --cov=./
 
 # Environment variables
 env:
