@@ -23,7 +23,7 @@ class ChamberAccess(object):
         """Create the SQLAlchemy engine for the MySQL database."""
         # Get database specific connection string.
         database_type = get_value('database_type')
-        if database_type.lower() == 'mysql':
+        if database_type.lower() == 'mysql':  # pragma: no cover
             # Configure MySQL server connection string
             host = get_value('host', 'MySQL-Server')
             user = get_value('user', 'MySQL-Server')
@@ -37,7 +37,7 @@ class ChamberAccess(object):
         self._engine = create_engine(conn_string, echo=False)
 
         # Create the schema if it doesn't exist (MySQL only)
-        if database_type.lower() == 'mysql':
+        if database_type.lower() == 'mysql':  # pragma: no cover
             self._schema = 'chamber'
             self._engine.execute(
                 f'CREATE DATABASE IF NOT EXISTS `{self._schema}`;')
@@ -115,7 +115,7 @@ class ChamberAccess(object):
                 return pool_to_add.pool_id
             else:
                 return pool_id[0]
-        except:
+        except:  # pragma: no cover
             session.rollback()
         finally:
             session.close()
@@ -163,7 +163,7 @@ class ChamberAccess(object):
                 return setting_to_add.setting_id
             else:
                 return setting_id[0]
-        except:
+        except:  # pragma: no cover
             session.rollback()
         finally:
             session.close()
@@ -206,7 +206,7 @@ class ChamberAccess(object):
                 return experiment_to_add.experiment_id
             else:
                 return experiment_id[0]
-        except:
+        except:  # pragma: no cover
             session.rollback()
         finally:
             session.close()
@@ -268,7 +268,7 @@ class ChamberAccess(object):
                 # Perform a bulk insert
                 session.bulk_save_objects(objects)
                 session.commit()
-        except:
+        except:  # pragma: no cover
             session.rollback()
         finally:
             # Observation counts for the experiment
