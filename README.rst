@@ -153,7 +153,7 @@ Back to `Table of Contents`_
     :scale: 100%
     :target: https://chamber.readthedocs.io/en/latest/?badge=latest
 
-.. |build| image:: https://travis-ci.com/rinman24/chamber.svg?branch=master
+.. |build| image:: https://travis-ci.com/rinman24/inman_phd.svg?branch=master
     :alt: Build Status
     :scale: 100%
     :target: https://travis-ci.com/rinman24/chamber
