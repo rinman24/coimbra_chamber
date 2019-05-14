@@ -53,7 +53,35 @@ class ChamberAccess(object):
     # Public methods: included in the API
 
     def add_data(self, data_specs):
-        """TODO docstring."""
+        """
+        Add experimental data to the database.
+
+        This method does not rewite data that already exists in the databse.
+
+        Parameters
+        ----------
+        data_specs : list of chamber.access.sql.contracts.DataSpec
+            All observations for a given experiment.
+
+        Returns
+        -------
+        dict of {str: int}
+            Dictionary summarizing the database insert.
+
+        Examples
+        --------
+        Assuming that you have two valid data_spec objects called `data_spec_1`
+        and `data_spec_2` each containint three temperature observations each,
+        we can prepare the data payload:
+        >>> payload = list(data_spec_1, data_spec_2)
+        Then create an instance of `ChamberAccess` and add the data:
+        >>> access = ChamberAccess()
+        >>> result = access.add_data(payload)
+        >>> result
+        {'pool_id': 1, 'setting_id': 1, 'experiment_id': 1, 'observations': 2,
+        'temperatures': 6}
+
+        """
         pool_id = self._add_pool(data_specs.pool)
         setting_id = self._add_setting(data_specs.setting)
         experiment_id = self._add_experiment(data_specs.experiment)
@@ -229,7 +257,7 @@ class ChamberAccess(object):
 
         Returns
         -------
-        TODO Update
+        dict of {str: int}
 
         """
         session = self.Session()
