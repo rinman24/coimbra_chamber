@@ -8,6 +8,6 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 script:
-  - python -m pytest -k "unit" -x --cov-config .coveragerc --cov=chamber chamber/tests -p no:warnings --ignore=tests_depreciated\
+  - python -m pytest -vvs -p no:warnings
 after_success:
   - bash <(curl -s https://codecov.io/bash)
