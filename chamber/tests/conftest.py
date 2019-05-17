@@ -17,11 +17,11 @@ from chamber.access.sql.contracts import PoolSpec, SettingSpec, TemperatureSpec
 
 
 @pytest.fixture('module')
-def access():
+def chamber_access():
     """Chamber access fixture."""
-    access = ChamberAccess()
-    yield access
-    access._teardown()
+    chamber_access = ChamberAccess()
+    yield chamber_access
+    chamber_access._teardown()
 
 
 @pytest.fixture('module')

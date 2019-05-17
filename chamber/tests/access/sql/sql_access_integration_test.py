@@ -17,13 +17,13 @@ from chamber.access.sql.models import Setting, Temperature
 # _add_pool ------------------------------------------------------------------
 
 
-def test_add_pool_that_does_not_exist(access, pool_spec):  # noqa: D103
+def test_add_pool_that_does_not_exist(chamber_access, pool_spec):  # noqa: D103
     # Act --------------------------------------------------------------------
-    pool_id = access._add_pool(pool_spec)
+    pool_id = chamber_access._add_pool(pool_spec)
     # Assert -----------------------------------------------------------------
     assert pool_id == 1
     # Now query result -------------------------------------------------------
-    session = access.Session()
+    session = chamber_access.Session()
     try:
         query = session.query(Pool).filter(Pool.material == 'test_material')
         result = query.one()
@@ -36,26 +36,26 @@ def test_add_pool_that_does_not_exist(access, pool_spec):  # noqa: D103
         session.close()
 
 
-def test_add_pool_that_already_exists(access, pool_spec):  # noqa: D103
+def test_add_pool_that_already_exists(chamber_access, pool_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # NOTE: The test above already added the pool
     # NOTE: These tests are intended to be run sequently
-    access._add_pool(pool_spec)
+    chamber_access._add_pool(pool_spec)
     # Act --------------------------------------------------------------------
-    new_pool_id = access._add_pool(pool_spec)
+    new_pool_id = chamber_access._add_pool(pool_spec)
     # Assert -----------------------------------------------------------------
     assert new_pool_id == 1
 
 # _add_setting ---------------------------------------------------------------
 
 
-def test_add_setting_that_does_not_exist(access, setting_spec):  # noqa: D103
+def test_add_setting_that_does_not_exist(chamber_access, setting_spec):  # noqa: D103
     # Act --------------------------------------------------------------------
-    setting_id = access._add_setting(setting_spec)
+    setting_id = chamber_access._add_setting(setting_spec)
     # Assert -----------------------------------------------------------------
     assert setting_id == 1
     # Now query result -------------------------------------------------------
-    session = access.Session()
+    session = chamber_access.Session()
     try:
         query = session.query(Setting)
         query = query.filter(Setting.pressure == setting_spec.pressure)
@@ -68,13 +68,13 @@ def test_add_setting_that_does_not_exist(access, setting_spec):  # noqa: D103
         session.close()
 
 
-def test_add_setting_that_already_exists(access, setting_spec):  # noqa: D103
+def test_add_setting_that_already_exists(chamber_access, setting_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # NOTE: The test above already added the setting
     # NOTE: These tests are intended to be run sequently
-    access._add_setting(setting_spec)
+    chamber_access._add_setting(setting_spec)
     # Act --------------------------------------------------------------------
-    new_setting_id = access._add_setting(setting_spec)
+    new_setting_id = chamber_access._add_setting(setting_spec)
     # Assert -----------------------------------------------------------------
     assert new_setting_id == 1
 
@@ -82,13 +82,13 @@ def test_add_setting_that_already_exists(access, setting_spec):  # noqa: D103
 # _add_experiment ------------------------------------------------------------
 
 
-def test_add_experiment_that_does_not_exist(access, experiment_spec):  # noqa: D103
+def test_add_experiment_that_does_not_exist(chamber_access, experiment_spec):  # noqa: D103
     # Act --------------------------------------------------------------------
-    experiment_id = access._add_experiment(experiment_spec)
+    experiment_id = chamber_access._add_experiment(experiment_spec)
     # Assert -----------------------------------------------------------------
     assert experiment_id == 1
     # Now query result -------------------------------------------------------
-    session = access.Session()
+    session = chamber_access.Session()
     try:
         query = session.query(Experiment)
         query = query.filter(Experiment.datetime == experiment_spec.datetime)
@@ -102,13 +102,13 @@ def test_add_experiment_that_does_not_exist(access, experiment_spec):  # noqa: D
         session.close()
 
 
-def test_add_experiment_that_already_exists(access, experiment_spec):  # noqa: D103
+def test_add_experiment_that_already_exists(chamber_access, experiment_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # NOTE: The test above already added the experiment
     # NOTE: These tests are intended to be run sequently
-    access._add_experiment(experiment_spec)
+    chamber_access._add_experiment(experiment_spec)
     # Act --------------------------------------------------------------------
-    new_experiment_id = access._add_experiment(experiment_spec)
+    new_experiment_id = chamber_access._add_experiment(experiment_spec)
     # Assert -----------------------------------------------------------------
     assert new_experiment_id == 1
 
@@ -116,15 +116,15 @@ def test_add_experiment_that_already_exists(access, experiment_spec):  # noqa: D
 # _add_observations ----------------------------------------------------------
 
 
-def test_add_observations_that_do_not_exist(access, observation_spec):  # noqa: D103
+def test_add_observations_that_do_not_exist(chamber_access, observation_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     experiment_id = 1
     #  Act --------------------------------------------------------------------
-    returned_dict = access._add_observations(observation_spec, experiment_id)
+    returned_dict = chamber_access._add_observations(observation_spec, experiment_id)
     # Assert -----------------------------------------------------------------
     assert returned_dict == dict(observations=2, temperatures=6)
     # Now query result -------------------------------------------------------
-    session = access.Session()
+    session = chamber_access.Session()
     try:
         query = session.query(Observation)
         query = query.filter(Observation.experiment_id == experiment_id)
@@ -172,13 +172,13 @@ def test_add_observations_that_do_not_exist(access, observation_spec):  # noqa: 
         session.close()
 
 
-def test_add_observations_that_already_exist(access, observation_spec):  # noqa: D103
+def test_add_observations_that_already_exist(chamber_access, observation_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # NOTE: The test above already added the observations
     # NOTE: These tests are intended to be run sequently
     experiment_id = 1
     # Act --------------------------------------------------------------------
-    returned_dict = access._add_observations(observation_spec, experiment_id)
+    returned_dict = chamber_access._add_observations(observation_spec, experiment_id)
     # Assert -----------------------------------------------------------------
     assert returned_dict == dict(observations=2, temperatures=6)
 
@@ -186,14 +186,14 @@ def test_add_observations_that_already_exist(access, observation_spec):  # noqa:
 # add_data -------------------------------------------------------------------
 
 @pytest.mark.parametrize('pool_id', [1, 999])
-def test_add_data(access, data_spec, pool_id):  # noqa: D103
+def test_add_data(chamber_access, data_spec, pool_id):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # NOTE: The tests above have already added the this to the database for
     # pool_id == 1, but not for pool_id == 999.
     changes = dict(pool_id=pool_id)
     data_spec = replace(data_spec, **changes)
     # Act --------------------------------------------------------------------
-    result = access.add_data(data_spec)
+    result = chamber_access.add_data(data_spec)
     # Assert -----------------------------------------------------------------
     if pool_id == 1:
         assert result['pool_id'] == 1

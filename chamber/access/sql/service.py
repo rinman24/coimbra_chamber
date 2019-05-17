@@ -88,8 +88,8 @@ class ChamberAccess(object):
         --------
         Assuming that you have a valid `DataSpec` object called `data_spec`
         containing two observations with three temperatures each:
-        >>> access = ChamberAccess()
-        >>> result = access.add_data(data_spec)
+        >>> chamber_access = ChamberAccess()
+        >>> result = chamber_access.add_data(data_spec)
         >>> result
         {'pool_id': 1, 'setting_id': 1, 'experiment_id': 1, 'observations': 2,
         'temperatures': 6}
