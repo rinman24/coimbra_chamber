@@ -1,14 +1,15 @@
-"""Test fixtures"""
+"""Test fixtures."""
 
 from datetime import datetime
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 from dacite import from_dict
+from nptdms import TdmsFile
 
 from chamber.access.sql.service import ChamberAccess
-
-from chamber.access.sql.contracts import ExperimentSpec, ObservationSpec
+from chamber.access.sql.contracts import DataSpec, ExperimentSpec, ObservationSpec
 from chamber.access.sql.contracts import PoolSpec, SettingSpec, TemperatureSpec
 
 # ----------------------------------------------------------------------------
@@ -57,7 +58,7 @@ def experiment_spec():
 
 
 @pytest.fixture('module')
-def observation_specs():
+def observation_spec():
     """Observation specifications including temperatures."""
     # Create a list of DTOs
     # This will consist of two timesteps and three thermocouples
@@ -124,6 +125,18 @@ def observation_specs():
         temperatures=[idx1_tc0, idx1_tc1, idx1_tc2])
     idx_1 = from_dict(ObservationSpec, data)
     # Now that we have the data we can construct a list of observations
-    observation_specs = [idx_0, idx_1]
+    observation_spec = [idx_0, idx_1]
 
-    return observation_specs
+    return observation_spec
+
+
+@pytest.fixture('module')
+def data_spec(setting_spec, experiment_spec, observation_spec):
+    """Return data specification for an entire experiment."""
+    data = dict(
+        pool_id=1,
+        setting=setting_spec,
+        experiment=experiment_spec,
+        observations=observation_spec)
+    data_spec = from_dict(DataSpec, data)
+    return data_spec

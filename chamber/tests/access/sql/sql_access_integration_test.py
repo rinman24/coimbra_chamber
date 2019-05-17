@@ -2,6 +2,8 @@
 
 from decimal import Decimal
 
+from dacite import from_dict
+
 from chamber.access.sql.models import Experiment, Observation, Pool
 from chamber.access.sql.models import Setting, Temperature
 
@@ -112,11 +114,11 @@ def test_add_experiment_that_already_exists(access, experiment_spec):  # noqa: D
 # _add_observations ----------------------------------------------------------
 
 
-def test_add_observations_that_do_not_exist(access, observation_specs):  # noqa: D103
+def test_add_observations_that_do_not_exist(access, observation_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     experiment_id = 1
     #  Act --------------------------------------------------------------------
-    returned_dict = access._add_observations(observation_specs, experiment_id)
+    returned_dict = access._add_observations(observation_spec, experiment_id)
     # Assert -----------------------------------------------------------------
     assert returned_dict == dict(observations=2, temperatures=6)
     # Now query result -------------------------------------------------------
@@ -166,12 +168,27 @@ def test_add_observations_that_do_not_exist(access, observation_specs):  # noqa:
         session.close()
 
 
-def test_add_observations_that_already_exist(access, observation_specs):  # noqa: D103
+def test_add_observations_that_already_exist(access, observation_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # NOTE: The test above already added the observations
     # NOTE: These tests are intended to be run sequently
     experiment_id = 1
     # Act --------------------------------------------------------------------
-    returned_dict = access._add_observations(observation_specs, experiment_id)
+    returned_dict = access._add_observations(observation_spec, experiment_id)
     # Assert -----------------------------------------------------------------
     assert returned_dict == dict(observations=2, temperatures=6)
+
+
+# add_data -------------------------------------------------------------------
+
+def test_add_data(access, data_spec):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    # NOTE: The tests above have already added the this to the database.
+    # Act --------------------------------------------------------------------
+    result = access.add_data(data_spec)
+    # Assert -----------------------------------------------------------------
+    assert result['pool_id'] == 1
+    assert result['setting_id'] == 1
+    assert result['experiment_id'] == 1
+    assert result['observations'] == 2
+    assert result['temperatures'] == 6

@@ -58,6 +58,9 @@ class ChamberAccess(object):
 
         This method does not rewite data that already exists in the databse.
 
+        NOTE: The tube must already exist in the database in order to add the
+        experimental data.
+
         Parameters
         ----------
         data_specs : list of chamber.access.sql.contracts.DataSpec
@@ -68,32 +71,59 @@ class ChamberAccess(object):
         dict of {str: int}
             Dictionary summarizing the database insert.
 
+        See Also
+        --------
+        TdmsAccess.get_data_spec : Get a valid DataSpec from tdms file.
+
+        Notes
+        -----
+        You can use TdmsAccess to build a valid DataSpec object.
+
+        The example below assumes you already have a valid `DataSpec` object.
+        If you do not, the easiest way to get one is to call
+        `TdmsAccess.get_data_spec()` which will return a valid `DataSpec`
+        object to use as input.
+
         Examples
         --------
-        Assuming that you have two valid data_spec objects called `data_spec_1`
-        and `data_spec_2` each containint three temperature observations each,
-        we can prepare the data payload:
-        >>> payload = list(data_spec_1, data_spec_2)
-        Then create an instance of `ChamberAccess` and add the data:
+        Assuming that you have a valid `DataSpec` object called `data_spec`
+        containing two observations with three temperatures each:
         >>> access = ChamberAccess()
-        >>> result = access.add_data(payload)
+        >>> result = access.add_data(data_spec)
         >>> result
         {'pool_id': 1, 'setting_id': 1, 'experiment_id': 1, 'observations': 2,
         'temperatures': 6}
 
         """
-        pool_id = self._add_pool(data_specs.pool)
-        setting_id = self._add_setting(data_specs.setting)
-        experiment_id = self._add_experiment(data_specs.experiment)
-        observations_dict = self._add_observations(
-            data_specs.observations, experiment_id)
-        result = dict(
-            pool_id=pool_id,
-            setting_id=setting_id,
-            experiment_id=experiment_id,
-            observations=observations_dict['observations'],
-            temperatures=observations_dict['temperatures'])
-        return result
+        pool_id = data_specs.pool_id
+        try:
+            # look for the pool using the pool id
+            session = self.Session()
+            pool = session.query(Pool).filter(Pool.pool_id == pool_id).first()
+            session.close()
+            assert pool
+        except AssertionError:
+            # some error and you just print out the results
+            err_msg = (
+                'You must add you pool to the database: '
+                f'pool_id {pool_id} does not exist.')
+            print(err_msg)
+            return
+        else:
+            # The pool is there so we can call the other functions
+            setting_id = self._add_setting(data_specs.setting)
+            experiment_id = self._add_experiment(data_specs.experiment)
+            observations_dict = self._add_observations(
+                data_specs.observations, experiment_id)
+            result = dict(
+                pool_id=pool_id,
+                setting_id=setting_id,
+                experiment_id=experiment_id,
+                observations=observations_dict['observations'],
+                temperatures=observations_dict['temperatures'])
+            return result
+        finally:
+            session.close()
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
