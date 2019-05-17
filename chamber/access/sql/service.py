@@ -105,8 +105,8 @@ class ChamberAccess(object):
         except AssertionError:
             # some error and you just print out the results
             err_msg = (
-                'You must add you pool to the database: '
-                f'pool_id {pool_id} does not exist.')
+                'You must add your pool to the database: '
+                f'pool_id `{pool_id}` does not exist.')
             print(err_msg)
             return
         else:

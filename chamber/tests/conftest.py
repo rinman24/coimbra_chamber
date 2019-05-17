@@ -130,7 +130,7 @@ def observation_spec():
     return observation_spec
 
 
-@pytest.fixture('module')
+@pytest.fixture('function')
 def data_spec(setting_spec, experiment_spec, observation_spec):
     """Return data specification for an entire experiment."""
     data = dict(

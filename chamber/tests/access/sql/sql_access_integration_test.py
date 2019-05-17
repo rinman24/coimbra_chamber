@@ -1,8 +1,10 @@
 """Integration test suite for ChamberAccess."""
 
+from dataclasses import replace
 from decimal import Decimal
 
 from dacite import from_dict
+import pytest
 
 from chamber.access.sql.models import Experiment, Observation, Pool
 from chamber.access.sql.models import Setting, Temperature
@@ -181,14 +183,21 @@ def test_add_observations_that_already_exist(access, observation_spec):  # noqa:
 
 # add_data -------------------------------------------------------------------
 
-def test_add_data(access, data_spec):  # noqa: D103
+@pytest.mark.parametrize('pool_id', [1, 999])
+def test_add_data(access, data_spec, pool_id):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    # NOTE: The tests above have already added the this to the database.
+    # NOTE: The tests above have already added the this to the database for
+    # pool_id == 1, but not for pool_id == 999.
+    changes = dict(pool_id=pool_id)
+    data_spec = replace(data_spec, **changes)
     # Act --------------------------------------------------------------------
     result = access.add_data(data_spec)
     # Assert -----------------------------------------------------------------
-    assert result['pool_id'] == 1
-    assert result['setting_id'] == 1
-    assert result['experiment_id'] == 1
-    assert result['observations'] == 2
-    assert result['temperatures'] == 6
+    if pool_id == 1:
+        assert result['pool_id'] == 1
+        assert result['setting_id'] == 1
+        assert result['experiment_id'] == 1
+        assert result['observations'] == 2
+        assert result['temperatures'] == 6
+    else:
+        assert not result
