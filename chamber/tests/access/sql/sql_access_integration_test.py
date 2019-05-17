@@ -139,6 +139,7 @@ def test_add_observations_that_do_not_exist(access, observation_spec):  # noqa: 
                 assert observation.pow_out == 0
                 assert observation.pow_ref == 0
                 assert observation.pressure == 987654
+                assert observation.surface_temp == Decimal('280.0')
             elif observation.idx == 1:
                 assert not observation.cap_man_ok
                 assert observation.dew_point == Decimal('280.20')
@@ -148,6 +149,7 @@ def test_add_observations_that_do_not_exist(access, observation_spec):  # noqa: 
                 assert observation.pow_out == 0
                 assert observation.pow_ref == 0
                 assert observation.pressure == 987000
+                assert observation.surface_temp == Decimal('280.2')
         query = session.query(Temperature)
         temperatures = query.filter(Temperature.experiment_id == experiment_id)
         for temperature in temperatures:

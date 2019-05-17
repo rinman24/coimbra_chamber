@@ -311,7 +311,8 @@ class ChamberAccess(object):
                         pow_out=observation.pow_out,
                         pow_ref=observation.pow_ref,
                         pressure=observation.pressure,
-                        experiment_id=experiment_id)
+                        experiment_id=experiment_id,
+                        surface_temp=observation.surface_temp)
                     # Append
                     objects.append(this_observation)
                     for temperature in observation.temperatures:

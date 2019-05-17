@@ -110,7 +110,8 @@ def observation_spec():
         pow_out=Decimal('0.0'),
         pow_ref=Decimal('0.0'),
         pressure=987654,
-        temperatures=[idx0_tc0, idx0_tc1, idx0_tc2])
+        temperatures=[idx0_tc0, idx0_tc1, idx0_tc2],
+        surface_temp=Decimal('280.0'))
     idx_0 = from_dict(ObservationSpec, data)
     # Idx = 1
     data = dict(
@@ -122,7 +123,8 @@ def observation_spec():
         pow_out=Decimal('0.0'),
         pow_ref=Decimal('0.0'),
         pressure=987000,
-        temperatures=[idx1_tc0, idx1_tc1, idx1_tc2])
+        temperatures=[idx1_tc0, idx1_tc1, idx1_tc2],
+        surface_temp=Decimal('280.2'))
     idx_1 = from_dict(ObservationSpec, data)
     # Now that we have the data we can construct a list of observations
     observation_spec = [idx_0, idx_1]
