@@ -9,15 +9,7 @@ from chamber.ifx.configuration import get_value
 
 
 class ChamberAccess(object):
-    """
-    Encapsulates all aspects of data access for an experiment.
-
-    Attributes
-    ----------
-    Session : sqlalchemy.orm.session.sessionmaker
-        Session factory bound to the object's internal engine.
-
-    """
+    """Encapsulates all aspects of data access for an experiment."""
 
     def __init__(self):
         """Create the SQLAlchemy engine for the MySQL database."""

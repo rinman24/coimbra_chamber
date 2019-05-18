@@ -11,6 +11,8 @@ from nptdms import TdmsFile
 from chamber.access.sql.service import ChamberAccess
 from chamber.access.sql.contracts import DataSpec, ExperimentSpec, ObservationSpec
 from chamber.access.sql.contracts import PoolSpec, SettingSpec, TemperatureSpec
+from chamber.access.tdms.service import TdmsAccess
+
 
 # ----------------------------------------------------------------------------
 # Fixtures
@@ -22,6 +24,13 @@ def chamber_access():
     chamber_access = ChamberAccess()
     yield chamber_access
     chamber_access._teardown()
+
+
+@pytest.fixture('module')
+def tdms_access():
+    """Tdms access fixture."""
+    tdms_access = TdmsAccess()
+    return tdms_access
 
 
 @pytest.fixture('module')
