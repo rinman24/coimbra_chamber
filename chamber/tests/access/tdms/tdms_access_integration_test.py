@@ -14,14 +14,13 @@ from chamber.access.sql.contracts import TemperatureSpec
 # Module level globals -------------------------------------------------------
 
 
-PATH_1 = Path('chamber/tests/access/tdms/resources/test_1.tdms')
-PATH_2 = Path('chamber/tests/access/tdms/resources/test_2.tdms')
+PATH = Path('chamber/tests/access/tdms/resources/test_1.tdms')
 
 
 # TdmsAccess -----------------------------------------------------------------
 
 
-@pytest.mark.parametrize('filepath', [PATH_1, PATH_2, 'bad_path'])
+@pytest.mark.parametrize('filepath', [PATH, 'bad_path'])
 def test_connect(tdms_access, filepath):  # noqa: D103
     # Act --------------------------------------------------------------------
     tdms_access.connect(filepath)
@@ -37,8 +36,7 @@ def test_connect(tdms_access, filepath):  # noqa: D103
 @pytest.mark.parametrize('index', [0, 1, 2])
 def test_get_temperature_spec(tdms_access, index):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    path = PATH_1
-    tdms_access.connect(path)
+    tdms_access.connect(PATH)
     # Act --------------------------------------------------------------------
     results = tdms_access._get_temperature_specs(index)
     # Assert -----------------------------------------------------------------
@@ -48,63 +46,104 @@ def test_get_temperature_spec(tdms_access, index):  # noqa: D103
         if index == 0:
             if tc_num == 4:
                 assert temp_spec.temperature == Decimal('296.58')
-            if tc_num == 5:
+            elif tc_num == 5:
                 assert temp_spec.temperature == Decimal('297.33')
-            if tc_num == 6:
+            elif tc_num == 6:
                 assert temp_spec.temperature == Decimal('297.08')
-            if tc_num == 7:
+            elif tc_num == 7:
                 assert temp_spec.temperature == Decimal('296.46')
-            if tc_num == 8:
+            elif tc_num == 8:
                 assert temp_spec.temperature == Decimal('297.08')
-            if tc_num == 9:
+            elif tc_num == 9:
                 assert temp_spec.temperature == Decimal('297.03')
-            if tc_num == 10:
+            elif tc_num == 10:
                 assert temp_spec.temperature == Decimal('297.66')
-            if tc_num == 11:
+            elif tc_num == 11:
                 assert temp_spec.temperature == Decimal('296.59')
-            if tc_num == 12:
+            elif tc_num == 12:
                 assert temp_spec.temperature == Decimal('297.42')
-            if tc_num == 13:
+            else:  # index must be 13
                 assert temp_spec.temperature == Decimal('296.36')
         elif index == 1:
             if tc_num == 4:
                 assert temp_spec.temperature == Decimal('296.58')
-            if tc_num == 5:
+            elif tc_num == 5:
                 assert temp_spec.temperature == Decimal('297.32')
-            if tc_num == 6:
+            elif tc_num == 6:
                 assert temp_spec.temperature == Decimal('297.09')
-            if tc_num == 7:
+            elif tc_num == 7:
                 assert temp_spec.temperature == Decimal('296.45')
-            if tc_num == 8:
+            elif tc_num == 8:
                 assert temp_spec.temperature == Decimal('297.08')
-            if tc_num == 9:
+            elif tc_num == 9:
                 assert temp_spec.temperature == Decimal('297.03')
-            if tc_num == 10:
+            elif tc_num == 10:
                 assert temp_spec.temperature == Decimal('297.65')
-            if tc_num == 11:
+            elif tc_num == 11:
                 assert temp_spec.temperature == Decimal('296.58')
-            if tc_num == 12:
+            elif tc_num == 12:
                 assert temp_spec.temperature == Decimal('297.42')
-            if tc_num == 13:
+            else:  # index must be 13
                 assert temp_spec.temperature == Decimal('296.36')
         else:  # index must be 2
             if tc_num == 4:
                 assert temp_spec.temperature == Decimal('296.58')
-            if tc_num == 5:
+            elif tc_num == 5:
                 assert temp_spec.temperature == Decimal('297.32')
-            if tc_num == 6:
+            elif tc_num == 6:
                 assert temp_spec.temperature == Decimal('297.07')
-            if tc_num == 7:
+            elif tc_num == 7:
                 assert temp_spec.temperature == Decimal('296.45')
-            if tc_num == 8:
+            elif tc_num == 8:
                 assert temp_spec.temperature == Decimal('297.08')
-            if tc_num == 9:
+            elif tc_num == 9:
                 assert temp_spec.temperature == Decimal('297.02')
-            if tc_num == 10:
+            elif tc_num == 10:
                 assert temp_spec.temperature == Decimal('297.65')
-            if tc_num == 11:
+            elif tc_num == 11:
                 assert temp_spec.temperature == Decimal('296.57')
-            if tc_num == 12:
+            elif tc_num == 12:
                 assert temp_spec.temperature == Decimal('297.42')
-            if tc_num == 13:
+            else:  # index must be 13
                 assert temp_spec.temperature == Decimal('296.36')
+
+
+@pytest.mark.parametrize('index', [0, 1, 2])
+def test_get_observation_sepc(tdms_access, index):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    tdms_access.connect(PATH)
+    # Act --------------------------------------------------------------------
+    results = tdms_access._get_observation_specs(index)
+    # Assert -----------------------------------------------------------------
+    for temp_spec in results.temperatures:
+        assert isinstance(temp_spec, TemperatureSpec)
+    if index == 0:
+        assert results.cap_man_ok is True
+        assert results.dew_point == Decimal('286.43')
+        assert results.idx == 1
+        assert results.mass == Decimal('0.0118974')
+        assert results.optidew_ok is True
+        assert results.pow_out == Decimal('-0.0011')
+        assert results.pow_ref == Decimal('-0.0011')
+        assert results.pressure == 100025
+        assert results.surface_temp == Decimal('296.02')
+    elif index == 1:
+        assert results.cap_man_ok is True
+        assert results.dew_point == Decimal('286.41')
+        assert results.idx == 2
+        assert results.mass == Decimal('0.0118974')
+        assert results.optidew_ok is True
+        assert results.pow_out == Decimal('-0.001')
+        assert results.pow_ref == Decimal('-0.0011')
+        assert results.pressure == 99981
+        assert results.surface_temp == Decimal('295.92')
+    else:  # index must be 2
+        assert results.cap_man_ok is True
+        assert results.dew_point == Decimal('286.46')
+        assert results.idx == 3
+        assert results.mass == Decimal('0.0118974')
+        assert results.optidew_ok is True
+        assert results.pow_out == Decimal('-0.0011')
+        assert results.pow_ref == Decimal('-0.0010')
+        assert results.pressure == 100016
+        assert results.surface_temp == Decimal('295.82')

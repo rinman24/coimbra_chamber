@@ -5,7 +5,7 @@ from decimal import Decimal
 from dacite import from_dict
 from nptdms import TdmsFile
 
-from chamber.access.sql.contracts import TemperatureSpec
+from chamber.access.sql.contracts import ObservationSpec, TemperatureSpec
 
 
 class TdmsAccess(object):
@@ -47,3 +47,19 @@ class TdmsAccess(object):
                 temperature_specs.append(this_spec)
 
         return temperature_specs
+
+    def _get_observation_specs(self, index):
+        data = self._data
+        observation_data = dict(
+            cap_man_ok=True if data.loc[index, 'CapManOk'] else False,
+            dew_point=Decimal(str(round(data.loc[index, 'DewPoint'], 2))),
+            idx=int(data.loc[index, 'Idx']),
+            mass=Decimal(str(round(data.loc[index, 'Mass'], 7))),
+            optidew_ok=True if data.loc[index, 'OptidewOk'] else False,
+            pow_out=Decimal(str(round(data.loc[index, 'PowOut'], 4))),
+            pow_ref=Decimal(str(round(data.loc[index, 'PowRef'], 4))),
+            pressure=int(data.loc[index, 'Pressure']),
+            surface_temp=Decimal(str(round(data.loc[index, 'SurfaceTemp'], 2))),
+            temperatures=self._get_temperature_specs(index))
+
+        return from_dict(ObservationSpec, observation_data)
