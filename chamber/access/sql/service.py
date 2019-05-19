@@ -87,7 +87,7 @@ class ChamberAccess(object):
         'temperatures': 6}
 
         """
-        pool_id = data_specs.pool_id
+        pool_id = data_specs.experiment.pool_id
         try:
             # look for the pool using the pool id
             session = self.Session()

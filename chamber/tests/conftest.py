@@ -144,7 +144,6 @@ def observation_spec():
 def data_spec(setting_spec, experiment_spec, observation_spec):
     """Return data specification for an entire experiment."""
     data = dict(
-        pool_id=1,
         setting=setting_spec,
         experiment=experiment_spec,
         observations=observation_spec)

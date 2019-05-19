@@ -193,6 +193,8 @@ def test_add_data(chamber_access, data_spec, pool_id):  # noqa: D103
     # NOTE: The tests above have already added the this to the database for
     # pool_id == 1, but not for pool_id == 999.
     changes = dict(pool_id=pool_id)
+    experimental_spec = replace(data_spec.experiment, **changes)
+    changes = dict(experiment=experimental_spec)
     data_spec = replace(data_spec, **changes)
     # Act --------------------------------------------------------------------
     result = chamber_access.add_data(data_spec)

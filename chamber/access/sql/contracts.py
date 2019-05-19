@@ -69,7 +69,6 @@ class ObservationSpec:
 class DataSpec:
     """Chamber data specification."""
 
-    pool_id: int
     setting: SettingSpec
     experiment: ExperimentSpec
     observations: List[ObservationSpec]
