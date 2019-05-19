@@ -84,7 +84,8 @@ def test_add_setting_that_already_exists(chamber_access, setting_spec):  # noqa:
 
 def test_add_experiment_that_does_not_exist(chamber_access, experiment_spec):  # noqa: D103
     # Act --------------------------------------------------------------------
-    experiment_id = chamber_access._add_experiment(experiment_spec)
+    setting_id = 1
+    experiment_id = chamber_access._add_experiment(experiment_spec, setting_id)
     # Assert -----------------------------------------------------------------
     assert experiment_id == 1
     # Now query result -------------------------------------------------------
@@ -106,9 +107,10 @@ def test_add_experiment_that_already_exists(chamber_access, experiment_spec):  #
     # Arrange ----------------------------------------------------------------
     # NOTE: The test above already added the experiment
     # NOTE: These tests are intended to be run sequently
-    chamber_access._add_experiment(experiment_spec)
+    setting_id = 1
+    chamber_access._add_experiment(experiment_spec, setting_id)
     # Act --------------------------------------------------------------------
-    new_experiment_id = chamber_access._add_experiment(experiment_spec)
+    new_experiment_id = chamber_access._add_experiment(experiment_spec, setting_id)
     # Assert -----------------------------------------------------------------
     assert new_experiment_id == 1
 

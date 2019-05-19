@@ -71,8 +71,7 @@ class TdmsAccess(object):
             author=self._properties['author'],
             datetime=self._properties['DateTime'],
             description=self._properties['description'],
-            pool_id=int(self._settings['TubeID']),
-            setting_id=setting_id)
+            pool_id=int(self._settings['TubeID']))
         return from_dict(ExperimentSpec, data)
 
     def _get_setting_specs(self):

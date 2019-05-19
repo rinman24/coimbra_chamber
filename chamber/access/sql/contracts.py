@@ -38,7 +38,6 @@ class ExperimentSpec:
     datetime: datetime
     description: str
     pool_id: int
-    setting_id: int
 
 
 @dataclass(frozen=True)

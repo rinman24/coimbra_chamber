@@ -163,7 +163,6 @@ def test_get_experiment_spec(tdms_access):  # noqa: D103
         2019, 5, 15, 20, 10, 29, 882475, tzinfo=utc)
     assert result.description == 'Test description 1.'
     assert result.pool_id == 1
-    assert result.setting_id == setting_id
 
 
 def test_get_setting_spec(tdms_access):  # noqa: D103

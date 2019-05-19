@@ -104,7 +104,7 @@ class ChamberAccess(object):
         else:
             # The pool is there so we can call the other functions
             setting_id = self._add_setting(data_specs.setting)
-            experiment_id = self._add_experiment(data_specs.experiment)
+            experiment_id = self._add_experiment(data_specs.experiment, setting_id)
             observations_dict = self._add_observations(
                 data_specs.observations, experiment_id)
             result = dict(
@@ -218,7 +218,7 @@ class ChamberAccess(object):
         finally:
             session.close()
 
-    def _add_experiment(self, experiment_spec):
+    def _add_experiment(self, experiment_spec, setting_id):
         """
         Add an experiment to the database and return its primary key.
 
@@ -250,7 +250,7 @@ class ChamberAccess(object):
                     datetime=experiment_spec.datetime,
                     description=experiment_spec.description,
                     pool_id=experiment_spec.pool_id,
-                    setting_id=experiment_spec.setting_id)
+                    setting_id=setting_id)
                 session.add(experiment_to_add)
                 session.commit()
                 return experiment_to_add.experiment_id

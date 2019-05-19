@@ -60,8 +60,7 @@ def experiment_spec():
         author='RHI',
         datetime=datetime(2019, 9, 24, 7, 45, 0),
         description='The description is descriptive.',
-        pool_id=1,
-        setting_id=1)
+        pool_id=1)
     experiment_spec = from_dict(ExperimentSpec, data)
     return experiment_spec
 
