@@ -164,3 +164,15 @@ def test_get_experiment_spec(tdms_access):  # noqa: D103
     assert result.description == 'Test description 1.'
     assert result.pool_id == 1
     assert result.setting_id == setting_id
+
+
+def test_get_setting_spec(tdms_access):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    tdms_access.connect(PATH)
+    # Act --------------------------------------------------------------------
+    result = tdms_access._get_setting_specs()
+    # Assert -----------------------------------------------------------------
+    assert result.duty == Decimal('0.0')
+    assert result.pressure == int(1e5)
+    assert result.temperature == Decimal('300.0')
+    assert result.time_step == Decimal('1.0')

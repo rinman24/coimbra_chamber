@@ -6,7 +6,7 @@ from dacite import from_dict
 from nptdms import TdmsFile
 
 from chamber.access.sql.contracts import ExperimentSpec, ObservationSpec
-from chamber.access.sql.contracts import TemperatureSpec
+from chamber.access.sql.contracts import SettingSpec, TemperatureSpec
 
 
 class TdmsAccess(object):
@@ -74,3 +74,12 @@ class TdmsAccess(object):
             pool_id=int(self._settings['TubeID']),
             setting_id=setting_id)
         return from_dict(ExperimentSpec, data)
+
+    def _get_setting_specs(self):
+        data = dict(
+            duty=Decimal(self._settings.DutyCycle[0]),
+            pressure=int(5e3*round(self._data.Pressure.mean()/5e3)),
+            temperature=Decimal(str(5*round(self._data.TC10.mean()/5))),
+            time_step=Decimal(str(self._settings.TimeStep[0])),
+            )
+        return from_dict(SettingSpec, data)
