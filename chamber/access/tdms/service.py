@@ -5,7 +5,8 @@ from decimal import Decimal
 from dacite import from_dict
 from nptdms import TdmsFile
 
-from chamber.access.sql.contracts import ObservationSpec, TemperatureSpec
+from chamber.access.sql.contracts import ExperimentSpec, ObservationSpec
+from chamber.access.sql.contracts import TemperatureSpec
 
 
 class TdmsAccess(object):
@@ -20,6 +21,7 @@ class TdmsAccess(object):
             self._tdms_file = TdmsFile(path)
             self._settings = self._tdms_file.object('Settings').as_dataframe()
             self._data = self._tdms_file.object('Data').as_dataframe()
+            self._properties = self._tdms_file.object().properties
         except FileNotFoundError as err:
             print(f'File not found: `{err}`')
 
@@ -63,3 +65,12 @@ class TdmsAccess(object):
             temperatures=self._get_temperature_specs(index))
 
         return from_dict(ObservationSpec, observation_data)
+
+    def _get_experiment_specs(self, setting_id):
+        data = dict(
+            author=self._properties['author'],
+            datetime=self._properties['DateTime'],
+            description=self._properties['description'],
+            pool_id=int(self._settings['TubeID']),
+            setting_id=setting_id)
+        return from_dict(ExperimentSpec, data)

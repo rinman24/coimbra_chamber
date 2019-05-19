@@ -1,7 +1,9 @@
 """Integration test suite for TdmsAccess."""
 
+from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
+from pytz import utc
 
 import pytest
 from nptdms import TdmsFile
@@ -147,3 +149,18 @@ def test_get_observation_sepc(tdms_access, index):  # noqa: D103
         assert results.pow_ref == Decimal('-0.0010')
         assert results.pressure == 100016
         assert results.surface_temp == Decimal('295.82')
+
+
+def test_get_experiment_spec(tdms_access):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    tdms_access.connect(PATH)
+    setting_id = 1
+    # Act --------------------------------------------------------------------
+    result = tdms_access._get_experiment_specs(setting_id)
+    # Assert -----------------------------------------------------------------
+    assert result.author == 'Test'
+    assert result.datetime == datetime(
+        2019, 5, 15, 20, 10, 29, 882475, tzinfo=utc)
+    assert result.description == 'Test description 1.'
+    assert result.pool_id == 1
+    assert result.setting_id == setting_id
