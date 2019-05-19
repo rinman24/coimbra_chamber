@@ -10,7 +10,7 @@ from nptdms import TdmsFile
 
 from chamber.access.sql.service import ChamberAccess
 from chamber.access.sql.contracts import DataSpec, ExperimentSpec, ObservationSpec
-from chamber.access.sql.contracts import PoolSpec, SettingSpec, TemperatureSpec
+from chamber.access.sql.contracts import TubeSpec, SettingSpec, TemperatureSpec
 from chamber.access.tdms.service import TdmsAccess
 
 
@@ -34,13 +34,13 @@ def tdms_access():
 
 
 @pytest.fixture('module')
-def pool_spec():
-    """Pool specification."""
+def tube_spec():
+    """Tube specification."""
     data = dict(
         inner_diameter=Decimal('0.1'), outer_diameter=Decimal('0.2'),
         height=Decimal('0.3'), material='test_material', mass=Decimal('0.4'))
-    pool_spec = from_dict(PoolSpec, data)
-    return pool_spec
+    tube_spec = from_dict(TubeSpec, data)
+    return tube_spec
 
 
 @pytest.fixture('module')
@@ -60,7 +60,7 @@ def experiment_spec():
         author='RHI',
         datetime=datetime(2019, 9, 24, 7, 45, 0),
         description='The description is descriptive.',
-        pool_id=1)
+        tube_id=1)
     experiment_spec = from_dict(ExperimentSpec, data)
     return experiment_spec
 

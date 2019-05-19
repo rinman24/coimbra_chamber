@@ -3,7 +3,7 @@
 from sqlalchemy import and_, create_engine, func
 from sqlalchemy.orm import sessionmaker
 
-from chamber.access.sql.models import Base, Experiment, Observation, Pool
+from chamber.access.sql.models import Base, Experiment, Observation, Tube
 from chamber.access.sql.models import Setting, Temperature
 from chamber.ifx.configuration import get_value
 
@@ -83,32 +83,32 @@ class ChamberAccess(object):
         >>> chamber_access = ChamberAccess()
         >>> result = chamber_access.add_data(data_spec)
         >>> result
-        {'pool_id': 1, 'setting_id': 1, 'experiment_id': 1, 'observations': 2,
+        {'tube_id': 1, 'setting_id': 1, 'experiment_id': 1, 'observations': 2,
         'temperatures': 6}
 
         """
-        pool_id = data_specs.experiment.pool_id
+        tube_id = data_specs.experiment.tube_id
         try:
-            # look for the pool using the pool id
+            # look for the tube using the tube id
             session = self.Session()
-            pool = session.query(Pool).filter(Pool.pool_id == pool_id).first()
+            tube = session.query(Tube).filter(Tube.tube_id == tube_id).first()
             session.close()
-            assert pool
+            assert tube
         except AssertionError:
             # some error and you just print out the results
             err_msg = (
-                'You must add your pool to the database: '
-                f'pool_id `{pool_id}` does not exist.')
+                'You must add your tube to the database: '
+                f'tube_id `{tube_id}` does not exist.')
             print(err_msg)
             return
         else:
-            # The pool is there so we can call the other functions
+            # The tube is there so we can call the other functions
             setting_id = self._add_setting(data_specs.setting)
             experiment_id = self._add_experiment(data_specs.experiment, setting_id)
             observations_dict = self._add_observations(
                 data_specs.observations, experiment_id)
             result = dict(
-                pool_id=pool_id,
+                tube_id=tube_id,
                 setting_id=setting_id,
                 experiment_id=experiment_id,
                 observations=observations_dict['observations'],
@@ -120,51 +120,51 @@ class ChamberAccess(object):
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
 
-    def _add_pool(self, pool_spec):
+    def _add_tube(self, tube_spec):
         """
-        Add a pool to the database and return its primary key.
+        Add a tube to the database and return its primary key.
 
-        If the pool already exists in the database, no new pool is added and
-        the primary key for the existing pool is returned.
+        If the tube already exists in the database, no new tube is added and
+        the primary key for the existing tube is returned.
 
         Parameters
         ----------
-        pool_spec : chamber.access.chamber.models.PoolSpec
-            Specification for the pool to be added.
+        tube_spec : chamber.access.chamber.models.TubeSpec
+            Specification for the tube to be added.
 
         Returns
         -------
         int
-            Primary key for the pool that was added.
+            Primary key for the tube that was added.
 
         """
         session = self.Session()
 
         try:
-            # Check if pool exists
-            query = session.query(Pool.pool_id).filter(
+            # Check if tube exists
+            query = session.query(Tube.tube_id).filter(
                 and_(
-                    Pool.inner_diameter == pool_spec.inner_diameter,
-                    Pool.outer_diameter == pool_spec.outer_diameter,
-                    Pool.height == pool_spec.height,
-                    Pool.material == pool_spec.material,
-                    Pool.mass == pool_spec.mass
+                    Tube.inner_diameter == tube_spec.inner_diameter,
+                    Tube.outer_diameter == tube_spec.outer_diameter,
+                    Tube.height == tube_spec.height,
+                    Tube.material == tube_spec.material,
+                    Tube.mass == tube_spec.mass
                     )
                 )
-            pool_id = query.first()
+            tube_id = query.first()
             # If not, insert it
-            if not pool_id:
-                pool_to_add = Pool(
-                    inner_diameter=pool_spec.inner_diameter,
-                    outer_diameter=pool_spec.outer_diameter,
-                    height=pool_spec.height,
-                    material=pool_spec.material,
-                    mass=pool_spec.mass)
-                session.add(pool_to_add)
+            if not tube_id:
+                tube_to_add = Tube(
+                    inner_diameter=tube_spec.inner_diameter,
+                    outer_diameter=tube_spec.outer_diameter,
+                    height=tube_spec.height,
+                    material=tube_spec.material,
+                    mass=tube_spec.mass)
+                session.add(tube_to_add)
                 session.commit()
-                return pool_to_add.pool_id
+                return tube_to_add.tube_id
             else:
-                return pool_id[0]
+                return tube_id[0]
         except:  # pragma: no cover
             session.rollback()
         finally:
@@ -249,7 +249,7 @@ class ChamberAccess(object):
                     author=experiment_spec.author,
                     datetime=experiment_spec.datetime,
                     description=experiment_spec.description,
-                    pool_id=experiment_spec.pool_id,
+                    tube_id=experiment_spec.tube_id,
                     setting_id=setting_id)
                 session.add(experiment_to_add)
                 session.commit()

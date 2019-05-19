@@ -6,7 +6,7 @@ from decimal import Decimal
 from dacite import from_dict
 import pytest
 
-from chamber.access.sql.models import Experiment, Observation, Pool
+from chamber.access.sql.models import Experiment, Observation, Tube
 from chamber.access.sql.models import Setting, Temperature
 
 
@@ -14,18 +14,18 @@ from chamber.access.sql.models import Setting, Temperature
 # ChamberAccess
 
 
-# _add_pool ------------------------------------------------------------------
+# _add_tube ------------------------------------------------------------------
 
 
-def test_add_pool_that_does_not_exist(chamber_access, pool_spec):  # noqa: D103
+def test_add_tube_that_does_not_exist(chamber_access, tube_spec):  # noqa: D103
     # Act --------------------------------------------------------------------
-    pool_id = chamber_access._add_pool(pool_spec)
+    tube_id = chamber_access._add_tube(tube_spec)
     # Assert -----------------------------------------------------------------
-    assert pool_id == 1
+    assert tube_id == 1
     # Now query result -------------------------------------------------------
     session = chamber_access.Session()
     try:
-        query = session.query(Pool).filter(Pool.material == 'test_material')
+        query = session.query(Tube).filter(Tube.material == 'test_material')
         result = query.one()
         session.commit()
         assert result.inner_diameter == Decimal('0.1000')
@@ -36,15 +36,15 @@ def test_add_pool_that_does_not_exist(chamber_access, pool_spec):  # noqa: D103
         session.close()
 
 
-def test_add_pool_that_already_exists(chamber_access, pool_spec):  # noqa: D103
+def test_add_tube_that_already_exists(chamber_access, tube_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    # NOTE: The test above already added the pool
+    # NOTE: The test above already added the tube
     # NOTE: These tests are intended to be run sequently
-    chamber_access._add_pool(pool_spec)
+    chamber_access._add_tube(tube_spec)
     # Act --------------------------------------------------------------------
-    new_pool_id = chamber_access._add_pool(pool_spec)
+    new_tube_id = chamber_access._add_tube(tube_spec)
     # Assert -----------------------------------------------------------------
-    assert new_pool_id == 1
+    assert new_tube_id == 1
 
 # _add_setting ---------------------------------------------------------------
 
@@ -97,7 +97,7 @@ def test_add_experiment_that_does_not_exist(chamber_access, experiment_spec):  #
         session.commit()
         assert result.author == 'RHI'
         assert result.description == 'The description is descriptive.'
-        assert result.pool_id == 1
+        assert result.tube_id == 1
         assert result.setting_id == 1
     finally:
         session.close()
@@ -187,20 +187,20 @@ def test_add_observations_that_already_exist(chamber_access, observation_spec): 
 
 # add_data -------------------------------------------------------------------
 
-@pytest.mark.parametrize('pool_id', [1, 999])
-def test_add_data(chamber_access, data_spec, pool_id):  # noqa: D103
+@pytest.mark.parametrize('tube_id', [1, 999])
+def test_add_data(chamber_access, data_spec, tube_id):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # NOTE: The tests above have already added the this to the database for
-    # pool_id == 1, but not for pool_id == 999.
-    changes = dict(pool_id=pool_id)
+    # tube_id == 1, but not for tube_id == 999.
+    changes = dict(tube_id=tube_id)
     experimental_spec = replace(data_spec.experiment, **changes)
     changes = dict(experiment=experimental_spec)
     data_spec = replace(data_spec, **changes)
     # Act --------------------------------------------------------------------
     result = chamber_access.add_data(data_spec)
     # Assert -----------------------------------------------------------------
-    if pool_id == 1:
-        assert result['pool_id'] == 1
+    if tube_id == 1:
+        assert result['tube_id'] == 1
         assert result['setting_id'] == 1
         assert result['experiment_id'] == 1
         assert result['observations'] == 2
