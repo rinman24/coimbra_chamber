@@ -5,7 +5,7 @@ from decimal import Decimal
 from dacite import from_dict
 from nptdms import TdmsFile
 
-from chamber.access.sql.contracts import ExperimentSpec, ObservationSpec
+from chamber.access.sql.contracts import DataSpec, ExperimentSpec, ObservationSpec
 from chamber.access.sql.contracts import SettingSpec, TemperatureSpec
 
 
@@ -66,7 +66,7 @@ class TdmsAccess(object):
 
         return from_dict(ObservationSpec, observation_data)
 
-    def _get_experiment_specs(self, setting_id):
+    def _get_experiment_specs(self):
         data = dict(
             author=self._properties['author'],
             datetime=self._properties['DateTime'],
@@ -82,3 +82,14 @@ class TdmsAccess(object):
             time_step=Decimal(str(self._settings.TimeStep[0])),
             )
         return from_dict(SettingSpec, data)
+
+    def _get_data_specs(self):
+        observations = []
+        for index in self._data.index:
+            observations.append(self._get_observation_specs(index))
+        data = dict(
+            setting=self._get_setting_specs(),
+            experiment=self._get_experiment_specs(),
+            observations=observations,
+            )
+        return from_dict(DataSpec, data)

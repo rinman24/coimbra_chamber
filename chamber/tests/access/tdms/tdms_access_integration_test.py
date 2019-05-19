@@ -154,9 +154,8 @@ def test_get_observation_sepc(tdms_access, index):  # noqa: D103
 def test_get_experiment_spec(tdms_access):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     tdms_access.connect(PATH)
-    setting_id = 1
     # Act --------------------------------------------------------------------
-    result = tdms_access._get_experiment_specs(setting_id)
+    result = tdms_access._get_experiment_specs()
     # Assert -----------------------------------------------------------------
     assert result.author == 'Test'
     assert result.datetime == datetime(
@@ -175,3 +174,20 @@ def test_get_setting_spec(tdms_access):  # noqa: D103
     assert result.pressure == int(1e5)
     assert result.temperature == Decimal('300.0')
     assert result.time_step == Decimal('1.0')
+
+
+def test_get_data_spec(tdms_access):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    tdms_access.connect(PATH)
+    # Act --------------------------------------------------------------------
+    result = tdms_access._get_data_specs()
+    # Assert -----------------------------------------------------------------
+    # Spot check values from each attribute.
+    assert result.setting.duty == Decimal('0')
+    assert result.experiment.datetime == datetime(
+        2019, 5, 15, 20, 10, 29, 882475, tzinfo=utc)
+    assert result.observations[0].pressure == 100025
+    assert result.observations[0].temperatures[0].thermocouple_num == 4
+    # Check the length of observations and temperatures
+    assert len(result.observations) == 3
+    assert len(result.observations[0].temperatures) == 10
