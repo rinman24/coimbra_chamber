@@ -10,8 +10,8 @@ from typing import List
 # Chamber DTOs
 
 @dataclass(frozen=True)
-class PoolSpec:
-    """Chamber pool specification."""
+class TubeSpec:
+    """Chamber tube specification."""
 
     inner_diameter: Decimal
     outer_diameter: Decimal
@@ -37,8 +37,7 @@ class ExperimentSpec:
     author: str
     datetime: datetime
     description: str
-    pool_id: int
-    setting_id: int
+    tube_id: int
 
 
 @dataclass(frozen=True)
@@ -63,13 +62,13 @@ class ObservationSpec:
     pow_ref: Decimal
     pressure: int
     temperatures: List[TemperatureSpec]
+    surface_temp: Decimal
 
 
 @dataclass(frozen=True)
 class DataSpec:
     """Chamber data specification."""
 
-    pool: PoolSpec
     setting: SettingSpec
     experiment: ExperimentSpec
     observations: List[ObservationSpec]

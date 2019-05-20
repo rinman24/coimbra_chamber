@@ -13,14 +13,14 @@ Base = declarative_base()
 metadata = Base.metadata
 
 
-class Pool(Base):
-    """Pool object definition."""
+class Tube(Base):
+    """Tube object definition."""
 
     # Metadata
-    __tablename__ = 'Pools'
+    __tablename__ = 'Tubes'
 
     # Columns
-    pool_id = Column(Integer, primary_key=True)
+    tube_id = Column(Integer, primary_key=True)
     inner_diameter = Column(Numeric(4, 4), nullable=False)
     outer_diameter = Column(Numeric(4, 4), nullable=False)
     height = Column(Numeric(4, 4), nullable=False)
@@ -28,11 +28,11 @@ class Pool(Base):
     mass = Column(Numeric(7, 7), nullable=False)
 
     # Children relationships
-    experiments = relationship('Experiment', back_populates='pool')
+    experiments = relationship('Experiment', back_populates='tube')
 
     def __repr__(self):  # noqa: D105
         return (
-            f'<Pool(inner_diameter={self.inner_diameter}, '
+            f'<Tube(inner_diameter={self.inner_diameter}, '
             f'outer_diameter={self.outer_diameter}, '
             f'height={self.height}, '
             f"material='{self.material}', "
@@ -76,11 +76,11 @@ class Experiment(Base):
     description = Column(Text, nullable=False)
 
     # Foreign keys
-    pool_id = Column(Integer, ForeignKey('Pools.pool_id'))
+    tube_id = Column(Integer, ForeignKey('Tubes.tube_id'))
     setting_id = Column(Integer, ForeignKey('Settings.setting_id'))
 
     # Parent relationships
-    pool = relationship('Pool', back_populates='experiments')
+    tube = relationship('Tube', back_populates='experiments')
     setting = relationship('Setting', back_populates='experiments')
 
     # Children relationships
@@ -113,6 +113,7 @@ class Observation(Base):
     pow_out = Column(Numeric(6, 4))
     pow_ref = Column(Numeric(6, 4))
     pressure = Column(Integer, nullable=False)
+    surface_temp = Column(Numeric(5, 2))
 
     # Foreign keys
     experiment_id = Column(

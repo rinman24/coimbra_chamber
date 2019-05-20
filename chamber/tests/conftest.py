@@ -1,36 +1,46 @@
-"""Test fixtures"""
+"""Test fixtures."""
 
 from datetime import datetime
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 from dacite import from_dict
+from nptdms import TdmsFile
 
 from chamber.access.sql.service import ChamberAccess
+from chamber.access.sql.contracts import DataSpec, ExperimentSpec, ObservationSpec
+from chamber.access.sql.contracts import TubeSpec, SettingSpec, TemperatureSpec
+from chamber.access.tdms.service import TdmsAccess
 
-from chamber.access.sql.contracts import ExperimentSpec, ObservationSpec
-from chamber.access.sql.contracts import PoolSpec, SettingSpec, TemperatureSpec
 
 # ----------------------------------------------------------------------------
 # Fixtures
 
 
 @pytest.fixture('module')
-def access():
+def chamber_access():
     """Chamber access fixture."""
-    access = ChamberAccess()
-    yield access
-    access._teardown()
+    chamber_access = ChamberAccess()
+    yield chamber_access
+    chamber_access._teardown()
 
 
 @pytest.fixture('module')
-def pool_spec():
-    """Pool specification."""
+def tdms_access():
+    """Tdms access fixture."""
+    tdms_access = TdmsAccess()
+    return tdms_access
+
+
+@pytest.fixture('module')
+def tube_spec():
+    """Tube specification."""
     data = dict(
         inner_diameter=Decimal('0.1'), outer_diameter=Decimal('0.2'),
         height=Decimal('0.3'), material='test_material', mass=Decimal('0.4'))
-    pool_spec = from_dict(PoolSpec, data)
-    return pool_spec
+    tube_spec = from_dict(TubeSpec, data)
+    return tube_spec
 
 
 @pytest.fixture('module')
@@ -50,14 +60,13 @@ def experiment_spec():
         author='RHI',
         datetime=datetime(2019, 9, 24, 7, 45, 0),
         description='The description is descriptive.',
-        pool_id=1,
-        setting_id=1)
+        tube_id=1)
     experiment_spec = from_dict(ExperimentSpec, data)
     return experiment_spec
 
 
 @pytest.fixture('module')
-def observation_specs():
+def observation_spec():
     """Observation specifications including temperatures."""
     # Create a list of DTOs
     # This will consist of two timesteps and three thermocouples
@@ -109,7 +118,8 @@ def observation_specs():
         pow_out=Decimal('0.0'),
         pow_ref=Decimal('0.0'),
         pressure=987654,
-        temperatures=[idx0_tc0, idx0_tc1, idx0_tc2])
+        temperatures=[idx0_tc0, idx0_tc1, idx0_tc2],
+        surface_temp=Decimal('280.0'))
     idx_0 = from_dict(ObservationSpec, data)
     # Idx = 1
     data = dict(
@@ -121,9 +131,21 @@ def observation_specs():
         pow_out=Decimal('0.0'),
         pow_ref=Decimal('0.0'),
         pressure=987000,
-        temperatures=[idx1_tc0, idx1_tc1, idx1_tc2])
+        temperatures=[idx1_tc0, idx1_tc1, idx1_tc2],
+        surface_temp=Decimal('280.2'))
     idx_1 = from_dict(ObservationSpec, data)
     # Now that we have the data we can construct a list of observations
-    observation_specs = [idx_0, idx_1]
+    observation_spec = [idx_0, idx_1]
 
-    return observation_specs
+    return observation_spec
+
+
+@pytest.fixture('function')
+def data_spec(setting_spec, experiment_spec, observation_spec):
+    """Return data specification for an entire experiment."""
+    data = dict(
+        setting=setting_spec,
+        experiment=experiment_spec,
+        observations=observation_spec)
+    data_spec = from_dict(DataSpec, data)
+    return data_spec

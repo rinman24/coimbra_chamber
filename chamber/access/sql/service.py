@@ -3,21 +3,13 @@
 from sqlalchemy import and_, create_engine, func
 from sqlalchemy.orm import sessionmaker
 
-from chamber.access.sql.models import Base, Experiment, Observation, Pool
+from chamber.access.sql.models import Base, Experiment, Observation, Tube
 from chamber.access.sql.models import Setting, Temperature
 from chamber.ifx.configuration import get_value
 
 
 class ChamberAccess(object):
-    """
-    Encapsulates all aspects of data access for an experiment.
-
-    Attributes
-    ----------
-    Session : sqlalchemy.orm.session.sessionmaker
-        Session factory bound to the object's internal engine.
-
-    """
+    """Encapsulates all aspects of data access for an experiment."""
 
     def __init__(self):
         """Create the SQLAlchemy engine for the MySQL database."""
@@ -53,68 +45,126 @@ class ChamberAccess(object):
     # Public methods: included in the API
 
     def add_data(self, data_specs):
-        """TODO docstring."""
-        pool_id = self._add_pool(data_specs.pool)
-        setting_id = self._add_setting(data_specs.setting)
-        experiment_id = self._add_experiment(data_specs.experiment)
-        observations_dict = self._add_observations(
-            data_specs.observations, experiment_id)
-        result = dict(
-            pool_id=pool_id,
-            setting_id=setting_id,
-            experiment_id=experiment_id,
-            observations=observations_dict['observations'],
-            temperatures=observations_dict['temperatures'])
-        return result
+        """
+        Add experimental data to the database.
+
+        This method does not rewite data that already exists in the databse.
+
+        NOTE: The tube must already exist in the database in order to add the
+        experimental data.
+
+        Parameters
+        ----------
+        data_specs : list of chamber.access.sql.contracts.DataSpec
+            All observations for a given experiment.
+
+        Returns
+        -------
+        dict of {str: int}
+            Dictionary summarizing the database insert.
+
+        See Also
+        --------
+        TdmsAccess.get_data_spec : Get a valid DataSpec from tdms file.
+
+        Notes
+        -----
+        You can use TdmsAccess to build a valid DataSpec object.
+
+        The example below assumes you already have a valid `DataSpec` object.
+        If you do not, the easiest way to get one is to call
+        `TdmsAccess.get_data_spec()` which will return a valid `DataSpec`
+        object to use as input.
+
+        Examples
+        --------
+        Assuming that you have a valid `DataSpec` object called `data_spec`
+        containing two observations with three temperatures each:
+        >>> chamber_access = ChamberAccess()
+        >>> result = chamber_access.add_data(data_spec)
+        >>> result
+        {'tube_id': 1, 'setting_id': 1, 'experiment_id': 1, 'observations': 2,
+        'temperatures': 6}
+
+        """
+        tube_id = data_specs.experiment.tube_id
+        try:
+            # look for the tube using the tube id
+            session = self.Session()
+            tube = session.query(Tube).filter(Tube.tube_id == tube_id).first()
+            session.close()
+            assert tube
+        except AssertionError:
+            # some error and you just print out the results
+            err_msg = (
+                'You must add your tube to the database: '
+                f'tube_id `{tube_id}` does not exist.')
+            print(err_msg)
+            return
+        else:
+            # The tube is there so we can call the other functions
+            setting_id = self._add_setting(data_specs.setting)
+            experiment_id = self._add_experiment(data_specs.experiment, setting_id)
+            observations_dict = self._add_observations(
+                data_specs.observations, experiment_id)
+            result = dict(
+                tube_id=tube_id,
+                setting_id=setting_id,
+                experiment_id=experiment_id,
+                observations=observations_dict['observations'],
+                temperatures=observations_dict['temperatures'])
+            return result
+        finally:
+            session.close()
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
 
-    def _add_pool(self, pool_spec):
+    def _add_tube(self, tube_spec):
         """
-        Add a pool to the database and return its primary key.
+        Add a tube to the database and return its primary key.
 
-        If the pool already exists in the database, no new pool is added and
-        the primary key for the existing pool is returned.
+        If the tube already exists in the database, no new tube is added and
+        the primary key for the existing tube is returned.
 
         Parameters
         ----------
-        pool_spec : chamber.access.chamber.models.PoolSpec
-            Specification for the pool to be added.
+        tube_spec : chamber.access.chamber.models.TubeSpec
+            Specification for the tube to be added.
 
         Returns
         -------
         int
-            Primary key for the pool that was added.
+            Primary key for the tube that was added.
 
         """
         session = self.Session()
 
         try:
-            # Check if pool exists
-            query = session.query(Pool.pool_id).filter(
+            # Check if tube exists
+            query = session.query(Tube.tube_id).filter(
                 and_(
-                    Pool.inner_diameter == pool_spec.inner_diameter,
-                    Pool.outer_diameter == pool_spec.outer_diameter,
-                    Pool.height == pool_spec.height,
-                    Pool.material == pool_spec.material,
-                    Pool.mass == pool_spec.mass
+                    Tube.inner_diameter == tube_spec.inner_diameter,
+                    Tube.outer_diameter == tube_spec.outer_diameter,
+                    Tube.height == tube_spec.height,
+                    Tube.material == tube_spec.material,
+                    Tube.mass == tube_spec.mass
                     )
                 )
-            pool_id = query.first()
+            tube_id = query.first()
             # If not, insert it
-            if not pool_id:
-                pool_to_add = Pool(
-                    inner_diameter=pool_spec.inner_diameter,
-                    outer_diameter=pool_spec.outer_diameter,
-                    height=pool_spec.height,
-                    material=pool_spec.material,
-                    mass=pool_spec.mass)
-                session.add(pool_to_add)
+            if not tube_id:
+                tube_to_add = Tube(
+                    inner_diameter=tube_spec.inner_diameter,
+                    outer_diameter=tube_spec.outer_diameter,
+                    height=tube_spec.height,
+                    material=tube_spec.material,
+                    mass=tube_spec.mass)
+                session.add(tube_to_add)
                 session.commit()
-                return pool_to_add.pool_id
+                return tube_to_add.tube_id
             else:
-                return pool_id[0]
+                return tube_id[0]
         except:  # pragma: no cover
             session.rollback()
         finally:
@@ -168,7 +218,7 @@ class ChamberAccess(object):
         finally:
             session.close()
 
-    def _add_experiment(self, experiment_spec):
+    def _add_experiment(self, experiment_spec, setting_id):
         """
         Add an experiment to the database and return its primary key.
 
@@ -199,8 +249,8 @@ class ChamberAccess(object):
                     author=experiment_spec.author,
                     datetime=experiment_spec.datetime,
                     description=experiment_spec.description,
-                    pool_id=experiment_spec.pool_id,
-                    setting_id=experiment_spec.setting_id)
+                    tube_id=experiment_spec.tube_id,
+                    setting_id=setting_id)
                 session.add(experiment_to_add)
                 session.commit()
                 return experiment_to_add.experiment_id
@@ -229,7 +279,7 @@ class ChamberAccess(object):
 
         Returns
         -------
-        TODO Update
+        dict of {str: int}
 
         """
         session = self.Session()
@@ -253,7 +303,8 @@ class ChamberAccess(object):
                         pow_out=observation.pow_out,
                         pow_ref=observation.pow_ref,
                         pressure=observation.pressure,
-                        experiment_id=experiment_id)
+                        experiment_id=experiment_id,
+                        surface_temp=observation.surface_temp)
                     # Append
                     objects.append(this_observation)
                     for temperature in observation.temperatures:
