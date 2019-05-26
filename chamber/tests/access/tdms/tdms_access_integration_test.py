@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from decimal import Decimal
-from pathlib import Path
 from pytz import utc
 
 import pytest
@@ -11,21 +10,16 @@ from pandas import DataFrame
 
 from chamber.access.tdms.service import TdmsAccess
 from chamber.access.sql.contracts import TemperatureSpec
-
-
-# Module level globals -------------------------------------------------------
-
-
-PATH = Path('chamber/tests/access/tdms/resources/test_1.tdms')
+from chamber.tests.conftest import tdms_path
 
 
 # TdmsAccess -----------------------------------------------------------------
 
 
-@pytest.mark.parametrize('filepath', [PATH, 'bad_path'])
+@pytest.mark.parametrize('filepath', [tdms_path, 'bad_path'])
 def test_connect(tdms_access, filepath):  # noqa: D103
     # Act --------------------------------------------------------------------
-    tdms_access.connect(filepath)
+    tdms_access._connect(filepath)
     # Assert -----------------------------------------------------------------
     if filepath:
         assert isinstance(tdms_access._tdms_file, TdmsFile)
@@ -38,7 +32,7 @@ def test_connect(tdms_access, filepath):  # noqa: D103
 @pytest.mark.parametrize('index', [0, 1, 2])
 def test_get_temperature_spec(tdms_access, index):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    tdms_access.connect(PATH)
+    tdms_access._connect(tdms_path)
     # Act --------------------------------------------------------------------
     results = tdms_access._get_temperature_specs(index)
     # Assert -----------------------------------------------------------------
@@ -113,7 +107,7 @@ def test_get_temperature_spec(tdms_access, index):  # noqa: D103
 @pytest.mark.parametrize('index', [0, 1, 2])
 def test_get_observation_sepc(tdms_access, index):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    tdms_access.connect(PATH)
+    tdms_access._connect(tdms_path)
     # Act --------------------------------------------------------------------
     results = tdms_access._get_observation_specs(index)
     # Assert -----------------------------------------------------------------
@@ -153,7 +147,7 @@ def test_get_observation_sepc(tdms_access, index):  # noqa: D103
 
 def test_get_experiment_spec(tdms_access):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    tdms_access.connect(PATH)
+    tdms_access._connect(tdms_path)
     # Act --------------------------------------------------------------------
     result = tdms_access._get_experiment_specs()
     # Assert -----------------------------------------------------------------
@@ -166,7 +160,7 @@ def test_get_experiment_spec(tdms_access):  # noqa: D103
 
 def test_get_setting_spec(tdms_access):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    tdms_access.connect(PATH)
+    tdms_access._connect(tdms_path)
     # Act --------------------------------------------------------------------
     result = tdms_access._get_setting_specs()
     # Assert -----------------------------------------------------------------
@@ -178,9 +172,8 @@ def test_get_setting_spec(tdms_access):  # noqa: D103
 
 def test_get_data_spec(tdms_access):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    tdms_access.connect(PATH)
     # Act --------------------------------------------------------------------
-    result = tdms_access._get_data_specs()
+    result = tdms_access.get_data_specs(tdms_path)
     # Assert -----------------------------------------------------------------
     # Spot check values from each attribute.
     assert result.setting.duty == Decimal('0')

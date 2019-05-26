@@ -15,8 +15,23 @@ class TdmsAccess(object):
     # ------------------------------------------------------------------------
     # Public methods: included in the API
 
-    def connect(self, path):
-        """Connect to a tdms file."""
+    def get_data_specs(self, path):
+        """Get tdms data."""
+        self._connect(path)
+        observations = []
+        for index in self._data.index:
+            observations.append(self._get_observation_specs(index))
+        data = dict(
+            setting=self._get_setting_specs(),
+            experiment=self._get_experiment_specs(),
+            observations=observations,
+            )
+        return from_dict(DataSpec, data)
+
+    # ------------------------------------------------------------------------
+    # Internal methods: not included in the API
+
+    def _connect(self, path):
         try:
             self._tdms_file = TdmsFile(path)
             self._settings = self._tdms_file.object('Settings').as_dataframe()
@@ -24,9 +39,6 @@ class TdmsAccess(object):
             self._properties = self._tdms_file.object().properties
         except FileNotFoundError as err:
             print(f'File not found: `{err}`')
-
-    # ------------------------------------------------------------------------
-    # Internal methods: not included in the API
 
     def _get_temperature_specs(self, index):
         temperature_specs = []
@@ -83,13 +95,3 @@ class TdmsAccess(object):
             )
         return from_dict(SettingSpec, data)
 
-    def _get_data_specs(self):
-        observations = []
-        for index in self._data.index:
-            observations.append(self._get_observation_specs(index))
-        data = dict(
-            setting=self._get_setting_specs(),
-            experiment=self._get_experiment_specs(),
-            observations=observations,
-            )
-        return from_dict(DataSpec, data)

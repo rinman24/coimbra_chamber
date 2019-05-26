@@ -15,6 +15,13 @@ from chamber.access.tdms.service import TdmsAccess
 
 
 # ----------------------------------------------------------------------------
+# Constants
+
+
+tdms_path = Path('chamber/tests/access/tdms/resources/test_1.tdms')
+
+
+# ----------------------------------------------------------------------------
 # Fixtures
 
 
