@@ -94,4 +94,3 @@ class TdmsAccess(object):
             time_step=Decimal(str(self._settings.TimeStep[0])),
             )
         return from_dict(SettingSpec, data)
-
