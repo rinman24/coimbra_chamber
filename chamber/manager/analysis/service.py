@@ -18,19 +18,21 @@ class AnalysisManager(object):
 
     def add_data(self):
         """Add data."""
-        path = self._get_path()
-        raw_data = self._exp_acc.get_raw_data(path)
+        path = self._get_path()  # None -> str
+        raw_data = self._exp_acc.get_raw_data(path)  # str -> DataSpec
         response = self._plt_util.plot(raw_data)
         if response:
             try:
-                response = self._exp_acc.persist_raw_data(raw_data)
+                response = self._exp_acc.persist_raw_data(raw_data)  # DTO -> DTO
             except:
                 print('Something went wrong.')
             else:
-                return response
+                return response  # DTO
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
 
     def _get_path(self):
-        return True
+        """Get path as a string."""
+        # TODO: Use Path to get a path string.
+        return 'path'
