@@ -16,7 +16,7 @@ class Observations:
 
     values: List  # List of observation values
     sigma: List  # Error bars not plotted if sum == 0
-    label: str = '' # Should be an empty string for abscissae
+    label: str = ''  # Should be an empty string for abscissae
 
 
 @dataclass(frozen=True)

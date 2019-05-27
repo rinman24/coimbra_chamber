@@ -22,22 +22,25 @@ class PlotUtility(object):
 
         # Get the plot
         plot = layout.plots[0]
+        for abs_, ord_ in zip(plot.abscissae, plot.ordinates):
+            # Get pointers to the values
+            x = abs_.values
+            sig_x = abs_.sigma
 
-        # Get pointers to the values
-        x = plot.abscissae[0].values
-        sig_x = plot.abscissae[0].sigma
-        y = plot.ordinates[0].values
-        sig_y = plot.ordinates[0].sigma
-        label = plot.ordinates[0].label
-        # Check if there are error bars present
-        if sum(sig_x) and sum(sig_y):
-            ax.errorbar(x, y, xerr=sig_x, yerr=sig_y, label=label)
-        elif sum(sig_y):
-            ax.errorbar(x, y, yerr=sig_y, label=label)
-        elif sum(sig_x):
-            ax.errorbar(x, y, xerr=sig_x, label=label)
-        else:
-            ax.plot(x, y, label=label)
+            y = ord_.values
+            sig_y = ord_.sigma
+
+            label = ord_.label
+
+            # Check if there are error bars present
+            if sum(sig_x) and sum(sig_y):
+                ax.errorbar(x, y, xerr=sig_x, yerr=sig_y, label=label)
+            elif sum(sig_y):
+                ax.errorbar(x, y, yerr=sig_y, label=label)
+            elif sum(sig_x):
+                ax.errorbar(x, y, xerr=sig_x, label=label)
+            else:
+                ax.plot(x, y, label=label)
 
         # Format plot
         ax.set(xlabel=plot.x_label, ylabel=plot.y_label, title=plot.title)

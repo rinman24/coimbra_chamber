@@ -38,15 +38,14 @@ def position_1():
     return dacite.from_dict(Observations, data)
 
 
-# @pytest.fixture(scope='function')
-# def position_2():
-#     """Create a position of car 2."""
-#     data = dict(
-#         values=[x**2.1 for x in range(10)],
-#         sigma=[0]*10,
-#         axis='position',
-#         label='car ')
-#     return dacite.from_dict(Observations, data)
+@pytest.fixture(scope='function')
+def position_2():
+    """Create a position of car 1."""
+    data = dict(
+        values=[x**2.1 for x in range(10)],
+        sigma=[0]*10,
+        label='car 2')
+    return dacite.from_dict(Observations, data)
 
 
 @pytest.fixture(scope='function')
@@ -55,7 +54,20 @@ def one_car_position_plot(time, position_1):
     data = dict(
         abscissae=[time],
         ordinates=[position_1],
-        title='Position with time',
+        title='Position with time of car 1.',
+        x_label='time',
+        y_label='position',
+        axis=0)
+    return dacite.from_dict(Plot, data)
+
+
+@pytest.fixture(scope='function')
+def two_car_position_plot(time, position_1, position_2):
+    """Create a one car position in time plot."""
+    data = dict(
+        abscissae=[time, time],
+        ordinates=[position_1, position_2],
+        title='Position with time of car 1 and 2.',
         x_label='time',
         y_label='position',
         axis=0)
@@ -131,11 +143,13 @@ def test_can_plot_abscissa_and_ordinate_errorbars(
     plt_util.plot(layout)
 
 
-def test_can_plot_multiple_plots_on_one_axis():  # noqa: D103
-    # [ ] Make a new plot to add to layout
-    # [ ] Add both plots to the layout
-    # [ ] Plot
-    assert True
+def test_can_plot_multiple_plots_on_one_axis(plt_util, two_car_position_plot):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    data = dict(rows=1, columns=1, plots=[two_car_position_plot])
+    layout = dacite.from_dict(Layout, data)
+
+    # Act --------------------------------------------------------------------
+    plt_util.plot(layout)
 
 
 def test_layout_length_2():  # noqa: D103
