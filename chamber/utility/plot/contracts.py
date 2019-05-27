@@ -11,8 +11,8 @@ from typing import List
 
 
 @dataclass(frozen=True)
-class Observations:
-    """Observations to plot on a single axis."""
+class DataSeries:
+    """DataSeries to plot on a single axis."""
 
     values: List  # List of observation values
     sigma: List  # Error bars not plotted if sum == 0
@@ -23,8 +23,8 @@ class Observations:
 class Plot:
     """Two dimensional plot."""
 
-    abscissae: List[Observations]  # Independent observations
-    ordinates: List[Observations]  # Dependent observations
+    abscissae: List[DataSeries]  # Independent data series
+    ordinates: List[DataSeries]  # Dependent data series
     title: str  # Title for the plot
     x_label: str  # x-label for the plot
     y_label: str  # y-label for the plot
