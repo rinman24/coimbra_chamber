@@ -24,30 +24,27 @@ class PlotUtility(object):
         plot = layout.plots[0]
 
         # Get pointers to the values
-        x = plot.abscissae.values
-        sig_x = plot.abscissae.sigma
-        y = plot.ordinates.values
-        sig_y = plot.ordinates.sigma
-        label = plot.ordinates.label
+        x = plot.abscissae[0].values
+        sig_x = plot.abscissae[0].sigma
+        y = plot.ordinates[0].values
+        sig_y = plot.ordinates[0].sigma
+        label = plot.ordinates[0].label
         # Check if there are error bars present
-        if sum(plot.abscissae.sigma) and sum(plot.ordinates.sigma):
+        if sum(sig_x) and sum(sig_y):
             ax.errorbar(x, y, xerr=sig_x, yerr=sig_y, label=label)
-        elif sum(plot.ordinates.sigma):
+        elif sum(sig_y):
             ax.errorbar(x, y, yerr=sig_y, label=label)
-        elif sum(plot.abscissae.sigma):
+        elif sum(sig_x):
             ax.errorbar(x, y, xerr=sig_x, label=label)
         else:
             ax.plot(x, y, label=label)
 
-        # Get fomatting information
-        xlabel = plot.abscissae.axis
-        ylabel = plot.ordinates.axis
-        title = plot.title
-        # set up the axis
-        ax.set(xlabel=xlabel, ylabel=ylabel, title=title)
+        # Format plot
+        ax.set(xlabel=plot.x_label, ylabel=plot.y_label, title=plot.title)
 
-        # add the legend
+        # Add the legend
         ax.legend()
+
         # Show the plot
         plt.show()
 

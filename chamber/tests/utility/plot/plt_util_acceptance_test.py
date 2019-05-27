@@ -24,11 +24,7 @@ def plt_util():
 @pytest.fixture(scope='function')
 def time():
     """Create a common time axis."""
-    data = dict(
-        values=list(range(10)),
-        sigma=[0]*10,
-        axis='time',
-        label='')
+    data = dict(values=list(range(10)), sigma=[0]*10)
     return dacite.from_dict(Coordinates, data)
 
 
@@ -38,18 +34,30 @@ def position_1():
     data = dict(
         values=[x**2 for x in range(10)],
         sigma=[0]*10,
-        axis='position',
         label='car 1')
     return dacite.from_dict(Coordinates, data)
+
+
+# @pytest.fixture(scope='function')
+# def position_2():
+#     """Create a position of car 2."""
+#     data = dict(
+#         values=[x**2.1 for x in range(10)],
+#         sigma=[0]*10,
+#         axis='position',
+#         label='car ')
+#     return dacite.from_dict(Coordinates, data)
 
 
 @pytest.fixture(scope='function')
 def one_car_position_plot(time, position_1):
     """Create a one car position in time plot."""
     data = dict(
-        abscissae=time,
-        ordinates=position_1,
+        abscissae=[time],
+        ordinates=[position_1],
         title='Position with time',
+        x_label='time',
+        y_label='position',
         axis=0)
     return dacite.from_dict(Plot, data)
 
@@ -76,7 +84,7 @@ def test_can_plot_ordinate_errorbars(
     # Adjust the uncertainty on the ordindate
     changes = dict(sigma=[5]*10)
     ordinates = dataclasses.replace(position_1, **changes)
-    changes = dict(ordinates=ordinates)
+    changes = dict(ordinates=[ordinates])
     plot = dataclasses.replace(one_car_position_plot, **changes)
 
     # Create the layout
@@ -92,7 +100,7 @@ def test_can_plot_abscissa_errorbars(
     # Adjust the uncertainty on the abscissa
     changes = dict(sigma=[0.5]*10)
     abscissae = dataclasses.replace(time, **changes)
-    changes = dict(abscissae=abscissae)
+    changes = dict(abscissae=[abscissae])
     plot = dataclasses.replace(one_car_position_plot, **changes)
 
     # Create the layout
@@ -112,7 +120,7 @@ def test_can_plot_abscissa_and_ordinate_errorbars(
     changes = dict(sigma=[5]*10)
     ordinates = dataclasses.replace(position_1, **changes)
 
-    changes = dict(abscissae=abscissae, ordinates=ordinates)
+    changes = dict(abscissae=[abscissae], ordinates=[ordinates])
     plot = dataclasses.replace(one_car_position_plot, **changes)
 
     # Create the layout
@@ -121,6 +129,13 @@ def test_can_plot_abscissa_and_ordinate_errorbars(
 
     # Act --------------------------------------------------------------------
     plt_util.plot(layout)
+
+
+def test_can_plot_multiple_plots_on_one_axis():  # noqa: D103
+    # [ ] Make a new plot to add to layout
+    # [ ] Add both plots to the layout
+    # [ ] Plot
+    assert True
 
 
 def test_layout_length_2():  # noqa: D103

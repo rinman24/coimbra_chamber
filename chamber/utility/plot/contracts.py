@@ -16,17 +16,18 @@ class Coordinates:
 
     values: List  # List of coordinate values
     sigma: List  # Error bars not plotted if sum == 0
-    axis: str  # Label for the axis
-    label: str  # Could be an empty string for abscissae
+    label: str = '' # Should be an empty string for abscissae
 
 
 @dataclass(frozen=True)
 class Plot:
     """Two dimensional plot."""
 
-    abscissae: Coordinates  # Independent coordinates
-    ordinates: Coordinates  # Dependent coordinates
+    abscissae: List[Coordinates]  # Independent coordinates
+    ordinates: List[Coordinates]  # Dependent coordinates
     title: str  # Title for the plot
+    x_label: str
+    y_label: str
     axis: int  # Location of the plot
 
 
