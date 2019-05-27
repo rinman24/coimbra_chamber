@@ -26,7 +26,7 @@ class PlotUtility(object):
         # Get pointers to the values
         x = plot.abscissae.values
         sig_x = plot.abscissae.sigma
-        y = plot.abscissae.values
+        y = plot.ordinates.values
         sig_y = plot.ordinates.sigma
         label = plot.ordinates.label
         # Check if there are error bars present

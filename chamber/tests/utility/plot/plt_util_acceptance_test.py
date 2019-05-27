@@ -36,7 +36,7 @@ def time():
 def position_1():
     """Create a position of car 1."""
     data = dict(
-        values=list(range(10)),
+        values=[x**2 for x in range(10)],
         sigma=[0]*10,
         axis='position',
         label='car 1')
@@ -90,7 +90,7 @@ def test_can_plot_abscissa_errorbars(
         plt_util, time, one_car_position_plot):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # Adjust the uncertainty on the abscissa
-    changes = dict(sigma=[1]*10)
+    changes = dict(sigma=[0.5]*10)
     abscissae = dataclasses.replace(time, **changes)
     changes = dict(abscissae=abscissae)
     plot = dataclasses.replace(one_car_position_plot, **changes)
@@ -106,7 +106,7 @@ def test_can_plot_abscissa_and_ordinate_errorbars(
         plt_util, time, position_1, one_car_position_plot):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # Adjust the uncertainty on the abscissa and the ordindate
-    changes = dict(sigma=[1]*10)
+    changes = dict(sigma=[0.5]*10)
     abscissae = dataclasses.replace(time, **changes)
 
     changes = dict(sigma=[5]*10)
@@ -121,3 +121,15 @@ def test_can_plot_abscissa_and_ordinate_errorbars(
 
     # Act --------------------------------------------------------------------
     plt_util.plot(layout)
+
+
+def test_layout_length_2():  # noqa: D103
+    assert True
+
+
+def test_layout_length_3():  # noqa: D103
+    pass
+
+
+def test_layout_length_4():  # noqa: D103
+    pass
