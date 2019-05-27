@@ -56,8 +56,7 @@ def one_car_position_plot(time, position_1):
         ordinates=[position_1],
         title='Position with time of car 1.',
         x_label='time',
-        y_label='position',
-        axis=0)
+        y_label='position')
     return dacite.from_dict(Plot, data)
 
 
@@ -69,8 +68,7 @@ def two_car_position_plot(time, position_1, position_2):
         ordinates=[position_1, position_2],
         title='Position with time of car 1 and 2.',
         x_label='time',
-        y_label='position',
-        axis=0)
+        y_label='position')
     return dacite.from_dict(Plot, data)
 
 
@@ -102,8 +100,7 @@ def two_car_velocity_plot(time, velocity_1, velocity_2):
         ordinates=[velocity_1, velocity_2],
         title='Velocity with time of car 1 and 2.',
         x_label='time',
-        y_label='velocity',
-        axis=0)
+        y_label='velocity')
     return dacite.from_dict(Plot, data)
 
 

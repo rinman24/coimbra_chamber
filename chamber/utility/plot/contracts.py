@@ -28,7 +28,6 @@ class Plot:
     title: str  # Title for the plot
     x_label: str  # x-label for the plot
     y_label: str  # y-label for the plot
-    axis: int  # Location of the plot
 
 
 @dataclass(frozen=True)
