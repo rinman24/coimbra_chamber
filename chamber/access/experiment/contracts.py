@@ -7,11 +7,11 @@ from typing import List
 
 
 # ----------------------------------------------------------------------------
-# Chamber DTOs
+# Experiment access DTOs
 
 @dataclass(frozen=True)
 class TubeSpec:
-    """Chamber tube specification."""
+    """Tube specification."""
 
     inner_diameter: Decimal
     outer_diameter: Decimal
@@ -22,7 +22,7 @@ class TubeSpec:
 
 @dataclass(frozen=True)
 class SettingSpec:
-    """Chamber setting specification."""
+    """Setting specification."""
 
     duty: Decimal
     pressure: int
@@ -32,7 +32,7 @@ class SettingSpec:
 
 @dataclass(frozen=True)
 class ExperimentSpec:
-    """Chamber experiment specifications."""
+    """Experiment specification."""
 
     author: str
     datetime: datetime
@@ -42,7 +42,7 @@ class ExperimentSpec:
 
 @dataclass(frozen=True)
 class TemperatureSpec:
-    """Chamber temperature specification."""
+    """Temperature specification."""
 
     thermocouple_num: int
     temperature: Decimal
@@ -51,7 +51,7 @@ class TemperatureSpec:
 
 @dataclass(frozen=True)
 class ObservationSpec:
-    """Chamber observation specification."""
+    """Observation specification."""
 
     cap_man_ok: bool
     dew_point: Decimal
@@ -67,7 +67,7 @@ class ObservationSpec:
 
 @dataclass(frozen=True)
 class DataSpec:
-    """Chamber data specification."""
+    """Data specification."""
 
     setting: SettingSpec
     experiment: ExperimentSpec
