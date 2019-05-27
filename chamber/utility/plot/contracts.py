@@ -26,8 +26,8 @@ class Plot:
     abscissae: List[Observations]  # Independent observations
     ordinates: List[Observations]  # Dependent observations
     title: str  # Title for the plot
-    x_label: str
-    y_label: str
+    x_label: str  # x-label for the plot
+    y_label: str  # y-label for the plot
     axis: int  # Location of the plot
 
 
@@ -35,5 +35,5 @@ class Plot:
 class Layout:
     """Layout of a figure."""
 
-    plots: List[Plot]  # List of plots to display
+    plots: List[Plot]  # List of plots to display (each on its own axis)
     style: str = ''  # valid pyplot.style

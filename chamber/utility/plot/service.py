@@ -19,38 +19,46 @@ class PlotUtility(object):
             plt.style.use('default')
 
         # Examine the length of plots to determine rows and columns
+        rows = len(layout.plots)
+        cols = 1
+        _, ax = plt.subplots(nrows=rows, ncols=cols)
+
+        # Flatten the ax nparray if we have more than 1 plot
         if len(layout.plots) == 1:
-            _, ax = plt.subplots(nrows=1, ncols=1)
+            axes = [ax]
+        else:
+            axes = ax.flatten()
 
-        # Get the plot
-        plot = layout.plots[0]
-        for abs_, ord_ in zip(plot.abscissae, plot.ordinates):
-            # Get pointers to the values
-            x = abs_.values
-            sig_x = abs_.sigma
+        # Iterate and plot
+        for plot, ax in zip(layout.plots, axes):
+            for abs_, ord_ in zip(plot.abscissae, plot.ordinates):
+                # Get pointers to the values
+                x = abs_.values
+                sig_x = abs_.sigma
 
-            y = ord_.values
-            sig_y = ord_.sigma
+                y = ord_.values
+                sig_y = ord_.sigma
 
-            label = ord_.label
+                label = ord_.label
 
-            # Check if there are error bars present
-            if sum(sig_x) and sum(sig_y):
-                ax.errorbar(x, y, xerr=sig_x, yerr=sig_y, label=label)
-            elif sum(sig_y):
-                ax.errorbar(x, y, yerr=sig_y, label=label)
-            elif sum(sig_x):
-                ax.errorbar(x, y, xerr=sig_x, label=label)
-            else:
-                ax.plot(x, y, label=label)
+                # Check if there are error bars present
+                if sum(sig_x) and sum(sig_y):
+                    ax.errorbar(x, y, xerr=sig_x, yerr=sig_y, label=label)
+                elif sum(sig_y):
+                    ax.errorbar(x, y, yerr=sig_y, label=label)
+                elif sum(sig_x):
+                    ax.errorbar(x, y, xerr=sig_x, label=label)
+                else:
+                    ax.plot(x, y, label=label)
 
-        # Format plot
-        ax.set(xlabel=plot.x_label, ylabel=plot.y_label, title=plot.title)
+            # Format plot
+            ax.set(xlabel=plot.x_label, ylabel=plot.y_label, title=plot.title)
 
-        # Add the legend
-        ax.legend()
+            # Add the legend
+            ax.legend()
 
         # Show the plot
+        plt.tight_layout()
         plt.show()
 
     # ------------------------------------------------------------------------
