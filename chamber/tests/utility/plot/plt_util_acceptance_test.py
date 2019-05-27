@@ -6,8 +6,8 @@ import dacite
 import pytest
 
 from chamber.utility.plot.contracts import (
-    Coordinates,
     Layout,
+    Observations,
     Plot)
 from chamber.utility.plot.service import PlotUtility
 
@@ -25,7 +25,7 @@ def plt_util():
 def time():
     """Create a common time axis."""
     data = dict(values=list(range(10)), sigma=[0]*10)
-    return dacite.from_dict(Coordinates, data)
+    return dacite.from_dict(Observations, data)
 
 
 @pytest.fixture(scope='function')
@@ -35,7 +35,7 @@ def position_1():
         values=[x**2 for x in range(10)],
         sigma=[0]*10,
         label='car 1')
-    return dacite.from_dict(Coordinates, data)
+    return dacite.from_dict(Observations, data)
 
 
 # @pytest.fixture(scope='function')
@@ -46,7 +46,7 @@ def position_1():
 #         sigma=[0]*10,
 #         axis='position',
 #         label='car ')
-#     return dacite.from_dict(Coordinates, data)
+#     return dacite.from_dict(Observations, data)
 
 
 @pytest.fixture(scope='function')

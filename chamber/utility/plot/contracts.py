@@ -11,10 +11,10 @@ from typing import List
 
 
 @dataclass(frozen=True)
-class Coordinates:
-    """Coordinates to plot on a single axis."""
+class Observations:
+    """Observations to plot on a single axis."""
 
-    values: List  # List of coordinate values
+    values: List  # List of observation values
     sigma: List  # Error bars not plotted if sum == 0
     label: str = '' # Should be an empty string for abscissae
 
@@ -23,8 +23,8 @@ class Coordinates:
 class Plot:
     """Two dimensional plot."""
 
-    abscissae: List[Coordinates]  # Independent coordinates
-    ordinates: List[Coordinates]  # Dependent coordinates
+    abscissae: List[Observations]  # Independent observations
+    ordinates: List[Observations]  # Dependent observations
     title: str  # Title for the plot
     x_label: str
     y_label: str
