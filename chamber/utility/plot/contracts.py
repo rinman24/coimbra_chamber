@@ -35,7 +35,5 @@ class Plot:
 class Layout:
     """Layout of a figure."""
 
-    rows: int  # Number of rows for the subplots
-    columns: int  # Number of columns for the subplots
     plots: List[Plot]  # List of plots to display
     style: str = ''  # valid pyplot.style

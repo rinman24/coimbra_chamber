@@ -17,8 +17,10 @@ class PlotUtility(object):
             plt.style.use(layout.style)
         else:
             plt.style.use('default')
-        # NOTE: We need to make this a bit more general here
-        _, ax = plt.subplots(nrows=layout.rows, ncols=layout.columns)
+
+        # Examine the length of plots to determine rows and columns
+        if len(layout.plots) == 1:
+            _, ax = plt.subplots(nrows=1, ncols=1)
 
         # Get the plot
         plot = layout.plots[0]

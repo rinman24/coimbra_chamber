@@ -81,9 +81,7 @@ def two_car_position_plot(time, position_1, position_2):
 @pytest.mark.parametrize('style', ['seaborn-darkgrid', '', 'dark_background'])
 def test_can_set_global_style(style, plt_util, one_car_position_plot):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    data = dict(
-        rows=1, columns=1, plots=[one_car_position_plot],
-        style=style)
+    data = dict(plots=[one_car_position_plot], style=style)
     layout = dacite.from_dict(Layout, data)
 
     # Act --------------------------------------------------------------------
@@ -100,7 +98,7 @@ def test_can_plot_ordinate_errorbars(
     plot = dataclasses.replace(one_car_position_plot, **changes)
 
     # Create the layout
-    data = dict(rows=1, columns=1, plots=[plot])
+    data = dict(plots=[plot])
     layout = dacite.from_dict(Layout, data)
     # Act --------------------------------------------------------------------
     plt_util.plot(layout)
@@ -116,7 +114,7 @@ def test_can_plot_abscissa_errorbars(
     plot = dataclasses.replace(one_car_position_plot, **changes)
 
     # Create the layout
-    data = dict(rows=1, columns=1, plots=[plot])
+    data = dict(plots=[plot])
     layout = dacite.from_dict(Layout, data)
     # Act --------------------------------------------------------------------
     plt_util.plot(layout)
@@ -136,7 +134,7 @@ def test_can_plot_abscissa_and_ordinate_errorbars(
     plot = dataclasses.replace(one_car_position_plot, **changes)
 
     # Create the layout
-    data = dict(rows=1, columns=1, plots=[plot])
+    data = dict(plots=[plot])
     layout = dacite.from_dict(Layout, data)
 
     # Act --------------------------------------------------------------------
@@ -145,7 +143,7 @@ def test_can_plot_abscissa_and_ordinate_errorbars(
 
 def test_can_plot_multiple_plots_on_one_axis(plt_util, two_car_position_plot):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    data = dict(rows=1, columns=1, plots=[two_car_position_plot])
+    data = dict(plots=[two_car_position_plot])
     layout = dacite.from_dict(Layout, data)
 
     # Act --------------------------------------------------------------------
