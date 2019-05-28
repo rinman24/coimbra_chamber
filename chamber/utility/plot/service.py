@@ -1,7 +1,9 @@
 """Plot utility service."""
 
 
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('TkAgg')  # Required in order to cooporate with tkinter
+import matplotlib.pyplot as plt  # noqa: E402
 
 
 class PlotUtility(object):
