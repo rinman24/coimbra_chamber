@@ -56,8 +56,9 @@ class PlotUtility(object):
             # Format plot
             ax.set(xlabel=plot.x_label, ylabel=plot.y_label, title=plot.title)
 
-            # Add the legend
-            ax.legend()
+            if plot.legend:
+                # Add the legend
+                ax.legend()
 
         # Show the plot
         plt.tight_layout()

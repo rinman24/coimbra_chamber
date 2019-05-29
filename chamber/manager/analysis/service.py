@@ -23,23 +23,22 @@ class AnalysisManager(object):
     def add_data(self):
         """Add data."""
         path = self._get_path()  # None -> str
-        data_spec = self._exp_acc.get_raw_data(path)  # str -> DataSpec
+        raw_data = self._exp_acc.get_raw_data(path)  # str -> DataSpec
         # Here we actually want to call experiment access plot raw data
-        layout = self._exp_acc.layout_raw_data(data_spec)
+        layout = self._exp_acc.layout_raw_data(raw_data)
         # Plot
         self._plt_util.plot(layout)
-        # NOTE: Before you go any further you need to make sure that you have
-        # a test for the exp_acc.layout_raw_data(data_spec)
-        # This is what is causing the failure.
-        # # Then the manager needs to ask for a response
-        # response = self._ask_to_proceed('Would you like to enter the experiment into the database?: ')
-        # if response:
-        #     try:
-        #         response = self._exp_acc.persist_raw_data(raw_data)  # DTO -> DTO
-        #     except:
-        #         print('Something went wrong.')
-        #     else:
-        #         return response  # DTO
+        # Then the manager needs to ask for a response
+        response = input(
+            'Would you like to enter the experiment into the database ([y]/n)? '
+            ).lower()
+        if (not response) or ('y' in response):
+            try:
+                response = self._exp_acc.add_raw_data(raw_data)  # DTO -> DTO
+            except Exception as e:
+                print(e)
+            else:
+                return response  # DTO
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API

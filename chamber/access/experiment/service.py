@@ -257,7 +257,9 @@ class ExperimentAccess(object):
             ordinates=ordinates,
             title='Temperature with time',
             x_label='time, [s]',
-            y_label='temperature, [K]')
+            y_label='temperature, [K]',
+            legend=False,
+            )
         plots['temperature'] = dacite.from_dict(Plot, data)
 
         # Pressure DataSeries

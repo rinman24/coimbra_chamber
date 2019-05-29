@@ -28,6 +28,7 @@ class Plot:
     title: str  # Title for the plot
     x_label: str  # x-label for the plot
     y_label: str  # y-label for the plot
+    legend: bool = True  # If True, show legend; else, do not
 
 
 @dataclass(frozen=True)
