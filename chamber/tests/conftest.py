@@ -173,89 +173,89 @@ def raw_layout():
 
     # Mass
     data = dict(
-        values=[Decimal('0.0118974'), Decimal('0.0118974'), Decimal('0.0118974')],
+        values=[Decimal('0.0129683'), Decimal('0.0129682'), Decimal('0.0129682')],
         sigma=[0, 0, 0],
         label='mass')
     data_series['mass'] = dacite.from_dict(DataSeries, data)
 
     # Thermocouples
     data = dict(
-        values=[Decimal('296.58'), Decimal('296.58'), Decimal('296.58')],
+        values=[Decimal('290.21'), Decimal('290.23'), Decimal('290.23')],
         sigma=[0, 0, 0],
         label='TC-4')
     data_series['TC4'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
-        values=[Decimal('297.33'), Decimal('297.32'), Decimal('297.32')],
+        values=[Decimal('289.9'), Decimal('289.9'), Decimal('289.91')],
         sigma=[0, 0, 0],
         label='TC-5')
     data_series['TC5'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
-        values=[Decimal('297.08'), Decimal('297.09'), Decimal('297.07')],
+        values=[Decimal('289.88'), Decimal('289.89'), Decimal('289.9')],
         sigma=[0, 0, 0],
         label='TC-6')
     data_series['TC6'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
-        values=[Decimal('296.46'), Decimal('296.45'), Decimal('296.45')],
+        values=[Decimal('290.21'), Decimal('290.23'), Decimal('290.23')],
         sigma=[0, 0, 0],
         label='TC-7')
     data_series['TC7'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
-        values=[Decimal('297.08'), Decimal('297.08'), Decimal('297.08')],
+        values=[Decimal('290.21'), Decimal('290.22'), Decimal('290.23')],
         sigma=[0, 0, 0],
         label='TC-8')
     data_series['TC8'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
-        values=[Decimal('297.03'), Decimal('297.03'), Decimal('297.02')],
+        values=[Decimal('289.82'), Decimal('289.83'), Decimal('289.84')],
         sigma=[0, 0, 0],
         label='TC-9')
     data_series['TC9'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
-        values=[Decimal('297.66'), Decimal('297.65'), Decimal('297.65')],
+        values=[Decimal('289.72'), Decimal('289.73'), Decimal('289.74')],
         sigma=[0, 0, 0],
         label='TC-10')
     data_series['TC10'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
-        values=[Decimal('296.59'), Decimal('296.58'), Decimal('296.57')],
+        values=[Decimal('289.91'), Decimal('289.92'), Decimal('289.93')],
         sigma=[0, 0, 0],
         label='TC-11')
     data_series['TC11'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
-        values=[Decimal('297.42'), Decimal('297.42'), Decimal('297.42')],
+        values=[Decimal('289.7'), Decimal('289.72'), Decimal('289.73')],
         sigma=[0, 0, 0],
         label='TC-12')
     data_series['TC12'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
-        values=[Decimal('296.36'), Decimal('296.36'), Decimal('296.36')],
+        values=[Decimal('290.1'), Decimal('290.11'), Decimal('290.11')],
         sigma=[0, 0, 0],
         label='TC-13')
     data_series['TC13'] = dacite.from_dict(DataSeries, data)
 
     # Dew point
     data = dict(
-        values=[Decimal('286.43'), Decimal('286.41'), Decimal('286.46')],
+        values=[Decimal('284.29'), Decimal('284.3'), Decimal('284.3')],
         sigma=[0, 0, 0],
         label='dew point')
     data_series['dew point'] = dacite.from_dict(DataSeries, data)
 
     # Surface temp
     data = dict(
-        values=[Decimal('296.02'), Decimal('295.92'), Decimal('295.82')],
+        values=[Decimal('291.34'), Decimal('291.3'), Decimal('291.22')],
         sigma=[0, 0, 0],
         label='surface temp')
     data_series['surface temp'] = dacite.from_dict(DataSeries, data)
 
     # Pressure
     data = dict(
-        values=[100025, 99981, 100016],
+        values=[99732, 99749, 99727],
         sigma=[0, 0, 0],
         label='pressure')
     data_series['pressure'] = dacite.from_dict(DataSeries, data)

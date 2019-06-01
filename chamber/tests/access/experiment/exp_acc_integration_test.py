@@ -246,67 +246,67 @@ def test_get_temperature_spec(exp_acc, index):  # noqa: D103
         tc_num = temp_spec.thermocouple_num
         if index == 0:
             if tc_num == 4:
-                assert temp_spec.temperature == Decimal('296.58')
+                assert temp_spec.temperature == Decimal('290.21')
             elif tc_num == 5:
-                assert temp_spec.temperature == Decimal('297.33')
+                assert temp_spec.temperature == Decimal('289.9')
             elif tc_num == 6:
-                assert temp_spec.temperature == Decimal('297.08')
+                assert temp_spec.temperature == Decimal('289.88')
             elif tc_num == 7:
-                assert temp_spec.temperature == Decimal('296.46')
+                assert temp_spec.temperature == Decimal('290.21')
             elif tc_num == 8:
-                assert temp_spec.temperature == Decimal('297.08')
+                assert temp_spec.temperature == Decimal('290.21')
             elif tc_num == 9:
-                assert temp_spec.temperature == Decimal('297.03')
+                assert temp_spec.temperature == Decimal('289.82')
             elif tc_num == 10:
-                assert temp_spec.temperature == Decimal('297.66')
+                assert temp_spec.temperature == Decimal('289.72')
             elif tc_num == 11:
-                assert temp_spec.temperature == Decimal('296.59')
+                assert temp_spec.temperature == Decimal('289.91')
             elif tc_num == 12:
-                assert temp_spec.temperature == Decimal('297.42')
+                assert temp_spec.temperature == Decimal('289.7')
             else:  # index must be 13
-                assert temp_spec.temperature == Decimal('296.36')
+                assert temp_spec.temperature == Decimal('290.1')
         elif index == 1:
             if tc_num == 4:
-                assert temp_spec.temperature == Decimal('296.58')
+                assert temp_spec.temperature == Decimal('290.23')
             elif tc_num == 5:
-                assert temp_spec.temperature == Decimal('297.32')
+                assert temp_spec.temperature == Decimal('289.9')
             elif tc_num == 6:
-                assert temp_spec.temperature == Decimal('297.09')
+                assert temp_spec.temperature == Decimal('289.89')
             elif tc_num == 7:
-                assert temp_spec.temperature == Decimal('296.45')
+                assert temp_spec.temperature == Decimal('290.23')
             elif tc_num == 8:
-                assert temp_spec.temperature == Decimal('297.08')
+                assert temp_spec.temperature == Decimal('290.22')
             elif tc_num == 9:
-                assert temp_spec.temperature == Decimal('297.03')
+                assert temp_spec.temperature == Decimal('289.83')
             elif tc_num == 10:
-                assert temp_spec.temperature == Decimal('297.65')
+                assert temp_spec.temperature == Decimal('289.73')
             elif tc_num == 11:
-                assert temp_spec.temperature == Decimal('296.58')
+                assert temp_spec.temperature == Decimal('289.92')
             elif tc_num == 12:
-                assert temp_spec.temperature == Decimal('297.42')
+                assert temp_spec.temperature == Decimal('289.72')
             else:  # index must be 13
-                assert temp_spec.temperature == Decimal('296.36')
+                assert temp_spec.temperature == Decimal('290.11')
         else:  # index must be 2
             if tc_num == 4:
-                assert temp_spec.temperature == Decimal('296.58')
+                assert temp_spec.temperature == Decimal('290.23')
             elif tc_num == 5:
-                assert temp_spec.temperature == Decimal('297.32')
+                assert temp_spec.temperature == Decimal('289.91')
             elif tc_num == 6:
-                assert temp_spec.temperature == Decimal('297.07')
+                assert temp_spec.temperature == Decimal('289.9')
             elif tc_num == 7:
-                assert temp_spec.temperature == Decimal('296.45')
+                assert temp_spec.temperature == Decimal('290.23')
             elif tc_num == 8:
-                assert temp_spec.temperature == Decimal('297.08')
+                assert temp_spec.temperature == Decimal('290.23')
             elif tc_num == 9:
-                assert temp_spec.temperature == Decimal('297.02')
+                assert temp_spec.temperature == Decimal('289.84')
             elif tc_num == 10:
-                assert temp_spec.temperature == Decimal('297.65')
+                assert temp_spec.temperature == Decimal('289.74')
             elif tc_num == 11:
-                assert temp_spec.temperature == Decimal('296.57')
+                assert temp_spec.temperature == Decimal('289.93')
             elif tc_num == 12:
-                assert temp_spec.temperature == Decimal('297.42')
+                assert temp_spec.temperature == Decimal('289.73')
             else:  # index must be 13
-                assert temp_spec.temperature == Decimal('296.36')
+                assert temp_spec.temperature == Decimal('290.11')
 
 
 @pytest.mark.parametrize('index', [0, 1, 2])
@@ -320,34 +320,34 @@ def test_get_observation_sepc(exp_acc, index):  # noqa: D103
         assert isinstance(temp_spec, TemperatureSpec)
     if index == 0:
         assert results.cap_man_ok is True
-        assert results.dew_point == Decimal('286.43')
+        assert results.dew_point == Decimal('284.29')
         assert results.idx == 1
-        assert results.mass == Decimal('0.0118974')
+        assert results.mass == Decimal('0.0129683')
         assert results.optidew_ok is True
-        assert results.pow_out == Decimal('-0.0011')
-        assert results.pow_ref == Decimal('-0.0011')
-        assert results.pressure == 100025
-        assert results.surface_temp == Decimal('296.02')
+        assert results.pow_out == Decimal('-0.0012')
+        assert results.pow_ref == Decimal('-0.0015')
+        assert results.pressure == 99732
+        assert results.surface_temp == Decimal('291.34')
     elif index == 1:
         assert results.cap_man_ok is True
-        assert results.dew_point == Decimal('286.41')
+        assert results.dew_point == Decimal('284.3')
         assert results.idx == 2
-        assert results.mass == Decimal('0.0118974')
-        assert results.optidew_ok is True
-        assert results.pow_out == Decimal('-0.001')
-        assert results.pow_ref == Decimal('-0.0011')
-        assert results.pressure == 99981
-        assert results.surface_temp == Decimal('295.92')
-    else:  # index must be 2
-        assert results.cap_man_ok is True
-        assert results.dew_point == Decimal('286.46')
-        assert results.idx == 3
-        assert results.mass == Decimal('0.0118974')
+        assert results.mass == Decimal('0.0129682')
         assert results.optidew_ok is True
         assert results.pow_out == Decimal('-0.0011')
-        assert results.pow_ref == Decimal('-0.0010')
-        assert results.pressure == 100016
-        assert results.surface_temp == Decimal('295.82')
+        assert results.pow_ref == Decimal('-0.0015')
+        assert results.pressure == 99749
+        assert results.surface_temp == Decimal('291.3')
+    else:  # index must be 2
+        assert results.cap_man_ok is True
+        assert results.dew_point == Decimal('284.3')
+        assert results.idx == 3
+        assert results.mass == Decimal('0.0129682')
+        assert results.optidew_ok is True
+        assert results.pow_out == Decimal('-0.0011')
+        assert results.pow_ref == Decimal('-0.0016')
+        assert results.pressure == 99727
+        assert results.surface_temp == Decimal('291.22')
 
 
 def test_get_experiment_spec(exp_acc):  # noqa: D103
@@ -356,9 +356,9 @@ def test_get_experiment_spec(exp_acc):  # noqa: D103
     # Act --------------------------------------------------------------------
     result = exp_acc._get_experiment_specs()
     # Assert -----------------------------------------------------------------
-    assert result.author == 'Test'
+    assert result.author == 'RHI'
     assert result.datetime == datetime.datetime(
-        2019, 5, 15, 20, 10, 29, 882475, tzinfo=utc)
+        2019, 6, 1, 17, 56, 34, 399828, tzinfo=utc)
     assert result.description == 'Test description 1.'
     assert result.tube_id == 1
 
@@ -371,7 +371,7 @@ def test_get_setting_spec(exp_acc):  # noqa: D103
     # Assert -----------------------------------------------------------------
     assert result.duty == Decimal('0.0')
     assert result.pressure == int(1e5)
-    assert result.temperature == Decimal('300.0')
+    assert result.temperature == Decimal('290')
     assert result.time_step == Decimal('1.0')
 
 
@@ -382,8 +382,8 @@ def test_get_raw_data(exp_acc):  # noqa: D103
     # Spot check values from each attribute.
     assert result.setting.duty == Decimal('0')
     assert result.experiment.datetime == datetime.datetime(
-        2019, 5, 15, 20, 10, 29, 882475, tzinfo=utc)
-    assert result.observations[0].pressure == 100025
+        2019, 6, 1, 17, 56, 34, 399828, tzinfo=utc)
+    assert result.observations[0].pressure == 99732
     assert result.observations[0].temperatures[0].thermocouple_num == 4
     # Check the length of observations and temperatures
     assert len(result.observations) == 3

@@ -143,7 +143,6 @@ class ExperimentAccess(object):
             session.close()
             assert tube
         except AssertionError:
-            # some error and you just print out the results
             err_msg = (
                 'You must add your tube to the database: '
                 f'tube_id `{tube_id}` does not exist.')
@@ -217,7 +216,6 @@ class ExperimentAccess(object):
             for i, temp_spec in enumerate(observation.temperatures):
                 observation
                 temp_lists[i].append(temp_spec.temperature)
-                pass
 
         # Now I can begin the list of ordinates for the temperature plot
         abscissae = []

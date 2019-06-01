@@ -1,4 +1,4 @@
-"""Smoke test suite for analysis manager."""
+"""Smoke test suite for data manager."""
 
 import pytest  # NOTE: Temporary
 
