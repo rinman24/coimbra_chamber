@@ -1,4 +1,4 @@
-"""Data contracts for experiment access."""
+"""Data contracts for data manager."""
 
 from dataclasses import dataclass
 

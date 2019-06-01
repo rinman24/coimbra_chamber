@@ -1,4 +1,4 @@
-"""Analysis manager service."""
+"""Data manager service."""
 
 import time
 import tkinter as tk
@@ -9,8 +9,8 @@ from chamber.access.experiment.service import ExperimentAccess
 from chamber.utility.plot.service import PlotUtility
 
 
-class AnalysisManager(object):
-    """Analysis manager."""
+class DataManager(object):
+    """Data manager."""
 
     def __init__(self):
         """Constructor."""
