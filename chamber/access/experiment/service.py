@@ -249,6 +249,15 @@ class ExperimentAccess(object):
         abscissae.append(idx)
         ordinates.append(data_series)
 
+        # IC temp
+        ic_temp = [obs.ic_temp for obs in data_specs.observations]
+        data = dict(
+            values=ic_temp, sigma=[0]*len(ic_temp),
+            label='IC temp')
+        data_series = dacite.from_dict(DataSeries, data)
+        abscissae.append(idx)
+        ordinates.append(data_series)
+
         # Make the temperature plot
         data = dict(
             abscissae=abscissae,
@@ -330,6 +339,7 @@ class ExperimentAccess(object):
             pow_ref=Decimal(str(round(data.loc[index, 'PowRef'], 4))),
             pressure=int(data.loc[index, 'Pressure']),
             surface_temp=Decimal(str(round(data.loc[index, 'SurfaceTemp'], 2))),
+            ic_temp=Decimal(str(round(data.loc[index, 'IC Temp'], 2))),
             temperatures=self._get_temperature_specs(index))
 
         return dacite.from_dict(ObservationSpec, observation_data)
@@ -534,7 +544,8 @@ class ExperimentAccess(object):
                         pow_ref=observation.pow_ref,
                         pressure=observation.pressure,
                         experiment_id=experiment_id,
-                        surface_temp=observation.surface_temp)
+                        surface_temp=observation.surface_temp,
+                        ic_temp=observation.ic_temp)
                     # Append
                     objects.append(this_observation)
                     for temperature in observation.temperatures:

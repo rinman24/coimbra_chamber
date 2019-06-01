@@ -154,6 +154,7 @@ def test_add_observations_that_do_not_exist(exp_acc, observation_spec):  # noqa:
                 assert observation.pow_ref == 0
                 assert observation.pressure == 987654
                 assert observation.surface_temp == Decimal('290.0')
+                assert observation.ic_temp == Decimal('291.00')
             elif observation.idx == 1:
                 assert not observation.cap_man_ok
                 assert observation.dew_point == Decimal('280.20')
@@ -164,6 +165,7 @@ def test_add_observations_that_do_not_exist(exp_acc, observation_spec):  # noqa:
                 assert observation.pow_ref == 0
                 assert observation.pressure == 987000
                 assert observation.surface_temp == Decimal('290.2')
+                assert observation.ic_temp == Decimal('291.20')
         query = session.query(Temperature)
         temperatures = query.filter(Temperature.experiment_id == experiment_id)
         for temperature in temperatures:
@@ -328,6 +330,7 @@ def test_get_observation_sepc(exp_acc, index):  # noqa: D103
         assert results.pow_ref == Decimal('-0.0015')
         assert results.pressure == 99732
         assert results.surface_temp == Decimal('291.34')
+        assert results.ic_temp == Decimal('294.86')
     elif index == 1:
         assert results.cap_man_ok is True
         assert results.dew_point == Decimal('284.3')
@@ -338,6 +341,7 @@ def test_get_observation_sepc(exp_acc, index):  # noqa: D103
         assert results.pow_ref == Decimal('-0.0015')
         assert results.pressure == 99749
         assert results.surface_temp == Decimal('291.3')
+        assert results.ic_temp == Decimal('294.86')
     else:  # index must be 2
         assert results.cap_man_ok is True
         assert results.dew_point == Decimal('284.3')
@@ -348,6 +352,7 @@ def test_get_observation_sepc(exp_acc, index):  # noqa: D103
         assert results.pow_ref == Decimal('-0.0016')
         assert results.pressure == 99727
         assert results.surface_temp == Decimal('291.22')
+        assert results.ic_temp == Decimal('294.86')
 
 
 def test_get_experiment_spec(exp_acc):  # noqa: D103

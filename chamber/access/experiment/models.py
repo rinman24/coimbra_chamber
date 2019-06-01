@@ -122,6 +122,7 @@ class Observation(Base):
     pow_ref = Column(Numeric(6, 4))
     pressure = Column(Integer, nullable=False)
     surface_temp = Column(Numeric(5, 2))
+    ic_temp = Column(Numeric(5, 2))
 
     # Foreign keys
     experiment_id = Column(

@@ -127,7 +127,8 @@ def observation_spec():
         pow_ref=Decimal('0.0'),
         pressure=987654,
         temperatures=[idx0_tc0, idx0_tc1, idx0_tc2],
-        surface_temp=Decimal('290.0'))
+        surface_temp=Decimal('290.0'),
+        ic_temp=Decimal('291.0'))
     idx_0 = dacite.from_dict(ObservationSpec, data)
     # Idx = 1
     data = dict(
@@ -140,7 +141,8 @@ def observation_spec():
         pow_ref=Decimal('0.0'),
         pressure=987000,
         temperatures=[idx1_tc0, idx1_tc1, idx1_tc2],
-        surface_temp=Decimal('290.2'))
+        surface_temp=Decimal('290.2'),
+        ic_temp=Decimal('291.2'))
     idx_1 = dacite.from_dict(ObservationSpec, data)
     # Now that we have the data we can construct a list of observations
     observation_spec = [idx_0, idx_1]

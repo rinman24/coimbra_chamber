@@ -63,6 +63,7 @@ class ObservationSpec:
     pressure: int
     temperatures: List[TemperatureSpec]
     surface_temp: Decimal
+    ic_temp: Decimal
 
 
 @dataclass(frozen=True)
