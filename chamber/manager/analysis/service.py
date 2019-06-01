@@ -21,7 +21,7 @@ class AnalysisManager(object):
     # Public methods: included in the API
 
     def add_data(self):
-        """Add data."""
+        """TODO: Make this interbnal. Not part of the api."""
         path = self._get_path()  # None -> str
         raw_data = self._exp_acc.get_raw_data(path)  # str -> DataSpec
         # Here we actually want to call experiment access plot raw data
