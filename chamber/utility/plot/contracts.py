@@ -25,6 +25,7 @@ class Axis:
 
     data: List[DataSeries]  # Data to plot on the axis
     y_label: str  # y-label for the axis
+    error_type: str = ''  # {discrete, continuous}
 
 
 @dataclass(frozen=True)

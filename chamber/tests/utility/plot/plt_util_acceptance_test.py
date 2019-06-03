@@ -138,14 +138,16 @@ def test_can_set_global_style(style, plt_util, one_car_position_plot):  # noqa: 
     plt_util.plot(layout)
 
 
+@pytest.mark.parametrize('error_type', ['', 'continuous'])
 def test_can_plot_ordinate_errorbars(
-        plt_util, position_1, one_car_position_axis, one_car_position_plot):  # noqa: D103
+        plt_util, position_1, one_car_position_axis, one_car_position_plot,
+        error_type):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # DataSeries
     changes = dict(sigma=[5]*10)
     position_1 = dataclasses.replace(position_1, **changes)
     # Axis
-    changes = dict(data=[position_1])
+    changes = dict(data=[position_1], error_type=error_type)
     one_car_position_axis = dataclasses.replace(one_car_position_axis, **changes)
     # Plot
     changes = dict(axes=[one_car_position_axis])
@@ -158,14 +160,19 @@ def test_can_plot_ordinate_errorbars(
     plt_util.plot(layout)
 
 
+@pytest.mark.parametrize('error_type', ['', 'continuous'])
 def test_can_plot_abscissa_errorbars(
-        plt_util, time, one_car_position_plot):  # noqa: D103
+        plt_util, time, one_car_position_axis, one_car_position_plot,
+        error_type):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # DataSeries
     changes = dict(sigma=[0.5]*10)
     time = dataclasses.replace(time, **changes)
+    # Axis
+    changes = dict(error_type=error_type)
+    one_car_position_axis = dataclasses.replace(one_car_position_axis, **changes)
     # Plot
-    changes = dict(abscissa=time)
+    changes = dict(abscissa=time, axes=[one_car_position_axis])
     one_car_position_plot = dataclasses.replace(one_car_position_plot, **changes)
 
     # Create the layout
@@ -175,8 +182,10 @@ def test_can_plot_abscissa_errorbars(
     plt_util.plot(layout)
 
 
+@pytest.mark.parametrize('error_type', ['', 'continuous'])
 def test_can_plot_abscissa_and_ordinate_errorbars(
-        plt_util, time, position_1, one_car_position_axis, one_car_position_plot):  # noqa: D103
+        plt_util, time, position_1, one_car_position_axis,
+        one_car_position_plot, error_type):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # DataSeries
     changes = dict(sigma=[0.5]*10)
@@ -184,7 +193,7 @@ def test_can_plot_abscissa_and_ordinate_errorbars(
     changes = dict(sigma=[5]*10)
     position_1 = dataclasses.replace(position_1, **changes)
     # Axis
-    changes = dict(data=[position_1])
+    changes = dict(data=[position_1], error_type=error_type)
     one_car_position_axis = dataclasses.replace(one_car_position_axis, **changes)
     # Plot
     changes = dict(abscissa=time, axes=[one_car_position_axis])

@@ -4,6 +4,7 @@
 import matplotlib
 matplotlib.use('TkAgg')  # Required in order to cooporate with tkinter
 import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
 
 
 class PlotUtility(object):
@@ -33,8 +34,8 @@ class PlotUtility(object):
 
         # Iterate and plot
         for plot, ax in zip(layout.plots, axes):
-            x = plot.abscissa.values
-            sig_x = plot.abscissa.sigma
+            x = np.array(plot.abscissa.values)
+            sig_x = np.array(plot.abscissa.sigma)
             for count, y_ax in enumerate(plot.axes):
                 # If this is the first axis then just plot
                 if count == 0:
@@ -43,16 +44,33 @@ class PlotUtility(object):
                 else:  # We need a new yaxis that shares the x-axis
                     this_ax = ax.twinx()
                 for data in y_ax.data:
-                    y = data.values
-                    sig_y = data.sigma
+                    y = np.array(data.values)
+                    sig_y = np.array(data.sigma)
                     label = data.label
                     # Check if the error bars are present
                     if sum(sig_x) and sum(sig_y):
-                        this_ax.errorbar(x, y, xerr=sig_x, yerr=sig_y, label=label)
+                        if y_ax.error_type.lower() == 'continuous':
+                            this_ax.plot(x, y)
+                            this_ax.fill_between(
+                                x, y-sig_y, y+sig_y, color='gray', alpha=0.2)
+                            this_ax.fill_betweenx(
+                                y, x-sig_x, x+sig_x, color='gray', alpha=0.2)
+                        else:
+                            this_ax.errorbar(x, y, xerr=sig_x, yerr=sig_y, label=label)
                     elif sum(sig_y):
-                        this_ax.errorbar(x, y, yerr=sig_y, label=label)
+                        if y_ax.error_type.lower() == 'continuous':
+                            this_ax.plot(x, y)
+                            this_ax.fill_between(
+                                x, y-sig_y, y+sig_y, color='gray', alpha=0.2)
+                        else:
+                            this_ax.errorbar(x, y, yerr=sig_y, label=label)
                     elif sum(sig_x):
-                        this_ax.errorbar(x, y, xerr=sig_x, label=label)
+                        if y_ax.error_type.lower() == 'continuous':
+                            this_ax.plot(x, y)
+                            this_ax.fill_betweenx(
+                                y, x-sig_x, x+sig_x, color='gray', alpha=0.2)
+                        else:
+                            this_ax.errorbar(x, y, xerr=sig_x, label=label)
                     else:
                         this_ax.plot(x, y, label=label)
                 # Format the y-axis before moving on
