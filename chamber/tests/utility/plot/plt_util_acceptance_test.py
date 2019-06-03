@@ -6,6 +6,7 @@ import dacite
 import pytest
 
 from chamber.utility.plot.contracts import (
+    Axis,
     DataSeries,
     Layout,
     Plot)
@@ -24,7 +25,7 @@ def plt_util():
 @pytest.fixture(scope='function')
 def time():
     """Create a common time axis."""
-    data = dict(values=list(range(10)), sigma=[0]*10)
+    data = dict(values=list(range(10)))
     return dacite.from_dict(DataSeries, data)
 
 
@@ -33,7 +34,6 @@ def position_1():
     """Create position of car 1."""
     data = dict(
         values=[x**2 for x in range(10)],
-        sigma=[0]*10,
         label='car 1')
     return dacite.from_dict(DataSeries, data)
 
@@ -43,32 +43,45 @@ def position_2():
     """Create position of car 2."""
     data = dict(
         values=[x**2.1 for x in range(10)],
-        sigma=[0]*10,
         label='car 2')
     return dacite.from_dict(DataSeries, data)
 
 
 @pytest.fixture(scope='function')
-def one_car_position_plot(time, position_1):
+def one_car_position_axis(position_1):
+    """Create a one car position in time axis."""
+    data = dict(
+        data=[position_1],
+        y_label='position')
+    return dacite.from_dict(Axis, data)
+
+
+@pytest.fixture(scope='function')
+def one_car_position_plot(time, one_car_position_axis):
     """Create a one car position in time plot."""
     data = dict(
-        abscissae=[time],
-        ordinates=[position_1],
-        title='Position with time of car 1.',
-        x_label='time',
-        y_label='position')
+        abscissa=time,
+        axes=[one_car_position_axis],
+        x_label='time')
     return dacite.from_dict(Plot, data)
 
 
 @pytest.fixture(scope='function')
-def two_car_position_plot(time, position_1, position_2):
+def two_car_position_axis(position_1, position_2):
+    """Create a two car position in time axis."""
+    data = dict(
+        data=[position_1, position_2],
+        y_label='position')
+    return dacite.from_dict(Axis, data)
+
+
+@pytest.fixture(scope='function')
+def two_car_position_plot(time, two_car_position_axis):
     """Create a two car position in time plot."""
     data = dict(
-        abscissae=[time, time],
-        ordinates=[position_1, position_2],
-        title='Position with time of car 1 and 2.',
-        x_label='time',
-        y_label='position')
+        abscissa=time,
+        axes=[two_car_position_axis],
+        x_label='time')
     return dacite.from_dict(Plot, data)
 
 
@@ -93,14 +106,21 @@ def velocity_2():
 
 
 @pytest.fixture(scope='function')
-def two_car_velocity_plot(time, velocity_1, velocity_2):
+def two_car_velocity_axis(velocity_1, velocity_2):
+    """Create a two car velocity in time axis."""
+    data = dict(
+        data=[velocity_1, velocity_2],
+        y_label='velocity')
+    return dacite.from_dict(Axis, data)
+
+
+@pytest.fixture(scope='function')
+def two_car_velocity_plot(time, two_car_velocity_axis):
     """Create a two car velocity in time plot."""
     data = dict(
-        abscissae=[time, time],
-        ordinates=[velocity_1, velocity_2],
-        title='Velocity with time of car 1 and 2.',
-        x_label='time',
-        y_label='velocity')
+        abscissa=time,
+        axes=[two_car_velocity_axis],
+        x_label='time')
     return dacite.from_dict(Plot, data)
 
 
@@ -119,16 +139,20 @@ def test_can_set_global_style(style, plt_util, one_car_position_plot):  # noqa: 
 
 
 def test_can_plot_ordinate_errorbars(
-        plt_util, position_1, one_car_position_plot):  # noqa: D103
+        plt_util, position_1, one_car_position_axis, one_car_position_plot):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    # Adjust the uncertainty on the ordindate
+    # DataSeries
     changes = dict(sigma=[5]*10)
-    ordinates = dataclasses.replace(position_1, **changes)
-    changes = dict(ordinates=[ordinates])
-    plot = dataclasses.replace(one_car_position_plot, **changes)
+    position_1 = dataclasses.replace(position_1, **changes)
+    # Axis
+    changes = dict(data=[position_1])
+    one_car_position_axis = dataclasses.replace(one_car_position_axis, **changes)
+    # Plot
+    changes = dict(axes=[one_car_position_axis])
+    one_car_position_plot = dataclasses.replace(one_car_position_plot, **changes)
 
     # Create the layout
-    data = dict(plots=[plot])
+    data = dict(plots=[one_car_position_plot])
     layout = dacite.from_dict(Layout, data)
     # Act --------------------------------------------------------------------
     plt_util.plot(layout)
@@ -137,36 +161,38 @@ def test_can_plot_ordinate_errorbars(
 def test_can_plot_abscissa_errorbars(
         plt_util, time, one_car_position_plot):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    # Adjust the uncertainty on the abscissa
+    # DataSeries
     changes = dict(sigma=[0.5]*10)
-    abscissae = dataclasses.replace(time, **changes)
-    changes = dict(abscissae=[abscissae])
-    plot = dataclasses.replace(one_car_position_plot, **changes)
+    time = dataclasses.replace(time, **changes)
+    # Plot
+    changes = dict(abscissa=time)
+    one_car_position_plot = dataclasses.replace(one_car_position_plot, **changes)
 
     # Create the layout
-    data = dict(plots=[plot])
+    data = dict(plots=[one_car_position_plot])
     layout = dacite.from_dict(Layout, data)
     # Act --------------------------------------------------------------------
     plt_util.plot(layout)
 
 
 def test_can_plot_abscissa_and_ordinate_errorbars(
-        plt_util, time, position_1, one_car_position_plot):  # noqa: D103
+        plt_util, time, position_1, one_car_position_axis, one_car_position_plot):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    # Adjust the uncertainty on the abscissa and the ordindate
+    # DataSeries
     changes = dict(sigma=[0.5]*10)
-    abscissae = dataclasses.replace(time, **changes)
-
+    time = dataclasses.replace(time, **changes)
     changes = dict(sigma=[5]*10)
-    ordinates = dataclasses.replace(position_1, **changes)
-
-    changes = dict(abscissae=[abscissae], ordinates=[ordinates])
-    plot = dataclasses.replace(one_car_position_plot, **changes)
+    position_1 = dataclasses.replace(position_1, **changes)
+    # Axis
+    changes = dict(data=[position_1])
+    one_car_position_axis = dataclasses.replace(one_car_position_axis, **changes)
+    # Plot
+    changes = dict(abscissa=time, axes=[one_car_position_axis])
+    one_car_position_plot = dataclasses.replace(one_car_position_plot, **changes)
 
     # Create the layout
-    data = dict(plots=[plot])
+    data = dict(plots=[one_car_position_plot])
     layout = dacite.from_dict(Layout, data)
-
     # Act --------------------------------------------------------------------
     plt_util.plot(layout)
 
@@ -212,6 +238,21 @@ def test_layout_length_4(
         plots=[two_car_position_plot, two_car_velocity_plot,
                two_car_position_plot, two_car_velocity_plot],
         style='grayscale')
+    layout = dacite.from_dict(Layout, data)
+
+    # Act --------------------------------------------------------------------
+    plt_util.plot(layout)
+
+
+def test_can_plot_two_y_axis_on_single_plot(
+        plt_util, two_car_position_axis, two_car_velocity_axis,
+        two_car_position_plot):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    # Plot
+    changes = dict(axes=[two_car_position_axis, two_car_velocity_axis])
+    plot = dataclasses.replace(two_car_position_plot, **changes)
+
+    data = dict(plots=[plot])
     layout = dacite.from_dict(Layout, data)
 
     # Act --------------------------------------------------------------------

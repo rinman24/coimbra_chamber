@@ -33,33 +33,32 @@ class PlotUtility(object):
 
         # Iterate and plot
         for plot, ax in zip(layout.plots, axes):
-            for abs_, ord_ in zip(plot.abscissae, plot.ordinates):
-                # Get pointers to the values
-                x = abs_.values
-                sig_x = abs_.sigma
-
-                y = ord_.values
-                sig_y = ord_.sigma
-
-                label = ord_.label
-
-                # Check if there are error bars present
-                if sum(sig_x) and sum(sig_y):
-                    ax.errorbar(x, y, xerr=sig_x, yerr=sig_y, label=label)
-                elif sum(sig_y):
-                    ax.errorbar(x, y, yerr=sig_y, label=label)
-                elif sum(sig_x):
-                    ax.errorbar(x, y, xerr=sig_x, label=label)
-                else:
-                    ax.plot(x, y, label=label)
-
-            # Format plot
-            ax.set(xlabel=plot.x_label, ylabel=plot.y_label, title=plot.title)
-
-            if plot.legend:
-                # Add the legend
-                ax.legend()
-
+            x = plot.abscissa.values
+            sig_x = plot.abscissa.sigma
+            for count, y_ax in enumerate(plot.axes):
+                # If this is the first axis then just plot
+                if count == 0:
+                    this_ax = ax
+                    this_ax.set(xlabel=plot.x_label)
+                else:  # We need a new yaxis that shares the x-axis
+                    this_ax = ax.twinx()
+                for data in y_ax.data:
+                    y = data.values
+                    sig_y = data.sigma
+                    label = data.label
+                    # Check if the error bars are present
+                    if sum(sig_x) and sum(sig_y):
+                        this_ax.errorbar(x, y, xerr=sig_x, yerr=sig_y, label=label)
+                    elif sum(sig_y):
+                        this_ax.errorbar(x, y, yerr=sig_y, label=label)
+                    elif sum(sig_x):
+                        this_ax.errorbar(x, y, xerr=sig_x, label=label)
+                    else:
+                        this_ax.plot(x, y, label=label)
+                # Format the y-axis before moving on
+                this_ax.set(ylabel=y_ax.y_label)
+                if plot.legend:
+                    this_ax.legend()
         # Show the plot
         plt.tight_layout()
         plt.show()

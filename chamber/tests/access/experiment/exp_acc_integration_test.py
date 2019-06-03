@@ -402,18 +402,7 @@ def test_layout_raw_data(exp_acc, raw_layout):  # noqa: D103
     layout = exp_acc.layout_raw_data(raw_data)
     # Assert -----------------------------------------------------------------
     assert layout.style == raw_layout.style
-    # mass
+    # mass and temperature
     assert layout.plots[0] == raw_layout.plots[0]
-    # temperature
-    # NOTE: there are 12 plots in general
-    # NOTE: temperature is broken out to make de-bugging of tests easier.
-    result_plots = layout.plots[1]
-    expected_plots = raw_layout.plots[1]
-    assert result_plots.title == expected_plots.title
-    assert result_plots.x_label == expected_plots.x_label
-    assert result_plots.y_label == expected_plots.y_label
-    for i in range(len(expected_plots.abscissae)):
-        assert result_plots.abscissae[i] == expected_plots.abscissae[i]
-        assert result_plots.ordinates[i] == expected_plots.ordinates[i]
     # pressure
-    assert layout.plots[2] == raw_layout.plots[2]
+    assert layout.plots[1] == raw_layout.plots[1]

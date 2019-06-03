@@ -23,6 +23,7 @@ from chamber.access.experiment.contracts import (
     TemperatureSpec)
 
 from chamber.utility.plot.contracts import (
+    Axis,
     DataSeries,
     Layout,
     Plot)
@@ -184,30 +185,20 @@ class ExperimentAccess(object):
         """
         # Idx DataSeries
         idx = [obs.idx for obs in data_specs.observations]
-        data = dict(
-            values=idx,
-            sigma=[0]*len(idx))
+        data = dict(values=idx)
         idx = dacite.from_dict(DataSeries, data)
 
         # Mass DataSeries
         mass = [obs.mass for obs in data_specs.observations]
-        data = dict(
-            values=mass,
-            sigma=[0]*len(idx.values),
-            label='mass')
+        data = dict(values=mass, label='mass')
         mass = dacite.from_dict(DataSeries, data)
 
-        plots = dict()
-        # Mass Plot
-        data = dict(
-            abscissae=[idx],
-            ordinates=[mass],
-            title='Mass with time',
-            x_label='time, [s]',
-            y_label='mass, [kg]')
-        plots['mass'] = dacite.from_dict(Plot, data)
+        # Mass Axis
+        axes = dict()
+        data = dict(data=[mass], y_label='mass, [kg]')
+        axes['mass'] = dacite.from_dict(Axis, data)
 
-        # Temperature DataSeries
+        # Temp DataSeries
         thermocouple_count = len(data_specs.observations[0].temperatures)
         temp_lists = [[] for _ in range(thermocouple_count)]
         for observation in data_specs.observations:
@@ -218,77 +209,66 @@ class ExperimentAccess(object):
                 temp_lists[i].append(temp_spec.temperature)
 
         # Now I can begin the list of ordinates for the temperature plot
-        abscissae = []
         ordinates = []
         initial_temps = data_specs.observations[0].temperatures
         for i, temps in enumerate(temp_lists):
-            # Add the x-axis
-            abscissae.append(idx)
             # Create the y-axis
             data = dict(
                 values=temps,
-                sigma=[0]*len(temps),
                 label=f'TC-{initial_temps[i].thermocouple_num}')
             this_data_series = dacite.from_dict(DataSeries, data)
             ordinates.append(this_data_series)
 
         # Dew point
         dew_point = [obs.dew_point for obs in data_specs.observations]
-        data = dict(
-            values=dew_point, sigma=[0]*len(dew_point), label='dew point')
+        data = dict(values=dew_point, label='dew point')
         data_series = dacite.from_dict(DataSeries, data)
-        abscissae.append(idx)
         ordinates.append(data_series)
 
         # Surface temp
         surface_temp = [obs.surface_temp for obs in data_specs.observations]
-        data = dict(
-            values=surface_temp, sigma=[0]*len(surface_temp),
-            label='surface temp')
+        data = dict(values=surface_temp, label='surface temp')
         data_series = dacite.from_dict(DataSeries, data)
-        abscissae.append(idx)
         ordinates.append(data_series)
 
         # IC temp
         ic_temp = [obs.ic_temp for obs in data_specs.observations]
-        data = dict(
-            values=ic_temp, sigma=[0]*len(ic_temp),
-            label='IC temp')
+        data = dict(values=ic_temp, label='IC temp')
         data_series = dacite.from_dict(DataSeries, data)
-        abscissae.append(idx)
         ordinates.append(data_series)
 
-        # Make the temperature plot
-        data = dict(
-            abscissae=abscissae,
-            ordinates=ordinates,
-            title='Temperature with time',
-            x_label='time, [s]',
-            y_label='temperature, [K]',
-            legend=False,
-            )
-        plots['temperature'] = dacite.from_dict(Plot, data)
+        # Temp Axis
+        data = dict(data=ordinates, y_label='temperature, [K]')
+        axes['temp'] = dacite.from_dict(Axis, data)
 
         # Pressure DataSeries
         pressure = [obs.pressure for obs in data_specs.observations]
-        data = dict(
-            values=pressure,
-            sigma=[0]*len(idx.values),
-            label='pressure')
+        data = dict(values=pressure, label='pressure')
         pressure = dacite.from_dict(DataSeries, data)
 
-        # Pressure Plot
+        # Pressure Axis
+        data = dict(data=[pressure], y_label='pressure, [Pa]')
+        axes['pressure'] = dacite.from_dict(Axis, data)
+
+        # Mass and temperature Plot
+        plots = dict()
         data = dict(
-            abscissae=[idx],
-            ordinates=[pressure],
-            title='Pressure with time',
-            x_label='time, [s]',
-            y_label='pressure, [Pa]')
+            abscissa=idx,
+            axes=[axes['mass'], axes['temp']],
+            x_label='index',
+            legend=False)
+        plots['mass_and_temp'] = dacite.from_dict(Plot, data)
+
+        # Pressure
+        data = dict(
+            abscissa=idx,
+            axes=[axes['pressure']],
+            x_label='index')
         plots['pressure'] = dacite.from_dict(Plot, data)
 
         # Finally put together the layout
         data = dict(
-            plots=[plots['mass'], plots['temperature'], plots['pressure']],
+            plots=[plots['mass_and_temp'], plots['pressure']],
             style='seaborn-darkgrid')
         layout = dacite.from_dict(Layout, data)
         return layout

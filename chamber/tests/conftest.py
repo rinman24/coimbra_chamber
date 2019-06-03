@@ -18,6 +18,7 @@ from chamber.access.experiment.contracts import (
 from chamber.access.experiment.service import ExperimentAccess
 
 from chamber.utility.plot.contracts import (
+    Axis,
     DataSeries,
     Layout,
     Plot)
@@ -168,134 +169,125 @@ def raw_layout():
     data_series = dict()
 
     # Idx
-    data = dict(
-        values=[1, 2, 3],
-        sigma=[0, 0, 0])
+    data = {'values': [1, 2, 3]}
     data_series['idx'] = dacite.from_dict(DataSeries, data)
 
     # Mass
     data = dict(
         values=[Decimal('0.0129683'), Decimal('0.0129682'), Decimal('0.0129682')],
-        sigma=[0, 0, 0],
         label='mass')
     data_series['mass'] = dacite.from_dict(DataSeries, data)
 
     # Thermocouples
     data = dict(
         values=[Decimal('290.21'), Decimal('290.23'), Decimal('290.23')],
-        sigma=[0, 0, 0],
         label='TC-4')
     data_series['TC4'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
         values=[Decimal('289.9'), Decimal('289.9'), Decimal('289.91')],
-        sigma=[0, 0, 0],
         label='TC-5')
     data_series['TC5'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
         values=[Decimal('289.88'), Decimal('289.89'), Decimal('289.9')],
-        sigma=[0, 0, 0],
         label='TC-6')
     data_series['TC6'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
         values=[Decimal('290.21'), Decimal('290.23'), Decimal('290.23')],
-        sigma=[0, 0, 0],
         label='TC-7')
     data_series['TC7'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
         values=[Decimal('290.21'), Decimal('290.22'), Decimal('290.23')],
-        sigma=[0, 0, 0],
         label='TC-8')
     data_series['TC8'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
         values=[Decimal('289.82'), Decimal('289.83'), Decimal('289.84')],
-        sigma=[0, 0, 0],
         label='TC-9')
     data_series['TC9'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
         values=[Decimal('289.72'), Decimal('289.73'), Decimal('289.74')],
-        sigma=[0, 0, 0],
         label='TC-10')
     data_series['TC10'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
         values=[Decimal('289.91'), Decimal('289.92'), Decimal('289.93')],
-        sigma=[0, 0, 0],
         label='TC-11')
     data_series['TC11'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
         values=[Decimal('289.7'), Decimal('289.72'), Decimal('289.73')],
-        sigma=[0, 0, 0],
         label='TC-12')
     data_series['TC12'] = dacite.from_dict(DataSeries, data)
 
     data = dict(
         values=[Decimal('290.1'), Decimal('290.11'), Decimal('290.11')],
-        sigma=[0, 0, 0],
         label='TC-13')
     data_series['TC13'] = dacite.from_dict(DataSeries, data)
 
     # Dew point
     data = dict(
         values=[Decimal('284.29'), Decimal('284.3'), Decimal('284.3')],
-        sigma=[0, 0, 0],
         label='dew point')
     data_series['dew point'] = dacite.from_dict(DataSeries, data)
 
     # Surface temp
     data = dict(
         values=[Decimal('291.34'), Decimal('291.3'), Decimal('291.22')],
-        sigma=[0, 0, 0],
         label='surface temp')
     data_series['surface temp'] = dacite.from_dict(DataSeries, data)
+
+    # IC temp
+    data = dict(
+        values=[Decimal('294.86'), Decimal('294.86'), Decimal('294.86')],
+        label='IC temp')
+    data_series['ic temp'] = dacite.from_dict(DataSeries, data)
 
     # Pressure
     data = dict(
         values=[99732, 99749, 99727],
-        sigma=[0, 0, 0],
         label='pressure')
     data_series['pressure'] = dacite.from_dict(DataSeries, data)
+
+    # Now the Axis -----------------------------------------------------------
+    axes = dict()
+
+    data = dict(data=[data_series['mass']], y_label='mass, [kg]')
+    axes['mass'] = dacite.from_dict(Axis, data)
+
+    data = dict(
+        data=[data_series['TC4'], data_series['TC5'], data_series['TC6'],
+              data_series['TC7'], data_series['TC8'], data_series['TC9'],
+              data_series['TC10'], data_series['TC11'], data_series['TC12'],
+              data_series['TC13'], data_series['dew point'],
+              data_series['surface temp'], data_series['ic temp']],
+        y_label='temperature, [K]')
+    axes['temp'] = dacite.from_dict(Axis, data)
+
+    data = dict(data=[data_series['pressure']], y_label='pressure, [Pa]')
+    axes['pressure'] = dacite.from_dict(Axis, data)
 
     # Then the Plots ---------------------------------------------------------
     plots = dict()
 
     data = dict(
-        abscissae=[data_series['idx']],
-        ordinates=[data_series['mass']],
-        title='Mass with time',
-        x_label='time, [s]',
-        y_label='mass, [kg]')
-    plots['mass'] = dacite.from_dict(Plot, data)
+        abscissa=data_series['idx'],
+        axes=[axes['mass'], axes['temp']],
+        x_label='index', legend=False)
+    plots['mass_and_temp'] = dacite.from_dict(Plot, data)
 
     data = dict(
-        abscissae=[data_series['idx']] * 12,
-        ordinates=[
-            data_series['TC4'], data_series['TC5'], data_series['TC6'],
-            data_series['TC7'], data_series['TC8'], data_series['TC9'],
-            data_series['TC10'], data_series['TC11'], data_series['TC12'],
-            data_series['TC13'], data_series['dew point'],
-            data_series['surface temp']],
-        title='Temperature with time',
-        x_label='time, [s]',
-        y_label='temperature, [K]')
-    plots['temperature'] = dacite.from_dict(Plot, data)
-
-    data = dict(
-        abscissae=[data_series['idx']],
-        ordinates=[data_series['pressure']],
-        title='Pressure with time',
-        x_label='time, [s]',
-        y_label='pressure, [Pa]')
+        abscissa=data_series['idx'],
+        axes=[axes['pressure']],
+        x_label='index')
     plots['pressure'] = dacite.from_dict(Plot, data)
 
     # Finally, the layout ----------------------------------------------------
     data = dict(
-        plots=[plots['mass'], plots['temperature'], plots['pressure']],
+        plots=[plots['mass_and_temp'], plots['pressure']],
         style='seaborn-darkgrid')
     return dacite.from_dict(Layout, data)
