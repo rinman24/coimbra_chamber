@@ -194,25 +194,28 @@ class AnalysisEngine(object):
 
         data = dict(
             abscissa=data_series['t'],
-            axes=[axes['pressure'], axes['Jref']],
+            axes=[axes['pressure']],
             x_label='index')
-        plots['pressure_and_pow'] = dacite.from_dict(Plot, data)
+        plots['pressure'] = dacite.from_dict(Plot, data)
 
         data = dict(
             abscissa=data_series['t'],
-            axes=[axes['status']],
+            axes=[axes['Jref'], axes['status']],
             x_label='index')
-        plots['status'] = dacite.from_dict(Plot, data)
+        plots['pow_and_status'] = dacite.from_dict(Plot, data)
 
         # Finally, the layout ----------------------------------------------------
         data = dict(
             plots=[
-                plots['mass_and_temp'], plots['pressure_and_pow'],
-                plots['status']
+                plots['mass_and_temp'], plots['pressure'],
+                plots['pow_and_status']
                 ],
             style='seaborn-darkgrid')
 
         return dacite.from_dict(Layout, data)
+
+    def _filter_observations(self, observations, lower, upper):
+        return observations.loc[lower:upper, :]
 
     def _regress_mass_flux(self):
         # TODO: Implement.

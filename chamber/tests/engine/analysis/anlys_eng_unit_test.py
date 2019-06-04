@@ -149,21 +149,21 @@ def observation_layout():
 
     data = dict(
         abscissa=data_series['t'],
-        axes=[axes['pressure'], axes['Jref']],
+        axes=[axes['pressure']],
         x_label='index')
-    plots['pressure_and_pow'] = dacite.from_dict(Plot, data)
+    plots['pressure'] = dacite.from_dict(Plot, data)
 
     data = dict(
         abscissa=data_series['t'],
-        axes=[axes['status']],
+        axes=[axes['Jref'], axes['status']],
         x_label='index')
-    plots['status'] = dacite.from_dict(Plot, data)
+    plots['pow_and_status'] = dacite.from_dict(Plot, data)
 
     # Finally, the layout ----------------------------------------------------
     data = dict(
         plots=[
-            plots['mass_and_temp'], plots['pressure_and_pow'],
-            plots['status']
+            plots['mass_and_temp'], plots['pressure'],
+            plots['pow_and_status']
             ],
         style='seaborn-darkgrid')
 
@@ -204,3 +204,18 @@ def test_layout_observations(anlys_eng, observations, observation_layout):  # no
     assert layout.plots[1] == observation_layout.plots[1]
     # status
     assert layout.plots[2] == observation_layout.plots[2]
+
+
+def test_filter_observations(anlys_eng):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    data = dict(
+        a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        b=[11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        )
+    observations = pd.DataFrame(data=data)
+    # Act --------------------------------------------------------------------
+    observations = anlys_eng._filter_observations(observations, 3, 7)
+    # Assert -----------------------------------------------------------------
+    assert observations.index.tolist() == [3, 4, 5, 6, 7]
+    assert observations.a.tolist() == [4, 5, 6, 7, 8]
+    assert observations.b.tolist() == [14, 15, 16, 17, 18]

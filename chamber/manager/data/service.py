@@ -22,13 +22,10 @@ class DataManager(object):
 
     def add_data(self):
         """TODO: Make this interbnal. Not part of the api."""
-        path = self._get_path()  # None -> str
-        raw_data = self._exp_acc.get_raw_data(path)  # str -> DataSpec
-        # Here we actually want to call experiment access plot raw data
+        path = self._get_path()
+        raw_data = self._exp_acc.get_raw_data(path)
         layout = self._exp_acc.layout_raw_data(raw_data)
-        # Plot
         self._plt_util.plot(layout)
-        # Then the manager needs to ask for a response
         response = input(
             'Would you like to enter the experiment into the database ([y]/n)? '
             ).lower()
