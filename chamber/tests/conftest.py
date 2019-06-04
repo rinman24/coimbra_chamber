@@ -2,6 +2,7 @@
 
 import datetime
 from decimal import Decimal
+from math import sqrt
 from pathlib import Path
 
 import dacite
@@ -164,7 +165,7 @@ def data_spec(setting_spec, experiment_spec, observation_spec):
 
 @pytest.fixture('function')
 def raw_layout():
-    """Create a dictionary of DataSeries contracts."""
+    """Create a raw data layout."""
     # First the DataSeries ---------------------------------------------------
     data_series = dict()
 
@@ -290,4 +291,5 @@ def raw_layout():
     data = dict(
         plots=[plots['mass_and_temp'], plots['pressure']],
         style='seaborn-darkgrid')
+
     return dacite.from_dict(Layout, data)
