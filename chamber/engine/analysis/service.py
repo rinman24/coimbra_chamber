@@ -53,7 +53,7 @@ class AnalysisEngine(object):
         for obs in observations:
             dew_point.append(ufloat(obs.dew_point, 0.2))
             mass.append(ufloat(obs.mass, 1e-7))
-            pow_ref.append(ufloat(obs.pow_ref, float(obs.pow_ref) * 0.05))
+            pow_ref.append(ufloat(obs.pow_ref, abs(float(obs.pow_ref)) * 0.05))
             pressure.append(ufloat(obs.pressure, int(obs.pressure * 0.0015)))
             surface_temp.append(ufloat(obs.surface_temp, 0.5))
             ic_temp.append(ufloat(obs.ic_temp, 0.2))
