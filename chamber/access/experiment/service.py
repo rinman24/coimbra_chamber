@@ -130,7 +130,7 @@ class ExperimentAccess(object):
         Assuming that you have a valid `DataSpec` object called `data_spec`
         containing two observations with three temperatures each:
         >>> chamber_access = ChamberAccess()
-        >>> result = chamber_access.add_data(data_spec)
+        >>> result = chamber_access.add_raw_data(data_spec)
         >>> result
         {'tube_id': 1, 'setting_id': 1, 'experiment_id': 1, 'observations': 2,
         'temperatures': 6}
