@@ -17,9 +17,9 @@ def anlys_eng():
     return AnalysisEngine()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def observations():
-    """Create a module level instance of the observations DataFrame."""
+    """Create observations DataFrame."""
     observation_data = dict(
         Tdp=[ufloat(280.123456789, 0.2), ufloat(280.2, 0.2)],
         m=[ufloat(0.1234567, 1e-7), ufloat(0.1222222, 1e-7)],
@@ -39,7 +39,7 @@ def observations():
 
 @pytest.fixture('function')
 def observation_layout():
-    """Create an observation layout."""
+    """Create observation layout."""
     # First the DataSeries ---------------------------------------------------
     data_series = dict()
 
@@ -204,18 +204,3 @@ def test_layout_observations(anlys_eng, observations, observation_layout):  # no
     assert layout.plots[1] == observation_layout.plots[1]
     # status
     assert layout.plots[2] == observation_layout.plots[2]
-
-
-def test_filter_observations(anlys_eng):  # noqa: D103
-    # Arrange ----------------------------------------------------------------
-    data = dict(
-        a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        b=[11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-        )
-    observations = pd.DataFrame(data=data)
-    # Act --------------------------------------------------------------------
-    observations = anlys_eng._filter_observations(observations, 3, 7)
-    # Assert -----------------------------------------------------------------
-    assert observations.index.tolist() == [3, 4, 5, 6, 7]
-    assert observations.a.tolist() == [4, 5, 6, 7, 8]
-    assert observations.b.tolist() == [14, 15, 16, 17, 18]
