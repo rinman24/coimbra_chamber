@@ -342,23 +342,6 @@ class ExperimentAccess(object):
         return dacite.from_dict(SettingSpec, data)
 
     def _add_tube(self, tube_spec):
-        """
-        Add a tube to the database and return its primary key.
-
-        If the tube already exists in the database, no new tube is added and
-        the primary key for the existing tube is returned.
-
-        Parameters
-        ----------
-        tube_spec : chamber.access.chamber.models.TubeSpec
-            Specification for the tube to be added.
-
-        Returns
-        -------
-        int
-            Primary key for the tube that was added.
-
-        """
         session = self.Session()
 
         try:
@@ -392,23 +375,6 @@ class ExperimentAccess(object):
             session.close()
 
     def _add_setting(self, setting_spec):
-        """
-        Add a setting to the database and return its primary key.
-
-        If the setting already exists in the database, no new setting is added
-        and the primary key for the existing setting is returned.
-
-        Parameters
-        ----------
-        setting_spec : chamber.access.chamber.models.SettingSpec
-            Specification for the setting to be added.
-
-        Returns
-        -------
-        int
-            Primary key for the setting that was added.
-
-        """
         session = self.Session()
 
         try:
@@ -440,23 +406,6 @@ class ExperimentAccess(object):
             session.close()
 
     def _add_experiment(self, experiment_spec, setting_id):
-        """
-        Add an experiment to the database and return its primary key.
-
-        If the experiment already exists in the database, no new experiment is
-        added and the primary key for the existing experiment is returned.
-
-        Parameters
-        ----------
-        experiment_spec : chamber.access.chamber.models.ExperimentSpec
-            Specification for the experiment to be added.
-
-        Returns
-        -------
-        int
-            Primary key for the experiment that was added.
-
-        """
         session = self.Session()
 
         try:
@@ -483,25 +432,6 @@ class ExperimentAccess(object):
             session.close()
 
     def _add_observations(self, observations, experiment_id):
-        """
-        Add several observations to the database.
-
-        If the experiment already exists in the database, no new observations
-        are added and the primary key for the existing experiment is returned.
-        Addition of the observations includes corresponding temperatures.
-
-        Parameters
-        ----------
-        observations : list of chamber.access.chamber.models.ObservationSpec
-            All the observations that correspond to a particular experiment.
-        experiment_id: int
-            ExperimentId for the observations being added.
-
-        Returns
-        -------
-        dict of {str: int}
-
-        """
         session = self.Session()
 
         try:
