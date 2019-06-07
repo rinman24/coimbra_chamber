@@ -6,6 +6,7 @@ from tkinter import filedialog
 import os
 
 from chamber.access.experiment.service import ExperimentAccess
+from chamber.engine.analysis.service import AnalysisEngine
 from chamber.utility.plot.service import PlotUtility
 
 
@@ -16,6 +17,7 @@ class DataManager(object):
         """Constructor."""
         self._exp_acc = ExperimentAccess()
         self._plt_util = PlotUtility()
+        self._anlys_eng = AnalysisEngine()
 
     # ------------------------------------------------------------------------
     # Public methods: included in the API
