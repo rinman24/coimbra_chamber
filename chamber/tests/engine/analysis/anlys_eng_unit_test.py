@@ -213,11 +213,12 @@ def test_layout_observations(anlys_eng, observations, observation_layout):  # no
     [
         (1, [ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2)]),
         (2, [ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2), ufloat(7, 7e-2), ufloat(6, 6e-2)]),
-        (3, [ufloat(9, 9e-2), ufloat(8, 8e-2), ufloat(7, 7e-2), ufloat(6, 6e-2), ufloat(5, 5e-2)]),
-        (4, [ufloat(7, 7e-2), ufloat(6, 6e-2), ufloat(5, 5e-2)]),
+        (3, [ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2), ufloat(7, 7e-2), ufloat(6, 6e-2), ufloat(5, 5e-2), ufloat(4, 4e-2)]),
+        (4, [ufloat(8, 8e-2), ufloat(7, 7e-2), ufloat(6, 6e-2), ufloat(5, 5e-2), ufloat(4, 4e-2)]),
+        (5, [ufloat(6, 6e-2), ufloat(5, 5e-2), ufloat(4, 4e-2)]),
         ]
     )
-def test_max_slice_even(anlys_eng, center, expected):  # noqa: D103
+def test_max_slice(anlys_eng, center, expected):  # noqa: D103
     """
     Test get maximum slice.
 
@@ -231,10 +232,10 @@ def test_max_slice_even(anlys_eng, center, expected):  # noqa: D103
     # Build the dataframe
     data = dict(
         my_col=[
-            ufloat(10, 0.1), ufloat(9, 0.09), ufloat(8, 0.08), ufloat(7, 0.07),
-            ufloat(6, 0.06), ufloat(5, 0.05)
+            ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2), ufloat(7, 7e-2),
+            ufloat(6, 6e-2), ufloat(5, 5e-2), ufloat(4, 4e-2)
             ],
-        not_my_col=[-999] * 6,
+        not_my_col=[-999] * 7,
         )
     dataframe = pd.DataFrame(data=data)
     # Act --------------------------------------------------------------------
@@ -244,4 +245,3 @@ def test_max_slice_even(anlys_eng, center, expected):  # noqa: D103
     for result, correct in zip(slice_, expected):
         assert isclose(result.nominal_value, correct.nominal_value)
         assert isclose(result.std_dev, correct.std_dev)
-    # NOTE: You need to add the rest of the test cases by parameterizing.
