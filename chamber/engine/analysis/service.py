@@ -6,7 +6,12 @@ import pandas as pd
 from uncertainties import ufloat
 
 from chamber.access.experiment.service import ExperimentAccess
+
+from chamber.utility.io.contracts import Prompt
+from chamber.utility.io.service import IOUtility
+
 from chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
+from chamber.utility.plot.service import PlotUtility
 
 
 class AnalysisEngine(object):
@@ -15,6 +20,8 @@ class AnalysisEngine(object):
     def __init__(self):
         """Constructor."""
         self._exp_acc = ExperimentAccess()
+        self._io_util = IOUtility()
+        self._plot_util = PlotUtility()
 
     # ------------------------------------------------------------------------
     # Public methods: included in the API
@@ -23,10 +30,24 @@ class AnalysisEngine(object):
         """TODO: docstring."""
         # Preprocess
         observations = self._get_observations(data.observations)
+        layout = self._layout_observations(observations)
+        self._plot_util.plot(layout)
+        # Get user input
+        data = dict(messages=['Lower limit: ', 'Upper limit: '])
+        prompt = dacite.from_dict(Prompt, data)
+        response = self._io_util.get_input(prompt)
+        # Parse the anser out into two integers
+        lower = int(response[0])
+        upper = int(response[1])
+        # Filter the observations
+        observations = observations.loc[lower:upper, :]
+        # Confirm that this was done correctly
+        layout = self._layout_observations(observations)
+        self._plot_util.plot(layout)
         # NOTE: You are here.
-        self._regress_mass_flux()
-        self._persist_results()
-        assert observations
+        # self._regress_mass_flux()
+        # self._persist_results()
+        return observations
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
@@ -214,13 +235,8 @@ class AnalysisEngine(object):
 
         return dacite.from_dict(Layout, data)
 
-    def _filter_observations(self, observations, lower, upper):
-        return observations.loc[lower:upper, :]
-
-    def _regress_mass_flux(self):
-        # TODO: Implement.
-        pass
-
-    def _persist_results(self):
-        # TODO: Implement.
-        pass
+    def _max_slice(self, df, center, col):
+        left = (2 * center) - len(df) + 1
+        right = 2 * center
+        result = df.loc[left:right, col].tolist()
+        return result

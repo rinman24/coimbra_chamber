@@ -195,6 +195,8 @@ def test_get_observations(anlys_eng, data_spec, observations):  # noqa: D103
 
 def test_layout_observations(anlys_eng, observations, observation_layout):  # noqa: D103
     # Act --------------------------------------------------------------------
+    # TODO: Move observation_layout into this test.
+    # NOTE: It does not need to be a fixture.
     layout = anlys_eng._layout_observations(observations)
     # Assert -----------------------------------------------------------------
     assert layout.style == observation_layout.style
@@ -204,3 +206,42 @@ def test_layout_observations(anlys_eng, observations, observation_layout):  # no
     assert layout.plots[1] == observation_layout.plots[1]
     # status
     assert layout.plots[2] == observation_layout.plots[2]
+
+
+@pytest.mark.parametrize(
+    'center, expected',
+    [
+        (1, [ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2)]),
+        (2, [ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2), ufloat(7, 7e-2), ufloat(6, 6e-2)]),
+        (3, [ufloat(9, 9e-2), ufloat(8, 8e-2), ufloat(7, 7e-2), ufloat(6, 6e-2), ufloat(5, 5e-2)]),
+        (4, [ufloat(7, 7e-2), ufloat(6, 6e-2), ufloat(5, 5e-2)]),
+        ]
+    )
+def test_max_slice_even(anlys_eng, center, expected):  # noqa: D103
+    """
+    Test get maximum slice.
+
+    Assumptions
+    -----------
+    #. DataFrame has a pd.RangeIndex with start == 0 and step == 1.
+    #. Each element in the desired column is a ufloat
+
+    """
+    # Arrange ----------------------------------------------------------------
+    # Build the dataframe
+    data = dict(
+        my_col=[
+            ufloat(10, 0.1), ufloat(9, 0.09), ufloat(8, 0.08), ufloat(7, 0.07),
+            ufloat(6, 0.06), ufloat(5, 0.05)
+            ],
+        not_my_col=[-999] * 6,
+        )
+    dataframe = pd.DataFrame(data=data)
+    # Act --------------------------------------------------------------------
+    slice_ = anlys_eng._max_slice(df=dataframe, center=center, col='my_col')
+    # Assert -----------------------------------------------------------------
+    assert len(slice_) == len(expected)
+    for result, correct in zip(slice_, expected):
+        assert isclose(result.nominal_value, correct.nominal_value)
+        assert isclose(result.std_dev, correct.std_dev)
+    # NOTE: You need to add the rest of the test cases by parameterizing.
