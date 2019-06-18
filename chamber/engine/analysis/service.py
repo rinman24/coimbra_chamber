@@ -29,8 +29,8 @@ class AnalysisEngine(object):
     def perform_analysis(self, data):
         """TODO: docstring."""
         # Preprocess
-        observations = self._get_observations(data.observations)
-        layout = self._layout_observations(observations)
+        # observations = self._get_observations(data.observations)
+        # layout = self._layout_observations(observations)
         self._plot_util.plot(layout)
         # Get user input
         data = dict(messages=['Lower limit: ', 'Upper limit: '])
@@ -42,7 +42,7 @@ class AnalysisEngine(object):
         # Filter the observations
         observations = observations.loc[lower:upper, :]
         # Confirm that this was done correctly
-        layout = self._layout_observations(observations)
+        # layout = self._layout_observations(observations)
         self._plot_util.plot(layout)
         # NOTE: You are here.
         # self._regress_mass_flux()
@@ -106,9 +106,9 @@ class AnalysisEngine(object):
             optidew=optidew,
             )
 
-        return pd.DataFrame(index=time, data=data)
+        self._observations = pd.DataFrame(index=time, data=data)
 
-    def _layout_observations(self, observations):
+    def _layout_observations(self):
         # internal helper logic
         def nominal(ufloat_):
             return ufloat_.nominal_value
@@ -119,58 +119,58 @@ class AnalysisEngine(object):
         # DataSeries ---------------------------------------------------------
         data_series = dict()
         # First get the time data series
-        data = dict(values=observations.index.tolist())
+        data = dict(values=self._observations.index.tolist())
         data_series['t'] = dacite.from_dict(DataSeries, data)
         # dew point, Tdp
         data = dict(
-            values=observations.Tdp.map(nominal).tolist(),
-            sigma=observations.Tdp.map(std_dev).tolist(),
+            values=self._observations.Tdp.map(nominal).tolist(),
+            sigma=self._observations.Tdp.map(std_dev).tolist(),
             label='Tdp')
         data_series['Tdp'] = dacite.from_dict(DataSeries, data)
         # mass, m
         data = dict(
-            values=observations.m.map(nominal).tolist(),
-            sigma=observations.m.map(std_dev).tolist(),
+            values=self._observations.m.map(nominal).tolist(),
+            sigma=self._observations.m.map(std_dev).tolist(),
             label='m')
         data_series['m'] = dacite.from_dict(DataSeries, data)
         # pow_ref, Jref
         data = dict(
-            values=observations.Jref.map(nominal).to_list(),
-            sigma=observations.Jref.map(std_dev).to_list(),
+            values=self._observations.Jref.map(nominal).to_list(),
+            sigma=self._observations.Jref.map(std_dev).to_list(),
             label='Jref')
         data_series['Jref'] = dacite.from_dict(DataSeries, data)
         # pressure, P
         data = dict(
-            values=observations.P.map(nominal).tolist(),
-            sigma=observations.P.map(std_dev).tolist(),
+            values=self._observations.P.map(nominal).tolist(),
+            sigma=self._observations.P.map(std_dev).tolist(),
             label='P')
         data_series['P'] = dacite.from_dict(DataSeries, data)
         # Ambient temp, Te
         data = dict(
-            values=observations.Te.map(nominal).tolist(),
-            sigma=observations.Te.map(std_dev).tolist(),
+            values=self._observations.Te.map(nominal).tolist(),
+            sigma=self._observations.Te.map(std_dev).tolist(),
             label='Te')
         data_series['Te'] = dacite.from_dict(DataSeries, data)
         # Surface temp, Ts
         data = dict(
-            values=observations.Ts.map(nominal).tolist(),
-            sigma=observations.Ts.map(std_dev).tolist(),
+            values=self._observations.Ts.map(nominal).tolist(),
+            sigma=self._observations.Ts.map(std_dev).tolist(),
             label='Ts')
         data_series['Ts'] = dacite.from_dict(DataSeries, data)
         # IC temp, Tic
         data = dict(
-            values=observations.Tic.map(nominal).tolist(),
-            sigma=observations.Tic.map(std_dev).tolist(),
+            values=self._observations.Tic.map(nominal).tolist(),
+            sigma=self._observations.Tic.map(std_dev).tolist(),
             label='Tic')
         data_series['Tic'] = dacite.from_dict(DataSeries, data)
         # Cap-man status, cap_man
         data = dict(
-            values=observations.cap_man.tolist(),
+            values=self._observations.cap_man.tolist(),
             label='cap_man')
         data_series['cap_man'] = dacite.from_dict(DataSeries, data)
         # Optidew status, optidew
         data = dict(
-            values=observations.optidew.tolist(),
+            values=self._observations.optidew.tolist(),
             label='optidew')
         data_series['optidew'] = dacite.from_dict(DataSeries, data)
 
@@ -240,3 +240,6 @@ class AnalysisEngine(object):
         right = 2 * center
         result = df.loc[left:right, col].tolist()
         return result
+
+    def _fit(self):
+        pass

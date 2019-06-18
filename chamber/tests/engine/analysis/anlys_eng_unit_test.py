@@ -11,6 +11,10 @@ from chamber.engine.analysis.service import AnalysisEngine
 from chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
 
 
+# ----------------------------------------------------------------------------
+# Fixtures
+
+
 @pytest.fixture(scope='module')
 def anlys_eng():
     """Create a module level instance of the analysis engine."""
@@ -170,9 +174,14 @@ def observation_layout():
     return dacite.from_dict(Layout, data)
 
 
+# ----------------------------------------------------------------------------
+# AnalysisEngine
+
+
 def test_get_observations(anlys_eng, data_spec, observations):  # noqa: D103
     # Act --------------------------------------------------------------------
-    result = anlys_eng._get_observations(data_spec.observations)
+    anlys_eng._get_observations(data_spec.observations)
+    result = anlys_eng._observations
 
     # Assert -----------------------------------------------------------------
     status_set = {'cap_man', 'optidew'}
@@ -193,19 +202,20 @@ def test_get_observations(anlys_eng, data_spec, observations):  # noqa: D103
                 assert this_obs is expect_this
 
 
-def test_layout_observations(anlys_eng, observations, observation_layout):  # noqa: D103
+def test_layout_observations(anlys_eng, data_spec, observation_layout):  # noqa: D103
     # Act --------------------------------------------------------------------
     # TODO: Move observation_layout into this test.
     # NOTE: It does not need to be a fixture.
-    layout = anlys_eng._layout_observations(observations)
+    anlys_eng._get_observations(data_spec.observations)
+    layout = anlys_eng._layout_observations()
     # Assert -----------------------------------------------------------------
     assert layout.style == observation_layout.style
     # mass and temperature
-    assert layout.plots[0] == observation_layout.plots[0]
+    _compare_layouts(layout, observation_layout)
     # pressure and power
-    assert layout.plots[1] == observation_layout.plots[1]
-    # status
-    assert layout.plots[2] == observation_layout.plots[2]
+    # assert layout.plots[1] == observation_layout.plots[1]
+    # # status
+    # assert layout.plots[2] == observation_layout.plots[2]
 
 
 @pytest.mark.parametrize(
@@ -245,3 +255,41 @@ def test_max_slice(anlys_eng, center, expected):  # noqa: D103
     for result, correct in zip(slice_, expected):
         assert isclose(result.nominal_value, correct.nominal_value)
         assert isclose(result.std_dev, correct.std_dev)
+
+
+# ----------------------------------------------------------------------------
+# Test helpers
+
+
+def _compare_layouts(lay1, lay2):
+    assert len(lay1.plots) == len(lay2.plots)
+    assert lay1.style == lay2.style
+    for p1, p2 in zip(lay1.plots, lay2.plots):
+        _compare_plots(p1, p2)
+
+
+def _compare_plots(p1, p2):
+    _compare_data_series(p1.abscissa, p2.abscissa)
+    assert len(p1.axes) == len(p2.axes)
+    for a1, a2 in zip(p1.axes, p2.axes):
+        _compare_axes(a1, a2)
+    assert p1.x_label == p2.x_label
+    assert p1.legend == p2.legend
+
+
+def _compare_data_series(d1, d2):
+    assert len(d1.values) == len(d2.values)
+    for v1, v2 in zip(d1.values, d2.values):
+        assert isclose(v1, v2)
+    assert len(d1.sigma) == len(d2.sigma)
+    for s1, s2 in zip(d1.sigma, d2.sigma):
+        assert isclose(s1, s2)
+    assert d1.label == d2.label
+
+
+def _compare_axes(a1, a2):
+    assert len(a1.data) == len(a2.data)
+    for ds1, ds2 in zip(a1.data, a2.data):
+        _compare_data_series(ds1, ds2)
+    assert a1.y_label == a2.y_label
+    assert a1.error_type == a2.error_type
