@@ -24,6 +24,7 @@ class DataManager(object):
 
     def add_data(self):
         """TODO: Make this interbnal. Not part of the api."""
+        """TODO: Add a __repr__."""
         path = self._get_path()
         raw_data = self._exp_acc.get_raw_data(path)
         layout = self._exp_acc.layout_raw_data(raw_data)

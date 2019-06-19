@@ -73,3 +73,17 @@ class DataSpec:
     setting: SettingSpec
     experiment: ExperimentSpec
     observations: List[ObservationSpec]
+
+
+@dataclass(frozen=True)
+class Fit:
+    """Regression fit results."""
+
+    a: float
+    sig_a: float
+    b: float
+    sig_b: float
+    r2: float
+    q: float
+    chi2: float
+    nu: int

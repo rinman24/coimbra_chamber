@@ -3,9 +3,11 @@
 
 import dacite
 import pandas as pd
+from scipy.stats import chi2
 from uncertainties import ufloat
 
 from chamber.access.experiment.service import ExperimentAccess
+from chamber.access.experiment.contracts import Fit
 
 from chamber.utility.io.contracts import Prompt
 from chamber.utility.io.service import IOUtility
@@ -16,7 +18,6 @@ from chamber.utility.plot.service import PlotUtility
 
 class AnalysisEngine(object):
     """Analysis engine."""
-
     def __init__(self):
         """Constructor."""
         self._exp_acc = ExperimentAccess()
@@ -235,11 +236,74 @@ class AnalysisEngine(object):
 
         return dacite.from_dict(Layout, data)
 
-    def _max_slice(self, df, center, col):
+    @staticmethod
+    def _max_slice(df, center, col):
+        """
+        Get the maximum window for the given column centered.
+
+        NOTE: Returns a list of ufloats.
+        TODO: docstring.
+        """
         left = (2 * center) - len(df) + 1
         right = 2 * center
         result = df.loc[left:right, col].tolist()
         return result
 
-    def _fit(self):
-        pass
+    @staticmethod
+    def _fit(sample):
+        """
+        Fit a line to the given series.
+
+        Parameters
+        ----------
+        sample : list of ufloats
+            Sample of observations to use for fitting.
+
+        Returns
+        -------
+        A DTO Fit object.
+
+        """
+        # Prepare the data
+        y = [i.nominal_value for i in sample]
+        sig = [i.std_dev for i in sample]
+        x = list(range(len(y)))  # Always indexed at zero
+
+        # Determine fit components
+        S = sum(1/sig[i]**2 for i in range(len(x)))
+        Sx = sum(x[i]/sig[i]**2 for i in range(len(x)))
+        Sy = sum(y[i]/sig[i]**2 for i in range(len(x)))
+        Sxx = sum(x[i]**2/sig[i]**2 for i in range(len(x)))
+        Sxy = sum(x[i]*y[i]/sig[i]**2 for i in range(len(x)))
+        Delta = S*Sxx - Sx**2
+
+        # Now calculate model parameters: y = a + bx
+        a = (Sxx*Sy - Sx*Sxy) / Delta
+        sig_a = (Sxx/Delta)**0.5
+        b = (S*Sxy - Sx*Sy) / Delta
+        sig_b = (S/Delta)**0.5
+
+        # Calculate R^2
+        predicted = [a + b*i for i in x]
+        y_bar = sum(y)/len(y)
+        SSres = sum((y[i] - predicted[i])**2 for i in range(len(x)))
+        SStot = sum((y[i] - y_bar)**2 for i in range(len(x)))
+        R2 = 1 - SSres/SStot
+
+        # Now for the merit function; i.e. chi^2
+        merit_value = sum(((y[i] - a - b*x[i])/sig[i])**2 for i in range(len(x)))
+
+        # And the goodness of fit; i.e. Q from Numerical Recipes
+        Q = chi2.sf(merit_value, len(x)-2)
+
+        data = dict(
+            a=a,
+            sig_a=sig_a,
+            b=b,
+            sig_b=sig_b,
+            r2=R2,
+            q=Q,
+            chi2=merit_value,
+            nu=len(sample)-2,
+            )
+        return dacite.from_dict(Fit, data)

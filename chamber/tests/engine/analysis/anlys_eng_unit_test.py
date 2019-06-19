@@ -257,6 +257,36 @@ def test_max_slice(anlys_eng, center, expected):  # noqa: D103
         assert isclose(result.std_dev, correct.std_dev)
 
 
+def test_fit(anlys_eng):  # noqa: D103
+    # ------------------------------------------------------------------------
+    # Arrange
+    sample = [
+        ufloat(0.01465781, 1e-07),
+        ufloat(0.01465775, 1e-07),
+        ufloat(0.0146577, 1e-07),
+        ufloat(0.01465767, 1e-07),
+        ufloat(0.01465762, 1e-07),
+        ]
+    # ------------------------------------------------------------------------
+    # Act
+    result = anlys_eng._fit(sample)
+    # ------------------------------------------------------------------------
+    # Assert
+    assert isclose(result.a, 0.014657801999999996)
+    assert isclose(result.sig_a, 7.745966692414835e-08)
+
+    assert isclose(result.b, -4.600000000048961e-08)
+    assert isclose(result.sig_b, 3.162277660168379e-08)
+
+    assert isclose(result.r2, 0.9887850467276053)
+
+    assert isclose(result.q, 0.9990182274301309)
+
+    assert isclose(result.chi2, 0.02400000000040884)
+
+    assert result.nu == 3
+
+
 # ----------------------------------------------------------------------------
 # Test helpers
 
