@@ -15,10 +15,9 @@ python:
 notifications:
   email: false
 
-
 # Install dependencies
 install:
-  - pip install -r requirements.txt
+  - pip install pipenv; pipenv install --dev --system --ignore-pipfile
 
 # Run test suite
 script:

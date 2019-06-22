@@ -283,6 +283,29 @@ class AnalysisEngine(object):
         b = (S*Sxy - Sx*Sy) / Delta
         sig_b = (S/Delta)**0.5
 
+        return dict(
+            a=a,
+            sig_a=sig_a,
+            b=b,
+            sig_b=sig_b,
+            )
+
+    @staticmethod
+    def _best_fit(sample):
+        for something in sample:
+            pass
+
+    @staticmethod
+    def _evaluate_fit(sample, fit):
+        """TODO: Docstring."""
+        # Prepare the data
+        y = [i.nominal_value for i in sample]
+        sig = [i.std_dev for i in sample]
+        x = list(range(len(y)))  # Always indexed at zero
+
+        a = fit['a']
+        b = fit['b']
+
         # Calculate R^2
         predicted = [a + b*i for i in x]
         y_bar = sum(y)/len(y)
@@ -296,14 +319,11 @@ class AnalysisEngine(object):
         # And the goodness of fit; i.e. Q from Numerical Recipes
         Q = chi2.sf(merit_value, len(x)-2)
 
-        data = dict(
-            a=a,
-            sig_a=sig_a,
-            b=b,
-            sig_b=sig_b,
-            r2=R2,
-            q=Q,
-            chi2=merit_value,
-            nu=len(sample)-2,
-            )
+        # Prepare payload
+        data = fit  # copy of a, b, sig_a, and sig_b
+        data['r2'] = R2
+        data['q'] = Q
+        data['chi2'] = merit_value
+        data['nu'] = len(x) - 2
+
         return dacite.from_dict(Fit, data)

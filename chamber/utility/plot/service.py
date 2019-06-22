@@ -2,7 +2,6 @@
 
 
 import matplotlib
-matplotlib.use('TkAgg')  # Required in order to cooporate with tkinter
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 

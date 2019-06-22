@@ -1,6 +1,7 @@
 """Unit test suite for analysis engine."""
 
 from math import isclose, sqrt
+from unittest.mock import MagicMock
 
 import dacite
 import pandas as pd
@@ -174,6 +175,30 @@ def observation_layout():
     return dacite.from_dict(Layout, data)
 
 
+@pytest.fixture('module')
+def sample():
+    """Sample uses for regression analysis."""
+    return [
+        ufloat(0.01465781, 1e-07),
+        ufloat(0.01465775, 1e-07),
+        ufloat(0.0146577, 1e-07),
+        ufloat(0.01465767, 1e-07),
+        ufloat(0.01465762, 1e-07),
+        ]
+
+
+@pytest.fixture('function')
+def mock_fit(monkeypatch):
+    """Mock of AnalysisEngine._fit."""
+    return_values = [
+        dict(a=1, sig_a=1, b=1, sig_b=0.5),
+        dict(a=1, sig_a=1, b=1, sig_b=0.1),
+        dict(a=1, sig_a=1, b=1, sig_b=0.01),
+        ]   
+    fit = MagicMock(side_effect=return_values)
+    monkeypatch.setattr(
+        'chamber.engine.analysis.service.AnalysisEngine._fit', fit)
+
 # ----------------------------------------------------------------------------
 # AnalysisEngine
 
@@ -257,19 +282,24 @@ def test_max_slice(anlys_eng, center, expected):  # noqa: D103
         assert isclose(result.std_dev, correct.std_dev)
 
 
-def test_fit(anlys_eng):  # noqa: D103
-    # ------------------------------------------------------------------------
-    # Arrange
-    sample = [
-        ufloat(0.01465781, 1e-07),
-        ufloat(0.01465775, 1e-07),
-        ufloat(0.0146577, 1e-07),
-        ufloat(0.01465767, 1e-07),
-        ufloat(0.01465762, 1e-07),
-        ]
+def test_fit(anlys_eng, sample):  # noqa: D103
     # ------------------------------------------------------------------------
     # Act
     result = anlys_eng._fit(sample)
+    # ------------------------------------------------------------------------
+    # Assert
+    assert isclose(result['a'], 0.014657801999999996)
+    assert isclose(result['sig_a'], 7.745966692414835e-08)
+
+    assert isclose(result['b'], -4.600000000048961e-08)
+    assert isclose(result['sig_b'], 3.162277660168379e-08)
+
+
+def test_evaluate(anlys_eng, sample):  # noqa: D103
+    # ------------------------------------------------------------------------
+    # Act
+    fit = anlys_eng._fit(sample)
+    result = anlys_eng._evaluate_fit(sample, fit)
     # ------------------------------------------------------------------------
     # Assert
     assert isclose(result.a, 0.014657801999999996)
@@ -285,6 +315,64 @@ def test_fit(anlys_eng):  # noqa: D103
     assert isclose(result.chi2, 0.02400000000040884)
 
     assert result.nu == 3
+
+@pytest.mark.skip(reason='Messing with pipenv.')
+def test_best_fit_stops_with_correct_error(anlys_eng, sample, mock_fit):
+    for i in range(3):
+        print(anlys_eng._fit())
+    #assert False
+    """You need to add logic so that it stops >= 0.01 error in slope."""
+    """
+    You want to call a method called _best_fit.
+    This method needs to take a sample and keep stepping until it returns the
+    correct error.
+    So let's call the function with a step of one and pass a bull shit
+    sample because we have a mock of _fit that will reutrn the three things
+    you need.
+    Bottom line, call _best_fit and then assert that what you get has the
+    error metric that you are looking for.
+    """
+    # ------------------------------------------------------------------------
+    # Arrange
+    # ------------------------------------------------------------------------
+    # Act
+    result = anlys_eng._best_fit(sample)
+    # ------------------------------------------------------------------------
+    # Assert
+    """
+    What do we want to assert?
+    We want to assert that we get a, sig_a, b, sig_b, and error is <=0.01
+    """
+    assert isclose(result['a'], 0.014657801999999996)
+    assert isclose(result['sig_a'], 7.745966692414835e-08)
+
+    assert isclose(result['b'], -4.600000000048961e-08)
+    assert isclose(result['sig_b'], 3.162277660168379e-08)
+    assert result['sig_b']/abs(result['b']) <= 0.01
+
+
+@pytest.mark.skip(reason='Not implemented.')
+def test_best_fit_takes_correct_steps():
+    """
+    All you are testing here is that the method takes the correct steps.
+    So, you will want to make sure that the _fit method is called the right number of times.
+    This requires checking the mock.
+    """
+    
+
+@pytest.mark.skip(reason='Not implemented')
+def test_crawler_takes_correct_steps():
+    pass
+
+
+@pytest.mark.skip(reason='Not implemented.')
+def test_crawler_works_with_list_that_is_too_short():
+    pass
+
+
+@pytest.mark.skip(reason='Not implemented.')
+def test_crawler_works_with_an_edge_case():
+    pass
 
 
 # ----------------------------------------------------------------------------
