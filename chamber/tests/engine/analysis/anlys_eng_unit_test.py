@@ -1,7 +1,7 @@
 """Unit test suite for analysis engine."""
 
 from math import isclose, sqrt
-from unittest.mock import MagicMock
+from unittest.mock import call, MagicMock
 
 import dacite
 import pandas as pd
@@ -194,10 +194,12 @@ def mock_fit(monkeypatch):
         dict(a=1, sig_a=1, b=1, sig_b=0.5),
         dict(a=1, sig_a=1, b=1, sig_b=0.1),
         dict(a=1, sig_a=1, b=1, sig_b=0.01),
-        ]   
+        ] 
     fit = MagicMock(side_effect=return_values)
     monkeypatch.setattr(
         'chamber.engine.analysis.service.AnalysisEngine._fit', fit)
+    return fit
+
 
 # ----------------------------------------------------------------------------
 # AnalysisEngine
@@ -316,6 +318,25 @@ def test_evaluate(anlys_eng, sample):  # noqa: D103
 
     assert result.nu == 3
 
+
+@pytest.mark.parametrize(
+    'steps, limits',
+    [
+        (1, [(1, 3), (0, 4), ]),
+        (2, [(0, 4), ]),
+        ]
+    )
+def test_best_fit_takes_correct_steps(anlys_eng, steps, limits, sample, mock_fit):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    center = 2
+    calls = [call(sample[i: j+1]) for i, j in limits]
+    # Act --------------------------------------------------------------------
+    anlys_eng._best_fit(sample, center, steps, None)
+    # Assert -----------------------------------------------------------------
+    assert len(calls) == len(mock_fit.mock_calls)
+    mock_fit.assert_has_calls(calls)
+
+
 @pytest.mark.skip(reason='Messing with pipenv.')
 def test_best_fit_stops_with_correct_error(anlys_eng, sample, mock_fit):
     for i in range(3):
@@ -349,21 +370,7 @@ def test_best_fit_stops_with_correct_error(anlys_eng, sample, mock_fit):
     assert isclose(result['b'], -4.600000000048961e-08)
     assert isclose(result['sig_b'], 3.162277660168379e-08)
     assert result['sig_b']/abs(result['b']) <= 0.01
-
-
-@pytest.mark.skip(reason='Not implemented.')
-def test_best_fit_takes_correct_steps():
-    """
-    All you are testing here is that the method takes the correct steps.
-    So, you will want to make sure that the _fit method is called the right number of times.
-    This requires checking the mock.
-    """
     
-
-@pytest.mark.skip(reason='Not implemented')
-def test_crawler_takes_correct_steps():
-    pass
-
 
 @pytest.mark.skip(reason='Not implemented.')
 def test_crawler_works_with_list_that_is_too_short():

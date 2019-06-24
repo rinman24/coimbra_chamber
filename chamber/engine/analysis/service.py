@@ -327,3 +327,9 @@ class AnalysisEngine(object):
         data['nu'] = len(x) - 2
 
         return dacite.from_dict(Fit, data)
+
+    def _best_fit(self, sample, center, steps, error):
+        total = len(sample)
+        while center + steps <= total:
+            self._fit(sample[center - steps: center + steps + 1])
+            steps += steps
