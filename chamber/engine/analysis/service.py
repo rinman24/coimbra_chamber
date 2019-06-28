@@ -17,9 +17,10 @@ from chamber.utility.plot.service import PlotUtility
 
 
 class AnalysisEngine(object):
-    """Analysis engine."""
+    """TODO: docstring."""
+
     def __init__(self):
-        """Constructor."""
+        """TODO: docstring."""
         self._exp_acc = ExperimentAccess()
         self._io_util = IOUtility()
         self._plot_util = PlotUtility()
@@ -54,7 +55,6 @@ class AnalysisEngine(object):
     # Internal methods: not included in the API
 
     def _get_observations(self, observations):
-        """Return a dataframe of experimental data with uncertainties."""
         # Create empty lists to hold data as we iterate through observations.
         dew_point = []
         mass = []
@@ -238,12 +238,6 @@ class AnalysisEngine(object):
 
     @staticmethod
     def _max_slice(df, center, col):
-        """
-        Get the maximum window for the given column centered.
-
-        NOTE: Returns a list of ufloats.
-        TODO: docstring.
-        """
         left = (2 * center) - len(df) + 1
         right = 2 * center
         result = df.loc[left:right, col].tolist()
@@ -251,19 +245,6 @@ class AnalysisEngine(object):
 
     @staticmethod
     def _fit(sample):
-        """
-        Fit a line to the given series.
-
-        Parameters
-        ----------
-        sample : list of ufloats
-            Sample of observations to use for fitting.
-
-        Returns
-        -------
-        A DTO Fit object.
-
-        """
         # Prepare the data
         y = [i.nominal_value for i in sample]
         sig = [i.std_dev for i in sample]
@@ -290,14 +271,19 @@ class AnalysisEngine(object):
             sig_b=sig_b,
             )
 
-    @staticmethod
-    def _best_fit(sample):
-        for something in sample:
-            pass
+    def _best_fit(self, sample, center, steps, error):
+        total = len(sample)
+        while center + steps <= total:
+            this_sample = sample[center - steps: center + steps + 1]
+            fit = self._fit(this_sample)
+            if fit['sig_b']/abs(fit['b']) <= error:
+                best_fit = self._evaluate_fit(this_sample, fit)
+                return best_fit
+            else:
+                steps += steps
 
     @staticmethod
     def _evaluate_fit(sample, fit):
-        """TODO: Docstring."""
         # Prepare the data
         y = [i.nominal_value for i in sample]
         sig = [i.std_dev for i in sample]
@@ -327,9 +313,3 @@ class AnalysisEngine(object):
         data['nu'] = len(x) - 2
 
         return dacite.from_dict(Fit, data)
-
-    def _best_fit(self, sample, center, steps, error):
-        total = len(sample)
-        while center + steps <= total:
-            self._fit(sample[center - steps: center + steps + 1])
-            steps += steps

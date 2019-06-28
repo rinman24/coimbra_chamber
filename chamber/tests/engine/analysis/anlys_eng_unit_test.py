@@ -8,6 +8,7 @@ import pandas as pd
 import pytest
 from uncertainties import ufloat
 
+from chamber.access.experiment.contracts import Fit
 from chamber.engine.analysis.service import AnalysisEngine
 from chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
 
@@ -191,15 +192,38 @@ def sample():
 def mock_fit(monkeypatch):
     """Mock of AnalysisEngine._fit."""
     return_values = [
-        dict(a=1, sig_a=1, b=1, sig_b=0.5),
-        dict(a=1, sig_a=1, b=1, sig_b=0.1),
-        dict(a=1, sig_a=1, b=1, sig_b=0.01),
-        ] 
+        dict(a=1.0, sig_a=1.0, b=1.0, sig_b=0.1),
+        dict(a=1.0, sig_a=1.0, b=1.0, sig_b=0.01),
+        dict(a=1.0, sig_a=1.0, b=1.0, sig_b=0.001),
+        ]
     fit = MagicMock(side_effect=return_values)
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._fit', fit)
+        'chamber.engine.analysis.service.AnalysisEngine._fit',
+        fit)
     return fit
 
+
+@pytest.fixture('function')
+def mock_evaluate_fit(monkeypatch):
+    """Mock of AnalysisEngine._evaluate_fit."""
+    # Define logic
+    def mock_logic(sample, fit):
+        data = fit
+        data['r2'] = 0.99
+        data['q'] = 0.01
+        data['chi2'] = 1.5
+        data['nu'] = 1
+        return dacite.from_dict(Fit, data)
+
+    # Assign side effect
+    evaluate_fit = MagicMock(side_effect=mock_logic)
+
+    # Patch
+    monkeypatch.setattr(
+        'chamber.engine.analysis.service.AnalysisEngine._evaluate_fit',
+        evaluate_fit)
+
+    return evaluate_fit
 
 # ----------------------------------------------------------------------------
 # AnalysisEngine
@@ -231,18 +255,11 @@ def test_get_observations(anlys_eng, data_spec, observations):  # noqa: D103
 
 def test_layout_observations(anlys_eng, data_spec, observation_layout):  # noqa: D103
     # Act --------------------------------------------------------------------
-    # TODO: Move observation_layout into this test.
-    # NOTE: It does not need to be a fixture.
     anlys_eng._get_observations(data_spec.observations)
     layout = anlys_eng._layout_observations()
     # Assert -----------------------------------------------------------------
     assert layout.style == observation_layout.style
-    # mass and temperature
     _compare_layouts(layout, observation_layout)
-    # pressure and power
-    # assert layout.plots[1] == observation_layout.plots[1]
-    # # status
-    # assert layout.plots[2] == observation_layout.plots[2]
 
 
 @pytest.mark.parametrize(
@@ -297,7 +314,7 @@ def test_fit(anlys_eng, sample):  # noqa: D103
     assert isclose(result['sig_b'], 3.162277660168379e-08)
 
 
-def test_evaluate(anlys_eng, sample):  # noqa: D103
+def test_evaluate_fit(anlys_eng, sample):  # noqa: D103
     # ------------------------------------------------------------------------
     # Act
     fit = anlys_eng._fit(sample)
@@ -326,60 +343,44 @@ def test_evaluate(anlys_eng, sample):  # noqa: D103
         (2, [(0, 4), ]),
         ]
     )
-def test_best_fit_takes_correct_steps(anlys_eng, steps, limits, sample, mock_fit):  # noqa: D103
+def test_best_fit_takes_correct_steps(
+        anlys_eng, steps, limits, sample, mock_fit, mock_evaluate_fit):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     center = 2
     calls = [call(sample[i: j+1]) for i, j in limits]
+    error = 0
     # Act --------------------------------------------------------------------
-    anlys_eng._best_fit(sample, center, steps, None)
+    anlys_eng._best_fit(sample, center, steps, error)
     # Assert -----------------------------------------------------------------
     assert len(calls) == len(mock_fit.mock_calls)
     mock_fit.assert_has_calls(calls)
 
 
-@pytest.mark.skip(reason='Messing with pipenv.')
-def test_best_fit_stops_with_correct_error(anlys_eng, sample, mock_fit):
-    for i in range(3):
-        print(anlys_eng._fit())
-    #assert False
-    """You need to add logic so that it stops >= 0.01 error in slope."""
-    """
-    You want to call a method called _best_fit.
-    This method needs to take a sample and keep stepping until it returns the
-    correct error.
-    So let's call the function with a step of one and pass a bull shit
-    sample because we have a mock of _fit that will reutrn the three things
-    you need.
-    Bottom line, call _best_fit and then assert that what you get has the
-    error metric that you are looking for.
-    """
+@pytest.mark.parametrize(
+    'requested_error, expected_result',
+    [
+        (0.1, 0.1),
+        (0.01, 0.01),
+        (0.001, None),
+        ]
+    )
+def test_best_fit_stops_with_correct_error(
+        anlys_eng, sample, requested_error, expected_result, mock_fit,
+        mock_evaluate_fit):  # noqa: D103
     # ------------------------------------------------------------------------
     # Arrange
+    center = 2
+    steps = 1
     # ------------------------------------------------------------------------
     # Act
-    result = anlys_eng._best_fit(sample)
+    result = anlys_eng._best_fit(sample, center, steps, requested_error)
     # ------------------------------------------------------------------------
     # Assert
-    """
-    What do we want to assert?
-    We want to assert that we get a, sig_a, b, sig_b, and error is <=0.01
-    """
-    assert isclose(result['a'], 0.014657801999999996)
-    assert isclose(result['sig_a'], 7.745966692414835e-08)
-
-    assert isclose(result['b'], -4.600000000048961e-08)
-    assert isclose(result['sig_b'], 3.162277660168379e-08)
-    assert result['sig_b']/abs(result['b']) <= 0.01
-    
-
-@pytest.mark.skip(reason='Not implemented.')
-def test_crawler_works_with_list_that_is_too_short():
-    pass
-
-
-@pytest.mark.skip(reason='Not implemented.')
-def test_crawler_works_with_an_edge_case():
-    pass
+    if result:  # Best fit found a fit before running out of samples
+        slope_error = result.sig_b/abs(result.b)
+        assert isclose(slope_error, requested_error)
+    else:  # Error theshold never reached and therefore no best fit
+        assert not result
 
 
 # ----------------------------------------------------------------------------
