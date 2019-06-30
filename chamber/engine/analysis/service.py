@@ -271,8 +271,11 @@ class AnalysisEngine(object):
             sig_b=sig_b,
             )
 
-    def _best_fit(self, sample, center, steps, error):
+    def _best_fit(self, sample, steps, error):
         total = len(sample)
+        # _max_slice always gives a sample with odd length, so we subtract one
+        # then divide to fine the center.
+        center = int((total - 1) / 2)
         while center + steps <= total:
             this_sample = sample[center - steps: center + steps + 1]
             fit = self._fit(this_sample)
@@ -313,3 +316,19 @@ class AnalysisEngine(object):
         data['nu'] = len(x) - 2
 
         return dacite.from_dict(Fit, data)
+
+    def _get_fits(self, df):
+        fits = []
+        center = 1
+        # len - 2 because we want to make sure we never end up at the last
+        # index and can't take a max slice
+        while center < len(df) - 2:
+            sample = self._max_slice(df, center=center, col='m')
+            best_fit = self._best_fit(sample, steps=1, error=0.01)
+            if best_fit:  # We got a fit that met the error threshold
+                fits.append(best_fit)
+                # Length of the best fit is the degrees of freedom plus 2 for a linear fit
+                center += best_fit.nu + 2
+            else:  # _best_fit returned None
+                center += len(sample)
+        return fits

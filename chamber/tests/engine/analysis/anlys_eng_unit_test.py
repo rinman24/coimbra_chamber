@@ -225,6 +225,27 @@ def mock_evaluate_fit(monkeypatch):
 
     return evaluate_fit
 
+
+@pytest.fixture('function')
+def mock_best_fit(monkeypatch):
+    """Mock of AnalysisEngine._best_fit."""
+    # Create two mock Fit DTOs for mock_best_fit to return
+    fit_dto_1 = MagicMock()
+    fit_dto_1.nu = 21
+    fit_dto_2 = MagicMock()
+    fit_dto_2.nu = 29
+
+    # Create the mock
+    fits = [None, None, fit_dto_1, fit_dto_2]
+    best_fit = MagicMock(side_effect=fits)
+
+    monkeypatch.setattr(
+        'chamber.engine.analysis.service.AnalysisEngine._best_fit',
+        best_fit)
+
+    return best_fit
+
+
 # ----------------------------------------------------------------------------
 # AnalysisEngine
 
@@ -346,11 +367,10 @@ def test_evaluate_fit(anlys_eng, sample):  # noqa: D103
 def test_best_fit_takes_correct_steps(
         anlys_eng, steps, limits, sample, mock_fit, mock_evaluate_fit):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    center = 2
     calls = [call(sample[i: j+1]) for i, j in limits]
     error = 0
     # Act --------------------------------------------------------------------
-    anlys_eng._best_fit(sample, center, steps, error)
+    anlys_eng._best_fit(sample, steps, error)
     # Assert -----------------------------------------------------------------
     assert len(calls) == len(mock_fit.mock_calls)
     mock_fit.assert_has_calls(calls)
@@ -369,11 +389,10 @@ def test_best_fit_stops_with_correct_error(
         mock_evaluate_fit):  # noqa: D103
     # ------------------------------------------------------------------------
     # Arrange
-    center = 2
     steps = 1
     # ------------------------------------------------------------------------
     # Act
-    result = anlys_eng._best_fit(sample, center, steps, requested_error)
+    result = anlys_eng._best_fit(sample, steps, requested_error)
     # ------------------------------------------------------------------------
     # Assert
     if result:  # Best fit found a fit before running out of samples
@@ -381,6 +400,30 @@ def test_best_fit_stops_with_correct_error(
         assert isclose(slope_error, requested_error)
     else:  # Error theshold never reached and therefore no best fit
         assert not result
+
+
+def test_get_fits(anlys_eng, mock_best_fit):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    # Set up the input data
+    data = {'m': list(range(60))}
+    df = pd.DataFrame(data=data)
+    # Set up the expected calls
+    calls = [
+        call(list(range(3)), steps=1, error=0.01),
+        call(list(range(9)), steps=1, error=0.01),
+        call(list(range(27)), steps=1, error=0.01),
+        call(list(range(13, 60)), steps=1, error=0.01),
+    ]
+    # Set up the expected degrees of freedom (nu) passed through from mock
+    # Should not contain the None return arguments
+    expected_nus = [21, 29]
+    # Act --------------------------------------------------------------------
+    fits = anlys_eng._get_fits(df)
+    # Assert -----------------------------------------------------------------
+    assert len(fits) == 2
+    for fit, nu in zip(fits, expected_nus):
+        assert fit.nu == nu
+    mock_best_fit.assert_has_calls(calls)
 
 
 # ----------------------------------------------------------------------------
