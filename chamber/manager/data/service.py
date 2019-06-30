@@ -17,7 +17,7 @@ class DataManager(object):
         """Constructor."""
         self._exp_acc = ExperimentAccess()
         self._plt_util = PlotUtility()
-        self._anlys_eng = AnalysisEngine()
+        self._anlys_eng = AnalysisEngine(1)
 
     # ------------------------------------------------------------------------
     # Public methods: included in the API

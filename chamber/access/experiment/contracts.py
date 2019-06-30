@@ -87,3 +87,5 @@ class Fit:
     q: float
     chi2: float
     nu: int
+    exp_id: int
+    idx: int

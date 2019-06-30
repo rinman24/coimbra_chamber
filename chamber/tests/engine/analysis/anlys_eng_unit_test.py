@@ -207,12 +207,14 @@ def mock_fit(monkeypatch):
 def mock_evaluate_fit(monkeypatch):
     """Mock of AnalysisEngine._evaluate_fit."""
     # Define logic
-    def mock_logic(sample, fit):
+    def mock_logic(sample, fit, idx):
         data = fit
         data['r2'] = 0.99
         data['q'] = 0.01
         data['chi2'] = 1.5
         data['nu'] = 1
+        data['exp_id'] = 1
+        data['idx'] = idx
         return dacite.from_dict(Fit, data)
 
     # Assign side effect
@@ -336,10 +338,12 @@ def test_fit(anlys_eng, sample):  # noqa: D103
 
 
 def test_evaluate_fit(anlys_eng, sample):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    idx = 1
     # ------------------------------------------------------------------------
     # Act
     fit = anlys_eng._fit(sample)
-    result = anlys_eng._evaluate_fit(sample, fit)
+    result = anlys_eng._evaluate_fit(sample, fit, idx)
     # ------------------------------------------------------------------------
     # Assert
     assert isclose(result.a, 0.014657801999999996)
@@ -369,8 +373,9 @@ def test_best_fit_takes_correct_steps(
     # Arrange ----------------------------------------------------------------
     calls = [call(sample[i: j+1]) for i, j in limits]
     error = 0
+    idx = 1
     # Act --------------------------------------------------------------------
-    anlys_eng._best_fit(sample, steps, error)
+    anlys_eng._best_fit(sample, idx, steps, error)
     # Assert -----------------------------------------------------------------
     assert len(calls) == len(mock_fit.mock_calls)
     mock_fit.assert_has_calls(calls)
@@ -390,9 +395,10 @@ def test_best_fit_stops_with_correct_error(
     # ------------------------------------------------------------------------
     # Arrange
     steps = 1
+    idx = 1
     # ------------------------------------------------------------------------
     # Act
-    result = anlys_eng._best_fit(sample, steps, requested_error)
+    result = anlys_eng._best_fit(sample, idx, steps, requested_error)
     # ------------------------------------------------------------------------
     # Assert
     if result:  # Best fit found a fit before running out of samples

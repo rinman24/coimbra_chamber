@@ -273,7 +273,7 @@ class AnalysisEngine(object):
             sig_b=sig_b,
             )
 
-    def _best_fit(self, sample, steps, error):
+    def _best_fit(self, sample, idx, steps, error):
         total = len(sample)
         # _max_slice always gives a sample with odd length, so we subtract one
         # then divide to fine the center.
@@ -282,13 +282,12 @@ class AnalysisEngine(object):
             this_sample = sample[center - steps: center + steps + 1]
             fit = self._fit(this_sample)
             if fit['sig_b']/abs(fit['b']) <= error:
-                best_fit = self._evaluate_fit(this_sample, fit)
+                best_fit = self._evaluate_fit(this_sample, fit, idx)
                 return best_fit
             else:
                 steps += steps
 
-    @staticmethod
-    def _evaluate_fit(sample, fit):
+    def _evaluate_fit(self, sample, fit, idx):
         # Prepare the data
         y = [i.nominal_value for i in sample]
         sig = [i.std_dev for i in sample]
@@ -316,6 +315,8 @@ class AnalysisEngine(object):
         data['q'] = Q
         data['chi2'] = merit_value
         data['nu'] = len(x) - 2
+        data['exp_id'] = self._experiment_id
+        data['idx'] = idx
 
         return dacite.from_dict(Fit, data)
 
