@@ -20,7 +20,7 @@ from chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
 @pytest.fixture(scope='module')
 def anlys_eng():
     """Create a module level instance of the analysis engine."""
-    return AnalysisEngine()
+    return AnalysisEngine(experiment_id=1)
 
 
 @pytest.fixture(scope='function')

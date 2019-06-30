@@ -6,7 +6,8 @@ import pandas as pd
 from scipy.stats import chi2
 from uncertainties import ufloat
 
-from chamber.access.experiment.service import ExperimentAccess
+# TODO: do you need this?
+# from chamber.access.experiment.service import ExperimentAccess
 from chamber.access.experiment.contracts import Fit
 
 from chamber.utility.io.contracts import Prompt
@@ -19,11 +20,12 @@ from chamber.utility.plot.service import PlotUtility
 class AnalysisEngine(object):
     """TODO: docstring."""
 
-    def __init__(self):
+    def __init__(self, experiment_id):
         """TODO: docstring."""
-        self._exp_acc = ExperimentAccess()
+        # self._exp_acc = ExperimentAccess() TODO: do you need this?
         self._io_util = IOUtility()
         self._plot_util = PlotUtility()
+        self._experiment_id = experiment_id
 
     # ------------------------------------------------------------------------
     # Public methods: included in the API
