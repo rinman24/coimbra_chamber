@@ -6,8 +6,7 @@ import pandas as pd
 from scipy.stats import chi2
 from uncertainties import ufloat
 
-# TODO: do you need this?
-# from chamber.access.experiment.service import ExperimentAccess
+from chamber.access.experiment.service import ExperimentAccess
 from chamber.access.experiment.contracts import Fit
 
 from chamber.utility.io.contracts import Prompt
@@ -22,10 +21,18 @@ class AnalysisEngine(object):
 
     def __init__(self, experiment_id):
         """TODO: docstring."""
-        # self._exp_acc = ExperimentAccess() TODO: do you need this?
+        self._experiment_id = experiment_id
+
+        self._exp_acc = ExperimentAccess()
         self._io_util = IOUtility()
         self._plot_util = PlotUtility()
-        self._experiment_id = experiment_id
+
+        self._column = 'm'
+        self._error = 0.01
+        self._fits = []
+        self._idx = 1
+        self._sample = []
+        self._steps = 1
 
     # ------------------------------------------------------------------------
     # Public methods: included in the API
@@ -238,11 +245,10 @@ class AnalysisEngine(object):
 
         return dacite.from_dict(Layout, data)
 
-    @staticmethod
-    def _max_slice(df, idx, col):
-        left = (2 * idx) - len(df) + 1
-        right = 2 * idx
-        result = df.loc[left:right, col].tolist()
+    def _max_slice(self):
+        left = (2 * self._idx) - len(self._observations) + 1
+        right = 2 * self._idx
+        result = self._observations.loc[left:right, self._column].tolist()
         return result
 
     @staticmethod
@@ -273,24 +279,25 @@ class AnalysisEngine(object):
             sig_b=sig_b,
             )
 
-    def _best_fit(self, sample, idx, steps, error):
-        total = len(sample)
+    def _best_fit(self):
+        total = len(self._sample)
         # _max_slice always gives a sample with odd length, so we subtract one
         # then divide to fine the center.
         center = int((total - 1) / 2)
+        steps = int(self._steps)  # Explicitly make a copy to use here
         while center + steps <= total:
-            this_sample = sample[center - steps: center + steps + 1]
+            this_sample = self._sample[center - steps: center + steps + 1]
             fit = self._fit(this_sample)
-            if fit['sig_b']/abs(fit['b']) <= error:
-                best_fit = self._evaluate_fit(this_sample, fit, idx)
+            if fit['sig_b']/abs(fit['b']) <= self._error:
+                best_fit = self._evaluate_fit(fit)
                 return best_fit
             else:
                 steps += steps
 
-    def _evaluate_fit(self, sample, fit, idx):
+    def _evaluate_fit(self, fit):
         # Prepare the data
-        y = [i.nominal_value for i in sample]
-        sig = [i.std_dev for i in sample]
+        y = [i.nominal_value for i in self._sample]
+        sig = [i.std_dev for i in self._sample]
         x = list(range(len(y)))  # Always indexed at zero
 
         a = fit['a']
@@ -316,22 +323,21 @@ class AnalysisEngine(object):
         data['chi2'] = merit_value
         data['nu'] = len(x) - 2
         data['exp_id'] = self._experiment_id
-        data['idx'] = idx
+        data['idx'] = self._idx
 
         return dacite.from_dict(Fit, data)
 
-    def _get_fits(self, df):
-        fits = []
-        idx = 1
+    def _get_fits(self):
+        # slef._fit == [], slef._idx == 1, and self._sample == []
+
         # len - 2 because we want to make sure we never end up at the last
         # index and can't take a max slice
-        while idx < len(df) - 2:
-            sample = self._max_slice(df, idx=idx, col='m')
-            best_fit = self._best_fit(sample, idx=idx, steps=1, error=0.01)
+        while self._idx < len(self._observations) - 2:
+            self._sample = self._max_slice()
+            best_fit = self._best_fit()
             if best_fit:  # We got a fit that met the error threshold
-                fits.append(best_fit)
+                self._fits.append(best_fit)
                 # Length of the best fit is the degrees of freedom plus 2 for a linear fit
-                idx += best_fit.nu + 2
+                self._idx += best_fit.nu + 2
             else:  # _best_fit returned None
-                idx += len(sample)
-        return fits
+                self._idx += len(self._sample)

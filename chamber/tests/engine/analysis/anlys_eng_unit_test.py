@@ -17,7 +17,7 @@ from chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
 # Fixtures
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def anlys_eng():
     """Create a module level instance of the analysis engine."""
     return AnalysisEngine(experiment_id=1)
@@ -207,14 +207,14 @@ def mock_fit(monkeypatch):
 def mock_evaluate_fit(monkeypatch):
     """Mock of AnalysisEngine._evaluate_fit."""
     # Define logic
-    def mock_logic(sample, fit, idx):
+    def mock_logic(fit):
         data = fit
         data['r2'] = 0.99
         data['q'] = 0.01
         data['chi2'] = 1.5
         data['nu'] = 1
         data['exp_id'] = 1
-        data['idx'] = idx
+        data['idx'] = 1
         return dacite.from_dict(Fit, data)
 
     # Assign side effect
@@ -306,6 +306,8 @@ def test_max_slice(anlys_eng, idx, expected):  # noqa: D103
 
     """
     # Arrange ----------------------------------------------------------------
+    # Set the correct index
+    anlys_eng._idx = idx
     # Build the dataframe
     data = dict(
         my_col=[
@@ -314,9 +316,10 @@ def test_max_slice(anlys_eng, idx, expected):  # noqa: D103
             ],
         not_my_col=[-999] * 7,
         )
-    dataframe = pd.DataFrame(data=data)
+    anlys_eng._column = 'my_col'
+    anlys_eng._observations = pd.DataFrame(data=data)
     # Act --------------------------------------------------------------------
-    slice_ = anlys_eng._max_slice(df=dataframe, idx=idx, col='my_col')
+    slice_ = anlys_eng._max_slice()
     # Assert -----------------------------------------------------------------
     assert len(slice_) == len(expected)
     for result, correct in zip(slice_, expected):
@@ -339,11 +342,11 @@ def test_fit(anlys_eng, sample):  # noqa: D103
 
 def test_evaluate_fit(anlys_eng, sample):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    idx = 1
+    anlys_eng._sample = sample
     # ------------------------------------------------------------------------
     # Act
     fit = anlys_eng._fit(sample)
-    result = anlys_eng._evaluate_fit(sample, fit, idx)
+    result = anlys_eng._evaluate_fit(fit)
     # ------------------------------------------------------------------------
     # Assert
     assert isclose(result.a, 0.014657801999999996)
@@ -372,10 +375,10 @@ def test_best_fit_takes_correct_steps(
         anlys_eng, steps, limits, sample, mock_fit, mock_evaluate_fit):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     calls = [call(sample[i: j+1]) for i, j in limits]
-    error = 0
-    idx = 1
+    anlys_eng._sample = sample
+    anlys_eng._steps = steps
     # Act --------------------------------------------------------------------
-    anlys_eng._best_fit(sample, idx, steps, error)
+    anlys_eng._best_fit()
     # Assert -----------------------------------------------------------------
     assert len(calls) == len(mock_fit.mock_calls)
     mock_fit.assert_has_calls(calls)
@@ -393,12 +396,8 @@ def test_best_fit_stops_with_correct_error(
         anlys_eng, sample, requested_error, expected_result, mock_fit,
         mock_evaluate_fit):  # noqa: D103
     # ------------------------------------------------------------------------
-    # Arrange
-    steps = 1
-    idx = 1
-    # ------------------------------------------------------------------------
     # Act
-    result = anlys_eng._best_fit(sample, idx, steps, requested_error)
+    result = anlys_eng._best_fit()
     # ------------------------------------------------------------------------
     # Assert
     if result:  # Best fit found a fit before running out of samples
@@ -412,22 +411,17 @@ def test_get_fits(anlys_eng, mock_best_fit):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # Set up the input data
     data = {'m': list(range(60))}
-    df = pd.DataFrame(data=data)
+    anlys_eng._observations = pd.DataFrame(data=data)
     # Set up the expected calls
-    calls = [
-        call(list(range(3)), idx=1, steps=1, error=0.01),
-        call(list(range(9)), idx=4, steps=1, error=0.01),
-        call(list(range(27)), idx=13, steps=1, error=0.01),
-        call(list(range(13, 60)), idx=36, steps=1, error=0.01),
-    ]
+    calls = [call()] * 4
     # Set up the expected degrees of freedom (nu) passed through from mock
     # Should not contain the None return arguments
     expected_nus = [21, 29]
     # Act --------------------------------------------------------------------
-    fits = anlys_eng._get_fits(df)
+    anlys_eng._get_fits()
     # Assert -----------------------------------------------------------------
-    assert len(fits) == 2
-    for fit, nu in zip(fits, expected_nus):
+    assert len(anlys_eng._fits) == 2
+    for fit, nu in zip(anlys_eng._fits, expected_nus):
         assert fit.nu == nu
     mock_best_fit.assert_has_calls(calls)
 
