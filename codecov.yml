@@ -18,6 +18,7 @@ ignore:
     - "**/contracts.py"
     - "**/models.py"
     - "setup.py"
+    - "**/__init__.py"
 
 parsers:
   gcov:
