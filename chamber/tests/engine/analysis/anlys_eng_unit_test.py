@@ -286,7 +286,7 @@ def test_layout_observations(anlys_eng, data_spec, observation_layout):  # noqa:
 
 
 @pytest.mark.parametrize(
-    'center, expected',
+    'idx, expected',
     [
         (1, [ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2)]),
         (2, [ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2), ufloat(7, 7e-2), ufloat(6, 6e-2)]),
@@ -295,7 +295,7 @@ def test_layout_observations(anlys_eng, data_spec, observation_layout):  # noqa:
         (5, [ufloat(6, 6e-2), ufloat(5, 5e-2), ufloat(4, 4e-2)]),
         ]
     )
-def test_max_slice(anlys_eng, center, expected):  # noqa: D103
+def test_max_slice(anlys_eng, idx, expected):  # noqa: D103
     """
     Test get maximum slice.
 
@@ -316,7 +316,7 @@ def test_max_slice(anlys_eng, center, expected):  # noqa: D103
         )
     dataframe = pd.DataFrame(data=data)
     # Act --------------------------------------------------------------------
-    slice_ = anlys_eng._max_slice(df=dataframe, center=center, col='my_col')
+    slice_ = anlys_eng._max_slice(df=dataframe, idx=idx, col='my_col')
     # Assert -----------------------------------------------------------------
     assert len(slice_) == len(expected)
     for result, correct in zip(slice_, expected):
@@ -415,10 +415,10 @@ def test_get_fits(anlys_eng, mock_best_fit):  # noqa: D103
     df = pd.DataFrame(data=data)
     # Set up the expected calls
     calls = [
-        call(list(range(3)), steps=1, error=0.01),
-        call(list(range(9)), steps=1, error=0.01),
-        call(list(range(27)), steps=1, error=0.01),
-        call(list(range(13, 60)), steps=1, error=0.01),
+        call(list(range(3)), idx=1, steps=1, error=0.01),
+        call(list(range(9)), idx=4, steps=1, error=0.01),
+        call(list(range(27)), idx=13, steps=1, error=0.01),
+        call(list(range(13, 60)), idx=36, steps=1, error=0.01),
     ]
     # Set up the expected degrees of freedom (nu) passed through from mock
     # Should not contain the None return arguments

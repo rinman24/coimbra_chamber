@@ -239,9 +239,9 @@ class AnalysisEngine(object):
         return dacite.from_dict(Layout, data)
 
     @staticmethod
-    def _max_slice(df, center, col):
-        left = (2 * center) - len(df) + 1
-        right = 2 * center
+    def _max_slice(df, idx, col):
+        left = (2 * idx) - len(df) + 1
+        right = 2 * idx
         result = df.loc[left:right, col].tolist()
         return result
 
@@ -322,16 +322,16 @@ class AnalysisEngine(object):
 
     def _get_fits(self, df):
         fits = []
-        center = 1
+        idx = 1
         # len - 2 because we want to make sure we never end up at the last
         # index and can't take a max slice
-        while center < len(df) - 2:
-            sample = self._max_slice(df, center=center, col='m')
-            best_fit = self._best_fit(sample, steps=1, error=0.01)
+        while idx < len(df) - 2:
+            sample = self._max_slice(df, idx=idx, col='m')
+            best_fit = self._best_fit(sample, idx=idx, steps=1, error=0.01)
             if best_fit:  # We got a fit that met the error threshold
                 fits.append(best_fit)
                 # Length of the best fit is the degrees of freedom plus 2 for a linear fit
-                center += best_fit.nu + 2
+                idx += best_fit.nu + 2
             else:  # _best_fit returned None
-                center += len(sample)
+                idx += len(sample)
         return fits
