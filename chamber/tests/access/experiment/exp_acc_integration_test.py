@@ -9,10 +9,12 @@ import pytest
 from nptdms import TdmsFile
 from pandas import DataFrame
 from pytz import utc
+from sqlalchemy import and_
 
 from chamber.access.experiment.contracts import TemperatureSpec
 from chamber.access.experiment.models import (
     Experiment,
+    Fit,
     Observation,
     Tube,
     Setting,
@@ -57,6 +59,7 @@ def test_add_tube_that_already_exists(exp_acc, tube_spec):  # noqa: D103
     new_tube_id = exp_acc._add_tube(tube_spec)
     # Assert -----------------------------------------------------------------
     assert new_tube_id == 1
+
 
 # _add_setting ---------------------------------------------------------------
 
@@ -199,7 +202,8 @@ def test_add_observations_that_already_exist(exp_acc, observation_spec):  # noqa
     assert returned_dict == dict(observations=2, temperatures=6)
 
 
-# add_raw_data -------------------------------------------------------------------
+# add_raw_data ---------------------------------------------------------------
+
 
 @pytest.mark.parametrize('tube_id', [1, 999])
 def test_add_raw_data(exp_acc, data_spec, tube_id):  # noqa: D103
@@ -223,6 +227,9 @@ def test_add_raw_data(exp_acc, data_spec, tube_id):  # noqa: D103
         assert not result
 
 
+# connect --------------------------------------------------------------------
+
+
 @pytest.mark.parametrize('filepath', [tdms_path, 'bad_path'])
 def test_connect(exp_acc, filepath):  # noqa: D103
     # Act --------------------------------------------------------------------
@@ -234,6 +241,9 @@ def test_connect(exp_acc, filepath):  # noqa: D103
         assert isinstance(exp_acc._data, DataFrame)
     else:
         assert not hasattr(exp_acc._tdms_file)
+
+
+# get_temperature_spec -------------------------------------------------------
 
 
 @pytest.mark.parametrize('index', [0, 1, 2])
@@ -311,6 +321,9 @@ def test_get_temperature_spec(exp_acc, index):  # noqa: D103
                 assert temp_spec.temperature == Decimal('290.11')
 
 
+# get_observation_spec -------------------------------------------------------
+
+
 @pytest.mark.parametrize('index', [0, 1, 2])
 def test_get_observation_sepc(exp_acc, index):  # noqa: D103
     # Arrange ----------------------------------------------------------------
@@ -355,6 +368,9 @@ def test_get_observation_sepc(exp_acc, index):  # noqa: D103
         assert results.ic_temp == Decimal('294.86')
 
 
+# get_experiment_spec --------------------------------------------------------
+
+
 def test_get_experiment_spec(exp_acc):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     exp_acc._connect(tdms_path)
@@ -368,6 +384,9 @@ def test_get_experiment_spec(exp_acc):  # noqa: D103
     assert result.tube_id == 1
 
 
+# get_setting_spec -----------------------------------------------------------
+
+
 def test_get_setting_spec(exp_acc):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     exp_acc._connect(tdms_path)
@@ -378,6 +397,9 @@ def test_get_setting_spec(exp_acc):  # noqa: D103
     assert result.pressure == int(1e5)
     assert result.temperature == Decimal('290')
     assert result.time_step == Decimal('1.0')
+
+
+# get_raw_data ---------------------------------------------------------------
 
 
 def test_get_raw_data(exp_acc):  # noqa: D103
@@ -395,6 +417,9 @@ def test_get_raw_data(exp_acc):  # noqa: D103
     assert len(result.observations[0].temperatures) == 10
 
 
+# layout_raw_data ------------------------------------------------------------
+
+
 def test_layout_raw_data(exp_acc, raw_layout):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     raw_data = exp_acc.get_raw_data(tdms_path)
@@ -406,3 +431,50 @@ def test_layout_raw_data(exp_acc, raw_layout):  # noqa: D103
     assert layout.plots[0] == raw_layout.plots[0]
     # pressure
     assert layout.plots[1] == raw_layout.plots[1]
+
+
+# add_fit --------------------------------------------------------------------
+
+
+def test_add_fit_that_does_not_exist(exp_acc, fit_spec):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    expected_experiment_id = 1
+    expected_idx = fit_spec.idx
+    # Act --------------------------------------------------------------------
+    exp_id, idx = exp_acc._add_fit(fit_spec, expected_experiment_id)
+    # Assert -----------------------------------------------------------------
+    assert exp_id == expected_experiment_id
+    assert idx == expected_idx
+    # Now query result -------------------------------------------------------
+    session = exp_acc.Session()
+    try:
+        query = session.query(Fit).filter(
+            and_(Fit.idx == expected_idx, Fit.experiment_id == exp_id)
+        )
+        result = query.one()
+        session.commit()
+        assert result.a == 1.0
+        assert result.sig_a == 2.0
+        assert result.b == -3.0
+        assert result.sig_b == 4.0
+        assert result.r2 == 5.0
+        assert result.q == 6.0
+        assert result.chi2 == 7.0
+        assert result.nu == 8
+        assert result.experiment_id == 1
+        assert result.idx == 0
+    finally:
+        session.close()
+
+
+def test_add_fit_that_already_exists(exp_acc, fit_spec):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    expected_experiment_id = 1
+    expected_idx = fit_spec.idx
+    # NOTE: The test above already added the fit
+    # NOTE: These tests are intended to be run sequently
+    # Act --------------------------------------------------------------------
+    new_exp_id, new_idx = exp_acc._add_fit(fit_spec, expected_experiment_id)
+    # Assert -----------------------------------------------------------------
+    assert new_exp_id == expected_experiment_id
+    assert new_idx == expected_idx

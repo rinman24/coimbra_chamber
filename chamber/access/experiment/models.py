@@ -4,6 +4,7 @@ from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
+    Float,
     ForeignKey,
     ForeignKeyConstraint,
     Integer,
@@ -169,3 +170,42 @@ class Temperature(Base):
             f'temperature={self.temperature}, '
             f'idx={self.idx}, '
             f'experiment_id={self.experiment_id})>')
+
+
+class Fit(Base):
+    """Fit object definition."""
+
+    # Metadata
+    __tablename__ = 'Fits'
+
+    # Columns
+    a = Column(Float, nullable=False)
+    sig_a = Column(Float, nullable=False)
+    b = Column(Float, nullable=False)
+    sig_b = Column(Float, nullable=False)
+    r2 = Column(Float, nullable=False)
+    q = Column(Float, nullable=False)
+    chi2 = Column(Float, nullable=False)
+    nu = Column(Integer, nullable=False)
+
+    # Composite foreign keys
+    idx = Column(Integer, primary_key=True)
+    experiment_id = Column(Integer, primary_key=True)
+
+    __table_args__ = (
+        ForeignKeyConstraint(
+            [idx, experiment_id], [Observation.idx, Observation.experiment_id]),
+        )
+
+    def __repr__(self):  # noqa: D105
+        return (
+            f'<Fit(a={self.a}, '
+            f'sig_a={self.sig_a}, '
+            f'b={self.b}, '
+            f'sig_b={self.sig_b}, '
+            f'r2={self.r2}, '
+            f'q={self.q}, '
+            f'chi2={self.chi2}, '
+            f'nu={self.nu}, '
+            f'experiment_id={self.experiment_id}, '
+            f'idx={self.idx})>')

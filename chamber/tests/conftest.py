@@ -12,6 +12,7 @@ from nptdms import TdmsFile
 from chamber.access.experiment.contracts import (
     DataSpec,
     ExperimentSpec,
+    FitSpec,
     ObservationSpec,
     TubeSpec,
     SettingSpec,
@@ -293,3 +294,21 @@ def raw_layout():
         style='seaborn-darkgrid')
 
     return dacite.from_dict(Layout, data)
+
+
+@pytest.fixture('function')
+def fit_spec():
+    """Fit specification."""
+    data = dict(
+        a=1.0,
+        sig_a=2.0,
+        b=-3.0,
+        sig_b=4.0,
+        r2=5.0,
+        q=6.0,
+        chi2=7.0,
+        nu=8,
+        exp_id=1,
+        idx=0)
+    fit_spec = dacite.from_dict(FitSpec, data)
+    return fit_spec

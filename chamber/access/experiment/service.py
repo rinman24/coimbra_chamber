@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from chamber.access.experiment.models import (
     Base,
     Experiment,
+    Fit,
     Observation,
     Tube,
     Setting,
@@ -485,6 +486,41 @@ class ExperimentAccess(object):
             session.close()
 
             return dict(observations=obs_count, temperatures=temp_count)
+
+    def _add_fit(self, fit_spec, experiment_id):
+        session = self.Session()
+
+        try:
+            # Check if tube exists
+            query = session.query(Fit).filter(
+                and_(
+                    Fit.idx == fit_spec.idx,
+                    Fit.experiment_id == fit_spec.exp_id,
+                    )
+                )
+            fit = query.first()
+            # If not, insert it
+            if not fit:
+                fit_to_add = Fit(
+                    a=fit_spec.a,
+                    sig_a=fit_spec.sig_a,
+                    b=fit_spec.b,
+                    sig_b=fit_spec.sig_b,
+                    r2=fit_spec.r2,
+                    q=fit_spec.q,
+                    chi2=fit_spec.chi2,
+                    nu=fit_spec.nu,
+                    idx=fit_spec.idx,
+                    experiment_id=fit_spec.exp_id)
+                session.add(fit_to_add)
+                session.commit()
+                return fit_to_add.experiment_id, fit_to_add.idx
+            else:
+                return fit.experiment_id, fit.idx
+        except:  # pragma: no cover
+            session.rollback()
+        finally:
+            session.close()
 
     def _teardown(self):
         """
