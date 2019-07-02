@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 from uncertainties import ufloat
 
-from chamber.access.experiment.contracts import Fit
+from chamber.access.experiment.contracts import FitSpec
 from chamber.engine.analysis.service import AnalysisEngine
 from chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
 
@@ -215,7 +215,7 @@ def mock_evaluate_fit(monkeypatch):
         data['nu'] = 1
         data['exp_id'] = 1
         data['idx'] = 1
-        return dacite.from_dict(Fit, data)
+        return dacite.from_dict(FitSpec, data)
 
     # Assign side effect
     evaluate_fit = MagicMock(side_effect=mock_logic)
@@ -231,7 +231,7 @@ def mock_evaluate_fit(monkeypatch):
 @pytest.fixture('function')
 def mock_best_fit(monkeypatch):
     """Mock of AnalysisEngine._best_fit."""
-    # Create two mock Fit DTOs for mock_best_fit to return
+    # Create two mock FitSpec DTOs for mock_best_fit to return
     fit_dto_1 = MagicMock()
     fit_dto_1.nu = 21
     fit_dto_2 = MagicMock()

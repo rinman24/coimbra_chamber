@@ -7,7 +7,7 @@ from scipy.stats import chi2
 from uncertainties import ufloat
 
 from chamber.access.experiment.service import ExperimentAccess
-from chamber.access.experiment.contracts import Fit
+from chamber.access.experiment.contracts import FitSpec
 
 from chamber.utility.io.contracts import Prompt
 from chamber.utility.io.service import IOUtility
@@ -325,7 +325,7 @@ class AnalysisEngine(object):
         data['exp_id'] = self._experiment_id
         data['idx'] = self._idx
 
-        return dacite.from_dict(Fit, data)
+        return dacite.from_dict(FitSpec, data)
 
     def _get_fits(self):
         # slef._fit == [], slef._idx == 1, and self._sample == []

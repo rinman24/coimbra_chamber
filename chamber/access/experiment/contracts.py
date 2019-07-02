@@ -76,7 +76,7 @@ class DataSpec:
 
 
 @dataclass(frozen=True)
-class Fit:
+class FitSpec:
     """Regression fit results."""
 
     a: float
