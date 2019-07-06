@@ -342,3 +342,10 @@ class AnalysisEngine(object):
                 self._idx += best_fit.nu + 2
             else:  # _best_fit returned None
                 self._idx += len(self._sample)
+
+    def _persist_fits(self, fits):
+        counter = 0
+        for fit in fits:
+            self._exp_acc.add_fit(fit, self._experiment_id)
+            counter += 1
+        return counter

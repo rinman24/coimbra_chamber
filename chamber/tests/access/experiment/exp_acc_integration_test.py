@@ -441,7 +441,7 @@ def test_add_fit_that_does_not_exist(exp_acc, fit_spec):  # noqa: D103
     expected_experiment_id = 1
     expected_idx = fit_spec.idx
     # Act --------------------------------------------------------------------
-    exp_id, idx = exp_acc._add_fit(fit_spec, expected_experiment_id)
+    exp_id, idx = exp_acc.add_fit(fit_spec, expected_experiment_id)
     # Assert -----------------------------------------------------------------
     assert exp_id == expected_experiment_id
     assert idx == expected_idx
@@ -474,7 +474,7 @@ def test_add_fit_that_already_exists(exp_acc, fit_spec):  # noqa: D103
     # NOTE: The test above already added the fit
     # NOTE: These tests are intended to be run sequently
     # Act --------------------------------------------------------------------
-    new_exp_id, new_idx = exp_acc._add_fit(fit_spec, expected_experiment_id)
+    new_exp_id, new_idx = exp_acc.add_fit(fit_spec, expected_experiment_id)
     # Assert -----------------------------------------------------------------
     assert new_exp_id == expected_experiment_id
     assert new_idx == expected_idx

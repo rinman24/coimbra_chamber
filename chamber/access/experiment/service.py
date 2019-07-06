@@ -106,7 +106,7 @@ class ExperimentAccess(object):
 
         Parameters
         ----------
-        data_specs : list of chamber.access.sql.contracts.DataSpec
+        data_specs : list of chamber.access.experiment.contracts.DataSpec
             All observations for a given experiment.
 
         Returns
@@ -130,8 +130,8 @@ class ExperimentAccess(object):
         --------
         Assuming that you have a valid `DataSpec` object called `data_spec`
         containing two observations with three temperatures each:
-        >>> chamber_access = ChamberAccess()
-        >>> result = chamber_access.add_raw_data(data_spec)
+        >>> access = ExperimentAccess()
+        >>> result = access.add_raw_data(data_spec)
         >>> result
         {'tube_id': 1, 'setting_id': 1, 'experiment_id': 1, 'observations': 2,
         'temperatures': 6}
@@ -273,6 +273,72 @@ class ExperimentAccess(object):
             style='seaborn-darkgrid')
         layout = dacite.from_dict(Layout, data)
         return layout
+
+    def add_fit(self, fit_spec, experiment_id):
+        """
+        Add fit to the database.
+
+        This method does not rewite data that already exists in the databse.
+        NOTE: The experiment and observations must already exist in the
+        database in order to add the fit.
+
+        Parameters
+        ----------
+        fit_spec : chamber.access.experiment.contracts.FitSpec
+            Parameters for a given fit.
+
+        Returns
+        -------
+        int
+            ExperimentId for the given fit.
+        int
+            Index in the test for the given fit.
+
+        Examples
+        --------
+        Assuming that you have a valid `FitSpec` object called `fit_spec`:
+        >>> access = ExperimentAccess()
+        >>> exp_id, idx = access.add_fit(fit_spec)
+        >>> exp_id
+        1
+        >>> idx
+        10
+
+        """
+        session = self.Session()
+
+        try:
+            # Check if tube exists
+            query = session.query(Fit).filter(
+                and_(
+                    Fit.idx == fit_spec.idx,
+                    Fit.experiment_id == fit_spec.exp_id,
+                    )
+                )
+            fit = query.first()
+            # If not, insert it
+            if not fit:
+                fit_to_add = Fit(
+                    a=fit_spec.a,
+                    sig_a=fit_spec.sig_a,
+                    b=fit_spec.b,
+                    sig_b=fit_spec.sig_b,
+                    r2=fit_spec.r2,
+                    q=fit_spec.q,
+                    chi2=fit_spec.chi2,
+                    nu=fit_spec.nu,
+                    idx=fit_spec.idx,
+                    experiment_id=fit_spec.exp_id)
+                session.add(fit_to_add)
+                session.commit()
+                return fit_to_add.experiment_id, fit_to_add.idx
+            else:
+                return fit.experiment_id, fit.idx
+        except:  # pragma: no cover
+            session.rollback()
+        finally:
+            session.close()
+
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
@@ -486,41 +552,6 @@ class ExperimentAccess(object):
             session.close()
 
             return dict(observations=obs_count, temperatures=temp_count)
-
-    def _add_fit(self, fit_spec, experiment_id):
-        session = self.Session()
-
-        try:
-            # Check if tube exists
-            query = session.query(Fit).filter(
-                and_(
-                    Fit.idx == fit_spec.idx,
-                    Fit.experiment_id == fit_spec.exp_id,
-                    )
-                )
-            fit = query.first()
-            # If not, insert it
-            if not fit:
-                fit_to_add = Fit(
-                    a=fit_spec.a,
-                    sig_a=fit_spec.sig_a,
-                    b=fit_spec.b,
-                    sig_b=fit_spec.sig_b,
-                    r2=fit_spec.r2,
-                    q=fit_spec.q,
-                    chi2=fit_spec.chi2,
-                    nu=fit_spec.nu,
-                    idx=fit_spec.idx,
-                    experiment_id=fit_spec.exp_id)
-                session.add(fit_to_add)
-                session.commit()
-                return fit_to_add.experiment_id, fit_to_add.idx
-            else:
-                return fit.experiment_id, fit.idx
-        except:  # pragma: no cover
-            session.rollback()
-        finally:
-            session.close()
 
     def _teardown(self):
         """
