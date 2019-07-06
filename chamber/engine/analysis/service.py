@@ -328,6 +328,7 @@ class AnalysisEngine(object):
         return dacite.from_dict(FitSpec, data)
 
     def _get_fits(self):
+        # The comment below is to remind us how `self` is initialized:
         # slef._fit == [], slef._idx == 1, and self._sample == []
 
         # len - 2 because we want to make sure we never end up at the last

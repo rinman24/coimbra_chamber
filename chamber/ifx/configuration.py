@@ -39,7 +39,7 @@ def get_value(key, section='DEFAULT'):
 
     # check local config.ini
     parser = ConfigParser(delimiters='|')
-    path = Path('chamber/config.ini')
+    path = Path('config.ini')
     parser.read(path)
 
     if parser.has_option(section, key):
@@ -47,7 +47,7 @@ def get_value(key, section='DEFAULT'):
 
     # check local example_config.ini
     parser = ConfigParser(delimiters='|')
-    path = Path('chamber/example_config.ini')
+    path = Path('example_config.ini')
     parser.read(path)
 
     if parser.has_option(section, key):

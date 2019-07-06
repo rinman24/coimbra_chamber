@@ -19,6 +19,8 @@ from chamber.access.experiment.contracts import (
     TemperatureSpec)
 from chamber.access.experiment.service import ExperimentAccess
 
+from chamber.engine.analysis.service import AnalysisEngine
+
 from chamber.utility.plot.contracts import (
     Axis,
     DataSeries,
@@ -34,6 +36,13 @@ tdms_path = Path('chamber/tests/access/experiment/test_1.tdms')
 
 # ----------------------------------------------------------------------------
 # Fixtures
+
+
+@pytest.fixture(scope='function')
+def anlys_eng():
+    """Create a module level instance of the analysis engine."""
+    engine = AnalysisEngine(experiment_id=1)
+    return engine
 
 
 @pytest.fixture('module')

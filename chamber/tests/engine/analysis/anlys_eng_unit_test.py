@@ -9,18 +9,11 @@ import pytest
 from uncertainties import ufloat
 
 from chamber.access.experiment.contracts import FitSpec
-from chamber.engine.analysis.service import AnalysisEngine
 from chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
 
 
 # ----------------------------------------------------------------------------
 # Fixtures
-
-
-@pytest.fixture(scope='function')
-def anlys_eng():
-    """Create a module level instance of the analysis engine."""
-    return AnalysisEngine(experiment_id=1)
 
 
 @pytest.fixture(scope='function')
