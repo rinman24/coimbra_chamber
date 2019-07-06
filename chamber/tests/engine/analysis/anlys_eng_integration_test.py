@@ -19,12 +19,12 @@ from chamber.access.experiment.models import (
 
 
 def test_persist_fits(
-        anlys_eng, exp_acc, tube_spec, setting_spec, experiment_spec,
+        anlys_eng_integrated, tube_spec, setting_spec, experiment_spec,
         observation_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # Use ExperimentAccess to add a tube, a setting, an experiment, and some
     # observations.
-    access = exp_acc
+    access = anlys_eng_integrated._exp_acc
     _ = access._add_tube(tube_spec)
     setting_id = access._add_setting(setting_spec)
     experiment_id = access._add_experiment(experiment_spec, setting_id)
@@ -61,7 +61,7 @@ def test_persist_fits(
     fit_spec = dac.from_dict(FitSpec, data)
     fits_to_add.append(fit_spec)
     # Act --------------------------------------------------------------------
-    num_fits_added = anlys_eng._persist_fits(fits_to_add)
+    num_fits_added = anlys_eng_integrated._persist_fits(fits_to_add)
     # Assert -----------------------------------------------------------------
     assert num_fits_added == 2
     # Now query result -------------------------------------------------------

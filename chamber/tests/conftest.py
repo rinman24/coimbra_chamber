@@ -38,19 +38,37 @@ tdms_path = Path('chamber/tests/access/experiment/test_1.tdms')
 # Fixtures
 
 
-@pytest.fixture(scope='function')
-def anlys_eng():
-    """Create a module level instance of the analysis engine."""
-    engine = AnalysisEngine(experiment_id=1)
-    return engine
-
-
 @pytest.fixture('module')
 def exp_acc():
     """Experiment access fixture."""
     access = ExperimentAccess()
     yield access
     access._teardown()
+
+
+@pytest.fixture(scope='module')
+def anlys_eng_integrated(exp_acc):
+    """
+    Create a module level instance of the analysis engine.
+
+    NOTE: For integration testing when we want this fixture integrated with the
+    `exp_acc` fixture.
+
+    """
+    engine = AnalysisEngine(experiment_id=1)
+    engine._exp_acc = exp_acc
+    return engine
+
+
+@pytest.fixture(scope='function')
+def anlys_eng():
+    """
+    Create a function level instance of the analysis engine.
+
+    NOTE: For unit testing when we want a new instance each time.
+    """
+    engine = AnalysisEngine(experiment_id=1)
+    return engine
 
 
 @pytest.fixture('module')
