@@ -37,28 +37,19 @@ class AnalysisEngine(object):
     # ------------------------------------------------------------------------
     # Public methods: included in the API
 
-    def perform_analysis(self, data):
+    def process_fits(self, data):
         """TODO: docstring."""
-        # Preprocess
-        # observations = self._get_observations(data.observations)
-        # layout = self._layout_observations(observations)
+        self._get_observations(data.observations)
+        layout = self._layout_observations()
         self._plot_util.plot(layout)
-        # Get user input
-        data = dict(messages=['Lower limit: ', 'Upper limit: '])
-        prompt = dacite.from_dict(Prompt, data)
+        prompt = dacite.from_dict(
+            Prompt,
+            data=dict(messages=['Would you like to continue?: [y]/n ']),
+        )
         response = self._io_util.get_input(prompt)
-        # Parse the anser out into two integers
-        lower = int(response[0])
-        upper = int(response[1])
-        # Filter the observations
-        observations = observations.loc[lower:upper, :]
-        # Confirm that this was done correctly
-        # layout = self._layout_observations(observations)
-        self._plot_util.plot(layout)
-        # NOTE: You are here.
-        # self._regress_mass_flux()
-        # self._persist_results()
-        return observations
+        if 'y' in response[0].lower():
+            self._get_fits()
+            self._persist_fits()
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
@@ -343,9 +334,9 @@ class AnalysisEngine(object):
             else:  # _best_fit returned None
                 self._idx += len(self._sample)
 
-    def _persist_fits(self, fits):
+    def _persist_fits(self):
         counter = 0
-        for fit in fits:
+        for fit in self._fits:
             self._exp_acc.add_fit(fit, self._experiment_id)
             counter += 1
         return counter

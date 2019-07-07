@@ -34,11 +34,11 @@ class DataManager(object):
             ).lower()
         if (not response) or ('y' in response):
             try:
-                response = self._exp_acc.add_raw_data(raw_data)  # DTO -> DTO
+                response = self._exp_acc.add_raw_data(raw_data)
             except Exception as e:
                 print(e)
             else:
-                return response  # DTO
+                return response
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API

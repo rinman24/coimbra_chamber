@@ -60,8 +60,9 @@ def test_persist_fits(
     )
     fit_spec = dac.from_dict(FitSpec, data)
     fits_to_add.append(fit_spec)
+    anlys_eng_integrated._fits = fits_to_add
     # Act --------------------------------------------------------------------
-    num_fits_added = anlys_eng_integrated._persist_fits(fits_to_add)
+    num_fits_added = anlys_eng_integrated._persist_fits()
     # Assert -----------------------------------------------------------------
     assert num_fits_added == 2
     # Now query result -------------------------------------------------------

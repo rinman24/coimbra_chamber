@@ -9,6 +9,8 @@ import pytest
 from uncertainties import ufloat
 
 from chamber.access.experiment.contracts import FitSpec
+
+from chamber.utility.io.contracts import Prompt
 from chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
 
 
@@ -241,6 +243,39 @@ def mock_best_fit(monkeypatch):
     return best_fit
 
 
+@pytest.fixture('function')
+def mock_engine(monkeypatch):
+    """Mock of AnalysisEngine._process_fits logic."""
+    engine = MagicMock()
+
+    monkeypatch.setattr(
+        'chamber.engine.analysis.service.AnalysisEngine._get_observations',
+        engine._get_observations)
+
+    engine._layout_observations = MagicMock(return_value='test_layout')
+    monkeypatch.setattr(
+        'chamber.engine.analysis.service.AnalysisEngine._layout_observations',
+        engine._layout_observations)
+
+    monkeypatch.setattr(
+        'chamber.utility.plot.service.PlotUtility.plot',
+        engine._plot_util.plot)
+
+    engine._io_util.get_input = MagicMock(return_value='y')
+    monkeypatch.setattr(
+        'chamber.utility.io.service.IOUtility.get_input',
+        engine._io_util.get_input)
+
+    monkeypatch.setattr(
+        'chamber.engine.analysis.service.AnalysisEngine._get_fits',
+        engine._get_fits)
+
+    monkeypatch.setattr(
+        'chamber.engine.analysis.service.AnalysisEngine._persist_fits',
+        engine._persist_fits)
+
+    return engine
+
 # ----------------------------------------------------------------------------
 # AnalysisEngine
 
@@ -417,6 +452,23 @@ def test_get_fits(anlys_eng, mock_best_fit):  # noqa: D103
     for fit, nu in zip(anlys_eng._fits, expected_nus):
         assert fit.nu == nu
     mock_best_fit.assert_has_calls(calls)
+
+
+def test_process_fits(anlys_eng, data_spec, mock_engine):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    expected_calls = [
+        call._get_observations(data_spec.observations),
+        call._layout_observations(),
+        call._plot_util.plot('test_layout'),
+        call._io_util.get_input(
+            Prompt(messages=['Would you like to continue?: [y]/n '])),
+        call._get_fits(),
+        call._persist_fits(),
+    ]
+    # Act --------------------------------------------------------------------
+    anlys_eng.process_fits(data_spec)
+    # Assert -----------------------------------------------------------------
+    mock_engine.assert_has_calls(expected_calls)
 
 
 # ----------------------------------------------------------------------------
