@@ -46,8 +46,8 @@ class AnalysisEngine(object):
             Prompt,
             data=dict(messages=['Would you like to continue?: [y]/n ']),
         )
-        response = self._io_util.get_input(prompt)
-        if 'y' in response[0].lower():
+        response = self._io_util.get_input(prompt)[0]
+        if (not response) or ('y' in response):
             self._get_fits()
             self._persist_fits()
 
@@ -276,10 +276,15 @@ class AnalysisEngine(object):
         # then divide to fine the center.
         center = int((total - 1) / 2)
         steps = int(self._steps)  # Explicitly make a copy to use here
-        while center + steps <= total:
+        while center + steps + 1 <= total:
             this_sample = self._sample[center - steps: center + steps + 1]
             fit = self._fit(this_sample)
-            if fit['sig_b']/abs(fit['b']) <= self._error:
+            # With small sample sizes, b is sometimes zero.
+            # If this is the case we want to continue.
+            if fit['b'] == 0:
+                steps += steps
+                continue
+            elif fit['sig_b']/abs(fit['b']) <= self._error:
                 best_fit = self._evaluate_fit(fit)
                 return best_fit
             else:

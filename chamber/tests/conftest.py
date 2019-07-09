@@ -4,6 +4,8 @@ import datetime
 from decimal import Decimal
 from math import sqrt
 from pathlib import Path
+import pickle
+from unittest.mock import MagicMock
 
 import dacite
 import pytest
@@ -46,28 +48,47 @@ def exp_acc():
     access._teardown()
 
 
-@pytest.fixture(scope='module')
-def anlys_eng_integrated(exp_acc):
-    """
-    Create a module level instance of the analysis engine.
+@pytest.fixture('function')
+def mock_io_utility(monkeypatch):
+    """Mock of IOUtility."""
+    io = MagicMock()
 
-    NOTE: For integration testing when we want this fixture integrated with the
-    `exp_acc` fixture.
-
-    """
-    engine = AnalysisEngine(experiment_id=1)
-    engine._exp_acc = exp_acc
-    return engine
+    io.get_input = MagicMock(return_value='y')
+    monkeypatch.setattr(
+        'chamber.utility.io.service.IOUtility.get_input',
+        io.get_input)
 
 
 @pytest.fixture(scope='function')
-def anlys_eng():
+def anlys_eng(exp_acc, mock_io_utility, monkeypatch):
     """
     Create a function level instance of the analysis engine.
 
     NOTE: For unit testing when we want a new instance each time.
     """
     engine = AnalysisEngine(experiment_id=1)
+    engine._exp_acc = exp_acc
+
+    # This instance of the AnalysisEngine has the get_raw_data method of its
+    # instance of ExperimentAccess mocked to return a previously serialized
+    # instance of a DataSpec dataclass. This dramatically speeds up loading
+    # the data for testing.
+    path = Path('chamber/tests/access/experiment/sample_data')
+    with open(path, 'rb') as stream:
+        data = pickle.load(stream)
+    # Now that we have data, we want to make a mock that will return it.
+    mock_get_raw_data = MagicMock(return_value=data)
+    monkeypatch.setattr(
+        'chamber.access.experiment.service.ExperimentAccess.get_raw_data',
+        mock_get_raw_data)
+
+    # This instance also has the plot method of its instance of PlotUtility
+    # mocked to return and do nothing.
+    mock_plot = MagicMock()
+    monkeypatch.setattr(
+        'chamber.utility.plot.service.PlotUtility.plot',
+        mock_plot)
+
     return engine
 
 

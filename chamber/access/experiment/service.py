@@ -339,7 +339,6 @@ class ExperimentAccess(object):
         finally:
             session.close()
 
-
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
 

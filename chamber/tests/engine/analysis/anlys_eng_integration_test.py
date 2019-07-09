@@ -1,7 +1,7 @@
 """Integration test suite for analysis engine."""
 
-
-import dacite as dac
+import dacite
+from pathlib import Path
 
 from chamber.access.experiment.contracts import (
     FitSpec
@@ -19,12 +19,12 @@ from chamber.access.experiment.models import (
 
 
 def test_persist_fits(
-        anlys_eng_integrated, tube_spec, setting_spec, experiment_spec,
+        anlys_eng, tube_spec, setting_spec, experiment_spec,
         observation_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # Use ExperimentAccess to add a tube, a setting, an experiment, and some
     # observations.
-    access = anlys_eng_integrated._exp_acc
+    access = anlys_eng._exp_acc
     _ = access._add_tube(tube_spec)
     setting_id = access._add_setting(setting_spec)
     experiment_id = access._add_experiment(experiment_spec, setting_id)
@@ -43,7 +43,7 @@ def test_persist_fits(
         exp_id=experiment_id,
         idx=0,
     )
-    fit_spec = dac.from_dict(FitSpec, data)
+    fit_spec = dacite.from_dict(FitSpec, data)
     fits_to_add.append(fit_spec)
     # Now the second one
     data = dict(
@@ -58,11 +58,11 @@ def test_persist_fits(
         exp_id=experiment_id,
         idx=1,
     )
-    fit_spec = dac.from_dict(FitSpec, data)
+    fit_spec = dacite.from_dict(FitSpec, data)
     fits_to_add.append(fit_spec)
-    anlys_eng_integrated._fits = fits_to_add
+    anlys_eng._fits = fits_to_add
     # Act --------------------------------------------------------------------
-    num_fits_added = anlys_eng_integrated._persist_fits()
+    num_fits_added = anlys_eng._persist_fits()
     # Assert -----------------------------------------------------------------
     assert num_fits_added == 2
     # Now query result -------------------------------------------------------
@@ -93,3 +93,22 @@ def test_persist_fits(
                 assert fit.nu == 111
     finally:
         session.close()
+
+
+def test_process_fits(anlys_eng, tube_spec):  # noqa: D103
+    # This is just a smoke test to make sure nothing breaks.
+    # Arrange ----------------------------------------------------------------
+    # The anlys_eng has the following call mocked to return a serialized
+    # DataSpec; see conftest.py.
+    data = anlys_eng._exp_acc.get_raw_data('test_path')
+
+    _ = anlys_eng._exp_acc._add_tube(tube_spec)
+    _ = anlys_eng._exp_acc.add_raw_data(data)
+    # Act --------------------------------------------------------------------
+    try:
+        anlys_eng.process_fits(data)
+        flag = True
+    except:
+        flag = False
+    # Assert -----------------------------------------------------------------
+    assert flag

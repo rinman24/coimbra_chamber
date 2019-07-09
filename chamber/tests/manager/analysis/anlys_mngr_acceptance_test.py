@@ -1,7 +1,5 @@
 """Smoke test suite for data manager."""
 
-import pytest  # NOTE: Temporary
-
 from chamber.manager.data.service import DataManager
 
 
