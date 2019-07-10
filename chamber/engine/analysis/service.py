@@ -275,25 +275,26 @@ class AnalysisEngine(object):
         # _max_slice always gives a sample with odd length, so we subtract one
         # then divide to fine the center.
         center = int((total - 1) / 2)
-        steps = int(self._steps)  # Explicitly make a copy to use here
+        steps = int(self._steps)  # Explicitly make a copy
+        delta = int(steps)  # Explicityly make a copy
         while center + steps + 1 <= total:
             this_sample = self._sample[center - steps: center + steps + 1]
             fit = self._fit(this_sample)
             # With small sample sizes, b is sometimes zero.
             # If this is the case we want to continue.
             if fit['b'] == 0:
-                steps += steps
+                steps += delta
                 continue
             elif fit['sig_b']/abs(fit['b']) <= self._error:
-                best_fit = self._evaluate_fit(fit)
+                best_fit = self._evaluate_fit(this_sample, fit)
                 return best_fit
             else:
-                steps += steps
+                steps += delta
 
-    def _evaluate_fit(self, fit):
+    def _evaluate_fit(self, this_sample, fit):
         # Prepare the data
-        y = [i.nominal_value for i in self._sample]
-        sig = [i.std_dev for i in self._sample]
+        y = [i.nominal_value for i in this_sample]
+        sig = [i.std_dev for i in this_sample]
         x = list(range(len(y)))  # Always indexed at zero
 
         a = fit['a']

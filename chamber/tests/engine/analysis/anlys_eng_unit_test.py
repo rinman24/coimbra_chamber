@@ -202,8 +202,8 @@ def mock_fit(monkeypatch):
 def mock_evaluate_fit(monkeypatch):
     """Mock of AnalysisEngine._evaluate_fit."""
     # Define logic
-    def mock_logic(fit):
-        data = fit
+    def mock_logic(this_sample, fit):
+        data = dict(fit)
         data['r2'] = 0.99
         data['q'] = 0.01
         data['chi2'] = 1.5
@@ -369,12 +369,10 @@ def test_fit(anlys_eng, sample):  # noqa: D103
 
 
 def test_evaluate_fit(anlys_eng, sample):  # noqa: D103
-    # Arrange ----------------------------------------------------------------
-    anlys_eng._sample = sample
     # ------------------------------------------------------------------------
     # Act
     fit = anlys_eng._fit(sample)
-    result = anlys_eng._evaluate_fit(fit)
+    result = anlys_eng._evaluate_fit(sample, fit)
     # ------------------------------------------------------------------------
     # Assert
     assert isclose(result.a, 0.014657801999999996)
