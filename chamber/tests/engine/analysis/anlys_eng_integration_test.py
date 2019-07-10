@@ -98,17 +98,35 @@ def test_persist_fits(
 def test_process_fits(anlys_eng, tube_spec):  # noqa: D103
     # This is just a smoke test to make sure nothing breaks.
     # Arrange ----------------------------------------------------------------
+    # Update the engine's experiment_id.
+    anlys_eng._experiment_id = 2
     # The anlys_eng has the following call mocked to return a serialized
     # DataSpec; see conftest.py.
     data = anlys_eng._exp_acc.get_raw_data('test_path')
 
     _ = anlys_eng._exp_acc._add_tube(tube_spec)
     _ = anlys_eng._exp_acc.add_raw_data(data)
+
+    # This will be used in the assert phase.
+    access = anlys_eng._exp_acc
+    expected_indexes = [
+        121, 268, 417, 570, 723, 876, 1033, 1192, 1355, 1514, 1679, 1844,
+        2011, 2178, 2349, 2520, 2693, 2866, 3041, 3216, 3393,
+    ]
     # Act --------------------------------------------------------------------
-    try:
-        anlys_eng.process_fits(data)
-        flag = True
-    except:
-        flag = False
+    anlys_eng.process_fits(data)
     # Assert -----------------------------------------------------------------
-    assert flag
+    # Here you need to query the fit table and make sure you get all of the
+    # idx that you expected when.
+    session = access.Session()
+    try:
+        result_indexes = [
+            r.idx for r in
+            session.query(Fit.idx)
+            .filter(Fit.experiment_id == anlys_eng._experiment_id)
+            .order_by(Fit.idx)
+        ]
+        session.commit()
+        assert result_indexes == expected_indexes
+    finally:
+        session.close()
