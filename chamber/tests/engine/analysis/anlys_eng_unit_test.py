@@ -281,11 +281,12 @@ def mock_engine(monkeypatch):
 
 
 def test_get_observations(anlys_eng, data_spec, observations):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    anlys_eng._data = data_spec
     # Act --------------------------------------------------------------------
-    anlys_eng._get_observations(data_spec.observations)
-    result = anlys_eng._observations
-
+    anlys_eng._get_observations()
     # Assert -----------------------------------------------------------------
+    result = anlys_eng._observations
     status_set = {'cap_man', 'optidew'}
     for time in result.index:
         for key in result.columns:  # pylint: disable=not-an-iterable
@@ -305,10 +306,12 @@ def test_get_observations(anlys_eng, data_spec, observations):  # noqa: D103
 
 
 def test_layout_observations(anlys_eng, data_spec, observation_layout):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    anlys_eng._data = data_spec
     # Act --------------------------------------------------------------------
-    anlys_eng._get_observations(data_spec.observations)
-    layout = anlys_eng._layout_observations()
+    anlys_eng._get_observations()
     # Assert -----------------------------------------------------------------
+    layout = anlys_eng._layout_observations()
     assert layout.style == observation_layout.style
     _compare_layouts(layout, observation_layout)
 
@@ -399,8 +402,9 @@ def test_get_best_local_fit_stops_with_correct_error(
 
 def test_process_fits(anlys_eng, data_spec, mock_engine):  # noqa: D103
     # Arrange ----------------------------------------------------------------
+    anlys_eng._data = data_spec
     expected_calls = [
-        call._get_observations(data_spec.observations),
+        call._get_observations(),
         call._layout_observations(),
         call._plot_util.plot('test_layout'),
         call._io_util.get_input(

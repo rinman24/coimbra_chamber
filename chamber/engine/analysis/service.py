@@ -39,7 +39,8 @@ class AnalysisEngine(object):
 
     def process_fits(self, data):
         """TODO: docstring."""
-        self._get_observations(data.observations)
+        self._data = data
+        self._get_observations()
         layout = self._layout_observations()
         self._plot_util.plot(layout)
         prompt = dacite.from_dict(
@@ -54,7 +55,7 @@ class AnalysisEngine(object):
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
 
-    def _get_observations(self, observations):
+    def _get_observations(self):
         # Create empty lists to hold data as we iterate through observations.
         dew_point = []
         mass = []
@@ -71,6 +72,7 @@ class AnalysisEngine(object):
         time = []
 
         # Interate and append observations while adding uncertainties
+        observations = self._data.observations
         initial_idx = observations[0].idx
         for obs in observations:
             dew_point.append(ufloat(obs.dew_point, 0.2))
