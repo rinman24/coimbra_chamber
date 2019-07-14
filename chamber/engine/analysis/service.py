@@ -236,8 +236,38 @@ class AnalysisEngine(object):
 
         return dacite.from_dict(Layout, data)
 
-    @staticmethod
-    def _fit(sample):
+    def _get_fits(self):  # TODO: This mehod should also get the non-dimensional results for the fit.
+        # The comment below is to remind us how `self` is initialized:
+        # slef._fits == [], slef._idx == 1, and self._sample == []
+
+        # len - 2 because we want to make sure we never end up at the last
+        # index and can't take a max slice
+        while self._idx < len(self._observations) - 2:
+            # Get the max slice
+            left = (2 * self._idx) - len(self._observations) + 1
+            right = 2 * self._idx
+            self._sample = (
+                self._observations.loc[left:right, self._column].tolist()
+            )
+            # Then search for the best fit and act accordingly
+            self._get_best_local_fit()
+            if self._this_fit:  # We got a fit that met the error threshold
+                self._evaluate_fit()
+                # TODO: self._nondimensionalize_fit()
+                # NOTE: The line above will also require updateing database
+                #    and orms.
+                self._fits.append(self._evaluated_fit)
+                # Length of the best fit is the degrees of freedom plus 2 for
+                # a linear fit
+                self._idx += self._evaluated_fit['nu'] + 2
+            else:  # _get_best_local_fit returned None
+                self._idx += len(self._sample)
+
+    # ------------------------------------------------------------------------
+    # Class helpers: internal use only
+
+    def _ols_fit(self):
+        sample = self._this_sample
         # Prepare the data
         y = [i.nominal_value for i in sample]
         sig = [i.std_dev for i in sample]
@@ -264,33 +294,36 @@ class AnalysisEngine(object):
             sig_b=sig_b,
             )
 
-    def _best_fit(self):
+    def _get_best_local_fit(self):
         # self._sample always has an odd length, so we use integer division.
         center = len(self._sample) // 2
         steps = int(self._steps)  # Explicitly make a copy
         delta = int(steps)  # Explicityly make a copy
         while center + steps + 1 <= len(self._sample):
-            this_sample = self._sample[center - steps: center + steps + 1]
-            fit = self._fit(this_sample)
+            self._this_sample = self._sample[center - steps: center + steps + 1]
+            fit = self._ols_fit()
             # With small sample sizes, b is sometimes zero.
             # If this is the case we want to continue.
             if fit['b'] == 0:
                 steps += delta
                 continue
             elif fit['sig_b']/abs(fit['b']) <= self._error:
-                best_fit = self._evaluate_fit(this_sample, fit)
-                return best_fit
+                self._this_fit = fit
+                return
             else:
                 steps += delta
+        # We did not find a fit
+        self._this_fit = None
 
-    def _evaluate_fit(self, this_sample, fit):
+    def _evaluate_fit(self):
+        fit = self._this_fit
         # Prepare the data
-        y = [i.nominal_value for i in this_sample]
-        sig = [i.std_dev for i in this_sample]
+        y = [i.nominal_value for i in self._this_sample]
+        sig = [i.std_dev for i in self._this_sample]
         x = list(range(len(y)))  # Always indexed at zero
 
-        a = fit['a']
-        b = fit['b']
+        a = self._this_fit['a']
+        b = self._this_fit['b']
 
         # Calculate R^2
         predicted = [a + b*i for i in x]
@@ -314,34 +347,12 @@ class AnalysisEngine(object):
         data['exp_id'] = self._experiment_id
         data['idx'] = self._idx
 
-        return dacite.from_dict(FitSpec, data)
-
-    def _get_fits(self):
-        # The comment below is to remind us how `self` is initialized:
-        # slef._fit == [], slef._idx == 1, and self._sample == []
-
-        # len - 2 because we want to make sure we never end up at the last
-        # index and can't take a max slice
-        while self._idx < len(self._observations) - 2:
-            # Get the max slice
-            left = (2 * self._idx) - len(self._observations) + 1
-            right = 2 * self._idx
-            self._sample = (
-                self._observations.loc[left:right, self._column].tolist()
-            )
-            # Then search for the best fit and act accordingly
-            best_fit = self._best_fit()
-            if best_fit:  # We got a fit that met the error threshold
-                self._fits.append(best_fit)
-                # Length of the best fit is the degrees of freedom plus 2 for
-                # a linear fit
-                self._idx += best_fit.nu + 2
-            else:  # _best_fit returned None
-                self._idx += len(self._sample)
+        self._evaluated_fit = data
 
     def _persist_fits(self):
         counter = 0
-        for fit in self._fits:
-            self._exp_acc.add_fit(fit, self._experiment_id)
+        for data in self._fits:
+            fit_spec = dacite.from_dict(FitSpec, data)
+            self._exp_acc.add_fit(fit_spec, self._experiment_id)
             counter += 1
         return counter

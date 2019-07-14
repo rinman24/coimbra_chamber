@@ -184,8 +184,8 @@ def sample():
 
 
 @pytest.fixture('function')
-def mock_fit(monkeypatch):
-    """Mock of AnalysisEngine._fit."""
+def mock_ols_fit(monkeypatch):
+    """Mock of AnalysisEngine._ols_fit."""
     return_values = [
         dict(a=1.0, sig_a=1.0, b=1.0, sig_b=0.1),
         dict(a=1.0, sig_a=1.0, b=1.0, sig_b=0.01),
@@ -193,7 +193,7 @@ def mock_fit(monkeypatch):
         ]
     fit = MagicMock(side_effect=return_values)
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._fit',
+        'chamber.engine.analysis.service.AnalysisEngine._ols_fit',
         fit)
     return fit
 
@@ -224,9 +224,9 @@ def mock_evaluate_fit(monkeypatch):
 
 
 @pytest.fixture('function')
-def mock_best_fit(monkeypatch):
-    """Mock of AnalysisEngine._best_fit."""
-    # Create two mock FitSpec DTOs for mock_best_fit to return
+def mock_get_best_local_fit(monkeypatch):
+    """Mock of AnalysisEngine._get_best_local_fit."""
+    # Create two mock FitSpec DTOs for mock_get_best_local_fit to return
     fit_dto_1 = MagicMock()
     fit_dto_1.nu = 21
     fit_dto_2 = MagicMock()
@@ -234,13 +234,13 @@ def mock_best_fit(monkeypatch):
 
     # Create the mock
     fits = [None, None, fit_dto_1, fit_dto_2]
-    best_fit = MagicMock(side_effect=fits)
+    get_best_local_fit = MagicMock(side_effect=fits)
 
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._best_fit',
-        best_fit)
+        'chamber.engine.analysis.service.AnalysisEngine._get_best_local_fit',
+        get_best_local_fit)
 
-    return best_fit
+    return get_best_local_fit
 
 
 @pytest.fixture('function')
@@ -313,10 +313,12 @@ def test_layout_observations(anlys_eng, data_spec, observation_layout):  # noqa:
     _compare_layouts(layout, observation_layout)
 
 
-def test_fit(anlys_eng, sample):  # noqa: D103
+def test_ols_fit(anlys_eng, sample):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    anlys_eng._this_sample = sample
     # ------------------------------------------------------------------------
     # Act
-    result = anlys_eng._fit(sample)
+    result = anlys_eng._ols_fit()
     # ------------------------------------------------------------------------
     # Assert
     assert isclose(result['a'], 0.014657801999999996)
@@ -327,25 +329,29 @@ def test_fit(anlys_eng, sample):  # noqa: D103
 
 
 def test_evaluate_fit(anlys_eng, sample):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    anlys_eng._this_sample = sample
+    anlys_eng._this_fit = anlys_eng._ols_fit()
     # ------------------------------------------------------------------------
     # Act
-    fit = anlys_eng._fit(sample)
-    result = anlys_eng._evaluate_fit(sample, fit)
+    anlys_eng._evaluate_fit()
     # ------------------------------------------------------------------------
     # Assert
-    assert isclose(result.a, 0.014657801999999996)
-    assert isclose(result.sig_a, 7.745966692414835e-08)
+    result = anlys_eng._evaluated_fit
 
-    assert isclose(result.b, -4.600000000048961e-08)
-    assert isclose(result.sig_b, 3.162277660168379e-08)
+    assert isclose(result['a'], 0.014657801999999996)
+    assert isclose(result['sig_a'], 7.745966692414835e-08)
 
-    assert isclose(result.r2, 0.9887850467276053)
+    assert isclose(result['b'], -4.600000000048961e-08)
+    assert isclose(result['sig_b'], 3.162277660168379e-08)
 
-    assert isclose(result.q, 0.9990182274301309)
+    assert isclose(result['r2'], 0.9887850467276053)
 
-    assert isclose(result.chi2, 0.02400000000040884)
+    assert isclose(result['q'], 0.9990182274301309)
 
-    assert result.nu == 3
+    assert isclose(result['chi2'], 0.02400000000040884)
+
+    assert result['nu'] == 3
 
 
 @pytest.mark.parametrize(
@@ -355,17 +361,17 @@ def test_evaluate_fit(anlys_eng, sample):  # noqa: D103
         (2, [(0, 4), ]),
         ]
     )
-def test_best_fit_takes_correct_steps(
-        anlys_eng, steps, limits, sample, mock_fit, mock_evaluate_fit):  # noqa: D103
+def test_get_best_local_fit_takes_correct_steps(
+        anlys_eng, steps, limits, sample, mock_ols_fit, mock_evaluate_fit):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    calls = [call(sample[i: j+1]) for i, j in limits]
+    calls = [call() for i, j in limits]
     anlys_eng._sample = sample
     anlys_eng._steps = steps
     # Act --------------------------------------------------------------------
-    anlys_eng._best_fit()
+    anlys_eng._get_best_local_fit()
     # Assert -----------------------------------------------------------------
-    assert len(calls) == len(mock_fit.mock_calls)
-    mock_fit.assert_has_calls(calls)
+    assert len(calls) == len(mock_ols_fit.mock_calls)
+    mock_ols_fit.assert_has_calls(calls)
 
 
 @pytest.mark.parametrize(
@@ -376,12 +382,12 @@ def test_best_fit_takes_correct_steps(
         (0.001, None),
         ]
     )
-def test_best_fit_stops_with_correct_error(
-        anlys_eng, sample, requested_error, expected_result, mock_fit,
+def test_get_best_local_fit_stops_with_correct_error(
+        anlys_eng, sample, requested_error, expected_result, mock_ols_fit,
         mock_evaluate_fit):  # noqa: D103
     # ------------------------------------------------------------------------
     # Act
-    result = anlys_eng._best_fit()
+    result = anlys_eng._get_best_local_fit()
     # ------------------------------------------------------------------------
     # Assert
     if result:  # Best fit found a fit before running out of samples
@@ -389,25 +395,6 @@ def test_best_fit_stops_with_correct_error(
         assert isclose(slope_error, requested_error)
     else:  # Error theshold never reached and therefore no best fit
         assert not result
-
-
-def test_get_fits(anlys_eng, mock_best_fit):  # noqa: D103
-    # Arrange ----------------------------------------------------------------
-    # Set up the input data
-    data = {'m': list(range(60))}
-    anlys_eng._observations = pd.DataFrame(data=data)
-    # Set up the expected calls
-    calls = [call()] * 4
-    # Set up the expected degrees of freedom (nu) passed through from mock
-    # Should not contain the None return arguments
-    expected_nus = [21, 29]
-    # Act --------------------------------------------------------------------
-    anlys_eng._get_fits()
-    # Assert -----------------------------------------------------------------
-    assert len(anlys_eng._fits) == 2
-    for fit, nu in zip(anlys_eng._fits, expected_nus):
-        assert fit.nu == nu
-    mock_best_fit.assert_has_calls(calls)
 
 
 def test_process_fits(anlys_eng, data_spec, mock_engine):  # noqa: D103

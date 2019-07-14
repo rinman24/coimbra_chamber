@@ -31,7 +31,7 @@ def test_persist_fits(
     _ = access._add_observations(observation_spec, experiment_id)
     # Setup a list of fits to add
     fits_to_add = []
-    data = dict(
+    fit = dict(
         a=0.1,
         sig_a=0.01,
         b=-0.2,
@@ -43,10 +43,9 @@ def test_persist_fits(
         exp_id=experiment_id,
         idx=0,
     )
-    fit_spec = dacite.from_dict(FitSpec, data)
-    fits_to_add.append(fit_spec)
+    fits_to_add.append(fit)
     # Now the second one
-    data = dict(
+    fit = dict(
         a=0.11,
         sig_a=0.011,
         b=-0.21,
@@ -58,8 +57,7 @@ def test_persist_fits(
         exp_id=experiment_id,
         idx=1,
     )
-    fit_spec = dacite.from_dict(FitSpec, data)
-    fits_to_add.append(fit_spec)
+    fits_to_add.append(fit)
     anlys_eng._fits = fits_to_add
     # Act --------------------------------------------------------------------
     num_fits_added = anlys_eng._persist_fits()
