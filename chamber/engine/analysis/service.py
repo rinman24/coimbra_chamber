@@ -236,12 +236,6 @@ class AnalysisEngine(object):
 
         return dacite.from_dict(Layout, data)
 
-    def _max_slice(self):
-        left = (2 * self._idx) - len(self._observations) + 1
-        right = 2 * self._idx
-        result = self._observations.loc[left:right, self._column].tolist()
-        return result
-
     @staticmethod
     def _fit(sample):
         # Prepare the data
@@ -271,13 +265,11 @@ class AnalysisEngine(object):
             )
 
     def _best_fit(self):
-        total = len(self._sample)
-        # _max_slice always gives a sample with odd length, so we subtract one
-        # then divide to fine the center.
-        center = int((total - 1) / 2)
+        # self._sample always has an odd length, so we use integer division.
+        center = len(self._sample) // 2
         steps = int(self._steps)  # Explicitly make a copy
         delta = int(steps)  # Explicityly make a copy
-        while center + steps + 1 <= total:
+        while center + steps + 1 <= len(self._sample):
             this_sample = self._sample[center - steps: center + steps + 1]
             fit = self._fit(this_sample)
             # With small sample sizes, b is sometimes zero.
@@ -331,11 +323,18 @@ class AnalysisEngine(object):
         # len - 2 because we want to make sure we never end up at the last
         # index and can't take a max slice
         while self._idx < len(self._observations) - 2:
-            self._sample = self._max_slice()
+            # Get the max slice
+            left = (2 * self._idx) - len(self._observations) + 1
+            right = 2 * self._idx
+            self._sample = (
+                self._observations.loc[left:right, self._column].tolist()
+            )
+            # Then search for the best fit and act accordingly
             best_fit = self._best_fit()
             if best_fit:  # We got a fit that met the error threshold
                 self._fits.append(best_fit)
-                # Length of the best fit is the degrees of freedom plus 2 for a linear fit
+                # Length of the best fit is the degrees of freedom plus 2 for
+                # a linear fit
                 self._idx += best_fit.nu + 2
             else:  # _best_fit returned None
                 self._idx += len(self._sample)

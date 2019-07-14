@@ -313,48 +313,6 @@ def test_layout_observations(anlys_eng, data_spec, observation_layout):  # noqa:
     _compare_layouts(layout, observation_layout)
 
 
-@pytest.mark.parametrize(
-    'idx, expected',
-    [
-        (1, [ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2)]),
-        (2, [ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2), ufloat(7, 7e-2), ufloat(6, 6e-2)]),
-        (3, [ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2), ufloat(7, 7e-2), ufloat(6, 6e-2), ufloat(5, 5e-2), ufloat(4, 4e-2)]),
-        (4, [ufloat(8, 8e-2), ufloat(7, 7e-2), ufloat(6, 6e-2), ufloat(5, 5e-2), ufloat(4, 4e-2)]),
-        (5, [ufloat(6, 6e-2), ufloat(5, 5e-2), ufloat(4, 4e-2)]),
-        ]
-    )
-def test_max_slice(anlys_eng, idx, expected):  # noqa: D103
-    """
-    Test get maximum slice.
-
-    Assumptions
-    -----------
-    #. DataFrame has a pd.RangeIndex with start == 0 and step == 1.
-    #. Each element in the desired column is a ufloat
-
-    """
-    # Arrange ----------------------------------------------------------------
-    # Set the correct index
-    anlys_eng._idx = idx
-    # Build the dataframe
-    data = dict(
-        my_col=[
-            ufloat(10, 1e-1), ufloat(9, 9e-2), ufloat(8, 8e-2), ufloat(7, 7e-2),
-            ufloat(6, 6e-2), ufloat(5, 5e-2), ufloat(4, 4e-2)
-            ],
-        not_my_col=[-999] * 7,
-        )
-    anlys_eng._column = 'my_col'
-    anlys_eng._observations = pd.DataFrame(data=data)
-    # Act --------------------------------------------------------------------
-    slice_ = anlys_eng._max_slice()
-    # Assert -----------------------------------------------------------------
-    assert len(slice_) == len(expected)
-    for result, correct in zip(slice_, expected):
-        assert isclose(result.nominal_value, correct.nominal_value)
-        assert isclose(result.std_dev, correct.std_dev)
-
-
 def test_fit(anlys_eng, sample):  # noqa: D103
     # ------------------------------------------------------------------------
     # Act
