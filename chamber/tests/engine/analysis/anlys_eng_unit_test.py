@@ -451,11 +451,11 @@ def test_process_fits(anlys_eng, data_spec, mock_engine):  # noqa: D103
     mock_engine.assert_has_calls(expected_calls)
 
 
-def test_get_local_exp_state(anlys_eng, sample):  # noqa: D103
+def test_set_local_exp_state(anlys_eng, sample):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     anlys_eng._this_sample = sample
     # Act --------------------------------------------------------------------
-    anlys_eng._get_local_exp_state()
+    anlys_eng._set_local_exp_state()
     # Assert -----------------------------------------------------------------
     result = anlys_eng._experimental_state
 
@@ -470,50 +470,59 @@ def test_get_local_exp_state(anlys_eng, sample):  # noqa: D103
     assert isclose(result['P'].std_dev, 67.0820393)
 
 
-@pytest.mark.skip(reason='Not-Implemented.')
-def test_get_local_properties():  # noqa: D103
+def test_set_local_properties(anlys_eng, sample):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    # TODO
+    anlys_eng._this_sample = sample
+    anlys_eng._set_local_exp_state()
+    anlys_eng._this_fit = dict(b=-1.95962946e-8, sig_b=1.943679571e-10)
     # Act --------------------------------------------------------------------
-    anlys_eng._get_local_properties()
-    # Assert ----------------------------------------------------------------- 
-    result = anlys_eng._get_local_properties
+    anlys_eng._set_local_properties()
+    # Assert -----------------------------------------------------------------
+    result = anlys_eng._properties
 
-    assert isclose(result['mddp'].nominal_value, 1)
-    assert isclose(result['T'].nominal_value, 1)
-    assert isclose(result['D12'].nominal_value, 1)
-    assert isclose(result['Bm1'].nominal_value, 1)
-    assert isclose(result['m1s'].nominal_value, 1)
-    assert isclose(result['m1e'].nominal_value, 1)
-    assert isclose(result['m1'].nominal_value, 1)
-    assert isclose(result['rho1s'].nominal_value, 1)
-    assert isclose(result['rho1e'].nominal_value, 1)
-    assert isclose(result['rho'].nominal_value, 1)
+    assert isclose(result['mddp'].nominal_value, 2.772308579e-05)
+    assert isclose(result['x1s'].nominal_value, 0.01775459089)
+    assert isclose(result['x1e'].nominal_value, 0.01319417284)
+    assert isclose(result['x1'].nominal_value, 0.01547438186)
+    assert isclose(result['m1s'].nominal_value, 0.01111759981)
+    assert isclose(result['m1e'].nominal_value, 0.008247635057)
+    assert isclose(result['m1'].nominal_value, 0.009682617432)
+    assert isclose(result['rhos'].nominal_value, 1.200089891)
+    assert isclose(result['rhoe'].nominal_value, 1.1966254259)
+    assert isclose(result['rho'].nominal_value, 1.198357659)
+    assert isclose(result['Bm1'].nominal_value, 0.002902230588)
+    assert isclose(result['T'].nominal_value, 289.3878875)
+    assert isclose(result['D12'].nominal_value, 2.452053646e-05)
 
-    assert isclose(result['mddp'].std_dev, 1)
-    assert isclose(result['T'].std_dev, 1)
-    assert isclose(result['D12'].std_dev, 1)
-    assert isclose(result['Bm1'].std_dev, 1)
-    assert isclose(result['m1s'].std_dev, 1)
-    assert isclose(result['m1e'].std_dev, 1)
-    assert isclose(result['m1'].std_dev, 1)
-    assert isclose(result['rho1s'].std_dev, 1)
-    assert isclose(result['rho1e'].std_dev, 1)
-    assert isclose(result['rho'].std_dev, 1)
+    assert isclose(result['mddp'].std_dev, 4.60701097856e-07)
+    assert isclose(result['x1s'].std_dev, 0.0002828675954)
+    assert isclose(result['x1e'].std_dev, 7.864283054e-05)
+    assert isclose(result['x1'].std_dev, 0.0001467981363)
+    assert isclose(result['m1s'].std_dev, 0.0001783233466)
+    assert isclose(result['m1e'].std_dev, 4.940580078e-05)
+    assert isclose(result['m1'].std_dev, 9.2520469498e-05)
+    assert isclose(result['rhos'].std_dev, 0.001027878884)
+    assert isclose(result['rhoe'].std_dev, 0.0001170215376)
+    assert isclose(result['rho'].std_dev, 0.00051725937395)
+    assert isclose(result['Bm1'].std_dev, 0.00018762568497)
+    assert isclose(result['T'].std_dev, 0.12416966710916158)
+    assert isclose(result['D12'].std_dev, 2.417443588e-08)
 
 
-@pytest.mark.skip(reason='Not-Implemented.')
-def test_get_nondim_groups():  # noqa: D103
+def test_set_nondim_groups(anlys_eng, sample):  # noqa: D103
     # Arrange ----------------------------------------------------------------
-    # TODO
+    anlys_eng._this_sample = sample
+    anlys_eng._set_local_exp_state()
+    anlys_eng._this_fit = dict(b=-1.95962946e-8, sig_b=1.943679571e-10)
+    anlys_eng._set_local_properties()
     # Act --------------------------------------------------------------------
-    anlys_eng._get_nondim_groups()
+    anlys_eng._set_nondim_groups()
     # Assert -----------------------------------------------------------------
     result = anlys_eng._nondim_groups
 
-    assert isclose(result['ShR'].nominal_value, 1)
+    assert isclose(result['ShR'].nominal_value, 4.883306014)
 
-    assert isclose(result['ShR'].std_dev, 1)
+    assert isclose(result['ShR'].std_dev, 0.32061333663132763)
 
 # ----------------------------------------------------------------------------
 # Test helpers

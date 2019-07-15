@@ -3,6 +3,9 @@
 
 import dacite
 import pandas as pd
+from math import log, pi
+
+from CoolProp.HumidAirProp import HAPropsSI
 from scipy.stats import chi2
 from uncertainties import ufloat
 
@@ -35,6 +38,12 @@ class AnalysisEngine(object):
         # IR sensor calibration
         self._a = ufloat(-2.34, 0.07)
         self._b = ufloat(1.0445, 0.0022)
+
+        # Tube radius; TODO: move to access method to obtain dynamically.
+        self._R = ufloat(0.015, 0.0001)
+        self._A = pi*self._R**2
+        self._M1 = 18.015
+        self._M2 = 28.964
 
     # ------------------------------------------------------------------------
     # Public methods: included in the API
@@ -272,7 +281,7 @@ class AnalysisEngine(object):
 
     # Properties .............................................................
 
-    def _get_local_exp_state(self):
+    def _set_local_exp_state(self):
         samples = len(self._this_sample)
         data = self._this_sample
         offset = 273.15
@@ -293,6 +302,129 @@ class AnalysisEngine(object):
             Tdp=Tdp_bar,
             Ts=Ts_bar_K,
             P=P_bar,
+        )
+
+    def _set_local_properties(self):
+        # Internal mapper ----------------------------------------------------
+        def x1_2_m1(self, x1):
+            num = self._M1 * x1
+            den = num + (self._M2 * (1 - x1))
+            return num/den
+
+        Ts = self._experimental_state['Ts']
+        P = self._experimental_state['P']
+        Te = self._experimental_state['Te']
+        Tdp = self._experimental_state['Tdp']
+
+        # mddp ---------------------------------------------------------------
+        mdot = ufloat(-self._this_fit['b'], self._this_fit['sig_b'])
+        mddp = mdot/self._A  # TODO: use exp_acc to get R and A
+
+        # x1 -----------------------------------------------------------------
+        # s-state
+        x1s_nv = HAPropsSI(
+            'psi_w',
+            'T', Ts.nominal_value,
+            'P', P.nominal_value,
+            'RH', 1)
+        x1s_sig = x1s_nv - HAPropsSI(
+            'psi_w',
+            'T', Ts.nominal_value + Ts.std_dev,
+            'P', P.nominal_value,
+            'RH', 1)
+        x1s = ufloat(x1s_nv, abs(x1s_sig))
+        # e-state
+        x1e_nv = HAPropsSI(
+            'psi_w',
+            'T', Te.nominal_value,
+            'P', P.nominal_value,
+            'Tdp', Tdp.nominal_value)
+        x1e_sig = x1e_nv - HAPropsSI(
+            'psi_w',
+            'T', Te.nominal_value + Te.std_dev,
+            'P', P.nominal_value,
+            'Tdp', Tdp.nominal_value + Tdp.std_dev)
+        x1e = ufloat(x1e_nv, abs(x1e_sig))
+
+        # m1 -----------------------------------------------------------------
+        # s-state
+        m1s = x1_2_m1(self, x1s)
+        # e-state
+        m1e = x1_2_m1(self, x1e)
+
+        # rho ---------------------------------------------------------------
+        # s-state
+        rhos_nv = 1 / HAPropsSI(
+            'Vha',
+            'T', Ts.nominal_value,
+            'P', P.nominal_value,
+            'Y', x1s_nv)
+        rhos_sig = rhos_nv - (
+            1 / HAPropsSI(
+                'Vha',
+                'T', Ts.nominal_value + Ts.std_dev,
+                'P', P.nominal_value,
+                'Y', x1s_nv)
+        )
+        rhos = ufloat(rhos_nv, abs(rhos_sig))
+        # e-state
+        rhoe_nv = 1 / HAPropsSI(
+            'Vha',
+            'T', Te.nominal_value,
+            'P', P.nominal_value,
+            'Y', x1e_nv)
+        rhoe_sig = rhoe_nv - (
+            1 / HAPropsSI(
+                'Vha',
+                'T', Te.nominal_value + Te.std_dev,
+                'P', P.nominal_value,
+                'Y', x1e_nv)
+        )
+        rhoe = ufloat(rhoe_nv, abs(rhoe_sig))
+
+        # Bm1 ----------------------------------------------------------------
+        Bm1 = (m1s - m1e)/(1-m1s)
+
+        # T ------------------------------------------------------------------
+        T = (Te+Ts) / 2
+
+        # D12 ----------------------------------------------------------------
+        D12 = 1.97e-5 * (101325/P) * pow(T/256, 1.685)
+
+        # set properties
+        self._properties = dict(
+            mddp=mddp,
+            x1s=x1s,
+            x1e=x1e,
+            x1=(x1s+x1e) / 2,
+            m1s=m1s,
+            m1e=m1e,
+            m1=(m1s+m1e) / 2,
+            rhos=rhos,
+            rhoe=rhoe,
+            rho=(rhos+rhoe) / 2,
+            Bm1=Bm1,
+            T=T,
+            D12=D12,
+        )
+
+    def _set_nondim_groups(self):
+        Bm1 = self._properties['Bm1']
+        mddp = self._properties['mddp']
+        R = self._R
+        rho = self._properties['rho']
+        D12 = self._properties['D12']
+
+        # We need to perform the log propagation manually
+        ln_Bm1_nv = log(1 + Bm1.nominal_value)
+        ln_Bm1_sig = ln_Bm1_nv - log(1 + Bm1.nominal_value + Bm1.std_dev)
+        ln_Bm1 = ufloat(ln_Bm1_nv, abs(ln_Bm1_sig))
+
+        # ShR ----------------------------------------------------------------
+        ShR = (mddp * R) / (ln_Bm1 * rho * D12)
+
+        self._nondim_groups = dict(
+            ShR=ShR,
         )
 
     # ------------------------------------------------------------------------
