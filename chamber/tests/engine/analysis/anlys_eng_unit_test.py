@@ -174,13 +174,44 @@ def observation_layout():
 @pytest.fixture('module')
 def sample():
     """Sample uses for regression analysis."""
-    return [
-        ufloat(0.01465781, 1e-07),
-        ufloat(0.01465775, 1e-07),
-        ufloat(0.0146577, 1e-07),
-        ufloat(0.01465767, 1e-07),
-        ufloat(0.01465762, 1e-07),
-        ]
+    data = dict(
+        m=[
+            ufloat(0.01465781, 1e-07),
+            ufloat(0.01465775, 1e-07),
+            ufloat(0.0146577, 1e-07),
+            ufloat(0.01465767, 1e-07),
+            ufloat(0.01465762, 1e-07),
+        ],
+        Te=[
+            ufloat(290.052, 0.06324),
+            ufloat(290.048, 0.06324),
+            ufloat(290.055, 0.06324),
+            ufloat(290.051, 0.06324),
+            ufloat(290.057, 0.06324),
+        ],
+        Tdp=[
+            ufloat(284.12, 0.2),
+            ufloat(284.18, 0.2),
+            ufloat(284.18, 0.2),
+            ufloat(284.18, 0.2),
+            ufloat(284.22, 0.2),
+        ],
+        Ts=[
+            ufloat(290.36, 0.5),
+            ufloat(290.32, 0.5),
+            ufloat(290.34, 0.5),
+            ufloat(290.24, 0.5),
+            ufloat(290.24, 0.5),
+        ],
+        P=[
+            ufloat(100086.0, 150.0),
+            ufloat(100108.0, 150.0),
+            ufloat(100091.0, 150.0),
+            ufloat(100069.0, 150.0),
+            ufloat(100064.0, 150.0),
+        ],
+    )
+    return pd.DataFrame(data=data)
 
 
 @pytest.fixture('function')
@@ -388,6 +419,8 @@ def test_get_best_local_fit_takes_correct_steps(
 def test_get_best_local_fit_stops_with_correct_error(
         anlys_eng, sample, requested_error, expected_result, mock_ols_fit,
         mock_evaluate_fit):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    anlys_eng._sample = sample
     # ------------------------------------------------------------------------
     # Act
     result = anlys_eng._get_best_local_fit()
@@ -417,6 +450,70 @@ def test_process_fits(anlys_eng, data_spec, mock_engine):  # noqa: D103
     # Assert -----------------------------------------------------------------
     mock_engine.assert_has_calls(expected_calls)
 
+
+def test_get_local_exp_state(anlys_eng, sample):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    anlys_eng._this_sample = sample
+    # Act --------------------------------------------------------------------
+    anlys_eng._get_local_exp_state()
+    # Assert -----------------------------------------------------------------
+    result = anlys_eng._experimental_state
+
+    assert isclose(result['Tdp'].nominal_value, 284.176)
+    assert isclose(result['Te'].nominal_value, 290.0526)
+    assert isclose(result['Ts'].nominal_value, 288.723175)
+    assert isclose(result['P'].nominal_value, 100083.6)
+
+    assert isclose(result['Tdp'].std_dev, 0.0894427191)
+    assert isclose(result['Te'].std_dev, 0.028281787779)
+    assert isclose(result['Ts'].std_dev, 0.246723662)
+    assert isclose(result['P'].std_dev, 67.0820393)
+
+
+@pytest.mark.skip(reason='Not-Implemented.')
+def test_get_local_properties():  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    # TODO
+    # Act --------------------------------------------------------------------
+    anlys_eng._get_local_properties()
+    # Assert ----------------------------------------------------------------- 
+    result = anlys_eng._get_local_properties
+
+    assert isclose(result['mddp'].nominal_value, 1)
+    assert isclose(result['T'].nominal_value, 1)
+    assert isclose(result['D12'].nominal_value, 1)
+    assert isclose(result['Bm1'].nominal_value, 1)
+    assert isclose(result['m1s'].nominal_value, 1)
+    assert isclose(result['m1e'].nominal_value, 1)
+    assert isclose(result['m1'].nominal_value, 1)
+    assert isclose(result['rho1s'].nominal_value, 1)
+    assert isclose(result['rho1e'].nominal_value, 1)
+    assert isclose(result['rho'].nominal_value, 1)
+
+    assert isclose(result['mddp'].std_dev, 1)
+    assert isclose(result['T'].std_dev, 1)
+    assert isclose(result['D12'].std_dev, 1)
+    assert isclose(result['Bm1'].std_dev, 1)
+    assert isclose(result['m1s'].std_dev, 1)
+    assert isclose(result['m1e'].std_dev, 1)
+    assert isclose(result['m1'].std_dev, 1)
+    assert isclose(result['rho1s'].std_dev, 1)
+    assert isclose(result['rho1e'].std_dev, 1)
+    assert isclose(result['rho'].std_dev, 1)
+
+
+@pytest.mark.skip(reason='Not-Implemented.')
+def test_get_nondim_groups():  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    # TODO
+    # Act --------------------------------------------------------------------
+    anlys_eng._get_nondim_groups()
+    # Assert -----------------------------------------------------------------
+    result = anlys_eng._nondim_groups
+
+    assert isclose(result['ShR'].nominal_value, 1)
+
+    assert isclose(result['ShR'].std_dev, 1)
 
 # ----------------------------------------------------------------------------
 # Test helpers

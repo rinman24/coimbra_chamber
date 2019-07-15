@@ -27,12 +27,14 @@ class AnalysisEngine(object):
         self._io_util = IOUtility()
         self._plot_util = PlotUtility()
 
-        self._column = 'm'
         self._error = 0.01
         self._fits = []
         self._idx = 1
-        self._sample = []
         self._steps = 1
+
+        # IR sensor calibration
+        self._a = ufloat(-2.34, 0.07)
+        self._b = ufloat(1.0445, 0.0022)
 
     # ------------------------------------------------------------------------
     # Public methods: included in the API
@@ -239,18 +241,13 @@ class AnalysisEngine(object):
         return dacite.from_dict(Layout, data)
 
     def _get_fits(self):  # TODO: This mehod should also get the non-dimensional results for the fit.
-        # The comment below is to remind us how `self` is initialized:
-        # slef._fits == [], slef._idx == 1, and self._sample == []
-
         # len - 2 because we want to make sure we never end up at the last
         # index and can't take a max slice
         while self._idx < len(self._observations) - 2:
             # Get the max slice
             left = (2 * self._idx) - len(self._observations) + 1
             right = 2 * self._idx
-            self._sample = (
-                self._observations.loc[left:right, self._column].tolist()
-            )
+            self._sample = self._observations.loc[left:right, :]
             # Then search for the best fit and act accordingly
             self._get_best_local_fit()
             if self._this_fit:  # We got a fit that met the error threshold
@@ -265,11 +262,44 @@ class AnalysisEngine(object):
             else:  # _get_best_local_fit returned None
                 self._idx += len(self._sample)
 
+    def _persist_fits(self):
+        counter = 0
+        for data in self._fits:
+            fit_spec = dacite.from_dict(FitSpec, data)
+            self._exp_acc.add_fit(fit_spec, self._experiment_id)
+            counter += 1
+        return counter
+
+    # Properties .............................................................
+
+    def _get_local_exp_state(self):
+        samples = len(self._this_sample)
+        data = self._this_sample
+        offset = 273.15
+
+        # Use calibration for ifrared sensor
+        Ts_bar_K = sum(data.Ts)/samples
+        Ts_bar_C = Ts_bar_K - offset
+        Ts_bar_C = self._a + self._b*Ts_bar_C
+        Ts_bar_K = Ts_bar_C + offset
+
+        # Now the rest of the state variables
+        Te_bar = sum(data.Te)/samples
+        Tdp_bar = sum(data.Tdp)/samples
+        P_bar = sum(data.P)/samples
+
+        self._experimental_state = dict(
+            Te=Te_bar,
+            Tdp=Tdp_bar,
+            Ts=Ts_bar_K,
+            P=P_bar,
+        )
+
     # ------------------------------------------------------------------------
     # Class helpers: internal use only
 
     def _ols_fit(self):
-        sample = self._this_sample
+        sample = self._this_sample['m'].tolist()
         # Prepare the data
         y = [i.nominal_value for i in sample]
         sig = [i.std_dev for i in sample]
@@ -302,7 +332,9 @@ class AnalysisEngine(object):
         steps = int(self._steps)  # Explicitly make a copy
         delta = int(steps)  # Explicityly make a copy
         while center + steps + 1 <= len(self._sample):
-            self._this_sample = self._sample[center - steps: center + steps + 1]
+            self._this_sample = (
+                self._sample.iloc[center - steps: center + steps + 1, :]
+            )
             fit = self._ols_fit()
             # With small sample sizes, b is sometimes zero.
             # If this is the case we want to continue.
@@ -320,8 +352,8 @@ class AnalysisEngine(object):
     def _evaluate_fit(self):
         fit = self._this_fit
         # Prepare the data
-        y = [i.nominal_value for i in self._this_sample]
-        sig = [i.std_dev for i in self._this_sample]
+        y = [i.nominal_value for i in self._this_sample['m']]
+        sig = [i.std_dev for i in self._this_sample['m']]
         x = list(range(len(y)))  # Always indexed at zero
 
         a = self._this_fit['a']
@@ -350,11 +382,3 @@ class AnalysisEngine(object):
         data['idx'] = self._idx
 
         self._evaluated_fit = data
-
-    def _persist_fits(self):
-        counter = 0
-        for data in self._fits:
-            fit_spec = dacite.from_dict(FitSpec, data)
-            self._exp_acc.add_fit(fit_spec, self._experiment_id)
-            counter += 1
-        return counter
