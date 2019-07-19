@@ -71,11 +71,13 @@ class AnalysisEngine(object):
         self._get_observations()
         layout = self._layout_observations()
         self._plot_util.plot(layout)
+        # Interact with user
         prompt = dacite.from_dict(
             Prompt,
             data=dict(messages=['Would you like to continue?: [y]/n ']),
         )
         response = self._io_util.get_input(prompt)[0]
+        # Use input to decide how to proceed
         if (not response) or ('y' in response):
             self._get_fits()
             self._persist_fits()
@@ -266,25 +268,26 @@ class AnalysisEngine(object):
 
         return dacite.from_dict(Layout, data)
 
-    def _get_fits(self):  # TODO: This mehod should also get the non-dimensional results for the fit.
+    def _get_fits(self):
         # len - 2 because we want to make sure we never end up at the last
         # index and can't take a max slice
         while self._idx < len(self._observations) - 2:
-            # Get the max slice
+            # Get a new sample centered at the self._idx that is as large as
+            # possible.
             left = (2 * self._idx) - len(self._observations) + 1
             right = 2 * self._idx
             self._sample = self._observations.loc[left:right, :]
-            # Then search for the best fit and act accordingly
+            # Then search for the best fit in self._sample
             self._get_best_local_fit()
             if self._this_fit:  # We got a fit that met the error threshold
                 self._evaluate_fit()
-                # TODO: self._nondimensionalize_fit()
-                # NOTE: The line above will also require updateing database
-                #    and orms.
-                self._fits.append(self._evaluated_fit)
+                self._set_local_exp_state()
+                self._set_local_properties()
+                self._set_nondim_groups()
+                self._fits.append(self._this_fit)
                 # Length of the best fit is the degrees of freedom plus 2 for
-                # a linear fit
-                self._idx += self._evaluated_fit['nu'] + 2
+                # a linear fit.
+                self._idx += self._this_fit['nu_chi'] + 2
             else:  # _get_best_local_fit returned None
                 self._idx += len(self._sample)
 
@@ -335,7 +338,7 @@ class AnalysisEngine(object):
 
         # mddp ---------------------------------------------------------------
         mdot = ufloat(-self._this_fit['b'], self._this_fit['sig_b'])
-        mddp = mdot/self._A  # TODO: use exp_acc to get R and A
+        mddp = mdot/self._A
 
         # x1 -----------------------------------------------------------------
         # s-state
@@ -586,6 +589,11 @@ class AnalysisEngine(object):
             nu=nu,
         )
 
+        # Update this fit
+        for key, value in self._properties.items():
+            self._this_fit[key] = value.nominal_value
+            self._this_fit[f'sig_{key}'] = value.std_dev
+
     def _set_nondim_groups(self):
         Bm1 = self._properties['Bm1']
         mddp = self._properties['mddp']
@@ -636,6 +644,11 @@ class AnalysisEngine(object):
             GrR_binary=GrR_binary,
             GrR_primary=GrR_primary,
         )
+
+        # Update this fit
+        for key, value in self._nondim_groups.items():
+            self._this_fit[key] = value.nominal_value
+            self._this_fit[f'sig_{key}'] = value.std_dev
 
     # ------------------------------------------------------------------------
     # Class helpers: internal use only
@@ -692,12 +705,12 @@ class AnalysisEngine(object):
         self._this_fit = None
 
     def _evaluate_fit(self):
-        fit = self._this_fit
         # Prepare the data
         y = [i.nominal_value for i in self._this_sample['m']]
         sig = [i.std_dev for i in self._this_sample['m']]
         x = list(range(len(y)))  # Always indexed at zero
 
+        # Fit parameters
         a = self._this_fit['a']
         b = self._this_fit['b']
 
@@ -714,13 +727,10 @@ class AnalysisEngine(object):
         # And the goodness of fit; i.e. Q from Numerical Recipes
         Q = chi2.sf(merit_value, len(x)-2)
 
-        # Prepare payload
-        data = fit  # copy of a, b, sig_a, and sig_b
-        data['r2'] = R2
-        data['q'] = Q
-        data['chi2'] = merit_value
-        data['nu'] = len(x) - 2
-        data['exp_id'] = self._experiment_id
-        data['idx'] = self._idx
-
-        self._evaluated_fit = data
+        # update this fit
+        self._this_fit['r2'] = R2
+        self._this_fit['q'] = Q
+        self._this_fit['chi2'] = merit_value
+        self._this_fit['nu_chi'] = len(x) - 2
+        self._this_fit['exp_id'] = self._experiment_id
+        self._this_fit['idx'] = self._idx

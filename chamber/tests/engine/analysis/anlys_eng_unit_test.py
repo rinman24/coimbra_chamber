@@ -378,7 +378,7 @@ def test_evaluate_fit(anlys_eng, sample):  # noqa: D103
     anlys_eng._evaluate_fit()
     # ------------------------------------------------------------------------
     # Assert
-    result = anlys_eng._evaluated_fit
+    result = anlys_eng._this_fit
 
     assert isclose(result['a'], 0.014657801999999996)
     assert isclose(result['sig_a'], 7.745966692414835e-08)
@@ -392,7 +392,7 @@ def test_evaluate_fit(anlys_eng, sample):  # noqa: D103
 
     assert isclose(result['chi2'], 0.02400000000040884)
 
-    assert result['nu'] == 3
+    assert result['nu_chi'] == 3
 
 
 @pytest.mark.parametrize(
@@ -485,6 +485,9 @@ def test_set_local_properties(anlys_eng, sample):  # noqa: D103
     # Act --------------------------------------------------------------------
     anlys_eng._set_local_properties()
     # Assert -----------------------------------------------------------------
+    # Properties first .......................................................
+    # We want to keep these properties as ufloats to ensure error propagation
+    # is automatic.
     result = anlys_eng._properties
 
     assert isclose(result['mddp'].nominal_value, 2.772308579e-05, **TOL)
@@ -557,6 +560,81 @@ def test_set_local_properties(anlys_eng, sample):  # noqa: D103
     assert isclose(result['mu'].std_dev, 5.968184047e-09, **TOL)
     assert isclose(result['nu'].std_dev, 8.158787725e-09, **TOL)
 
+    # Then the fit ...........................................................
+    # The fit has them broken out into separate floats that can be stored in
+    # the database.
+    result = anlys_eng._this_fit
+
+    assert isclose(result['mddp'], 2.772308579e-05, **TOL)
+    assert isclose(result['x1s'], 0.01775459089, **TOL)
+    assert isclose(result['x1e'], 0.01319417284, **TOL)
+    assert isclose(result['x1'], 0.01547438186, **TOL)
+    assert isclose(result['m1s'], 0.01111759981, **TOL)
+    assert isclose(result['m1e'], 0.008247635057, **TOL)
+    assert isclose(result['m1'], 0.009682617432, **TOL)
+    assert isclose(result['rhos'], 1.200089891, **TOL)
+    assert isclose(result['rhoe'], 1.1966254259, **TOL)
+    assert isclose(result['rho'], 1.198357659, **TOL)
+    assert isclose(result['Bm1'], 0.002902230588, **TOL)
+    assert isclose(result['T'], 289.3878875, **TOL)
+    assert isclose(result['D12'], 2.452053646e-05, **TOL)
+    assert isclose(result['hfg'], 2463995.459, **TOL)
+    assert isclose(result['hu'], -2463995.459, **TOL)
+    assert isclose(result['hs'], 0, **TOL)
+    assert isclose(result['cpv'], 1014.5270579, **TOL)
+    assert isclose(result['he'], 1348.737634, **TOL)
+    assert isclose(result['cpl'], 4187.515626, **TOL)
+    assert isclose(result['hT'], 5566.987961, **TOL)
+    assert isclose(result['qcu'], 68.46389159, **TOL)
+    assert isclose(result['Ebe'], 401.3453444, **TOL)
+    assert isclose(result['Ebs'], 394.0376841, **TOL)
+    assert isclose(result['qrs'], 7.210491646, **TOL)
+    assert isclose(result['kv'], 0.0255848377, **TOL)
+    assert isclose(result['alpha'], 2.104420756e-05, **TOL)
+    assert isclose(result['Bh'], -0.00507699306, **TOL)
+    assert isclose(result['M'], 28.8579850, **TOL)
+    assert isclose(result['gamma1'], 0.5022594719, **TOL)
+    assert isclose(result['beta'], 0.003455569646, **TOL)
+    assert isclose(result['Delta_m'], 0.00286996475, **TOL)
+    assert isclose(result['Delta_T'], -1.329425, **TOL)
+    assert isclose(result['mu'], 1.794143889e-05, **TOL)
+    assert isclose(result['nu'], 1.49716896e-05, **TOL)
+
+    assert isclose(result['sig_mddp'], 4.60701097856e-07, **TOL)
+    assert isclose(result['sig_x1s'], 0.0002828675954, **TOL)
+    assert isclose(result['sig_x1e'], 7.86428302795e-05, **TOL)
+    assert isclose(result['sig_x1'], 0.0001467981363, **TOL)
+    assert isclose(result['sig_m1s'], 0.0001783233466, **TOL)
+    assert isclose(result['sig_m1e'], 4.940580078e-05, **TOL)
+    assert isclose(result['sig_m1'], 9.2520469498e-05, **TOL)
+    assert isclose(result['sig_rhos'], 0.001027878884, **TOL)
+    assert isclose(result['sig_rhoe'], 0.0001170215376, **TOL)
+    assert isclose(result['sig_rho'], 0.00051725937395, **TOL)
+    assert isclose(result['sig_Bm1'], 0.00018762568497, **TOL)
+    assert isclose(result['sig_T'], 0.12416966710916158, **TOL)
+    assert isclose(result['sig_D12'], 2.417443588e-08, **TOL)
+    assert isclose(result['sig_hfg'], 1126.860038, **TOL)
+    assert isclose(result['sig_hu'], 1126.860038, **TOL)
+    assert isclose(result['sig_hs'], 0, **TOL)
+    assert isclose(result['sig_cpv'], 0.002956749426, **TOL)
+    assert isclose(result['sig_he'], 251.9469741, **TOL)
+    assert isclose(result['sig_cpl'], 0.1216812541, **TOL)
+    assert isclose(result['sig_hT'], 1039.924855, **TOL)
+    assert isclose(result['sig_qcu'], 1.138524024, **TOL)
+    assert isclose(result['sig_Ebe'], 0.1565338681, **TOL)
+    assert isclose(result['sig_Ebs'], 1.346873806, **TOL)
+    assert isclose(result['sig_qrs'], 1.337909842, **TOL)
+    assert isclose(result['sig_kv'], 9.186775478e-06, **TOL)
+    assert isclose(result['sig_alpha'], 1.181578989e-08, **TOL)
+    assert isclose(result['sig_Bh'], 8.26715095e-05, **TOL)
+    assert isclose(result['sig_M'], 0.001013006621, **TOL)
+    assert isclose(result['sig_gamma1'], 0.0002218153945, **TOL)
+    assert isclose(result['sig_beta'], 1.4827052243e-06, **TOL)
+    assert isclose(result['sig_Delta_m'], 0.000185040939, **TOL)
+    assert isclose(result['sig_Delta_T'], 0.24833933421832313, **TOL)
+    assert isclose(result['sig_mu'], 5.968184047e-09, **TOL)
+    assert isclose(result['sig_nu'], 8.158787725e-09, **TOL)
+
 
 def test_set_nondim_groups(anlys_eng, sample):  # noqa: D103
     # Arrange ----------------------------------------------------------------
@@ -567,6 +645,7 @@ def test_set_nondim_groups(anlys_eng, sample):  # noqa: D103
     # Act --------------------------------------------------------------------
     anlys_eng._set_nondim_groups()
     # Assert -----------------------------------------------------------------
+    # Groups first ...........................................................
     result = anlys_eng._nondim_groups
 
     assert isclose(result['ShR'].nominal_value, 4.883306014, **TOL)
@@ -580,6 +659,22 @@ def test_set_nondim_groups(anlys_eng, sample):  # noqa: D103
     assert isclose(result['Le'].std_dev, 0.001321978489, **TOL)
     assert isclose(result['GrR_binary'].std_dev, 128.377472, **TOL)
     assert isclose(result['GrR_primary'].std_dev, 127.9778022, **TOL)
+
+    # Then the fit ...........................................................
+    result = anlys_eng._this_fit
+
+    assert isclose(result['ShR'], 4.883306014, **TOL)
+    assert isclose(result['NuR'], -3.239682362, **TOL)
+    assert isclose(result['Le'], 1.165191723, **TOL)
+    assert isclose(result['GrR_binary'], -423.4062806, **TOL)
+    assert isclose(result['GrR_primary'], 427.0226524, **TOL)
+
+    assert isclose(result['sig_ShR'], 0.3206133366, **TOL)
+    assert isclose(result['sig_NuR'], 0.06555358581, **TOL)
+    assert isclose(result['sig_Le'], 0.001321978489, **TOL)
+    assert isclose(result['sig_GrR_binary'], 128.377472, **TOL)
+    assert isclose(result['sig_GrR_primary'], 127.9778022, **TOL)
+
 
 # ----------------------------------------------------------------------------
 # Test helpers

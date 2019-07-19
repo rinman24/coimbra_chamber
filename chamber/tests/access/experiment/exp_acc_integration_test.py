@@ -464,39 +464,73 @@ def test_add_fit_that_does_not_exist(exp_acc, fit_spec):  # noqa: D103
         assert result.experiment_id == 1
         assert result.idx == 0
         assert result.mddp == 9
+        assert result.sig_mddp == 9.1
         assert result.x1s == 10
+        assert result.sig_x1s == 10.1
         assert result.x1e == 11
+        assert result.sig_x1e == 11.1
         assert result.x1 == 12
+        assert result.sig_x1 == 12.1
         assert result.m1s == 13
+        assert result.sig_m1s == 13.1
         assert result.m1e == 14
+        assert result.sig_m1e == 14.1
         assert result.m1 == 15
+        assert result.sig_m1 == 15.1
         assert result.rhos == 16
+        assert result.sig_rhos == 16.1
         assert result.rhoe == 17
+        assert result.sig_rhoe == 17.1
         assert result.rho == 18
+        assert result.sig_rho == 18.1
         assert result.Bm1 == 19
+        assert result.sig_Bm1 == 19.1
         assert result.T == 20
+        assert result.sig_T == 20.1
         assert result.D12 == 21
+        assert result.sig_D12 == 21.1
         assert result.hfg == 22
+        assert result.sig_hfg == 22.1
         assert result.hu == 23
+        assert result.sig_hu == 23.1
         assert result.hs == 24
+        assert result.sig_hs == 24.1
         assert result.cpv == 25
+        assert result.sig_cpv == 25.1
         assert result.he == 26
+        assert result.sig_he == 26.1
         assert result.cpl == 27
+        assert result.sig_cpl == 27.1
         assert result.hT == 28
+        assert result.sig_hT == 28.1
         assert result.qcu == 29
+        assert result.sig_qcu == 29.1
         assert result.Ebe == 30
+        assert result.sig_Ebe == 30.1
         assert result.Ebs == 31
+        assert result.sig_Ebs == 31.1
         assert result.qrs == 32
+        assert result.sig_qrs == 32.1
         assert result.kv == 33
+        assert result.sig_kv == 33.1
         assert result.alpha == 34
+        assert result.sig_alpha == 34.1
         assert result.Bh == 35
+        assert result.sig_Bh == 35.1
         assert result.M == 36
+        assert result.sig_M == 36.1
         assert result.gamma1 == 37
+        assert result.sig_gamma1 == 37.1
         assert result.beta == 38
-        assert result.Deltam == 39
-        assert result.DeltaT == 40
+        assert result.sig_beta == 38.1
+        assert result.Delta_m == 39
+        assert result.sig_Delta_m == 39.1
+        assert result.Delta_T == 40
+        assert result.sig_Delta_T == 40.1
         assert result.mu == 41
+        assert result.sig_mu == 41.1
         assert result.nu == 42
+        assert result.sig_nu == 42.1
     finally:
         session.close()
 
