@@ -147,6 +147,8 @@ class FitSpec:
     sig_M: float
     gamma1: float
     sig_gamma1: float
+    gamma2: float
+    sig_gamma2: float
     beta: float
     sig_beta: float
     Delta_m: float

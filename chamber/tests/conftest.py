@@ -426,6 +426,8 @@ def fit_spec():
         sig_mu=41.1,
         nu=42.0,
         sig_nu=42.1,
+        gamma2=43.0,
+        sig_gamma2=43.1,
     )
     fit_spec = dacite.from_dict(FitSpec, data)
     return fit_spec

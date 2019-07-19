@@ -245,6 +245,8 @@ class Fit(Base):
     sig_M = Column(Float, nullable=False)
     gamma1 = Column(Float, nullable=False)
     sig_gamma1 = Column(Float, nullable=False)
+    gamma2 = Column(Float, nullable=False)
+    sig_gamma2 = Column(Float, nullable=False)
     beta = Column(Float, nullable=False)
     sig_beta = Column(Float, nullable=False)
     Delta_m = Column(Float, nullable=False)

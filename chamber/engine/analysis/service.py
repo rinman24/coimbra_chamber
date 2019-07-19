@@ -524,6 +524,9 @@ class AnalysisEngine(object):
         # gamma1 -------------------------------------------------------------
         gamma1 = (1/rho) * (M/self._M1 - 1)
 
+        # gamma2 -------------------------------------------------------------
+        gamma2 = (1/rho) * (M/self._M2 - 1)
+
         # beta ---------------------------------------------------------------
         beta = 1/T
 
@@ -582,6 +585,7 @@ class AnalysisEngine(object):
             Bh=Bh,
             M=M,
             gamma1=gamma1,
+            gamma2=gamma2,
             beta=beta,
             Delta_m=Delta_m,
             Delta_T=Delta_T,

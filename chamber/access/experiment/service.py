@@ -387,6 +387,8 @@ class ExperimentAccess(object):
                     sig_M=fit_spec.sig_M,
                     gamma1=fit_spec.gamma1,
                     sig_gamma1=fit_spec.sig_gamma1,
+                    gamma2=fit_spec.gamma2,
+                    sig_gamma2=fit_spec.sig_gamma2,
                     beta=fit_spec.beta,
                     sig_beta=fit_spec.sig_beta,
                     Delta_m=fit_spec.Delta_m,
