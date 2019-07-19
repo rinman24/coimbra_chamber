@@ -460,9 +460,43 @@ def test_add_fit_that_does_not_exist(exp_acc, fit_spec):  # noqa: D103
         assert result.r2 == 5.0
         assert result.q == 6.0
         assert result.chi2 == 7.0
-        assert result.nu == 8
+        assert result.nu_chi == 8
         assert result.experiment_id == 1
         assert result.idx == 0
+        assert result.mddp == 9
+        assert result.x1s == 10
+        assert result.x1e == 11
+        assert result.x1 == 12
+        assert result.m1s == 13
+        assert result.m1e == 14
+        assert result.m1 == 15
+        assert result.rhos == 16
+        assert result.rhoe == 17
+        assert result.rho == 18
+        assert result.Bm1 == 19
+        assert result.T == 20
+        assert result.D12 == 21
+        assert result.hfg == 22
+        assert result.hu == 23
+        assert result.hs == 24
+        assert result.cpv == 25
+        assert result.he == 26
+        assert result.cpl == 27
+        assert result.hT == 28
+        assert result.qcu == 29
+        assert result.Ebe == 30
+        assert result.Ebs == 31
+        assert result.qrs == 32
+        assert result.kv == 33
+        assert result.alpha == 34
+        assert result.Bh == 35
+        assert result.M == 36
+        assert result.gamma1 == 37
+        assert result.beta == 38
+        assert result.Deltam == 39
+        assert result.DeltaT == 40
+        assert result.mu == 41
+        assert result.nu == 42
     finally:
         session.close()
 

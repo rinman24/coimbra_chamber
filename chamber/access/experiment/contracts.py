@@ -86,6 +86,40 @@ class FitSpec:
     r2: float
     q: float
     chi2: float
-    nu: int
+    nu_chi: int
     exp_id: int
     idx: int
+    mddp: float
+    x1s: float
+    x1e: float
+    x1: float
+    m1s: float
+    m1e: float
+    m1: float
+    rhos: float
+    rhoe: float
+    rho: float
+    Bm1: float
+    T: float
+    D12: float
+    hfg: float
+    hu: float
+    hs: float
+    cpv: float
+    he: float
+    cpl: float
+    hT: float
+    qcu: float
+    Ebe: float
+    Ebs: float
+    qrs: float
+    kv: float
+    alpha: float
+    Bh: float
+    M: float
+    gamma1: float
+    beta: float
+    Deltam: float
+    DeltaT: float
+    mu: float
+    nu: float

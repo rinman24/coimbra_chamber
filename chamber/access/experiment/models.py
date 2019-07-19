@@ -186,7 +186,41 @@ class Fit(Base):
     r2 = Column(Float, nullable=False)
     q = Column(Float, nullable=False)
     chi2 = Column(Float, nullable=False)
-    nu = Column(Integer, nullable=False)
+    nu_chi = Column(Integer, nullable=False)
+    mddp = Column(Float, nullable=False)
+    x1s = Column(Float, nullable=False)
+    x1e = Column(Float, nullable=False)
+    x1 = Column(Float, nullable=False)
+    m1s = Column(Float, nullable=False)
+    m1e = Column(Float, nullable=False)
+    m1 = Column(Float, nullable=False)
+    rhos = Column(Float, nullable=False)
+    rhoe = Column(Float, nullable=False)
+    rho = Column(Float, nullable=False)
+    Bm1 = Column(Float, nullable=False)
+    T = Column(Float, nullable=False)
+    D12 = Column(Float, nullable=False)
+    hfg = Column(Float, nullable=False)
+    hu = Column(Float, nullable=False)
+    hs = Column(Float, nullable=False)
+    cpv = Column(Float, nullable=False)
+    he = Column(Float, nullable=False)
+    cpl = Column(Float, nullable=False)
+    hT = Column(Float, nullable=False)
+    qcu = Column(Float, nullable=False)
+    Ebe = Column(Float, nullable=False)
+    Ebs = Column(Float, nullable=False)
+    qrs = Column(Float, nullable=False)
+    kv = Column(Float, nullable=False)
+    alpha = Column(Float, nullable=False)
+    Bh = Column(Float, nullable=False)
+    M = Column(Float, nullable=False)
+    gamma1 = Column(Float, nullable=False)
+    beta = Column(Float, nullable=False)
+    Deltam = Column(Float, nullable=False)
+    DeltaT = Column(Float, nullable=False)
+    mu = Column(Float, nullable=False)
+    nu = Column(Float, nullable=False)
 
     # Composite foreign keys
     idx = Column(Integer, primary_key=True)
@@ -209,3 +243,11 @@ class Fit(Base):
             f'nu={self.nu}, '
             f'experiment_id={self.experiment_id}, '
             f'idx={self.idx})>')
+
+    # TODO: Update __repr__ with additional attributes including:
+    # nu_chi, mddp, x1s, x1e, x1, m1s, m1e, m1, rhos, rhoe, rho, Bm1, T, D12,
+    # hfg, hu, hs, cpv, he, cpl, hT, qcu, Ebe, Ebs, qrs, kv, alpha, Bh, M,
+    # gamma1, beta, Deltam, DeltaT, mu, and nu.
+    # NOTE: nu and nu_chi where updated in the last PR. We know there is an
+    # existing nu. The TODO above includes nu so that we make sure we map
+    # everything correctly.
