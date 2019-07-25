@@ -19,6 +19,7 @@ ignore:
     - "**/models.py"
     - "setup.py"
     - "**/__init__.py"
+    - "chamber/util/**"
 
 parsers:
   gcov:
