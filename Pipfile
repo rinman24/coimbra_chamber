@@ -21,6 +21,7 @@ uncertainties = "*"
 coolprop = "*"
 nptdms = "*"
 sqlalchemy = "*"
+click-spinner = "*"
 
 [requires]
 python_version = "3.7"
