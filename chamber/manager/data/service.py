@@ -22,26 +22,32 @@ class DataManager(object):
     # ------------------------------------------------------------------------
     # Public methods: included in the API
 
-    def add_data(self):
-        """TODO: Make this interbnal. Not part of the api."""
-        """TODO: Add a __repr__."""
+    def run(self):
+        """TODO: Docstring."""
+        self._add_data()
+        self._anlys_eng.process_fits(self._raw_data)
+
+    # ------------------------------------------------------------------------
+    # Internal methods: not included in the API
+
+    def _add_data(self):
         path = self._get_path()
-        raw_data = self._exp_acc.get_raw_data(path)
-        layout = self._exp_acc.layout_raw_data(raw_data)
+        print('Loading tdsm file...')
+        self._raw_data = self._exp_acc.get_raw_data(path)
+        print('Success!')
+        layout = self._exp_acc.layout_raw_data(self._raw_data)
         self._plt_util.plot(layout)
         response = input(
             'Would you like to enter the experiment into the database ([y]/n)? '
             ).lower()
         if (not response) or ('y' in response):
             try:
-                response = self._exp_acc.add_raw_data(raw_data)
+                print('Adding data to database...')
+                response = self._exp_acc.add_raw_data(self._raw_data)
             except Exception as e:
                 print(e)
             else:
                 return response
-
-    # ------------------------------------------------------------------------
-    # Internal methods: not included in the API
 
     def _get_path(self):
         """Get path as a string."""
