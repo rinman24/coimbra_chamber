@@ -314,6 +314,23 @@ def mock_engine(monkeypatch):
 
     return engine
 
+
+@pytest.fixture('function')
+def mock_io_util(monkeypatch):
+    """Mock of IOUtility."""
+    util = MagicMock()
+
+    util.get_input = MagicMock(
+        side_effect=[['string', 3.14], [None, None], [10, 1], [10, 20], ])
+
+    monkeypatch.setattr(
+        'chamber.utility.io.service.IOUtility.get_input',
+        util.get_input
+    )
+
+    return util
+
+
 # ----------------------------------------------------------------------------
 # AnalysisEngine
 
@@ -678,6 +695,18 @@ def test_set_nondim_groups(anlys_eng, sample):  # noqa: D103
     assert isclose(result['sig_Le'], 0.001321978489, **TOL)
     assert isclose(result['sig_GrR_binary'], 128.377472, **TOL)
     assert isclose(result['sig_GrR_primary'], 127.9778022, **TOL)
+
+
+def test_get_bounds_to_filter(anlys_eng, mock_io_util):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    prompt = anlys_eng._filter_observations_prompt
+    expected_calls = [call(prompt)] * 4
+    expected_bounds = (10, 20)
+    # Act --------------------------------------------------------------------
+    anlys_eng._get_bounds_to_filter()
+    # Assert -----------------------------------------------------------------
+    mock_io_util.get_input.assert_has_calls(expected_calls)
+    assert anlys_eng._bounds == expected_bounds
 
 
 # ----------------------------------------------------------------------------

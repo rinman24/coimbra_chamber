@@ -23,6 +23,12 @@ from chamber.utility.plot.service import PlotUtility
 class AnalysisEngine(object):
     """TODO: docstring."""
 
+    _filter_observations_prompt = dacite.from_dict(
+        Prompt,
+        dict(messages=['Enter lower index (int): ',
+                       'Enter upper index (int): ']),
+    )
+
     def __init__(self, experiment_id):
         """TODO: docstring."""
         self._experiment_id = experiment_id
@@ -35,6 +41,7 @@ class AnalysisEngine(object):
         self._fits = []
         self._idx = 1
         self._steps = 1
+        self._bounds = (None, None)
 
         # IR sensor calibration
         self._a = ufloat(-2.34, 0.07)
@@ -140,6 +147,21 @@ class AnalysisEngine(object):
             )
 
         self._observations = pd.DataFrame(index=time, data=data)
+
+    def _get_bounds_to_filter(self):
+        flag = False
+        while not flag:
+            response = self._io_util.get_input(self._filter_observations_prompt)
+            both_are_ints = all([isinstance(i, int) for i in response])
+            if both_are_ints:
+                correct_limits = (response[0] < response[1])
+                if correct_limits:
+                    self._bounds = (response[0], response[1])
+                    flag = True
+
+    def _filter_observations(self, lower, upper):
+        # This is trivial with pd.loc[lower:upper, :]
+        pass
 
     def _layout_observations(self):
         # internal helper logic
