@@ -732,6 +732,25 @@ def test_ask_to_continue_or_filter(
     assert anlys_eng._proceed is expected_proceed_bool
 
 
+@pytest.mark.parametrize(
+    'side_effect, lower, upper',
+    [
+        ([['c']], 0, 1),
+        ([['f'], [1, 2]], 1, 1),
+    ]
+)
+def test_filter_observations_based_on_user_input(
+        anlys_eng, mock_io_util, observations, side_effect, lower, upper):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    anlys_eng._observations = observations
+    mock_io_util.get_input.side_effect = side_effect
+    expected_obs = observations.iloc[lower:upper+1, :].reset_index(drop=True)
+    # Act --------------------------------------------------------------------
+    anlys_eng._filter_observations()
+    # Assert -----------------------------------------------------------------
+    pd.testing.assert_frame_equal(anlys_eng._observations, expected_obs)
+
+
 # ----------------------------------------------------------------------------
 # Test helpers
 

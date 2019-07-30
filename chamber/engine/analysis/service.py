@@ -303,9 +303,18 @@ class AnalysisEngine(object):
                     self._bounds = (response[0], response[1])
                     flag = True
 
-    def _filter_observations(self, lower, upper):
-        # This is trivial with pd.loc[lower:upper, :]
-        pass
+    def _filter_observations(self):
+        self._ask_to_continue_or_filter()
+        if not self._proceed:
+            self._get_bounds_to_filter()
+            # We actually need to filter
+            lower = self._bounds[0]
+            upper = self._bounds[1]
+            self._observations = (
+                self._observations
+                .iloc[lower:upper+1, :]
+                .reset_index(drop=True)
+            )
 
     def _get_fits(self):
         # len - 2 because we want to make sure we never end up at the last
