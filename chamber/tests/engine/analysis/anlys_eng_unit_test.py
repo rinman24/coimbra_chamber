@@ -320,9 +320,6 @@ def mock_io_util(monkeypatch):
     """Mock of IOUtility."""
     util = MagicMock()
 
-    util.get_input = MagicMock(
-        side_effect=[['string', 3.14], [None, None], [10, 1], [10, 20], ])
-
     monkeypatch.setattr(
         'chamber.utility.io.service.IOUtility.get_input',
         util.get_input
@@ -699,6 +696,12 @@ def test_set_nondim_groups(anlys_eng, sample):  # noqa: D103
 
 def test_get_bounds_to_filter(anlys_eng, mock_io_util):  # noqa: D103
     # Arrange ----------------------------------------------------------------
+    mock_io_util.get_input.side_effect = [
+        ['string', 3.14],
+        [None, None],
+        [10, 1],
+        [10, 20],
+    ]
     prompt = anlys_eng._filter_observations_prompt
     expected_calls = [call(prompt)] * 4
     expected_bounds = (10, 20)
@@ -707,6 +710,26 @@ def test_get_bounds_to_filter(anlys_eng, mock_io_util):  # noqa: D103
     # Assert -----------------------------------------------------------------
     mock_io_util.get_input.assert_has_calls(expected_calls)
     assert anlys_eng._bounds == expected_bounds
+
+
+@pytest.mark.parametrize(
+    'side_effect, expected_proceed_bool',
+    [
+        ([['string'], [10], ['c']], True),
+        ([['string'], [10], ['f']], False),
+    ]
+)
+def test_ask_to_continue_or_filter(
+        anlys_eng, mock_io_util, side_effect, expected_proceed_bool):  # noqa: D103
+    # Arrange ----------------------------------------------------------------
+    mock_io_util.get_input.side_effect = side_effect
+    prompt = anlys_eng._confirm_selection_prompt
+    expected_calls = [call(prompt)] * 3
+    # Act --------------------------------------------------------------------
+    anlys_eng._ask_to_continue_or_filter()
+    # Assert -----------------------------------------------------------------
+    mock_io_util.get_input.assert_has_calls(expected_calls)
+    assert anlys_eng._proceed is expected_proceed_bool
 
 
 # ----------------------------------------------------------------------------
