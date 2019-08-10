@@ -299,7 +299,6 @@ def mock_engine(monkeypatch):
         'chamber.utility.plot.service.PlotUtility.plot',
         engine._plot_util.plot)
 
-    engine._io_util.get_input = MagicMock(return_value='y')
     monkeypatch.setattr(
         'chamber.utility.io.service.IOUtility.get_input',
         engine._io_util.get_input)
@@ -312,20 +311,11 @@ def mock_engine(monkeypatch):
         'chamber.engine.analysis.service.AnalysisEngine._persist_fits',
         engine._persist_fits)
 
-    return engine
-
-
-@pytest.fixture('function')
-def mock_io_util(monkeypatch):
-    """Mock of IOUtility."""
-    util = MagicMock()
-
     monkeypatch.setattr(
-        'chamber.utility.io.service.IOUtility.get_input',
-        util.get_input
-    )
+        'chamber.utility.plot.service.PlotUtility.plot',
+        engine._plot)
 
-    return util
+    return engine
 
 
 # ----------------------------------------------------------------------------
@@ -362,10 +352,10 @@ def test_layout_observations(anlys_eng, data_spec, observation_layout):  # noqa:
     anlys_eng._data = data_spec
     # Act --------------------------------------------------------------------
     anlys_eng._get_observations()
+    anlys_eng._layout_observations()
     # Assert -----------------------------------------------------------------
-    layout = anlys_eng._layout_observations()
-    assert layout.style == observation_layout.style
-    _compare_layouts(layout, observation_layout)
+    assert anlys_eng._layout.style == observation_layout.style
+    _compare_layouts(anlys_eng._layout, observation_layout)
 
 
 def test_ols_fit(anlys_eng, sample):  # noqa: D103
@@ -454,18 +444,29 @@ def test_get_best_local_fit_stops_with_correct_error(
         assert not result
 
 
-def test_process_fits(anlys_eng, data_spec, mock_engine):  # noqa: D103
+def test_process_fits(anlys_eng, data_spec, mock_engine, monkeypatch):  # noqa: D103
     # Arrange ----------------------------------------------------------------
+    # Add extra mock calls
+    monkeypatch.setattr(
+        'chamber.engine.analysis.service.AnalysisEngine._filter_observations',
+        mock_engine._filter_observations)
+
+    monkeypatch.setattr(
+        'chamber.engine.analysis.service.AnalysisEngine._get_fits',
+        mock_engine._get_fits)
+
+    monkeypatch.setattr(
+        'chamber.engine.analysis.service.AnalysisEngine._persist_fits',
+        mock_engine._persist_fits)
+
     anlys_eng._data = data_spec
     expected_calls = [
         call._get_observations(),
-        call._layout_observations(),
-        call._plot_util.plot('test_layout'),
-        call._io_util.get_input(
-            Prompt(messages=['Would you like to continue?: [y]/n '])),
+        call._filter_observations(),
         call._get_fits(),
         call._persist_fits(),
     ]
+    # anlys_eng._layout = 'test_layout'
     # Act --------------------------------------------------------------------
     anlys_eng.process_fits(data_spec)
     # Assert -----------------------------------------------------------------
@@ -697,10 +698,10 @@ def test_set_nondim_groups(anlys_eng, sample):  # noqa: D103
 def test_get_bounds_to_filter(anlys_eng, mock_io_util):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     mock_io_util.get_input.side_effect = [
-        ['string', 3.14],
-        [None, None],
-        [10, 1],
-        [10, 20],
+        ['string', '3.14'],
+        ['', ''],
+        ['10', '1'],
+        ['10', '20'],
     ]
     prompt = anlys_eng._filter_observations_prompt
     expected_calls = [call(prompt)] * 4
@@ -732,23 +733,38 @@ def test_ask_to_continue_or_filter(
     assert anlys_eng._proceed is expected_proceed_bool
 
 
-@pytest.mark.parametrize(
-    'side_effect, lower, upper',
-    [
-        ([['c']], 0, 1),
-        ([['f'], [1, 2]], 1, 1),
-    ]
-)
-def test_filter_observations_based_on_user_input(
-        anlys_eng, mock_io_util, observations, side_effect, lower, upper):  # noqa: D103
+def test_filter_observations(anlys_eng, observations, mock_engine):  # noqa: D103
+    # NOTE: mock_engine only patches a few functions so that we can check the
+    # order of the calls.
     # Arrange ----------------------------------------------------------------
+    # Set layout since we mocked `self._layout_observations`.
+    anlys_eng._layout = 'test_layout'
+    # Observations
     anlys_eng._observations = observations
-    mock_io_util.get_input.side_effect = side_effect
-    expected_obs = observations.iloc[lower:upper+1, :].reset_index(drop=True)
+    expected_obs = observations.copy().iloc[1: 2+1, :].reset_index(drop=True)
+    # Calls
+    expected_calls = [
+        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter?: [c]/f'])),
+        call._io_util.get_input(Prompt(messages=['Enter lower index (int): ', 'Enter upper index (int): '])),
+        call._layout_observations(),
+        call._plot('test_layout'),
+        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter?: [c]/f'])),
+        call._io_util.get_input(Prompt(messages=['Enter lower index (int): ', 'Enter upper index (int): '])),
+        call._layout_observations(),
+        call._plot('test_layout'),
+        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter?: [c]/f'])),
+    ]
+    # Mock io_util side effects
+    mock_engine._io_util.get_input.side_effect = [
+        ['f'], ['0', '10'],
+        ['f'], ['1', '2'],
+        ['c'],
+    ]
     # Act --------------------------------------------------------------------
     anlys_eng._filter_observations()
     # Assert -----------------------------------------------------------------
     pd.testing.assert_frame_equal(anlys_eng._observations, expected_obs)
+    mock_engine.assert_has_calls(expected_calls)
 
 
 # ----------------------------------------------------------------------------

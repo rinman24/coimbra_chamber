@@ -80,18 +80,9 @@ class AnalysisEngine(object):
         """TODO: docstring."""
         self._data = data
         self._get_observations()
-        layout = self._layout_observations()
-        self._plot_util.plot(layout)
-        # Interact with user
-        prompt = dacite.from_dict(
-            Prompt,
-            data=dict(messages=['Would you like to continue?: [y]/n ']),
-        )
-        response = self._io_util.get_input(prompt)[0]
-        # Use input to decide how to proceed
-        if (not response) or ('y' in response):
-            self._get_fits()
-            self._persist_fits()
+        self._filter_observations()
+        self._get_fits()
+        self._persist_fits()
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
@@ -277,7 +268,7 @@ class AnalysisEngine(object):
                 ],
             style='seaborn-darkgrid')
 
-        return dacite.from_dict(Layout, data)
+        self._layout = dacite.from_dict(Layout, data)
 
     def _ask_to_continue_or_filter(self):
         flag = False
@@ -296,25 +287,34 @@ class AnalysisEngine(object):
         flag = False
         while not flag:
             response = self._io_util.get_input(self._filter_observations_prompt)
-            both_are_ints = all([isinstance(i, int) for i in response])
+            try:
+                response[0] = int(response[0])
+                response[1] = int(response[1])
+                both_are_ints = True
+            except ValueError:
+                both_are_ints = False
             if both_are_ints:
-                correct_limits = (response[0] < response[1])
-                if correct_limits:
+                if response[0] < response[1]:
                     self._bounds = (response[0], response[1])
                     flag = True
 
     def _filter_observations(self):
-        self._ask_to_continue_or_filter()
-        if not self._proceed:
-            self._get_bounds_to_filter()
-            # We actually need to filter
-            lower = self._bounds[0]
-            upper = self._bounds[1]
-            self._observations = (
-                self._observations
-                .iloc[lower:upper+1, :]
-                .reset_index(drop=True)
-            )
+        done = False
+        while not done:
+            self._ask_to_continue_or_filter()
+            if not self._proceed:
+                self._get_bounds_to_filter()
+                lower = self._bounds[0]
+                upper = self._bounds[1]
+                self._observations = (
+                    self._observations
+                    .iloc[lower: upper + 1, :]
+                    .reset_index(drop=True)
+                )
+                self._layout_observations()
+                self._plot_util.plot(self._layout)
+            else:
+                done = True
 
     def _get_fits(self):
         # len - 2 because we want to make sure we never end up at the last

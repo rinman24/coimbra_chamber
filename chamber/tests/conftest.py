@@ -49,18 +49,20 @@ def exp_acc():
 
 
 @pytest.fixture('function')
-def mock_io_utility(monkeypatch):
+def mock_io_util(monkeypatch):
     """Mock of IOUtility."""
-    io = MagicMock()
+    util = MagicMock()
 
-    io.get_input = MagicMock(return_value='y')
     monkeypatch.setattr(
         'chamber.utility.io.service.IOUtility.get_input',
-        io.get_input)
+        util.get_input
+    )
+
+    return util
 
 
 @pytest.fixture(scope='function')
-def anlys_eng(exp_acc, mock_io_utility, monkeypatch):
+def anlys_eng(exp_acc, monkeypatch):
     """
     Create a function level instance of the analysis engine.
 

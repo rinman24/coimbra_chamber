@@ -19,9 +19,10 @@ from chamber.access.experiment.models import (
 
 
 def test_persist_fits(
-        anlys_eng, tube_spec, setting_spec, experiment_spec,
+        anlys_eng, mock_io_util, tube_spec, setting_spec, experiment_spec,
         observation_spec):  # noqa: D103
     # Arrange ----------------------------------------------------------------
+    mock_io_util.get_input.return_value = ['c']
     # Use ExperimentAccess to add a tube, a setting, an experiment, and some
     # observations.
     access = anlys_eng._exp_acc
@@ -299,8 +300,9 @@ def test_persist_fits(
         session.close()
 
 
-def test_process_fits(anlys_eng, tube_spec):  # noqa: D103
+def test_process_fits(anlys_eng, mock_io_util, tube_spec):  # noqa: D103
     # This is just a smoke test to make sure nothing breaks.
+    mock_io_util.get_input.side_effect = [['f'], ['0', '3600'], ['c']]
     # Arrange ----------------------------------------------------------------
     # Update the engine's experiment_id.
     anlys_eng._experiment_id = 2
