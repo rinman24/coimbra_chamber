@@ -15,14 +15,13 @@ python:
 notifications:
   email: false
 
-
 # Install dependencies
 install:
-  - pip install -r requirements.txt
+  - pip install pipenv; pipenv install --dev --system --ignore-pipfile
 
 # Run test suite
 script:
-  - python -m pytest -vvs -p no:warnings --cov=./
+  - python -m pytest -vvs -p no:warnings --ignore-glob="*acceptance*" --cov=./
 
 # Environment variables
 env:
