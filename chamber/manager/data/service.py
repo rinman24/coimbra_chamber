@@ -1,5 +1,6 @@
 """Data manager service."""
 
+import dacite
 import time
 import tkinter as tk
 from tkinter import filedialog
@@ -7,25 +8,37 @@ import os
 
 from chamber.access.experiment.service import ExperimentAccess
 from chamber.engine.analysis.service import AnalysisEngine
+from chamber.utility.io.service import IOUtility
+from chamber.utility.io.contracts import Prompt
 from chamber.utility.plot.service import PlotUtility
 
 
 class DataManager(object):
     """Data manager."""
 
+    _confirm_acceptable_data_prompt = dacite.from_dict(
+        Prompt,
+        dict(messages=['Would you like to continue [y]/n: ']))
+
     def __init__(self):
         """Constructor."""
         self._exp_acc = ExperimentAccess()
         self._plt_util = PlotUtility()
-        self._anlys_eng = AnalysisEngine(1)
+        self._io_util = IOUtility()
 
     # ------------------------------------------------------------------------
     # Public methods: included in the API
 
     def run(self):
         """TODO: Docstring."""
-        self._add_data()
-        self._anlys_eng.process_fits(self._raw_data)
+        try:
+            self._add_data()
+            self._anlys_eng.process_fits(self._raw_data)
+        except Exception as e:
+            print(f'Error: {e}')
+            self._success = False
+        else:
+            self._success = True
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
@@ -37,9 +50,7 @@ class DataManager(object):
         print('Success!')
         layout = self._exp_acc.layout_raw_data(self._raw_data)
         self._plt_util.plot(layout)
-        response = input(
-            'Would you like to enter the experiment into the database ([y]/n)? '
-            ).lower()
+        response = self._io_util.get_input(self._confirm_acceptable_data_prompt)
         if (not response) or ('y' in response):
             try:
                 print('Adding data to database...')
@@ -47,6 +58,7 @@ class DataManager(object):
             except Exception as e:
                 print(e)
             else:
+                self._anlys_eng = AnalysisEngine(response['experiment_id'])
                 return response
 
     def _get_path(self):
