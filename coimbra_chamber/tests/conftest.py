@@ -75,7 +75,7 @@ def anlys_eng(exp_acc, monkeypatch):
     # instance of ExperimentAccess mocked to return a previously serialized
     # instance of a DataSpec dataclass. This dramatically speeds up loading
     # the data for testing.
-    path = Path('coimbra_chamber/tests/access/experiment/sample_data')
+    path = Path('coimbra_chamber/tests/access/experiment/sample_data.pkl')
     with open(path, 'rb') as stream:
         data = pickle.load(stream)
     # Now that we have data, we want to make a mock that will return it.
