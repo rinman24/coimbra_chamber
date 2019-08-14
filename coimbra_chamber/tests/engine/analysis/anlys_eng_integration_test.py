@@ -2,6 +2,7 @@
 
 import dacite
 from pathlib import Path
+import pytest
 
 from coimbra_chamber.access.experiment.contracts import (
     FitSpec
@@ -76,6 +77,11 @@ def test_persist_fits(
         mu=44.0, sig_mu=44.1,
         nu=45.0, sig_nu=45.1,
         gamma2=46.0, sig_gamma2=46.1,
+        ShR=47.0, sig_ShR=47.1,
+        NuR=48.0, sig_NuR=48.1,
+        Le=49.0, sig_Le=49.1,
+        GrR_binary=50.0, sig_GrR_binary=50.1,
+        GrR_primary=51.0, sig_GrR_primary=51.1,
     )
     fits_to_add.append(fit)
     # Now the second one
@@ -123,6 +129,11 @@ def test_persist_fits(
         mu=441.0, sig_mu=441.1,
         nu=451.0, sig_nu=451.1,
         gamma2=461.0, sig_gamma2=461.1,
+        ShR=547.0, sig_ShR=547.1,
+        NuR=548.0, sig_NuR=548.1,
+        Le=549.0, sig_Le=549.1,
+        GrR_binary=550.0, sig_GrR_binary=550.1,
+        GrR_primary=551.0, sig_GrR_primary=551.1,
     )
     fits_to_add.append(fit)
     anlys_eng._fits = fits_to_add
@@ -217,6 +228,16 @@ def test_persist_fits(
                 assert fit.sig_nu == 45.1
                 assert fit.gamma2 == 46.0
                 assert fit.sig_gamma2 == 46.1
+                assert fit.ShR == 47.0
+                assert fit.sig_ShR == 47.1
+                assert fit.NuR == 48.0
+                assert fit.sig_NuR == 48.1
+                assert fit.Le == 49.0
+                assert fit.sig_Le == 49.1
+                assert fit.GrR_binary == 50.0
+                assert fit.sig_GrR_binary == 50.1
+                assert fit.GrR_primary == 51.0
+                assert fit.sig_GrR_primary == 51.1
             elif fit.idx == 1:
                 assert fit.a == 0.11
                 assert fit.sig_a == 0.011
@@ -296,6 +317,16 @@ def test_persist_fits(
                 assert fit.sig_nu == 451.1
                 assert fit.gamma2 == 461
                 assert fit.sig_gamma2 == 461.1
+                assert fit.ShR == 547.0
+                assert fit.sig_ShR == 547.1
+                assert fit.NuR == 548.0
+                assert fit.sig_NuR == 548.1
+                assert fit.Le == 549.0
+                assert fit.sig_Le == 549.1
+                assert fit.GrR_binary == 550.0
+                assert fit.sig_GrR_binary == 550.1
+                assert fit.GrR_primary == 551.0
+                assert fit.sig_GrR_primary == 551.1
     finally:
         session.close()
 
