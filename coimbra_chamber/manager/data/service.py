@@ -6,11 +6,11 @@ import tkinter as tk
 from tkinter import filedialog
 import os
 
-from chamber.access.experiment.service import ExperimentAccess
-from chamber.engine.analysis.service import AnalysisEngine
-from chamber.utility.io.service import IOUtility
-from chamber.utility.io.contracts import Prompt
-from chamber.utility.plot.service import PlotUtility
+from coimbra_chamber.access.experiment.service import ExperimentAccess
+from coimbra_chamber.engine.analysis.service import AnalysisEngine
+from coimbra_chamber.utility.io.service import IOUtility
+from coimbra_chamber.utility.io.contracts import Prompt
+from coimbra_chamber.utility.plot.service import PlotUtility
 
 
 class DataManager(object):

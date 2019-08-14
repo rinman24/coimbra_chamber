@@ -10,14 +10,14 @@ from CoolProp.HumidAirProp import HAPropsSI
 from scipy.stats import chi2
 from uncertainties import ufloat
 
-from chamber.access.experiment.service import ExperimentAccess
-from chamber.access.experiment.contracts import FitSpec
+from coimbra_chamber.access.experiment.service import ExperimentAccess
+from coimbra_chamber.access.experiment.contracts import FitSpec
 
-from chamber.utility.io.contracts import Prompt
-from chamber.utility.io.service import IOUtility
+from coimbra_chamber.utility.io.contracts import Prompt
+from coimbra_chamber.utility.io.service import IOUtility
 
-from chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
-from chamber.utility.plot.service import PlotUtility
+from coimbra_chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
+from coimbra_chamber.utility.plot.service import PlotUtility
 
 
 class AnalysisEngine(object):

@@ -3,7 +3,7 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import chamber as cc
+import coimbra_chamber as cc
 
 
 def test_successful_run(tube_spec, monkeypatch):  # noqa: D103

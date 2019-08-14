@@ -8,10 +8,10 @@ import pandas as pd
 import pytest
 from uncertainties import ufloat
 
-from chamber.access.experiment.contracts import FitSpec
+from coimbra_chamber.access.experiment.contracts import FitSpec
 
-from chamber.utility.io.contracts import Prompt
-from chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
+from coimbra_chamber.utility.io.contracts import Prompt
+from coimbra_chamber.utility.plot.contracts import Axis, DataSeries, Layout, Plot
 
 
 # ----------------------------------------------------------------------------

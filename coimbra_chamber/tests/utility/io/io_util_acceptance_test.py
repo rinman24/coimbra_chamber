@@ -2,8 +2,8 @@
 
 import dacite
 
-from chamber.utility.io.service import IOUtility
-from chamber.utility.io.contracts import Prompt
+from coimbra_chamber.utility.io.service import IOUtility
+from coimbra_chamber.utility.io.contracts import Prompt
 
 # ----------------------------------------------------------------------------
 # Acceptance tests

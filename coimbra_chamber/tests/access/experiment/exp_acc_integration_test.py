@@ -11,17 +11,17 @@ from pandas import DataFrame
 from pytz import utc
 from sqlalchemy import and_
 
-from chamber.access.experiment.contracts import TemperatureSpec
-from chamber.access.experiment.models import (
+from coimbra_chamber.access.experiment.contracts import TemperatureSpec
+from coimbra_chamber.access.experiment.models import (
     Experiment,
     Fit,
     Observation,
     Tube,
     Setting,
     Temperature)
-from chamber.access.experiment.service import ExperimentAccess
+from coimbra_chamber.access.experiment.service import ExperimentAccess
 
-from chamber.tests.conftest import tdms_path
+from coimbra_chamber.tests.conftest import tdms_path
 
 
 # ----------------------------------------------------------------------------

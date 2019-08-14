@@ -11,7 +11,7 @@ import dacite
 import pytest
 from nptdms import TdmsFile
 
-from chamber.access.experiment.contracts import (
+from coimbra_chamber.access.experiment.contracts import (
     DataSpec,
     ExperimentSpec,
     FitSpec,
@@ -19,11 +19,11 @@ from chamber.access.experiment.contracts import (
     TubeSpec,
     SettingSpec,
     TemperatureSpec)
-from chamber.access.experiment.service import ExperimentAccess
+from coimbra_chamber.access.experiment.service import ExperimentAccess
 
-from chamber.engine.analysis.service import AnalysisEngine
+from coimbra_chamber.engine.analysis.service import AnalysisEngine
 
-from chamber.utility.plot.contracts import (
+from coimbra_chamber.utility.plot.contracts import (
     Axis,
     DataSeries,
     Layout,

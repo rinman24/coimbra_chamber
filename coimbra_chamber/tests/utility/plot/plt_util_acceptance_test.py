@@ -5,12 +5,12 @@ import dataclasses
 import dacite
 import pytest
 
-from chamber.utility.plot.contracts import (
+from coimbra_chamber.utility.plot.contracts import (
     Axis,
     DataSeries,
     Layout,
     Plot)
-from chamber.utility.plot.service import PlotUtility
+from coimbra_chamber.utility.plot.service import PlotUtility
 
 
 # ----------------------------------------------------------------------------

@@ -8,7 +8,7 @@ from nptdms import TdmsFile
 from sqlalchemy import and_, create_engine, func
 from sqlalchemy.orm import sessionmaker
 
-from chamber.access.experiment.models import (
+from coimbra_chamber.access.experiment.models import (
     Base,
     Experiment,
     Fit,
@@ -16,20 +16,20 @@ from chamber.access.experiment.models import (
     Tube,
     Setting,
     Temperature)
-from chamber.access.experiment.contracts import (
+from coimbra_chamber.access.experiment.contracts import (
     DataSpec,
     ExperimentSpec,
     ObservationSpec,
     SettingSpec,
     TemperatureSpec)
 
-from chamber.utility.plot.contracts import (
+from coimbra_chamber.utility.plot.contracts import (
     Axis,
     DataSeries,
     Layout,
     Plot)
 
-import chamber.ifx.configuration as config
+import coimbra_chamber.ifx.configuration as config
 
 
 class ExperimentAccess(object):

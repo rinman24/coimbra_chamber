@@ -3,10 +3,10 @@
 import dacite
 from pathlib import Path
 
-from chamber.access.experiment.contracts import (
+from coimbra_chamber.access.experiment.contracts import (
     FitSpec
 )
-from chamber.access.experiment.models import (
+from coimbra_chamber.access.experiment.models import (
     Fit
 )
 
