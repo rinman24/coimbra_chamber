@@ -66,10 +66,10 @@ Preferred Way to Run Tests
 
 Back to `Table of Contents`_
 
-1. From the repo directory; i.e., chamber
+1. From the repo directory; i.e., coimbra_chamber
 .. code-block:: bash
 
-    $ python -m pytest tests -xv  --cov=chamber --cov-report html tests
+    $ python -m pytest tests -xv  --cov=coimbra_chamber --cov-report html tests
 
 The above line requires both `pytest` and `pytest-cov` are installed.
 

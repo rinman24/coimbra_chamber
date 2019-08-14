@@ -258,10 +258,16 @@ class Fit(Base):
     nu = Column(Float, nullable=False)
     sig_nu = Column(Float, nullable=False)
     ShR = Column(Float, nullable=False)
+    sig_ShR = Column(Float, nullable=False)
     NuR = Column(Float, nullable=False)
+    sig_NuR = Column(Float, nullable=False)
     Le = Column(Float, nullable=False)
+    sig_Le = Column(Float, nullable=False)
     GrR_binary = Column(Float, nullable=False)
+    sig_GrR_binary = Column(Float, nullable=False)
     GrR_primary = Column(Float, nullable=False)
+    sig_GrR_primary = Column(Float, nullable=False)
+
 
     # Composite foreign keys
     idx = Column(Integer, primary_key=True)

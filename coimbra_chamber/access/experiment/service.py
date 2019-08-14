@@ -57,7 +57,7 @@ class ExperimentAccess(object):
 
         # Create the schema if it doesn't exist (MySQL only)
         if database_type.lower() == 'mysql':  # pragma: no cover
-            self._schema = 'inman'
+            self._schema = 'chamber'
             self._engine.execute(
                 f'CREATE DATABASE IF NOT EXISTS `{self._schema}`;')
             self._engine.execute(f'USE `{self._schema}`;')
@@ -106,7 +106,7 @@ class ExperimentAccess(object):
 
         Parameters
         ----------
-        data_specs : list of chamber.access.experiment.contracts.DataSpec
+        data_specs : list of coimbra_chamber.access.experiment.contracts.DataSpec
             All observations for a given experiment.
 
         Returns
@@ -284,7 +284,7 @@ class ExperimentAccess(object):
 
         Parameters
         ----------
-        fit_spec : chamber.access.experiment.contracts.FitSpec
+        fit_spec : coimbra_chamber.access.experiment.contracts.FitSpec
             Parameters for a given fit.
 
         Returns
@@ -400,10 +400,15 @@ class ExperimentAccess(object):
                     nu=fit_spec.nu,
                     sig_nu=fit_spec.sig_nu,
                     ShR=fit_spec.ShR,
+                    sig_ShR=fit_spec.sig_ShR,
                     NuR=fit_spec.NuR,
+                    sig_NuR=fit_spec.sig_NuR,
                     Le=fit_spec.Le,
+                    sig_Le=fit_spec.sig_Le,
                     GrR_binary=fit_spec.GrR_binary,
+                    sig_GrR_binary=fit_spec.sig_GrR_binary,
                     GrR_primary=fit_spec.GrR_primary,
+                    sig_GrR_primary=fit_spec.sig_GrR_primary,
                 )
                 session.add(fit_to_add)
                 session.commit()
