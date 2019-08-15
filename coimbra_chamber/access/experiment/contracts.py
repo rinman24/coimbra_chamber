@@ -159,3 +159,13 @@ class FitSpec:
     sig_mu: float
     nu: float
     sig_nu: float
+    ShR: float
+    sig_ShR: float
+    NuR: float
+    sig_NuR: float
+    Le: float
+    sig_Le: float
+    GrR_binary: float
+    sig_GrR_binary: float
+    GrR_primary: float
+    sig_GrR_primary: float

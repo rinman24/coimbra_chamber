@@ -8,12 +8,12 @@ setup(
     author='Rich H. Inman',
     author_email='rinman24@gmail.com',
     packages=[
-        'chamber.access',
-        'chamber.engine',
-        'chamber.ifx',
-        'chamber.manager'
+        'coimbra_chamber.access',
+        'coimbra_chamber.engine',
+        'coimbra_chamber.ifx',
+        'coimbra_chamber.manager'
         ],
-    url='https://github.com/rinman24/inman_phd',
+    url='https://github.com/rinman24/coimbra_chamber',
     license='LICENSE.txt',
     description=(
         'Python programs for Rich Inman\'s PhD work involving the Coimbra '

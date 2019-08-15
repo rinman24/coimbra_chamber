@@ -231,7 +231,7 @@ def mock_ols_fit(monkeypatch):
         ]
     fit = MagicMock(side_effect=return_values)
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._ols_fit',
+        'coimbra_chamber.engine.analysis.service.AnalysisEngine._ols_fit',
         fit)
     return fit
 
@@ -255,7 +255,7 @@ def mock_evaluate_fit(monkeypatch):
 
     # Patch
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._evaluate_fit',
+        'coimbra_chamber.engine.analysis.service.AnalysisEngine._evaluate_fit',
         evaluate_fit)
 
     return evaluate_fit
@@ -275,7 +275,7 @@ def mock_get_best_local_fit(monkeypatch):
     get_best_local_fit = MagicMock(side_effect=fits)
 
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._get_best_local_fit',
+        'coimbra_chamber.engine.analysis.service.AnalysisEngine._get_best_local_fit',
         get_best_local_fit)
 
     return get_best_local_fit
@@ -287,32 +287,32 @@ def mock_engine(monkeypatch):
     engine = MagicMock()
 
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._get_observations',
+        'coimbra_chamber.engine.analysis.service.AnalysisEngine._get_observations',
         engine._get_observations)
 
     engine._layout_observations = MagicMock(return_value='test_layout')
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._layout_observations',
+        'coimbra_chamber.engine.analysis.service.AnalysisEngine._layout_observations',
         engine._layout_observations)
 
     monkeypatch.setattr(
-        'chamber.utility.plot.service.PlotUtility.plot',
+        'coimbra_chamber.utility.plot.service.PlotUtility.plot',
         engine._plot_util.plot)
 
     monkeypatch.setattr(
-        'chamber.utility.io.service.IOUtility.get_input',
+        'coimbra_chamber.utility.io.service.IOUtility.get_input',
         engine._io_util.get_input)
 
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._get_fits',
+        'coimbra_chamber.engine.analysis.service.AnalysisEngine._get_fits',
         engine._get_fits)
 
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._persist_fits',
+        'coimbra_chamber.engine.analysis.service.AnalysisEngine._persist_fits',
         engine._persist_fits)
 
     monkeypatch.setattr(
-        'chamber.utility.plot.service.PlotUtility.plot',
+        'coimbra_chamber.utility.plot.service.PlotUtility.plot',
         engine._plot)
 
     return engine
@@ -448,15 +448,15 @@ def test_process_fits(anlys_eng, data_spec, mock_engine, monkeypatch):  # noqa: 
     # Arrange ----------------------------------------------------------------
     # Add extra mock calls
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._filter_observations',
+        'coimbra_chamber.engine.analysis.service.AnalysisEngine._filter_observations',
         mock_engine._filter_observations)
 
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._get_fits',
+        'coimbra_chamber.engine.analysis.service.AnalysisEngine._get_fits',
         mock_engine._get_fits)
 
     monkeypatch.setattr(
-        'chamber.engine.analysis.service.AnalysisEngine._persist_fits',
+        'coimbra_chamber.engine.analysis.service.AnalysisEngine._persist_fits',
         mock_engine._persist_fits)
 
     anlys_eng._data = data_spec

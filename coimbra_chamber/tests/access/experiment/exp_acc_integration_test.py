@@ -533,6 +533,16 @@ def test_add_fit_that_does_not_exist(exp_acc, fit_spec):  # noqa: D103
         assert result.sig_nu == 42.1
         assert result.gamma2 == 43
         assert result.sig_gamma2 == 43.1
+        assert result.ShR == 44.0
+        assert result.sig_ShR == 44.1
+        assert result.NuR == 45.0
+        assert result.sig_NuR == 45.1
+        assert result.Le == 46.0
+        assert result.sig_Le == 46.1
+        assert result.GrR_binary == 47.0
+        assert result.sig_GrR_binary == 47.1
+        assert result.GrR_primary == 48.0
+        assert result.sig_GrR_primary == 48.1
     finally:
         session.close()
 

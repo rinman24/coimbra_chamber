@@ -13,13 +13,13 @@ coverage:
     changes: no
 
 ignore:
-    - "chamber/tests/**"
-    - "chamber/ifx/**"
+    - "coimbra_chamber/tests/**"
+    - "coimbra_chamber/ifx/**"
     - "**/contracts.py"
     - "**/models.py"
     - "setup.py"
     - "**/__init__.py"
-    - "chamber/util/**"
+    - "coimbra_chamber/util/**"
 
 parsers:
   gcov:

@@ -26,7 +26,7 @@ def get_value(key, section='DEFAULT'):
 
     Examples
     --------
-    >>> import chamber.ifx.configuration as config
+    >>> import coimbra_chamber.ifx.configuration as config
     >>> config.get_value('user', 'MySQL-Server')
     'root'
 

@@ -33,7 +33,7 @@ from coimbra_chamber.utility.plot.contracts import (
 # Constants
 
 
-tdms_path = Path('chamber/tests/access/experiment/test_1.tdms')
+tdms_path = Path('coimbra_chamber/tests/access/experiment/test_1.tdms')
 
 
 # ----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ def mock_io_util(monkeypatch):
     util = MagicMock()
 
     monkeypatch.setattr(
-        'chamber.utility.io.service.IOUtility.get_input',
+        'coimbra_chamber.utility.io.service.IOUtility.get_input',
         util.get_input
     )
 
@@ -75,20 +75,20 @@ def anlys_eng(exp_acc, monkeypatch):
     # instance of ExperimentAccess mocked to return a previously serialized
     # instance of a DataSpec dataclass. This dramatically speeds up loading
     # the data for testing.
-    path = Path('chamber/tests/access/experiment/sample_data')
+    path = Path('coimbra_chamber/tests/access/experiment/sample_data.pkl')
     with open(path, 'rb') as stream:
         data = pickle.load(stream)
     # Now that we have data, we want to make a mock that will return it.
     mock_get_raw_data = MagicMock(return_value=data)
     monkeypatch.setattr(
-        'chamber.access.experiment.service.ExperimentAccess.get_raw_data',
+        'coimbra_chamber.access.experiment.service.ExperimentAccess.get_raw_data',
         mock_get_raw_data)
 
     # This instance also has the plot method of its instance of PlotUtility
     # mocked to return and do nothing.
     mock_plot = MagicMock()
     monkeypatch.setattr(
-        'chamber.utility.plot.service.PlotUtility.plot',
+        'coimbra_chamber.utility.plot.service.PlotUtility.plot',
         mock_plot)
 
     return engine
@@ -430,6 +430,16 @@ def fit_spec():
         sig_nu=42.1,
         gamma2=43.0,
         sig_gamma2=43.1,
+        ShR=44.0,
+        sig_ShR=44.1,
+        NuR=45.0,
+        sig_NuR=45.1,
+        Le=46.0,
+        sig_Le=46.1,
+        GrR_binary=47.0,
+        sig_GrR_binary=47.1,
+        GrR_primary=48.0,
+        sig_GrR_primary=48.1,
     )
     fit_spec = dacite.from_dict(FitSpec, data)
     return fit_spec

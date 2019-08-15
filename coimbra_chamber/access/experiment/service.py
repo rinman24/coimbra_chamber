@@ -106,7 +106,7 @@ class ExperimentAccess(object):
 
         Parameters
         ----------
-        data_specs : list of chamber.access.experiment.contracts.DataSpec
+        data_specs : list of coimbra_chamber.access.experiment.contracts.DataSpec
             All observations for a given experiment.
 
         Returns
@@ -284,7 +284,7 @@ class ExperimentAccess(object):
 
         Parameters
         ----------
-        fit_spec : chamber.access.experiment.contracts.FitSpec
+        fit_spec : coimbra_chamber.access.experiment.contracts.FitSpec
             Parameters for a given fit.
 
         Returns
@@ -399,6 +399,16 @@ class ExperimentAccess(object):
                     sig_mu=fit_spec.sig_mu,
                     nu=fit_spec.nu,
                     sig_nu=fit_spec.sig_nu,
+                    ShR=fit_spec.ShR,
+                    sig_ShR=fit_spec.sig_ShR,
+                    NuR=fit_spec.NuR,
+                    sig_NuR=fit_spec.sig_NuR,
+                    Le=fit_spec.Le,
+                    sig_Le=fit_spec.sig_Le,
+                    GrR_binary=fit_spec.GrR_binary,
+                    sig_GrR_binary=fit_spec.sig_GrR_binary,
+                    GrR_primary=fit_spec.GrR_primary,
+                    sig_GrR_primary=fit_spec.sig_GrR_primary,
                 )
                 session.add(fit_to_add)
                 session.commit()
