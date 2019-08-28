@@ -18,7 +18,7 @@ class DataManager(object):
 
     _confirm_acceptable_data_prompt = dacite.from_dict(
         Prompt,
-        dict(messages=['Would you like to continue [y]/n: ']))
+        dict(messages=['Would you like to continue? [y]/n: ']))
 
     def __init__(self):
         """Constructor."""
