@@ -744,15 +744,15 @@ def test_filter_observations(anlys_eng, observations, mock_engine):  # noqa: D10
     expected_obs = observations.copy().iloc[1: 2+1, :].reset_index(drop=True)
     # Calls
     expected_calls = [
-        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter?: [c]/f'])),
+        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter? [c]/f: '])),
         call._io_util.get_input(Prompt(messages=['Enter lower index (int): ', 'Enter upper index (int): '])),
         call._layout_observations(),
         call._plot('test_layout'),
-        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter?: [c]/f'])),
+        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter? [c]/f: '])),
         call._io_util.get_input(Prompt(messages=['Enter lower index (int): ', 'Enter upper index (int): '])),
         call._layout_observations(),
         call._plot('test_layout'),
-        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter?: [c]/f'])),
+        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter? [c]/f: '])),
     ]
     # Mock io_util side effects
     mock_engine._io_util.get_input.side_effect = [

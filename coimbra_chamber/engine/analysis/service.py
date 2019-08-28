@@ -25,7 +25,7 @@ class AnalysisEngine(object):
 
     _confirm_selection_prompt = dacite.from_dict(
         Prompt,
-        dict(messages=['Would you like to continue or filter?: [c]/f'])
+        dict(messages=['Would you like to continue or filter? [c]/f: '])
     )
     _filter_observations_prompt = dacite.from_dict(
         Prompt,
@@ -299,6 +299,8 @@ class AnalysisEngine(object):
                     flag = True
 
     def _filter_observations(self):
+        self._layout_observations()
+        self._plot_util.plot(self._layout)
         done = False
         while not done:
             self._ask_to_continue_or_filter()
