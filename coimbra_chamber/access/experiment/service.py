@@ -21,19 +21,41 @@ from coimbra_chamber.access.experiment.contracts import (
     ExperimentSpec,
     ObservationSpec,
     SettingSpec,
-    TemperatureSpec)
-
+    TemperatureSpec,
+    TubeSpec)
+from coimbra_chamber.utility.io.contracts import Prompt
+from coimbra_chamber.utility.io.service import IOUtility
 from coimbra_chamber.utility.plot.contracts import (
     Axis,
     DataSeries,
     Layout,
     Plot)
-
 import coimbra_chamber.ifx.configuration as config
 
 
 class ExperimentAccess(object):
     """Experiment access."""
+
+    _inner_diameter_prompt = dacite.from_dict(
+        Prompt,
+        dict(messages=["Enter the tube's inner diameter in meters: "])
+    )
+    _outer_diameter_prompt = dacite.from_dict(
+        Prompt,
+        dict(messages=["Enter the tube's outer diameter in meters: "])
+    )
+    _inner_height_prompt = dacite.from_dict(
+        Prompt,
+        dict(messages=["Enter the tube's inner height in meters: "])
+    )
+    _mass_prompt = dacite.from_dict(
+        Prompt,
+        dict(messages=["Enter the tube's mass in kilograms: "])
+    )
+    _material_prompt = dacite.from_dict(
+        Prompt,
+        dict(messages=["Enter the tube's material: "])
+    )
 
     # ------------------------------------------------------------------------
     # Constructors
@@ -57,7 +79,7 @@ class ExperimentAccess(object):
 
         # Create the schema if it doesn't exist (MySQL only)
         if database_type.lower() == 'mysql':  # pragma: no cover
-            self._schema = 'chamber'
+            self._schema = 'inman_testing'
             self._engine.execute(
                 f'CREATE DATABASE IF NOT EXISTS `{self._schema}`;')
             self._engine.execute(f'USE `{self._schema}`;')
@@ -67,6 +89,9 @@ class ExperimentAccess(object):
 
         # Session factory
         self.Session = sessionmaker(bind=self._engine)
+
+        # IOUtility
+        self._io_util = IOUtility()
 
     # ------------------------------------------------------------------------
     # Public methods: included in the API
@@ -149,8 +174,9 @@ class ExperimentAccess(object):
                 'You must add your tube to the database: '
                 f'tube_id `{tube_id}` does not exist.')
             print(err_msg)
-            return
-        else:
+            # Prompt the user to input the tube data.
+            self.add_tube()
+        finally:
             # The tube is there so we can call the other functions
             setting_id = self._add_setting(data_specs.setting)
             experiment_id = self._add_experiment(data_specs.experiment, setting_id)
@@ -162,9 +188,8 @@ class ExperimentAccess(object):
                 experiment_id=experiment_id,
                 observations=observations_dict['observations'],
                 temperatures=observations_dict['temperatures'])
-            return result
-        finally:
             session.close()
+            return result
 
     def layout_raw_data(self, data_specs):
         """
@@ -420,6 +445,11 @@ class ExperimentAccess(object):
         finally:
             session.close()
 
+    def add_tube(self):
+        """TODO."""
+        self._get_tube_spec()
+        self._add_tube(self._tube_spec)
+
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API
 
@@ -489,8 +519,7 @@ class ExperimentAccess(object):
         return dacite.from_dict(SettingSpec, data)
 
     def _add_tube(self, tube_spec):
-        session = self.Session()
-
+        session = self.Session()        
         try:
             # Check if tube exists
             query = session.query(Tube.tube_id).filter(
@@ -645,3 +674,61 @@ class ExperimentAccess(object):
         Base.metadata.drop_all(self._engine)
         # Dispose of the engine
         self._engine.dispose()
+
+    def _get_tube_spec(self):
+        # Inner diameter
+        flag = False
+        while not flag:
+            response = self._io_util.get_input(self._inner_diameter_prompt)
+            response = response[0]
+            try:
+                inner_diameter = float(response)
+            except ValueError:
+                print("You must input a numerical value for the tube's inner diameter.")
+            else:
+                flag = True
+        # Outer diameter
+        flag = False
+        while not flag:
+            response = self._io_util.get_input(self._outer_diameter_prompt)
+            response = response[0]
+            try:
+                outer_diameter = float(response)
+            except ValueError:
+                print("You must input a numerical value for the tube's outer diameter.")
+            else:
+                flag = True
+        # Inner height
+        flag = False
+        while not flag:
+            response = self._io_util.get_input(self._inner_height_prompt)
+            response = response[0]
+            try:
+                inner_height = float(response)
+            except ValueError:
+                print("You must input a numerical value for the tube's inner height.")
+            else:
+                flag = True
+        # Mass
+        flag = False
+        while not flag:
+            response = self._io_util.get_input(self._mass_prompt)
+            response = response[0]
+            try:
+                mass = float(response)
+            except ValueError:
+                print("You must input a numerical value for the tube's mass.")
+            else:
+                flag = True
+        # Material: always a string.
+        response = self._io_util.get_input(self._material_prompt)
+        material = response[0]
+        # Construct the TubeSpec dataclass
+        data = dict(
+            inner_diameter=Decimal(inner_diameter),
+            outer_diameter=Decimal(outer_diameter),
+            height=Decimal(inner_height),
+            mass=Decimal(mass),
+            material=material,
+        )
+        self._tube_spec = dacite.from_dict(TubeSpec, data)
