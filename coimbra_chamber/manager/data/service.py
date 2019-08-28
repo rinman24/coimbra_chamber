@@ -30,7 +30,7 @@ class DataManager(object):
     # Public methods: included in the API
 
     def run(self):
-        """TODO: Docstring."""
+        """Run an analysis for a given experiment."""
         try:
             self._add_data()
             self._anlys_eng.process_fits(self._raw_data)
