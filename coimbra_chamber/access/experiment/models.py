@@ -268,7 +268,6 @@ class Fit(Base):
     GrR_primary = Column(Float, nullable=False)
     sig_GrR_primary = Column(Float, nullable=False)
 
-
     # Composite foreign keys
     idx = Column(Integer, primary_key=True)
     experiment_id = Column(Integer, primary_key=True)

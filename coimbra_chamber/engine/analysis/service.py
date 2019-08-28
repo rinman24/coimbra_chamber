@@ -21,7 +21,7 @@ from coimbra_chamber.utility.plot.service import PlotUtility
 
 
 class AnalysisEngine(object):
-    """TODO: docstring."""
+    """Encapsulate all aspects of analysis."""
 
     _confirm_selection_prompt = dacite.from_dict(
         Prompt,
@@ -34,7 +34,6 @@ class AnalysisEngine(object):
     )
 
     def __init__(self, experiment_id):
-        """TODO: docstring."""
         self._experiment_id = experiment_id
 
         self._exp_acc = ExperimentAccess()
@@ -51,7 +50,7 @@ class AnalysisEngine(object):
         self._a = ufloat(-2.34, 0.07)
         self._b = ufloat(1.0445, 0.0022)
 
-        # Tube radius; TODO: move to access method to obtain dynamically.
+        # Tube radius
         self._R = ufloat(0.015, 0.0001)
         self._A = pi*self._R**2
         self._M1 = 18.015
@@ -77,7 +76,14 @@ class AnalysisEngine(object):
     # Public methods: included in the API
 
     def process_fits(self, data):
-        """TODO: docstring."""
+        """
+        Process fits from data.
+        
+        Parameters
+        ----------
+        data : comimbra_chamber.access.experiment.contracts.DataSpec.
+
+        """
         self._data = data
         self._get_observations()
         self._filter_observations()

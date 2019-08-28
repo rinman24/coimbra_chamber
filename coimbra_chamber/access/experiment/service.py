@@ -446,7 +446,7 @@ class ExperimentAccess(object):
             session.close()
 
     def add_tube(self):
-        """TODO."""
+        """Add a tube to the database."""
         self._get_tube_spec()
         self._add_tube(self._tube_spec)
 
