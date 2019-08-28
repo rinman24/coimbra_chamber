@@ -39,6 +39,7 @@ class DataManager(object):
             self._success = False
         else:
             self._success = True
+            print('Successfully completed analysis and persisted data.')
 
     # ------------------------------------------------------------------------
     # Internal methods: not included in the API

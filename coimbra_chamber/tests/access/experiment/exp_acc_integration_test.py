@@ -3,6 +3,7 @@
 import dataclasses
 import datetime
 from decimal import Decimal
+from unittest.mock import MagicMock
 
 import dacite
 import pytest
@@ -205,15 +206,23 @@ def test_add_observations_that_already_exist(exp_acc, observation_spec):  # noqa
 # add_raw_data ---------------------------------------------------------------
 
 
-@pytest.mark.parametrize('tube_id', [1, 999])
-def test_add_raw_data(exp_acc, data_spec, tube_id):  # noqa: D103
+@pytest.mark.parametrize('tube_id', [1, 2])
+def test_add_raw_data(exp_acc, data_spec, tube_id, monkeypatch):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # NOTE: The tests above have already added the this to the database for
-    # tube_id == 1, but not for tube_id == 999.
+    # tube_id == 1, but not for tube_id == 2.
     changes = dict(tube_id=tube_id)
     experimental_spec = dataclasses.replace(data_spec.experiment, **changes)
     changes = dict(experiment=experimental_spec)
     data_spec = dataclasses.replace(data_spec, **changes)
+    # If the tube_id == 2, then we want to ask the user for that info.
+    # This requires a mock.
+    user_input = [['0.1111'], ['0.2222'], ['0.3333'], ['0.4444'],
+                  ['test_material']]
+    mock_io = MagicMock(side_effect=user_input)
+    monkeypatch.setattr(
+        'coimbra_chamber.utility.io.service.IOUtility.get_input',
+        mock_io)
     # Act --------------------------------------------------------------------
     result = exp_acc.add_raw_data(data_spec)
     # Assert -----------------------------------------------------------------
@@ -224,8 +233,11 @@ def test_add_raw_data(exp_acc, data_spec, tube_id):  # noqa: D103
         assert result['observations'] == 2
         assert result['temperatures'] == 6
     else:
-        assert not result
-
+        assert result['tube_id'] == 2
+        assert result['setting_id'] == 1
+        assert result['experiment_id'] == 1
+        assert result['observations'] == 2
+        assert result['temperatures'] == 6
 
 # connect --------------------------------------------------------------------
 
