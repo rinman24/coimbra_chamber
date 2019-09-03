@@ -1,5 +1,5 @@
-UCSD Coimbra Chamber
-====================
+Coimbra Chamber
+===============
 
 |build| |codecov| |license|
 
@@ -9,6 +9,7 @@ Table of Contents
 -----------------
 
   * `Description`_
+  * `Getting Started`_
   * `Python Version`_
   * `MySQL Database`_
   * `Preferred Way to Run Tests`_
@@ -20,6 +21,28 @@ Description
 Back to `Table of Contents`_
 
 Description will go here.
+
+Installation
+------------
+
+Run the following to install:
+
+.. code-block:: bash
+
+    $ pip install coimbra_chamber
+
+Getting Started
+---------------
+
+Back to `Table of Contents`_
+
+Run an analysis:
+
+.. code-block:: python
+
+    >>> import coimbra_chamber as cc
+    >>> manager = cc.DataManager()
+    >>> manager.run()
 
 The host, username, and password used to acces the server are all stored in
 config.ini in the root of the repository. Make sure to edit this file so that

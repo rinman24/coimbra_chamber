@@ -1,0 +1,10 @@
+include *.lock
+include *.txt
+include *.yml
+include Pipfile
+include example_config.ini
+recursive-include coimbra_chamber *.pkl
+recursive-include coimbra_chamber *.py
+recursive-include coimbra_chamber *.tdms
+recursive-include images *.jpg
+recursive-include images *.png

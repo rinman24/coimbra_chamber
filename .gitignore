@@ -42,3 +42,10 @@
 ##########
 config.ini
 config_server.ini
+
+########
+# pypi #
+########
+*.egg-info
+*build
+*dist
