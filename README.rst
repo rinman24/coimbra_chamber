@@ -9,6 +9,7 @@ Table of Contents
 -----------------
 
   * `Description`_
+  * `Installation`_
   * `Getting Started`_
   * `Python Version`_
   * `MySQL Database`_
@@ -36,7 +37,17 @@ Getting Started
 
 Back to `Table of Contents`_
 
-Run an analysis:
+We must configure our database before running any analysis:
+
+First, we must decide if we want to use an in-memory SQLite database or point to an instance of a MySQL database.
+Then we need to create a config file in our working directory to reflect our configuration.
+
+Create a copy of the file `example-config.ini` from the repository and rename it to `config.ini`.
+Move the `config.ini` file that we just created into your working directory and open the file.
+Change database_type to `memory` if we chose an in-memory database above.
+Otherwise, leave the database_type as `MySQL` and replace the `host`, `user`, and `password` fields with the host, username, and password for MySQL database we choose.
+
+Then, to run an analysis:
 
 .. code-block:: python
 
@@ -44,15 +55,7 @@ Run an analysis:
     >>> manager = cc.DataManager()
     >>> manager.run()
 
-The host, username, and password used to acces the server are all stored in
-config.ini in the root of the repository. Make sure to edit this file so that
-it contains your information.
-::
-
-  [MySQL-Server]
-  host = your-host
-  user = your-username
-  password = your-password
+Follow the prompts in the terminal to complete your analysis.
 
 Python Version
 --------------
