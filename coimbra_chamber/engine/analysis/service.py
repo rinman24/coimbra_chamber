@@ -78,7 +78,7 @@ class AnalysisEngine(object):
     def process_fits(self, data):
         """
         Process fits from data.
-        
+
         Parameters
         ----------
         data : comimbra_chamber.access.experiment.contracts.DataSpec.
@@ -647,6 +647,7 @@ class AnalysisEngine(object):
             Delta_T=Delta_T,
             mu=mu,
             nu=nu,
+            Ts=Ts,
         )
 
         # Update this fit

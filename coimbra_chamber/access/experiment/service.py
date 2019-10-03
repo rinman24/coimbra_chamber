@@ -79,7 +79,7 @@ class ExperimentAccess(object):
 
         # Create the schema if it doesn't exist (MySQL only)
         if database_type.lower() == 'mysql':  # pragma: no cover
-            self._schema = 'inman-all'
+            self._schema = 'chamber'
             self._engine.execute(
                 f'CREATE DATABASE IF NOT EXISTS `{self._schema}`;')
             self._engine.execute(f'USE `{self._schema}`;')
@@ -434,6 +434,8 @@ class ExperimentAccess(object):
                     sig_GrR_binary=fit_spec.sig_GrR_binary,
                     GrR_primary=fit_spec.GrR_primary,
                     sig_GrR_primary=fit_spec.sig_GrR_primary,
+                    Ts=fit_spec.Ts,
+                    sig_Ts=fit_spec.sig_Ts,
                 )
                 session.add(fit_to_add)
                 session.commit()

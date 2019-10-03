@@ -82,6 +82,7 @@ def test_persist_fits(
         Le=49.0, sig_Le=49.1,
         GrR_binary=50.0, sig_GrR_binary=50.1,
         GrR_primary=51.0, sig_GrR_primary=51.1,
+        Ts=52.0, sig_Ts=52.1,
     )
     fits_to_add.append(fit)
     # Now the second one
@@ -134,6 +135,7 @@ def test_persist_fits(
         Le=549.0, sig_Le=549.1,
         GrR_binary=550.0, sig_GrR_binary=550.1,
         GrR_primary=551.0, sig_GrR_primary=551.1,
+        Ts=552.0, sig_Ts=552.1,
     )
     fits_to_add.append(fit)
     anlys_eng._fits = fits_to_add
@@ -238,6 +240,8 @@ def test_persist_fits(
                 assert fit.sig_GrR_binary == 50.1
                 assert fit.GrR_primary == 51.0
                 assert fit.sig_GrR_primary == 51.1
+                assert fit.Ts == 52.0
+                assert fit.sig_Ts == 52.1
             elif fit.idx == 1:
                 assert fit.a == 0.11
                 assert fit.sig_a == 0.011
@@ -327,6 +331,8 @@ def test_persist_fits(
                 assert fit.sig_GrR_binary == 550.1
                 assert fit.GrR_primary == 551.0
                 assert fit.sig_GrR_primary == 551.1
+                assert fit.Ts == 552.0
+                assert fit.sig_Ts == 552.1
     finally:
         session.close()
 

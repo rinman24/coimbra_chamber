@@ -169,3 +169,5 @@ class FitSpec:
     sig_GrR_binary: float
     GrR_primary: float
     sig_GrR_primary: float
+    Ts: float
+    sig_Ts: float

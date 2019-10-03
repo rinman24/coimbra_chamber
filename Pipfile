@@ -11,6 +11,8 @@ pytest = "*"
 pytest-cov = "*"
 check-manifest = "*"
 twine = "*"
+seaborn = "*"
+jupyter = "*"
 
 [packages]
 dacite = "*"
@@ -23,6 +25,7 @@ uncertainties = "*"
 coolprop = "*"
 nptdms = "*"
 sqlalchemy = "*"
+coimbra-chamber = {editable = true,path = "."}
 
 [requires]
 python_version = "3.7"
