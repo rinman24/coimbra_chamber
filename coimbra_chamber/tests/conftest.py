@@ -440,6 +440,8 @@ def fit_spec():
         sig_GrR_binary=47.1,
         GrR_primary=48.0,
         sig_GrR_primary=48.1,
+        Ts=49.0,
+        sig_Ts=49.1,
     )
     fit_spec = dacite.from_dict(FitSpec, data)
     return fit_spec

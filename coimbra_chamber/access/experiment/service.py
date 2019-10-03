@@ -434,6 +434,8 @@ class ExperimentAccess(object):
                     sig_GrR_binary=fit_spec.sig_GrR_binary,
                     GrR_primary=fit_spec.GrR_primary,
                     sig_GrR_primary=fit_spec.sig_GrR_primary,
+                    Ts=fit_spec.Ts,
+                    sig_Ts=fit_spec.sig_Ts,
                 )
                 session.add(fit_to_add)
                 session.commit()

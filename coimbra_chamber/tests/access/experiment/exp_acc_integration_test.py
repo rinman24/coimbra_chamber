@@ -555,6 +555,8 @@ def test_add_fit_that_does_not_exist(exp_acc, fit_spec):  # noqa: D103
         assert result.sig_GrR_binary == 47.1
         assert result.GrR_primary == 48.0
         assert result.sig_GrR_primary == 48.1
+        assert result.Ts == 49.0
+        assert result.sig_Ts == 49.1
     finally:
         session.close()
 

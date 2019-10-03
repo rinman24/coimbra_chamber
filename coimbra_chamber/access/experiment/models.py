@@ -267,6 +267,8 @@ class Fit(Base):
     sig_GrR_binary = Column(Float, nullable=False)
     GrR_primary = Column(Float, nullable=False)
     sig_GrR_primary = Column(Float, nullable=False)
+    Ts = Column(Float, nullable=False)
+    sig_Ts = Column(Float, nullable=False)
 
     # Composite foreign keys
     idx = Column(Integer, primary_key=True)
