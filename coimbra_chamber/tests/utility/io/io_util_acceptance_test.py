@@ -19,7 +19,7 @@ def test_can_get_single_input():  # noqa: D103
     print(response)
 
 
-def test_can_get_souble_input():  # noqa: D103
+def test_can_get_double_input():  # noqa: D103
     # Arrange ----------------------------------------------------------------
     io_util = IOUtility()
     data = dict(messages=['Lower limit on index:', 'Upper limit on index:'])

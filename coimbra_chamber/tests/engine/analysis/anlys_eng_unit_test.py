@@ -447,9 +447,6 @@ def test_get_best_local_fit_stops_with_correct_error(
 def test_process_fits(anlys_eng, data_spec, mock_engine, monkeypatch):  # noqa: D103
     # Arrange ----------------------------------------------------------------
     # Add extra mock calls
-    monkeypatch.setattr(
-        'coimbra_chamber.engine.analysis.service.AnalysisEngine._filter_observations',
-        mock_engine._filter_observations)
 
     monkeypatch.setattr(
         'coimbra_chamber.engine.analysis.service.AnalysisEngine._get_fits',
@@ -462,7 +459,6 @@ def test_process_fits(anlys_eng, data_spec, mock_engine, monkeypatch):  # noqa: 
     anlys_eng._data = data_spec
     expected_calls = [
         call._get_observations(),
-        call._filter_observations(),
         call._get_fits(),
         call._persist_fits(),
     ]
@@ -693,78 +689,6 @@ def test_set_nondim_groups(anlys_eng, sample):  # noqa: D103
     assert isclose(result['sig_Le'], 0.001321978489, **TOL)
     assert isclose(result['sig_GrR_binary'], 128.377472, **TOL)
     assert isclose(result['sig_GrR_primary'], 127.9778022, **TOL)
-
-
-def test_get_bounds_to_filter(anlys_eng, mock_io_util):  # noqa: D103
-    # Arrange ----------------------------------------------------------------
-    mock_io_util.get_input.side_effect = [
-        ['string', '3.14'],
-        ['', ''],
-        ['10', '1'],
-        ['10', '20'],
-    ]
-    prompt = anlys_eng._filter_observations_prompt
-    expected_calls = [call(prompt)] * 4
-    expected_bounds = (10, 20)
-    # Act --------------------------------------------------------------------
-    anlys_eng._get_bounds_to_filter()
-    # Assert -----------------------------------------------------------------
-    mock_io_util.get_input.assert_has_calls(expected_calls)
-    assert anlys_eng._bounds == expected_bounds
-
-
-@pytest.mark.parametrize(
-    'side_effect, expected_proceed_bool',
-    [
-        ([['string'], [10], ['c']], True),
-        ([['string'], [10], ['f']], False),
-    ]
-)
-def test_ask_to_continue_or_filter(
-        anlys_eng, mock_io_util, side_effect, expected_proceed_bool):  # noqa: D103
-    # Arrange ----------------------------------------------------------------
-    mock_io_util.get_input.side_effect = side_effect
-    prompt = anlys_eng._confirm_selection_prompt
-    expected_calls = [call(prompt)] * 3
-    # Act --------------------------------------------------------------------
-    anlys_eng._ask_to_continue_or_filter()
-    # Assert -----------------------------------------------------------------
-    mock_io_util.get_input.assert_has_calls(expected_calls)
-    assert anlys_eng._proceed is expected_proceed_bool
-
-
-def test_filter_observations(anlys_eng, observations, mock_engine):  # noqa: D103
-    # NOTE: mock_engine only patches a few functions so that we can check the
-    # order of the calls.
-    # Arrange ----------------------------------------------------------------
-    # Set layout since we mocked `self._layout_observations`.
-    anlys_eng._layout = 'test_layout'
-    # Observations
-    anlys_eng._observations = observations
-    expected_obs = observations.copy().iloc[1: 2+1, :].reset_index(drop=True)
-    # Calls
-    expected_calls = [
-        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter? [c]/f: '])),
-        call._io_util.get_input(Prompt(messages=['Enter lower index (int): ', 'Enter upper index (int): '])),
-        call._layout_observations(),
-        call._plot('test_layout'),
-        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter? [c]/f: '])),
-        call._io_util.get_input(Prompt(messages=['Enter lower index (int): ', 'Enter upper index (int): '])),
-        call._layout_observations(),
-        call._plot('test_layout'),
-        call._io_util.get_input(Prompt(messages=['Would you like to continue or filter? [c]/f: '])),
-    ]
-    # Mock io_util side effects
-    mock_engine._io_util.get_input.side_effect = [
-        ['f'], ['0', '10'],
-        ['f'], ['1', '2'],
-        ['c'],
-    ]
-    # Act --------------------------------------------------------------------
-    anlys_eng._filter_observations()
-    # Assert -----------------------------------------------------------------
-    pd.testing.assert_frame_equal(anlys_eng._observations, expected_obs)
-    mock_engine.assert_has_calls(expected_calls)
 
 
 # ----------------------------------------------------------------------------
