@@ -23,15 +23,6 @@ from coimbra_chamber.utility.plot.service import PlotUtility
 class AnalysisEngine(object):
     """Encapsulate all aspects of analysis."""
 
-    _confirm_selection_prompt = dacite.from_dict(
-        Prompt,
-        dict(messages=['Would you like to continue or filter? [c]/f: '])
-    )
-    _filter_observations_prompt = dacite.from_dict(
-        Prompt,
-        dict(messages=['Enter lower index (int): ',
-                       'Enter upper index (int): ']),
-    )
 
     def __init__(self, experiment_id):
         self._experiment_id = experiment_id
@@ -86,7 +77,6 @@ class AnalysisEngine(object):
         """
         self._data = data
         self._get_observations()
-        self._filter_observations()
         self._get_fits()
         self._persist_fits()
 
@@ -276,53 +266,6 @@ class AnalysisEngine(object):
 
         self._layout = dacite.from_dict(Layout, data)
 
-    def _ask_to_continue_or_filter(self):
-        flag = False
-        while not flag:
-            response = self._io_util.get_input(self._confirm_selection_prompt)
-            response = response[0]
-            if isinstance(response, str):
-                if 'c' in response.lower():
-                    self._proceed = True
-                    flag = True
-                elif 'f' in response.lower():
-                    self._proceed = False
-                    flag = True
-
-    def _get_bounds_to_filter(self):
-        flag = False
-        while not flag:
-            response = self._io_util.get_input(self._filter_observations_prompt)
-            try:
-                response[0] = int(response[0])
-                response[1] = int(response[1])
-                both_are_ints = True
-            except ValueError:
-                both_are_ints = False
-            if both_are_ints:
-                if response[0] < response[1]:
-                    self._bounds = (response[0], response[1])
-                    flag = True
-
-    def _filter_observations(self):
-        self._layout_observations()
-        self._plot_util.plot(self._layout)
-        done = False
-        while not done:
-            self._ask_to_continue_or_filter()
-            if not self._proceed:
-                self._get_bounds_to_filter()
-                lower = self._bounds[0]
-                upper = self._bounds[1]
-                self._observations = (
-                    self._observations
-                    .iloc[lower: upper + 1, :]
-                    .reset_index(drop=True)
-                )
-                self._layout_observations()
-                self._plot_util.plot(self._layout)
-            else:
-                done = True
 
     def _get_fits(self):
         # len - 2 because we want to make sure we never end up at the last
