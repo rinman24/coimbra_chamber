@@ -23,8 +23,7 @@ from coimbra_chamber.utility.plot.service import PlotUtility
 class AnalysisEngine(object):
     """Encapsulate all aspects of analysis."""
 
-
-    def __init__(self, experiment_id):
+    def __init__(self, experiment_id):  # noqa: D107
         self._experiment_id = experiment_id
 
         self._exp_acc = ExperimentAccess()
@@ -265,7 +264,6 @@ class AnalysisEngine(object):
             style='seaborn-darkgrid')
 
         self._layout = dacite.from_dict(Layout, data)
-
 
     def _get_fits(self):
         # len - 2 because we want to make sure we never end up at the last
