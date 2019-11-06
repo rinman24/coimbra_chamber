@@ -41,7 +41,7 @@ class AnalysisEngine(object):
         self._b = ufloat(1.0445, 0.0022)
 
         # Tube radius
-        self._R = ufloat(0.015, 0.0001)
+        self._R = ufloat(0.0355, 0.0001)
         self._A = pi*self._R**2
         self._M1 = 18.015
         self._M2 = 28.964

@@ -79,7 +79,7 @@ class ExperimentAccess(object):
 
         # Create the schema if it doesn't exist (MySQL only)
         if database_type.lower() == 'mysql':  # pragma: no cover
-            self._schema = 'chamber'
+            self._schema = 'large_pan'
             self._engine.execute(
                 f'CREATE DATABASE IF NOT EXISTS `{self._schema}`;')
             self._engine.execute(f'USE `{self._schema}`;')
