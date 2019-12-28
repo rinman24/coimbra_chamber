@@ -311,8 +311,6 @@ class AnalysisEngine(object):
 
         # Now the rest of the state variables
         Te_bar = sum(data.Te)/samples
-        # Round experimental state to the nearest 5 for reference
-        Te_bar = ufloat(5 * round(Te_bar.nominal_value/5), Te_bar.std_dev)
         Tdp_bar = sum(data.Tdp)/samples
         P_bar = sum(data.P)/samples
 
